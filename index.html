@@ -1,0 +1,3163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manager Schedule Builder</title>
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ========== LAYOUT ========== */
+.app-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.app-header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+.app-header .subtitle { font-size: 0.85rem; opacity: 0.7; margin-top: 2px; }
+.header-actions { display: flex; gap: 0.5rem; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+.section {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.section-header {
+  background: #f8f9fb;
+  border-bottom: 1px solid #e8eaed;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.section-header h2 { font-size: 1.1rem; font-weight: 600; color: #1a1a2e; }
+.section-header .toggle { font-size: 1.2rem; color: #666; transition: transform 0.2s; }
+.section-header.collapsed .toggle { transform: rotate(-90deg); }
+.section-body { padding: 1.25rem; }
+.section-body.collapsed { display: none; }
+
+/* ========== BUTTONS ========== */
+button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+button:hover { filter: brightness(0.95); }
+button:active { transform: scale(0.98); }
+
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-success { background: #059669; color: #fff; }
+.btn-success:hover { background: #047857; }
+.btn-danger { background: #dc2626; color: #fff; }
+.btn-danger:hover { background: #b91c1c; }
+.btn-secondary { background: #e5e7eb; color: #374151; }
+.btn-secondary:hover { background: #d1d5db; }
+.btn-outline { background: transparent; border: 1px solid #d1d5db; color: #374151; }
+.btn-outline:hover { background: #f3f4f6; }
+.btn-large { padding: 0.75rem 2rem; font-size: 1rem; }
+
+/* Small round +/- buttons */
+.btn-round {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ========== SETUP ========== */
+.setup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.setup-left, .setup-right { display: flex; flex-direction: column; gap: 1rem; }
+
+.manager-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.manager-section-header label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.manager-section-header .count-badge {
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.manager-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+.manager-row .role-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  min-width: 36px;
+  text-align: center;
+  color: #fff;
+}
+.role-sm { background: #7c3aed; }
+.role-am { background: #2563eb; }
+.role-kc { background: #d97706; }
+.manager-row input[type="text"] {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.manager-row input[type="text"]:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+
+.kc-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.kc-toggle-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.period-picker { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.period-picker select, .period-picker input[type="number"] {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.period-picker select { min-width: 320px; }
+.period-picker label { font-weight: 600; font-size: 0.9rem; }
+.period-info {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #374151;
+  background: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+}
+.period-info strong { color: #1e40af; }
+
+/* ========== INPUT CALENDAR ========== */
+.input-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0;
+  flex-wrap: wrap;
+}
+.input-tab {
+  padding: 0.5rem 1rem;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-bottom: none;
+  cursor: pointer;
+  position: relative;
+  bottom: -2px;
+}
+.input-tab.active {
+  background: #fff;
+  color: #1a1a2e;
+  border-color: #e5e7eb;
+  border-bottom: 2px solid #fff;
+}
+
+.input-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.cal-header {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #6b7280;
+  padding: 0.4rem 0;
+  text-transform: uppercase;
+}
+.cal-header.weekend { color: #dc2626; }
+
+.cal-cell {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.3rem;
+  min-height: 60px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.1s;
+  background: #fff;
+}
+.cal-cell:hover { border-color: #93c5fd; background: #f0f7ff; }
+.cal-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+.cal-cell.empty:hover { background: transparent; border-color: transparent; }
+.cal-cell .day-num {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 2px;
+}
+.cal-cell.weekend { background: #fef9f0; }
+.cal-cell.monday { background: #f0f0ff; }
+.cal-cell .cell-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-top: 2px;
+}
+.tag-pto { background: #dbeafe; color: #1e40af; }
+.tag-rto { background: #ffedd5; color: #9a3412; }
+.tag-open { background: #d1fae5; color: #065f46; }
+.tag-mid { background: #e0e7ff; color: #3730a3; }
+.tag-close { background: #fce7f3; color: #9d174d; }
+.tag-off { background: #f3f4f6; color: #6b7280; }
+
+/* Cell context menu */
+.cell-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 0.25rem;
+  min-width: 130px;
+}
+.cell-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  background: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+}
+.cell-menu button:hover { background: #f3f4f6; }
+
+/* ========== WEEKLY SCHEDULE OUTPUT ========== */
+.week-table-wrapper {
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.week-header {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, #f0f7ff 0%, #f8f9fb 100%);
+  border: 1px solid #d1d5db;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.week-header .week-dates {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+.week-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  table-layout: fixed;
+  border: 1px solid #d1d5db;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  min-width: 600px;
+}
+.week-table th, .week-table td {
+  border: 1px solid #d1d5db;
+  padding: 0.4rem 0.3rem;
+  text-align: center;
+  vertical-align: middle;
+}
+.week-table thead tr:first-child th {
+  background: #1a1a2e;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.week-table thead tr:nth-child(2) th {
+  background: #2d3748;
+  color: #e2e8f0;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+.week-table thead th.weekend-col { background: #2d1a4e; }
+.week-table thead tr:nth-child(2) th.weekend-col { background: #3d2a5e; }
+.week-table thead th.monday-col { background: #1a2e4e; }
+.week-table thead tr:nth-child(2) th.monday-col { background: #2a3e5e; }
+
+.week-table .name-col {
+  width: 140px;
+  min-width: 140px;
+  text-align: left;
+  padding-left: 0.5rem;
+  font-weight: 600;
+  background: #f8f9fb;
+}
+.week-table thead .name-col { text-align: center; }
+
+.week-table tbody tr:nth-child(even) td { background: #fafbfc; }
+.week-table tbody tr:nth-child(even) td.name-col { background: #f0f1f3; }
+
+.week-table .coverage-row td {
+  background: #f0f7ff !important;
+  font-weight: 700;
+  font-size: 0.75rem;
+  border-top: 2px solid #1a1a2e;
+}
+.week-table .coverage-row .name-col { background: #e0ecff !important; }
+
+/* Shift cell colors */
+.shift-open { background: #d1fae5 !important; color: #065f46; font-weight: 600; }
+.shift-mid { background: #e0e7ff !important; color: #3730a3; font-weight: 600; }
+.shift-close { background: #fce7f3 !important; color: #9d174d; font-weight: 600; }
+.shift-pto { background: #dbeafe !important; color: #1e40af; font-weight: 600; }
+.shift-rto { background: #ffedd5 !important; color: #9a3412; font-weight: 600; }
+.shift-off { background: #f3f4f6 !important; color: #9ca3af; }
+.shift-kc-close { background: #fef3c7 !important; color: #92400e; font-weight: 600; }
+
+.coverage-ok { color: #059669; }
+.coverage-warn { color: #d97706; }
+.coverage-bad { color: #dc2626; }
+
+.weekend-stripe { background-color: #faf5ff !important; }
+
+/* ========== SUMMARY PANELS ========== */
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+.summary-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+.summary-panel h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; color: #1a1a2e; }
+.summary-panel table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.summary-panel table th, .summary-panel table td {
+  padding: 0.35rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid #f3f4f6;
+}
+.summary-panel table th { font-weight: 700; color: #6b7280; text-transform: uppercase; font-size: 0.7rem; }
+
+/* Warnings */
+.warnings-panel {
+  grid-column: 1 / -1;
+}
+.warning-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+}
+.warning-error { background: #fef2f2; color: #991b1b; }
+.warning-warn { background: #fffbeb; color: #92400e; }
+.warning-info { background: #eff6ff; color: #1e40af; }
+.warning-icon { font-weight: 700; min-width: 20px; }
+
+/* ========== PRINT SCHEDULE (hidden on screen, shown in print) ========== */
+.print-schedule { display: none; }
+
+.print-schedule .print-title {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.print-schedule .print-title .print-main-title {
+  font-size: 16pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.print-schedule .print-title .print-sub-title {
+  font-size: 12pt;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.print-schedule .print-week {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+  table-layout: fixed;
+  margin-bottom: 0.75rem;
+}
+.print-schedule .print-week th,
+.print-schedule .print-week td {
+  border: 1px solid #000;
+  padding: 3px 4px;
+  text-align: center;
+  vertical-align: middle;
+}
+.print-schedule .print-week thead th {
+  font-weight: 700;
+  font-size: 9pt;
+  background: #fff;
+  color: #000;
+}
+.print-schedule .print-week .we-label-col {
+  text-align: left;
+  padding-left: 6px;
+  font-weight: 700;
+  width: 120px;
+  min-width: 100px;
+}
+.print-schedule .print-week .name-col {
+  text-align: left;
+  padding-left: 6px;
+  font-weight: 600;
+  width: 120px;
+  min-width: 100px;
+}
+.print-schedule .print-week tbody td {
+  font-size: 9pt;
+  font-weight: 400;
+}
+.print-schedule .print-week tbody td.name-col {
+  font-weight: 600;
+}
+
+/* ========== PRINT ========== */
+@media print {
+  body { background: #fff !important; font-size: 11px; color: #000 !important; }
+  .app-header { display: none !important; }
+  .no-print { display: none !important; }
+  #schedule-section { box-shadow: none; border: none; }
+  #schedule-section .section-header { display: none !important; }
+  #schedule-section .section-body { padding: 0; }
+  #summary-section { display: none !important; }
+
+  /* Hide the screen schedule grid */
+  #schedule-grid { display: none !important; }
+  .period-print-header { display: none !important; }
+
+  /* Show the print schedule */
+  .print-schedule {
+    display: block !important;
+  }
+
+  .print-schedule .print-week {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .container { padding: 0.25rem; max-width: 100%; }
+  .section { box-shadow: none; margin-bottom: 0; }
+}
+.period-print-header { display: none; }
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 600px) {
+  html { font-size: 13px; }
+  .app-header {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .app-header h1 { font-size: 1.2rem; }
+  .header-actions { width: 100%; justify-content: flex-start; }
+  .header-actions button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.5rem 0.75rem;
+  }
+  .container { padding: 0.75rem; }
+  .setup-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .period-picker {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .period-picker select {
+    min-width: 0;
+    width: 100%;
+  }
+  .period-picker input[type="number"] {
+    width: 100%;
+  }
+  .period-picker .btn-primary {
+    width: 100%;
+    min-height: 44px;
+  }
+  .input-tabs {
+    gap: 0.15rem;
+  }
+  .input-tab {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .cal-cell {
+    min-height: 48px;
+    padding: 0.2rem;
+  }
+  .cal-cell .day-num { font-size: 0.65rem; }
+  .cal-cell .cell-tag { font-size: 0.55rem; padding: 1px 2px; }
+  .cal-header { font-size: 0.65rem; padding: 0.3rem 0; }
+  .week-table { font-size: 0.7rem; min-width: 500px; }
+  .week-table th, .week-table td { padding: 0.25rem 0.15rem; }
+  .week-table .name-col { width: 100px; min-width: 100px; padding-left: 0.25rem; font-size: 0.7rem; }
+  .week-header { font-size: 0.85rem; padding: 0.4rem 0.5rem; flex-wrap: wrap; gap: 0.25rem; }
+  .week-header .week-dates { font-size: 0.7rem; }
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+  .summary-panel table { font-size: 0.7rem; }
+  .summary-panel table th, .summary-panel table td { padding: 0.25rem 0.3rem; }
+  .legend { gap: 0.4rem; }
+  .legend-item { font-size: 0.65rem; }
+  button { min-height: 44px; }
+  .btn-round { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
+  .btn-large { width: 100%; }
+  .manager-row { gap: 0.4rem; }
+  .manager-row .role-badge { font-size: 0.6rem; padding: 0.15rem 0.35rem; min-width: 30px; }
+  .manager-row input[type="text"] { font-size: 0.8rem; padding: 0.4rem; }
+  .kc-toggle-label { font-size: 0.65rem; }
+}
+
+/* ========== MISC ========== */
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-sm { gap: 0.5rem; }
+.mt-1 { margin-top: 0.75rem; }
+.text-muted { color: #6b7280; font-size: 0.8rem; }
+.hidden { display: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 0; }
+.legend-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 600; }
+.legend-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
+
+/* Input week separator */
+.input-week-label {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e40af;
+  padding: 0.5rem 0 0.25rem 0;
+  border-top: 2px solid #e0ecff;
+  margin-top: 0.25rem;
+}
+.input-week-label:first-of-type { border-top: none; margin-top: 0; }
+
+/* Overlay for cell menu */
+.overlay { position: fixed; inset: 0; z-index: 50; }
+
+/* ========== SCHEDULE EDIT POPUP ========== */
+.sched-edit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+.sched-edit-menu {
+  position: fixed;
+  z-index: 210;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+  padding: 0.3rem;
+  min-width: 150px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.sched-edit-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.45rem 0.7rem;
+  background: none;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #374151;
+  min-height: 36px;
+  white-space: nowrap;
+}
+.sched-edit-menu button:hover { background: #f3f4f6; }
+.sched-edit-menu button .swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+.sched-edit-menu .menu-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0.2rem 0.5rem;
+}
+
+/* Clickable shift cells in generated schedule */
+.week-table tbody td.shift-editable {
+  cursor: pointer;
+  position: relative;
+}
+.week-table tbody td.shift-editable:hover {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+@media (max-width: 600px) {
+  .sched-edit-menu {
+    min-width: 170px;
+  }
+  .sched-edit-menu button {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div>
+    <h1>Manager Schedule Builder</h1>
+    <div class="subtitle">NRF 4-5-4 Retail Fiscal Calendar</div>
+  </div>
+  <div class="header-actions no-print">
+    <button class="btn-outline" onclick="saveToStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Save</button>
+    <button class="btn-outline" onclick="loadFromStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Load</button>
+    <button class="btn-outline" onclick="window.print()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Print</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- SETUP SECTION -->
+  <div class="section no-print">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>Setup</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body" id="setup-body">
+      <div class="setup-grid">
+        <div class="setup-left">
+          <!-- SM (always 1) -->
+          <div>
+            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store Manager</label>
+            <div class="manager-row">
+              <span class="role-badge role-sm">SM</span>
+              <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name">
+            </div>
+          </div>
+
+          <!-- AMs (dynamic) -->
+          <div>
+            <div class="manager-section-header">
+              <label>Assistant Managers</label>
+              <span class="count-badge" id="am-count-badge">3</span>
+              <button class="btn-round btn-danger" onclick="removeAM()" title="Remove last AM">-</button>
+              <button class="btn-round btn-primary" onclick="addAM()" title="Add assistant manager">+</button>
+            </div>
+            <div id="am-rows"></div>
+          </div>
+
+          <!-- KCs (dynamic) -->
+          <div>
+            <div class="manager-section-header">
+              <label>Key Carriers</label>
+              <span class="count-badge" id="kc-count-badge">1</span>
+              <button class="btn-round btn-danger" onclick="removeKC()" title="Remove last KC">-</button>
+              <button class="btn-round btn-primary" onclick="addKC()" title="Add key carrier">+</button>
+            </div>
+            <div id="kc-rows"></div>
+          </div>
+        </div>
+        <div class="setup-right">
+          <div>
+            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store Number</label>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+              <label style="font-weight:600;font-size:0.9rem">Store #:</label>
+              <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.9rem">
+            </div>
+          </div>
+          <div>
+            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Fiscal Period</label>
+            <div class="period-picker">
+              <label>FY:</label>
+              <input type="number" id="pick-year" min="2024" max="2030" value="2026" style="width:80px" onchange="buildPeriodDropdown()">
+              <label>Period:</label>
+              <select id="pick-period"></select>
+              <button class="btn-primary" onclick="loadPeriod()">Load Period</button>
+            </div>
+            <div class="period-info" id="period-info"></div>
+          </div>
+          <div class="legend mt-1">
+            <div class="legend-item"><span class="legend-swatch" style="background:#d1fae5"></span> Open</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#e0e7ff"></span> Mid</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#fce7f3"></span> Close</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#dbeafe"></span> PTO</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#ffedd5"></span> RTO</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#f3f4f6"></span> Off</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#fef3c7"></span> KC Close</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT SECTION -->
+  <div class="section no-print" id="input-section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>Shift Requests & Time Off</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body" id="input-body">
+      <div class="input-tabs" id="input-tabs"></div>
+      <div id="input-calendars"></div>
+      <p class="text-muted mt-1">Click any day to set: PTO, RTO, Open, Mid, Close, Off, or Clear.</p>
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="section no-print">
+    <div class="section-body" style="text-align:center;padding:1.5rem">
+      <button class="btn-success btn-large" onclick="generateSchedule()">Generate Schedule</button>
+      <button class="btn-danger" onclick="clearSchedule()" style="margin-left:1rem">Clear Generated</button>
+    </div>
+  </div>
+
+  <!-- SCHEDULE OUTPUT -->
+  <div class="section" id="schedule-section" style="display:none">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2 id="schedule-title">Schedule</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body" id="schedule-body">
+      <div class="period-print-header" id="print-header"></div>
+      <div id="schedule-grid"></div>
+      <div class="print-schedule" id="print-schedule"></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="section" id="summary-section" style="display:none">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>Coverage Summary</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body" id="summary-body">
+      <div class="summary-grid" id="summary-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Cell menu (portal) -->
+<div id="cell-menu-portal"></div>
+<!-- Schedule edit menu (portal) -->
+<div id="sched-edit-portal"></div>
+
+<script>
+/* ====================================================================
+   MANAGER SCHEDULE BUILDER — NRF 4-5-4 Fiscal Calendar
+   Dynamic managers + key carriers
+   ==================================================================== */
+
+// ── Dynamic Configuration State ──
+let amCount = 3;
+let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
+
+// ── Computed Role Arrays ──
+function getRoles() {
+  // Returns ['sm', 'am1', ..., 'amN'] plus any KCs with manager-mode on
+  const roles = ['sm'];
+  for (let i = 1; i <= amCount; i++) roles.push('am' + i);
+  kcList.forEach(kc => { if (kc.asManager) roles.push(kc.id); });
+  return roles;
+}
+
+function getAMs() {
+  // Returns just the AM IDs
+  const ams = [];
+  for (let i = 1; i <= amCount; i++) ams.push('am' + i);
+  return ams;
+}
+
+function getNonManagerKCs() {
+  // KCs that are NOT in manager mode
+  return kcList.filter(kc => !kc.asManager);
+}
+
+function getManagerKCs() {
+  // KCs that ARE in manager mode
+  return kcList.filter(kc => kc.asManager);
+}
+
+function getAllWithKC() {
+  // All roles that appear in the schedule grid: managers + non-manager KCs
+  const roles = getRoles();
+  kcList.forEach(kc => { if (!kc.asManager) roles.push(kc.id); });
+  return roles;
+}
+
+function getAllPersonIds() {
+  // Every person ID (for inputs, etc.)
+  const ids = ['sm'];
+  for (let i = 1; i <= amCount; i++) ids.push('am' + i);
+  kcList.forEach(kc => ids.push(kc.id));
+  return ids;
+}
+
+// ── Constants ──
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAY_NAMES_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const PERIOD_WEEKS = [4, 5, 4, 4, 5, 4, 4, 5, 4, 4, 5, 4]; // NRF 4-5-4 pattern
+const SHIFT_LABELS = {
+  'open-early':'O 6-4', 'open-late':'O 7-5',
+  'mid-early':'M 8-6', 'mid-late':'M 9-7',
+  'close':'C 12:30-10:30',
+  'pto':'PTO', 'rto':'RTO', 'off':'OFF',
+  'kc-close':'KC Close'
+};
+const SHIFT_SHORT = {
+  'open-early':'O 6-4', 'open-late':'O 7-5',
+  'mid-early':'M 8-6', 'mid-late':'M 9-7',
+  'close':'C',
+  'pto':'PTO', 'rto':'RTO', 'off':'OFF',
+  'kc-close':'KC-C'
+};
+const SHIFT_CSS = {
+  'open-early':'shift-open', 'open-late':'shift-open',
+  'mid-early':'shift-mid', 'mid-late':'shift-mid',
+  'close':'shift-close',
+  'pto':'shift-pto', 'rto':'shift-rto', 'off':'shift-off',
+  'kc-close':'shift-kc-close'
+};
+const TAG_CSS = {
+  'pto':'tag-pto', 'rto':'tag-rto',
+  'open-early':'tag-open', 'open-late':'tag-open',
+  'mid-early':'tag-mid', 'mid-late':'tag-mid',
+  'close':'tag-close', 'off':'tag-off'
+};
+
+// ── NRF 4-5-4 Fiscal Calendar ──
+function getFiscalYearStart(year) {
+  // NRF fiscal year starts on the Sunday closest to Feb 1
+  const feb1 = new Date(year, 1, 1); // Feb 1
+  const day = feb1.getDay(); // 0=Sun
+  if (day === 0) return new Date(year, 1, 1);
+  if (day <= 3) return new Date(year, 1, 1 - day);
+  return new Date(year, 1, 1 + (7 - day));
+}
+
+function getFiscalPeriods(fiscalYear) {
+  const fyStart = getFiscalYearStart(fiscalYear);
+  const periods = [];
+  let currentDate = new Date(fyStart);
+
+  for (let p = 0; p < 12; p++) {
+    const numWeeks = PERIOD_WEEKS[p];
+    const periodStart = new Date(currentDate);
+    const weeks = [];
+
+    for (let w = 0; w < numWeeks; w++) {
+      const weekStart = new Date(currentDate);
+      const weekEnd = new Date(currentDate);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      weeks.push({ start: new Date(weekStart), end: new Date(weekEnd) });
+      currentDate.setDate(currentDate.getDate() + 7);
+    }
+
+    const periodEnd = new Date(currentDate);
+    periodEnd.setDate(periodEnd.getDate() - 1);
+
+    // Determine approximate month name for the period
+    const midDate = new Date(periodStart);
+    midDate.setDate(midDate.getDate() + Math.floor(numWeeks * 7 / 2));
+    const approxMonth = MONTH_NAMES[midDate.getMonth()];
+
+    const quarter = Math.floor(p / 3) + 1;
+    const periodInQuarter = (p % 3) + 1;
+
+    periods.push({
+      number: p + 1,
+      quarter,
+      periodInQuarter,
+      numWeeks,
+      start: periodStart,
+      end: periodEnd,
+      weeks,
+      approxMonth
+    });
+  }
+  return periods;
+}
+
+function formatDate(d) {
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function formatDateFull(d) {
+  return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+// ── State ──
+let fiscalYear = new Date().getFullYear();
+let currentPeriodIndex = 0; // 0-based
+let allPeriods = [];
+let currentPeriod = null; // the selected period object
+let periodDates = []; // flat array of Date objects for every day in the period
+let inputs = {}; // { 'sm': { 'YYYY-MM-DD': 'pto', ... }, ... }
+let schedule = {}; // same shape but final
+let activeTab = 'sm';
+let openMenu = null;
+
+// Convert Date to key string
+function dateKey(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+// ── Dynamic Manager/KC UI ──
+function renderAMRows() {
+  const container = document.getElementById('am-rows');
+  let html = '';
+  for (let i = 1; i <= amCount; i++) {
+    const id = 'am' + i;
+    const existing = document.getElementById('name-' + id);
+    const val = existing ? existing.value : 'AM' + i;
+    html += `<div class="manager-row">
+      <span class="role-badge role-am">AM${i}</span>
+      <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}">
+    </div>`;
+  }
+  container.innerHTML = html;
+  document.getElementById('am-count-badge').textContent = amCount;
+}
+
+function renderKCRows() {
+  const container = document.getElementById('kc-rows');
+  let html = '';
+  kcList.forEach((kc, idx) => {
+    html += `<div class="manager-row">
+      <span class="role-badge role-kc">KC${idx + 1}</span>
+      <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="Key Carrier ${idx + 1}"
+        onchange="kcList[${idx}].name = this.value">
+      <label class="kc-toggle-label">
+        <input type="checkbox" ${kc.asManager ? 'checked' : ''}
+          onchange="kcList[${idx}].asManager = this.checked; rebuildAfterConfigChange()">
+        Mgr coverage
+      </label>
+    </div>`;
+  });
+  container.innerHTML = html;
+  document.getElementById('kc-count-badge').textContent = kcList.length;
+}
+
+function addAM() {
+  amCount++;
+  renderAMRows();
+  rebuildAfterConfigChange();
+}
+
+function removeAM() {
+  if (amCount <= 1) return; // need at least 1 AM
+  const removedId = 'am' + amCount;
+  delete inputs[removedId];
+  amCount--;
+  renderAMRows();
+  rebuildAfterConfigChange();
+}
+
+function addKC() {
+  const num = kcList.length + 1;
+  kcList.push({ id: 'kc' + num, name: 'Key Carrier ' + num, asManager: false });
+  renderKCRows();
+  rebuildAfterConfigChange();
+}
+
+function removeKC() {
+  if (kcList.length <= 0) return;
+  const removed = kcList.pop();
+  delete inputs[removed.id];
+  renderKCRows();
+  rebuildAfterConfigChange();
+}
+
+function rebuildAfterConfigChange() {
+  // Ensure inputs exist for all current roles
+  getAllPersonIds().forEach(r => { if (!inputs[r]) inputs[r] = {}; });
+  // If the active tab no longer exists, switch to sm
+  if (!getAllPersonIds().includes(activeTab)) activeTab = 'sm';
+  buildInputTabs();
+  buildInputCalendar(activeTab);
+  // Clear generated schedule since config changed
+  schedule = {};
+  document.getElementById('schedule-section').style.display = 'none';
+  document.getElementById('summary-section').style.display = 'none';
+}
+
+// ── Init ──
+(function boot() {
+  document.getElementById('pick-year').value = fiscalYear;
+  renderAMRows();
+  renderKCRows();
+  buildPeriodDropdown();
+
+  // Try to auto-select the current period
+  const today = new Date();
+  let foundPeriod = false;
+  for (let i = 0; i < allPeriods.length; i++) {
+    if (today >= allPeriods[i].start && today <= allPeriods[i].end) {
+      currentPeriodIndex = i;
+      document.getElementById('pick-period').value = i;
+      foundPeriod = true;
+      break;
+    }
+  }
+  if (!foundPeriod) currentPeriodIndex = 0;
+
+  loadPeriod();
+})();
+
+function buildPeriodDropdown() {
+  fiscalYear = parseInt(document.getElementById('pick-year').value);
+  allPeriods = getFiscalPeriods(fiscalYear);
+
+  const sel = document.getElementById('pick-period');
+  sel.innerHTML = '';
+  allPeriods.forEach((p, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `P${p.number} - ${p.approxMonth} (${formatDate(p.start)} - ${formatDate(p.end)}) - ${p.numWeeks} weeks [Q${p.quarter}]`;
+    sel.appendChild(o);
+  });
+
+  if (currentPeriodIndex >= allPeriods.length) currentPeriodIndex = 0;
+  sel.value = currentPeriodIndex;
+  updatePeriodInfo();
+}
+
+function updatePeriodInfo() {
+  const idx = parseInt(document.getElementById('pick-period').value);
+  const p = allPeriods[idx];
+  if (!p) return;
+  const infoEl = document.getElementById('period-info');
+  infoEl.innerHTML = `<strong>FY${fiscalYear} Period ${p.number}</strong> (Q${p.quarter}.${p.periodInQuarter}) &mdash; ` +
+    `${formatDateFull(p.start)} to ${formatDateFull(p.end)} &mdash; <strong>${p.numWeeks} weeks</strong>, ${p.numWeeks * 7} days`;
+}
+
+document.getElementById('pick-period').addEventListener('change', updatePeriodInfo);
+
+function getManagerNames() {
+  const names = {
+    sm: document.getElementById('name-sm').value || 'Store Manager'
+  };
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    names['am' + i] = el ? (el.value || ('AM' + i)) : ('AM' + i);
+  }
+  kcList.forEach((kc, idx) => {
+    const el = document.getElementById('name-' + kc.id);
+    names[kc.id] = el ? (el.value || kc.name) : kc.name;
+  });
+  return names;
+}
+
+function loadPeriod() {
+  currentPeriodIndex = parseInt(document.getElementById('pick-period').value);
+  fiscalYear = parseInt(document.getElementById('pick-year').value);
+  allPeriods = getFiscalPeriods(fiscalYear);
+  currentPeriod = allPeriods[currentPeriodIndex];
+
+  // Build flat date list
+  periodDates = [];
+  for (const week of currentPeriod.weeks) {
+    const d = new Date(week.start);
+    for (let i = 0; i < 7; i++) {
+      periodDates.push(new Date(d));
+      d.setDate(d.getDate() + 1);
+    }
+  }
+
+  // Init inputs for all roles
+  getAllPersonIds().forEach(r => { if (!inputs[r]) inputs[r] = {}; });
+
+  buildInputTabs();
+  buildInputCalendar(activeTab);
+  updatePeriodInfo();
+  document.getElementById('schedule-section').style.display = 'none';
+  document.getElementById('summary-section').style.display = 'none';
+}
+
+// ── Input Tabs ──
+function buildInputTabs() {
+  const names = getManagerNames();
+  const container = document.getElementById('input-tabs');
+  container.innerHTML = '';
+  getAllPersonIds().forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'input-tab' + (r === activeTab ? ' active' : '');
+    btn.textContent = names[r] || r.toUpperCase();
+    btn.onclick = () => { activeTab = r; buildInputTabs(); buildInputCalendar(r); };
+    container.appendChild(btn);
+  });
+}
+
+// ── Input Calendar ──
+function buildInputCalendar(role) {
+  if (!currentPeriod) return;
+  const container = document.getElementById('input-calendars');
+  let html = '';
+
+  // Show each week in the period
+  currentPeriod.weeks.forEach((week, wIdx) => {
+    html += `<div class="input-week-label">Week ${wIdx + 1}: ${formatDate(week.start)} - ${formatDate(week.end)}</div>`;
+    html += '<div class="input-calendar">';
+
+    // Headers
+    DAY_NAMES.forEach((d, i) => {
+      const cls = (i === 0 || i === 6) ? ' weekend' : '';
+      html += `<div class="cal-header${cls}">${d}</div>`;
+    });
+
+    // Day cells for this week (always 7 days, Sun-Sat)
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(week.start);
+      d.setDate(d.getDate() + i);
+      const dk = dateKey(d);
+      const dayOfWeek = d.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      const isMonday = dayOfWeek === 1;
+      let cls = 'cal-cell';
+      if (isWeekend) cls += ' weekend';
+      if (isMonday) cls += ' monday';
+
+      const val = inputs[role] && inputs[role][dk];
+      let tagHtml = '';
+      if (val) {
+        const tagCls = TAG_CSS[val] || 'tag-off';
+        tagHtml = `<span class="cell-tag ${tagCls}">${SHIFT_LABELS[val] || val.toUpperCase()}</span>`;
+      }
+
+      html += `<div class="${cls}" data-dk="${dk}" data-role="${role}" onclick="openCellMenu(event, '${role}', '${dk}')">`;
+      html += `<div class="day-num">${formatDate(d)}${isMonday ? ' (Mon)' : ''}</div>`;
+      html += tagHtml;
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+// ── Cell Menu ──
+function openCellMenu(e, role, dk) {
+  e.stopPropagation();
+  closeCellMenu();
+  const cell = e.currentTarget;
+  const rect = cell.getBoundingClientRect();
+
+  const options = [
+    { label: 'PTO (vacation)', value: 'pto' },
+    { label: 'RTO (day off)', value: 'rto' },
+    { label: 'Open (6am-4pm)', value: 'open-early' },
+    { label: 'Open (7am-5pm)', value: 'open-late' },
+    { label: 'Mid (8am-6pm)', value: 'mid-early' },
+    { label: 'Mid (9am-7pm)', value: 'mid-late' },
+    { label: 'Close', value: 'close' },
+    { label: 'Off (request)', value: 'off' },
+    { label: 'Clear', value: null }
+  ];
+
+  const portal = document.getElementById('cell-menu-portal');
+  let html = '<div class="overlay" onclick="closeCellMenu()"></div>';
+  html += `<div class="cell-menu" style="position:fixed;top:${rect.bottom + 4}px;left:${rect.left}px;z-index:100">`;
+  options.forEach(o => {
+    html += `<button onclick="setCellValue('${role}','${dk}',${o.value === null ? 'null' : "'" + o.value + "'"})">${o.label}</button>`;
+  });
+  html += '</div>';
+  portal.innerHTML = html;
+  openMenu = true;
+
+  // Adjust if off screen
+  requestAnimationFrame(() => {
+    const menu = portal.querySelector('.cell-menu');
+    if (menu) {
+      const mr = menu.getBoundingClientRect();
+      if (mr.bottom > window.innerHeight) menu.style.top = (rect.top - mr.height - 4) + 'px';
+      if (mr.right > window.innerWidth) menu.style.left = (rect.right - mr.width) + 'px';
+    }
+  });
+}
+
+function closeCellMenu() {
+  document.getElementById('cell-menu-portal').innerHTML = '';
+  openMenu = null;
+}
+
+function setCellValue(role, dk, value) {
+  if (!inputs[role]) inputs[role] = {};
+  if (value === null) {
+    delete inputs[role][dk];
+  } else {
+    inputs[role][dk] = value;
+  }
+  closeCellMenu();
+  buildInputCalendar(role);
+}
+
+// Close menu on outside click
+document.addEventListener('click', (e) => { if (openMenu && !e.target.closest('.cell-menu')) closeCellMenu(); });
+
+// ── Section Toggle ──
+function toggleSection(header) {
+  header.classList.toggle('collapsed');
+  const body = header.nextElementSibling;
+  body.classList.toggle('collapsed');
+}
+
+// ── Helpers ──
+function isClose(shift) { return shift === 'close' || shift === 'kc-close'; }
+function isOpen(shift) { return shift === 'open-early' || shift === 'open-late'; }
+function isMid(shift) { return shift === 'mid-early' || shift === 'mid-late'; }
+function isWork(shift) { return isOpen(shift) || isMid(shift) || isClose(shift); }
+function isPto(shift) { return shift === 'pto'; }
+function isRto(shift) { return shift === 'rto'; }
+function isOff(shift) { return shift === 'off' || shift === 'rto'; }
+function isScheduled(shift) { return isWork(shift) || isPto(shift); }
+
+function isMonday(d) { return d.getDay() === 1; }
+function isSaturday(d) { return d.getDay() === 6; }
+function isSunday(d) { return d.getDay() === 0; }
+function isWeekend(d) { return d.getDay() === 0 || d.getDay() === 6; }
+
+// Get the previous date key in the period (or null)
+function prevDateKey(dk) {
+  const idx = periodDates.findIndex(d => dateKey(d) === dk);
+  if (idx <= 0) return null;
+  return dateKey(periodDates[idx - 1]);
+}
+
+// ── GENERATE SCHEDULE ──
+function generateSchedule() {
+  try { _generateScheduleInner(); }
+  catch(e) { alert('Generate error: ' + e.message + '\n' + e.stack); console.error(e); }
+}
+function _generateScheduleInner() {
+  schedule = {};
+  const names = getManagerNames();
+
+  // Snapshot current roles at generation time
+  const ROLES = getRoles();      // SM + AMs + manager-mode KCs
+  const ALL_KC = getAllWithKC();  // ROLES + non-manager KCs
+  const AMS = getAMs();          // just AM IDs
+  const nonMgrKCs = getNonManagerKCs(); // KCs not in manager mode
+
+  if (!periodDates || periodDates.length === 0) {
+    alert('Please load a fiscal period first.');
+    return;
+  }
+
+  const allDks = periodDates.map(d => dateKey(d)).filter(dk => typeof dk === 'string' && dk.includes('-'));
+  const numWeeks = currentPeriod.numWeeks;
+
+  // ── Utility closures ──
+  const dkToDate = (dk) => {
+    if (!dk || typeof dk !== 'string') return new Date(NaN);
+    const parts = dk.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  };
+  const isDkMonday   = (dk) => dkToDate(dk).getDay() === 1;
+  const isDkSaturday = (dk) => dkToDate(dk).getDay() === 6;
+  const isDkSunday   = (dk) => dkToDate(dk).getDay() === 0;
+  const isDkWeekend  = (dk) => { const dow = dkToDate(dk).getDay(); return dow === 0 || dow === 6; };
+  const dkDow        = (dk) => dkToDate(dk).getDay();
+
+  const getWeekDks = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
+
+  // Count scheduled days (work + PTO) for a role in a week — PTO counts toward 5, RTO does not
+  const weekSchedCount = (role, wIdx) => {
+    let c = 0;
+    getWeekDks(wIdx).forEach(dk => { if (isScheduled(schedule[role][dk])) c++; });
+    return c;
+  };
+
+  // Count working managers on a day
+  const dayWorkCount = (dk) => ROLES.filter(r => isWork(schedule[r][dk])).length;
+
+  // Next dk in period (or null)
+  const nextDk = (dk) => {
+    const idx = allDks.indexOf(dk);
+    return idx >= 0 && idx < allDks.length - 1 ? allDks[idx + 1] : null;
+  };
+  // Prev dk in period (or null)
+  const prevDkOf = (dk) => {
+    const idx = allDks.indexOf(dk);
+    return idx > 0 ? allDks[idx - 1] : null;
+  };
+
+  // All weekend (Sat+Sun) pairs in the period
+  const allWeekendPairs = [];
+  for (let i = 0; i < allDks.length; i++) {
+    if (isDkSaturday(allDks[i]) && i + 1 < allDks.length && isDkSunday(allDks[i + 1])) {
+      allWeekendPairs.push({ sat: allDks[i], sun: allDks[i + 1] });
+    }
+  }
+
+  // Is a day an input-locked value?
+  const isInputLocked = (role, dk) => inputs[role] && inputs[role][dk] !== undefined;
+
+  // ════════════════════════════════════════════════════
+  // STEP 1: LOCK ALL REQUESTS
+  // Copy PTO, RTO, shift requests. Non-manager KCs close on Monday. Managers work Monday.
+  // ════════════════════════════════════════════════════
+
+  ALL_KC.forEach(r => {
+    schedule[r] = {};
+    if (inputs[r]) {
+      Object.keys(inputs[r]).forEach(dk => { schedule[r][dk] = inputs[r][dk]; });
+    }
+  });
+
+  // Non-manager KCs close every Monday (rotation if multiple)
+  allDks.forEach(dk => {
+    if (isDkMonday(dk)) {
+      if (nonMgrKCs.length > 0) {
+        // Find which Monday this is (0-based index across the period)
+        const mondayIndex = allDks.filter((d, i) => i <= allDks.indexOf(dk) && isDkMonday(d)).length - 1;
+        const kcIdx = mondayIndex % nonMgrKCs.length;
+        const assignedKC = nonMgrKCs[kcIdx];
+        schedule[assignedKC.id][dk] = 'kc-close';
+        // Other non-manager KCs are off on Monday (unless they have input)
+        nonMgrKCs.forEach((kc, i) => {
+          if (i !== kcIdx && !schedule[kc.id][dk]) {
+            // leave unassigned — they don't need to be scheduled
+          }
+        });
+      }
+    }
+  });
+
+  // All managers (ROLES) work Monday — remove any Monday offs (unless PTO)
+  ROLES.forEach(r => {
+    allDks.forEach(dk => {
+      if (isDkMonday(dk)) {
+        const s = schedule[r][dk];
+        if (s === 'off' || s === 'rto') {
+          delete schedule[r][dk];
+        }
+      }
+    });
+  });
+
+  // ════════════════════════════════════════════════════
+  // STEP 2: GIVE EACH MANAGER THEIR FULL WEEKEND OFF
+  // At least 1 consecutive Sat+Sun off per period.
+  // Spread across different weekends — max 2 managers sharing the same weekend.
+  // Skip weekends where the manager has an input-locked shift.
+  // ════════════════════════════════════════════════════
+
+  const hasConsecWeekend = {};
+  ROLES.forEach(r => { hasConsecWeekend[r] = false; });
+
+  // Detect existing consecutive weekends off from inputs
+  ROLES.forEach(r => {
+    allWeekendPairs.forEach(wp => {
+      const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
+      if ((s1 === 'off' || s1 === 'rto' || s1 === 'pto') &&
+          (s2 === 'off' || s2 === 'rto' || s2 === 'pto')) {
+        hasConsecWeekend[r] = true;
+      }
+    });
+  });
+
+  // Count how many managers already have a full weekend off on this pair
+  const wpOffCount = (wp) => ROLES.filter(r => {
+    const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
+    return (s1 === 'off' || s1 === 'rto' || s1 === 'pto') &&
+           (s2 === 'off' || s2 === 'rto' || s2 === 'pto');
+  }).length;
+
+  // Assign weekend off to managers who don't have one yet
+  ROLES.forEach(r => {
+    if (hasConsecWeekend[r]) return;
+    const sorted = [...allWeekendPairs].sort((a, b) => wpOffCount(a) - wpOffCount(b));
+    for (const wp of sorted) {
+      const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
+      // Skip if the manager has an input-locked work shift on either day
+      if (isInputLocked(r, wp.sat) && isWork(inputs[r][wp.sat])) continue;
+      if (isInputLocked(r, wp.sun) && isWork(inputs[r][wp.sun])) continue;
+      // Can't override other locked inputs (work shifts from user)
+      if (s1 && s1 !== 'off' && s1 !== 'rto') continue;
+      if (s2 && s2 !== 'off' && s2 !== 'rto') continue;
+      if (wpOffCount(wp) >= 2) continue;
+      if (!s1) schedule[r][wp.sat] = 'off';
+      if (!s2) schedule[r][wp.sun] = 'off';
+      hasConsecWeekend[r] = true;
+      break;
+    }
+    // Relax the 2-per-weekend limit if needed (all weekends already have 2)
+    if (!hasConsecWeekend[r]) {
+      for (const wp of [...allWeekendPairs].sort((a, b) => wpOffCount(a) - wpOffCount(b))) {
+        const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
+        if (isInputLocked(r, wp.sat) && isWork(inputs[r][wp.sat])) continue;
+        if (isInputLocked(r, wp.sun) && isWork(inputs[r][wp.sun])) continue;
+        if (s1 && s1 !== 'off' && s1 !== 'rto') continue;
+        if (s2 && s2 !== 'off' && s2 !== 'rto') continue;
+        if (!s1) schedule[r][wp.sat] = 'off';
+        if (!s2) schedule[r][wp.sun] = 'off';
+        hasConsecWeekend[r] = true;
+        break;
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════
+  // STEP 3: ASSIGN CLOSING SHIFTS — night-first approach
+  // For each non-Monday night, assign exactly 1 closer.
+  // 6 non-Monday nights per week. SM gets 1.
+  // Remaining 5 distributed among AMs (+ manager-mode KCs) as evenly as possible.
+  // ════════════════════════════════════════════════════
+
+  // The "closers pool" = AMs + manager-mode KCs (everyone in ROLES except SM)
+  const closerPool = ROLES.filter(r => r !== 'sm');
+  const closerCount = closerPool.length;
+  // SM gets 1 close. Remaining = 5. Distribute among closerPool.
+  const remainingCloses = 5;
+  // Base closes per closer, and how many get an extra
+  const baseClosesPerCloser = Math.floor(remainingCloses / closerCount);
+  const extraClosers = remainingCloses % closerCount;
+  // So `extraClosers` closers get (baseClosesPerCloser + 1), the rest get baseClosesPerCloser
+  // Target per closer rotates which ones get the extra across weeks
+
+  // Track closes per manager per week
+  const closesPerWeek = {};
+  ROLES.forEach(r => { closesPerWeek[r] = new Array(numWeeks).fill(0); });
+
+  // Pre-count any input closes
+  ROLES.forEach(r => {
+    allDks.forEach(dk => {
+      if (schedule[r][dk] === 'close') {
+        const w = Math.floor(allDks.indexOf(dk) / 7);
+        closesPerWeek[r][w]++;
+      }
+    });
+  });
+
+  // Get all non-Monday nights that need a closer
+  const nightsToFill = allDks.filter(dk => {
+    if (isDkMonday(dk)) return false; // KC handles Monday (or manager-mode KC handles via ROLES)
+    // Check if already has a closer from inputs
+    const hasCloser = ROLES.some(r => schedule[r][dk] === 'close');
+    return !hasCloser;
+  });
+
+  // For each night, pick the best manager to close
+  for (const dk of nightsToFill) {
+    const w = Math.floor(allDks.indexOf(dk) / 7);
+    const ndk = nextDk(dk);
+
+    // Who CAN close this night?
+    const candidates = ROLES.filter(r => {
+      const s = schedule[r][dk];
+      if (s === 'off' || s === 'rto' || s === 'pto' || s === 'close') return false;
+      // Clopen: don't close if tomorrow already has an open assigned
+      if (ndk && isOpen(schedule[r][ndk])) return false;
+      return true;
+    });
+
+    if (candidates.length === 0) continue; // repair loop will handle
+
+    // Score each candidate — lower is better
+    const scored = candidates.map(r => {
+      let score = 0;
+      const myCloses = closesPerWeek[r][w];
+
+      // SM: should close exactly 1/week
+      if (r === 'sm') {
+        if (myCloses >= 1) score += 100; // already has their close — strongly avoid
+        else score -= 5; // SM still needs a close — mild preference
+        if (isDkWeekend(dk)) score += 10; // SM prefers not closing weekends
+      } else {
+        // AM / manager-KC: target closes per week
+        // Determine this closer's target for this week
+        const closerIdx = closerPool.indexOf(r);
+        const targetForThisCloser = baseClosesPerCloser + ((closerIdx + w) % closerCount < extraClosers ? 1 : 0);
+        if (myCloses >= targetForThisCloser + 1) score += 100; // well over target
+        else if (myCloses >= targetForThisCloser) score += 50; // at target
+        else if (myCloses === targetForThisCloser - 1) score -= 3; // needs more
+        else score -= 5; // well under target
+      }
+
+      // Prefer close-before-off (next day is off = ideal)
+      if (ndk) {
+        const ns = schedule[r][ndk];
+        if (ns === 'off' || ns === 'rto') score -= 8;
+        else if (!ns) score -= 2; // unassigned = fine, we'll make it mid
+      }
+
+      // Prefer managers with fewer total closes (fair distribution)
+      const totalCloses = allDks.filter(d => schedule[r][d] === 'close').length;
+      score += totalCloses;
+
+      // Weekend close fairness: if this is a weekend night, penalize managers
+      // who already have more weekend closes (spread them evenly)
+      if (isDkWeekend(dk) && r !== 'sm') {
+        const myWeekendCloses = allDks.filter(d => schedule[r][d] === 'close' && isDkWeekend(d)).length;
+        score += myWeekendCloses * 5; // strong penalty for weekend close accumulation
+      }
+
+      return { role: r, score };
+    });
+
+    scored.sort((a, b) => a.score - b.score);
+    const chosen = scored[0].role;
+    schedule[chosen][dk] = 'close';
+    closesPerWeek[chosen][w]++;
+  }
+
+  // ════════════════════════════════════════════════════
+  // STEP 4: ASSIGN REMAINING DAYS OFF (to hit 5 per week)
+  // PTO counts as a scheduled day. RTO does NOT.
+  // Never Monday off. Don't remove close assignments.
+  // Prefer days with most other managers working (least coverage impact).
+  // Don't stack too many managers off on the same day.
+  // ════════════════════════════════════════════════════
+
+  for (let w = 0; w < numWeeks; w++) {
+    const weekDks = getWeekDks(w);
+    ROLES.forEach(r => {
+      const rtos = weekDks.filter(dk => schedule[r][dk] === 'rto').length;
+      const ptos = weekDks.filter(dk => schedule[r][dk] === 'pto').length;
+      const currentOffs = weekDks.filter(dk => schedule[r][dk] === 'off').length;
+      const currentWork = weekDks.filter(dk => isWork(schedule[r][dk])).length;
+      const availDays = 7 - rtos;
+      const targetSched = Math.min(5, availDays);
+      // Scheduled = work + PTO. We need targetSched of these.
+      // Offs needed = availDays - targetSched - currentOffs (already placed weekends/inputs)
+      const alreadySched = currentWork + ptos;
+      let offNeeded = Math.max(0, availDays - targetSched - currentOffs);
+
+      if (offNeeded <= 0) return;
+
+      // Count how many managers are off on each day (to avoid stacking)
+      const dayOffCounts = {};
+      weekDks.forEach(dk => {
+        dayOffCounts[dk] = ROLES.filter(rx => {
+          const sx = schedule[rx][dk];
+          return sx === 'off' || sx === 'rto';
+        }).length;
+      });
+
+      // Count how many managers are working or potentially working each day
+      const dayWorkerCounts = {};
+      weekDks.forEach(dk => {
+        dayWorkerCounts[dk] = ROLES.filter(rx => {
+          const sx = schedule[rx][dk];
+          return isWork(sx) || !sx; // working or unassigned (potential worker)
+        }).length;
+      });
+
+      // Count this manager's current weekend offs across the period (for fairness)
+      const myWeekendOffs = allDks.filter(d => {
+        const s = schedule[r][d];
+        return (s === 'off' || s === 'rto') && isDkWeekend(d);
+      }).length;
+
+      // Pick days for off
+      const candidates = weekDks.filter(dk => {
+        if (isDkMonday(dk)) return false;
+        const s = schedule[r][dk];
+        if (s === 'close') return false;  // don't remove a close
+        if (s === 'off' || s === 'rto' || s === 'pto') return false; // already accounted
+        if (isWork(s)) return false; // user-entered work shift or close — don't override
+        // Only unassigned slots
+        return !s;
+      }).sort((a, b) => {
+        // Primary: prefer days with most coverage (least impact to remove us)
+        const coverageDiff = dayWorkerCounts[b] - dayWorkerCounts[a];
+        if (coverageDiff !== 0) return coverageDiff;
+        // Secondary: if this manager has many weekend offs, prefer weekday offs
+        // If few weekend offs, slightly prefer weekend offs (balance)
+        const avgWeekendOffs = ROLES.reduce((sum, rx) => {
+          return sum + allDks.filter(d => (schedule[rx][d] === 'off' || schedule[rx][d] === 'rto') && isDkWeekend(d)).length;
+        }, 0) / ROLES.length;
+        const aWe = isDkWeekend(a) ? 1 : 0;
+        const bWe = isDkWeekend(b) ? 1 : 0;
+        if (aWe !== bWe) {
+          if (myWeekendOffs > avgWeekendOffs + 0.5) return aWe - bWe; // prefer weekday (already have lots of weekend offs)
+          if (myWeekendOffs < avgWeekendOffs - 0.5) return bWe - aWe; // prefer weekend (behind on weekend offs)
+        }
+        // Tertiary: prefer days with fewest managers already off (avoid stacking)
+        return dayOffCounts[a] - dayOffCounts[b];
+      });
+
+      for (const dk of candidates) {
+        if (offNeeded <= 0) break;
+        // Don't stack more than 2 managers off on the same day
+        if (dayOffCounts[dk] >= 2) continue;
+        schedule[r][dk] = 'off';
+        dayOffCounts[dk]++;
+        offNeeded--;
+      }
+
+      // If we still need offs (couldn't find uncrowded days), relax the stacking limit
+      if (offNeeded > 0) {
+        for (const dk of candidates) {
+          if (offNeeded <= 0) break;
+          if (schedule[r][dk] === 'off') continue; // already used
+          schedule[r][dk] = 'off';
+          offNeeded--;
+        }
+      }
+    });
+  }
+
+  // ════════════════════════════════════════════════════
+  // STEP 5: FILL REMAINING SLOTS WITH OPEN/MID SHIFTS
+  // If closed previous day -> mid (NEVER open = clopen prevention).
+  // Ensure at least 1 opener and 1 closer per day.
+  // Alternate early/late variants for variety.
+  // ════════════════════════════════════════════════════
+
+  let openVariety = 0;
+  let midVariety = 0;
+
+  allDks.forEach((dk, dkIdx) => {
+    const pdk = dkIdx > 0 ? allDks[dkIdx - 1] : null;
+
+    // Count current coverage on this day
+    let opens = 0, mids = 0, closes = 0;
+    ROLES.forEach(r => {
+      const s = schedule[r][dk];
+      if (isOpen(s)) opens++;
+      if (isMid(s)) mids++;
+      if (isClose(s)) closes++;
+    });
+    // Count non-manager KC closes on Monday
+    if (isDkMonday(dk)) {
+      nonMgrKCs.forEach(kc => { if (schedule[kc.id][dk] === 'kc-close') closes++; });
+    }
+
+    // Gather unassigned roles for this day
+    const unassigned = ROLES.filter(r => !schedule[r][dk]);
+
+    // Count each manager's total opens and mids so far (for fairness)
+    const managerOpens = {};
+    const managerMids = {};
+    ROLES.forEach(r => {
+      managerOpens[r] = allDks.filter(d => isOpen(schedule[r][d])).length;
+      managerMids[r] = allDks.filter(d => isMid(schedule[r][d])).length;
+    });
+
+    // Sort: closed-yesterday first (forced mid), then SM first (prefers open),
+    // then others sorted by who has most opens (they should get mid next for balance)
+    unassigned.sort((a, b) => {
+      const aClosedYesterday = pdk && isClose(schedule[a][pdk]) ? 1 : 0;
+      const bClosedYesterday = pdk && isClose(schedule[b][pdk]) ? 1 : 0;
+      if (aClosedYesterday !== bClosedYesterday) return bClosedYesterday - aClosedYesterday;
+      // SM goes early (prefers open shifts)
+      if (a === 'sm' && b !== 'sm') return -1;
+      if (b === 'sm' && a !== 'sm') return 1;
+      // Among AMs/manager-KCs: sort by who has MOST opens (they should get mid next)
+      return managerOpens[b] - managerOpens[a];
+    });
+
+    for (const r of unassigned) {
+      const closedYesterday = pdk && isClose(schedule[r][pdk]);
+      // SM always prefers open — no fairness balancing for SM
+      // Others balance open/mid fairly
+      const isSM = (r === 'sm');
+      const preferMid = !isSM && managerOpens[r] > managerMids[r] + 1;
+      const preferOpen = isSM || (!isSM && managerMids[r] > managerOpens[r] + 1);
+
+      if (closedYesterday) {
+        // MUST be mid — NEVER open after a close
+        schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+        mids++;
+        midVariety++;
+        managerMids[r]++;
+      } else if (opens === 0) {
+        // No opener yet — assign open (unless we should try to balance and have other options)
+        if (preferMid && unassigned.some(r2 => r2 !== r && !schedule[r2][dk] && !(pdk && isClose(schedule[r2][pdk])))) {
+          // Skip — let someone else open, we'll get mid below
+          schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+          mids++;
+          midVariety++;
+          managerMids[r]++;
+        } else {
+          schedule[r][dk] = (openVariety % 2 === 0) ? 'open-early' : 'open-late';
+          opens++;
+          openVariety++;
+          managerOpens[r]++;
+        }
+      } else if (mids === 0) {
+        // No mid yet — assign mid (unless should balance toward open)
+        if (preferOpen && opens < 2) {
+          schedule[r][dk] = (openVariety % 2 === 0) ? 'open-late' : 'open-early';
+          opens++;
+          openVariety++;
+          managerOpens[r]++;
+        } else {
+          schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+          mids++;
+          midVariety++;
+          managerMids[r]++;
+        }
+      } else if (opens < 2) {
+        // Bonus coverage — use fairness to decide
+        if (preferMid) {
+          schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+          mids++;
+          midVariety++;
+          managerMids[r]++;
+        } else {
+          schedule[r][dk] = (openVariety % 2 === 0) ? 'open-late' : 'open-early';
+          opens++;
+          openVariety++;
+          managerOpens[r]++;
+        }
+      } else {
+        // Extra mid
+        schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-late' : 'mid-early';
+        mids++;
+        midVariety++;
+      }
+    }
+  });
+
+  // Non-manager KC mid for critically understaffed non-Monday days (< 2 managers working)
+  allDks.forEach(dk => {
+    if (isDkMonday(dk)) return;
+    if (dayWorkCount(dk) < 2) {
+      // Find a non-manager KC that isn't already scheduled
+      for (const kc of nonMgrKCs) {
+        if (!schedule[kc.id][dk]) {
+          schedule[kc.id][dk] = 'mid-early';
+          break;
+        }
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════
+  // STEP 5b: BALANCE WEEKEND OFFS across all managers
+  // For managers with too many weekend offs, swap a weekend off for a weekday off.
+  // For managers with too few, swap a weekday off for a weekend off.
+  // Repeat until all managers are within 1 of each other.
+  // ════════════════════════════════════════════════════
+
+  for (let balancePass = 0; balancePass < 20; balancePass++) {
+    const weOffs = {};
+    ROLES.forEach(r => {
+      weOffs[r] = allDks.filter(dk => schedule[r][dk] === 'off' && isDkWeekend(dk)).length;
+    });
+    const maxWe = Math.max(...Object.values(weOffs));
+    const minWe = Math.min(...Object.values(weOffs));
+    if (maxWe - minWe <= 1) break;
+
+    // Pick the manager with the most weekend offs
+    const over = ROLES.find(r => weOffs[r] === maxWe);
+    if (!over) break;
+
+    // Find a weekend off day we can move to a weekday
+    const weOffDays = allDks.filter(dk =>
+      isDkWeekend(dk) && schedule[over][dk] === 'off' && !isInputLocked(over, dk)
+    );
+
+    let didSwap = false;
+    for (const weDk of weOffDays) {
+      if (didSwap) break;
+      const weWeek = Math.floor(allDks.indexOf(weDk) / 7);
+      const weekDks = getWeekDks(weWeek);
+
+      // Find a weekday in the same week where this manager works (not close, not Monday)
+      const wdCands = weekDks.filter(dk => {
+        if (isDkMonday(dk) || isDkWeekend(dk)) return false;
+        const s = schedule[over][dk];
+        return isWork(s) && !isClose(s) && !isInputLocked(over, dk);
+      });
+
+      for (const wdDk of wdCands) {
+        // Safety: don't create clopen on the weekend day
+        const weIdx = allDks.indexOf(weDk);
+        const wePrev = weIdx > 0 ? allDks[weIdx - 1] : null;
+        const wdShift = schedule[over][wdDk];
+        if (wePrev && isClose(schedule[over][wePrev]) && isOpen(wdShift)) continue;
+
+        // Safety: don't leave the weekday without coverage
+        const wdOtherWorkers = ROLES.filter(rx => rx !== over && isWork(schedule[rx][wdDk])).length;
+        if (wdOtherWorkers < 2) continue; // need at least 2 others working that day
+
+        // Safety: if this manager is the only opener on that weekday, don't remove them
+        if (isOpen(wdShift)) {
+          const otherOpeners = ROLES.filter(rx => rx !== over && isOpen(schedule[rx][wdDk])).length;
+          if (otherOpeners === 0) continue;
+        }
+
+        // Swap: weekend off -> work (gets the weekday's shift), weekday work -> off
+        schedule[over][weDk] = wdShift;
+        schedule[over][wdDk] = 'off';
+        didSwap = true;
+        break;
+      }
+    }
+    if (!didSwap) break;
+  }
+
+  // STEP 5c: Give under-managers MORE weekend offs
+  for (let balancePass = 0; balancePass < 20; balancePass++) {
+    const weOffs = {};
+    ROLES.forEach(r => {
+      weOffs[r] = allDks.filter(dk => schedule[r][dk] === 'off' && isDkWeekend(dk)).length;
+    });
+    const maxWe = Math.max(...Object.values(weOffs));
+    const minWe = Math.min(...Object.values(weOffs));
+    if (maxWe - minWe <= 1) break;
+
+    const under = ROLES.find(r => weOffs[r] === minWe);
+    if (!under) break;
+
+    const myWeekdayOffs = allDks.filter(dk =>
+      !isDkWeekend(dk) && !isDkMonday(dk) && schedule[under][dk] === 'off' && !isInputLocked(under, dk)
+    );
+
+    let didSwap = false;
+    for (const wdDk of myWeekdayOffs) {
+      if (didSwap) break;
+      const wdWeek = Math.floor(allDks.indexOf(wdDk) / 7);
+      const weekDks = getWeekDks(wdWeek);
+
+      const weCands = weekDks.filter(dk => {
+        if (!isDkWeekend(dk)) return false;
+        const s = schedule[under][dk];
+        return isWork(s) && !isClose(s) && !isInputLocked(under, dk);
+      });
+
+      for (const weDk of weCands) {
+        const wdIdx = allDks.indexOf(wdDk);
+        const wdPrev = wdIdx > 0 ? allDks[wdIdx - 1] : null;
+        const weShift = schedule[under][weDk];
+        if (wdPrev && isClose(schedule[under][wdPrev]) && isOpen(weShift)) continue;
+
+        const weOtherWorkers = ROLES.filter(rx => rx !== under && isWork(schedule[rx][weDk])).length;
+        if (weOtherWorkers < 1) continue;
+
+        if (isOpen(weShift)) {
+          const otherOpeners = ROLES.filter(rx => rx !== under && isOpen(schedule[rx][weDk])).length;
+          if (otherOpeners === 0) continue;
+        }
+
+        schedule[under][wdDk] = weShift;
+        schedule[under][weDk] = 'off';
+        didSwap = true;
+        break;
+      }
+    }
+    if (!didSwap) break;
+  }
+
+  // ════════════════════════════════════════════════════
+  // STEP 6: VALIDATE -> REPAIR LOOP (safety net)
+  // ════════════════════════════════════════════════════
+
+  let maxPasses = 50;
+  let pass = 0;
+  let lastErrorCount = Infinity;
+  let staleCount = 0;
+  let lastErrorSig = '';
+
+  while (pass < maxPasses) {
+    const violations = validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDkMonday, isDkSaturday, isDkSunday, isDkWeekend, dkDow, allWeekendPairs, names, ROLES, ALL_KC, AMS, closerPool);
+    const errors = violations.filter(v => v.severity === 'error');
+    if (errors.length === 0) break;
+
+    // Track whether the error *composition* changed (not just count)
+    const errorSig = errors.map(e => e.rule + ':' + e.manager + ':' + e.week + ':' + e.day).sort().join('|');
+    if (errorSig === lastErrorSig) {
+      staleCount++;
+    } else {
+      staleCount = 0;
+    }
+    lastErrorSig = errorSig;
+
+    // Use aggressive mode after 5 passes or if stuck for 3 passes
+    const aggressive = pass >= 5 || staleCount >= 2;
+
+    // Bail only if truly stuck (same exact errors for 5+ passes)
+    if (staleCount >= 5) break;
+
+    lastErrorCount = errors.length;
+    repairViolations(schedule, errors, allDks, numWeeks, getWeekDks, dkToDate, isDkMonday, isDkSaturday, isDkSunday, isDkWeekend, dkDow, allWeekendPairs, names, aggressive, ROLES, ALL_KC, AMS, closerPool);
+    pass++;
+  }
+
+  // ════════════════════════════════════════════════════
+  // STEP 7: Soft preference pass (non-breaking)
+  // ════════════════════════════════════════════════════
+
+  // Soft pref 1: Open shift before weekend off
+  for (let i = 0; i < allDks.length - 1; i++) {
+    const dk = allDks[i];
+    const ndk = allDks[i + 1];
+    ROLES.forEach(r => {
+      if (!isDkWeekend(ndk)) return;
+      const ns = schedule[r][ndk];
+      if (ns !== 'off' && ns !== 'rto') return;
+      if (!isMid(schedule[r][dk])) return;
+      // Find someone to swap with who has open today and is NOT off tomorrow
+      const swapWith = ROLES.find(r2 => {
+        if (r2 === r) return false;
+        if (!isOpen(schedule[r2][dk])) return false;
+        const r2ns = schedule[r2][ndk];
+        if (r2ns === 'off' || r2ns === 'rto') return false;
+        // Don't create a clopen for them
+        const r2prevDk = i > 0 ? allDks[i - 1] : null;
+        if (r2prevDk && isClose(schedule[r2][r2prevDk])) return false;
+        return true;
+      });
+      if (swapWith) {
+        const tmp = schedule[swapWith][dk];
+        schedule[swapWith][dk] = schedule[r][dk];
+        schedule[r][dk] = tmp;
+      }
+    });
+  }
+
+  // ════════════════════════════════════════════════════
+  // STEP 8: Final validation report
+  // ════════════════════════════════════════════════════
+
+  const finalViolations = validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDkMonday, isDkSaturday, isDkSunday, isDkWeekend, dkDow, allWeekendPairs, names, ROLES, ALL_KC, AMS, closerPool);
+  const warnings = finalViolations.map(v => ({
+    type: v.severity === 'error' ? 'error' : (v.severity === 'warning' ? 'warn' : 'info'),
+    msg: v.detail
+  }));
+
+  // Note non-manager KC mid usage
+  allDks.forEach(dk => {
+    nonMgrKCs.forEach(kc => {
+      if (isMid(schedule[kc.id][dk])) {
+        warnings.push({ type: 'info', msg: `${names[kc.id]}: mid coverage ${formatDate(dkToDate(dk))} (low manager count)` });
+      }
+    });
+  });
+
+  const hasErrors = finalViolations.some(v => v.severity === 'error');
+  if (!hasErrors) {
+    warnings.unshift({ type: 'info', msg: `All hard constraints satisfied. (${pass} repair pass${pass !== 1 ? 'es' : ''})` });
+  } else {
+    warnings.unshift({ type: 'warn', msg: `${finalViolations.filter(v=>v.severity==='error').length} hard constraint(s) remain after ${pass} repair passes.` });
+  }
+
+  renderSchedule(warnings, ROLES, ALL_KC);
+  renderSummary(warnings, ROLES, ALL_KC);
+  document.getElementById('schedule-section').style.display = '';
+  document.getElementById('summary-section').style.display = '';
+  document.getElementById('schedule-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+
+// ════════════════════════════════════════════════════
+// VALIDATOR
+// Checks every hard rule and returns an array of violation objects.
+// ════════════════════════════════════════════════════
+
+function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDkMonday, isDkSaturday, isDkSunday, isDkWeekend, dkDow, allWeekendPairs, names, ROLES, ALL_KC, AMS, closerPool) {
+  const violations = [];
+
+  const v = (severity, rule, manager, week, day, detail) =>
+    violations.push({ severity, rule, manager, week, day, detail });
+
+  // ── Rule 1: 5 scheduled days per week (PTO counts, RTO does not) ──
+  for (let w = 0; w < numWeeks; w++) {
+    const weekDks = getWeekDks(w);
+    ROLES.forEach(r => {
+      let sched = 0;
+      weekDks.forEach(dk => { if (isScheduled(schedule[r][dk])) sched++; });
+      if (sched !== 5) {
+        // Check if RTO makes 5 impossible (fewer than 5 non-RTO days)
+        const rtos = weekDks.filter(dk => schedule[r][dk] === 'rto').length;
+        const availDays = 7 - rtos;
+        const target = Math.min(5, availDays);
+        if (sched !== target) {
+          v('error', 'five-day-week', r, w, null,
+            `${names[r]}: Week ${w+1} has ${sched} scheduled days (target ${target})`);
+        }
+      }
+    });
+  }
+
+  // ── Rule 2: All managers on Monday ──
+  allDks.forEach(dk => {
+    if (!isDkMonday(dk)) return;
+    ROLES.forEach(r => {
+      const s = schedule[r][dk];
+      if (!isWork(s) && !isPto(s)) {
+        v('error', 'monday-all', r, null, dk,
+          `${names[r]}: Not working on Monday ${formatDate(dkToDate(dk))}`);
+      }
+    });
+  });
+
+  // ── Rule 3: SM closes exactly 1 per week ──
+  for (let w = 0; w < numWeeks; w++) {
+    const weekDks = getWeekDks(w);
+    const smCloses = weekDks.filter(dk => schedule.sm[dk] === 'close').length;
+    if (smCloses !== 1) {
+      v('error', 'sm-close-1', 'sm', w, null,
+        `${names.sm}: Week ${w+1} has ${smCloses} closes (need exactly 1)`);
+    }
+  }
+
+  // ── Rule 4: Closer distribution ──
+  // 6 non-Monday nights per week. SM gets 1. Remaining 5 distributed among closerPool.
+  const remainingCloses = 5;
+  const closerCount = closerPool.length;
+  const baseTarget = Math.floor(remainingCloses / closerCount);
+  const extraCount = remainingCloses % closerCount;
+  // Each closer should have between baseTarget and baseTarget+1 closes per week
+  const minTarget = baseTarget;
+  const maxTarget = baseTarget + (extraCount > 0 ? 1 : 0);
+
+  for (let w = 0; w < numWeeks; w++) {
+    const weekDks = getWeekDks(w);
+    const closeCounts = {};
+    closerPool.forEach(r => {
+      closeCounts[r] = weekDks.filter(dk => schedule[r][dk] === 'close').length;
+    });
+    const smCloses = weekDks.filter(dk => schedule.sm[dk] === 'close').length;
+    const totalCloses = smCloses + closerPool.reduce((sum, r) => sum + closeCounts[r], 0);
+
+    closerPool.forEach(r => {
+      const closes = closeCounts[r];
+      if (closes === 0) {
+        v('error', 'am-close-2', r, w, null,
+          `${names[r]}: Week ${w+1} has 0 closes (need at least ${minTarget})`);
+      } else if (closes > maxTarget + 1) {
+        v('error', 'am-close-2', r, w, null,
+          `${names[r]}: Week ${w+1} has ${closes} closes (max ${maxTarget + 1})`);
+      } else if (closes === maxTarget + 1) {
+        v('warning', 'am-close-2', r, w, null,
+          `${names[r]}: Week ${w+1} has ${closes} closes (target is ${minTarget}-${maxTarget}, but may be needed for coverage)`);
+      }
+    });
+
+    // Total closes should cover all 6 non-Monday nights
+    if (totalCloses < 6) {
+      v('warning', 'close-coverage', null, w, null,
+        `Week ${w+1}: Only ${totalCloses} of 6 non-Monday nights have closers`);
+    }
+  }
+
+  // ── Rule 5: KC Monday close (informational only — always placed in step 1) ──
+  // (validated implicitly, not a repair target)
+
+  // ── Rule 6: No clopens ──
+  for (let i = 1; i < allDks.length; i++) {
+    const dk = allDks[i];
+    const prevDk = allDks[i - 1];
+    ROLES.forEach(r => {
+      if (isClose(schedule[r][prevDk]) && isOpen(schedule[r][dk])) {
+        v('error', 'no-clopen', r, null, dk,
+          `${names[r]}: Clopen on ${formatDate(dkToDate(dk))} (closed ${formatDate(dkToDate(prevDk))})`);
+      }
+    });
+  }
+
+  // ── Rule 7: 1 consecutive weekend off per period ──
+  ROLES.forEach(r => {
+    let hasConsec = false;
+    allWeekendPairs.forEach(wp => {
+      const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
+      const off1 = s1 === 'off' || s1 === 'rto' || s1 === 'pto';
+      const off2 = s2 === 'off' || s2 === 'rto' || s2 === 'pto';
+      if (off1 && off2) hasConsec = true;
+    });
+    if (!hasConsec) {
+      v('error', 'weekend-off', r, null, null,
+        `${names[r]}: No consecutive Sat+Sun off in the period`);
+    }
+  });
+
+  // ── Rule 8: Coverage every day (1 opener + 1 closer minimum) ──
+  allDks.forEach(dk => {
+    let opens = 0, closes = 0;
+    ALL_KC.forEach(r => {
+      const s = schedule[r][dk];
+      if (isOpen(s)) opens++;
+      if (isClose(s) || s === 'kc-close') closes++;
+    });
+    if (opens === 0) {
+      v('error', 'coverage-open', null, null, dk,
+        `${formatDate(dkToDate(dk))}: No opener`);
+    }
+    if (closes === 0) {
+      v('error', 'coverage-close', null, null, dk,
+        `${formatDate(dkToDate(dk))}: No closer`);
+    }
+  });
+
+  // ── Rule 9: No manager close on Monday ──
+  allDks.forEach(dk => {
+    if (!isDkMonday(dk)) return;
+    ROLES.forEach(r => {
+      if (schedule[r][dk] === 'close') {
+        v('error', 'no-monday-close', r, null, dk,
+          `${names[r]}: Closing on Monday ${formatDate(dkToDate(dk))} (KC handles Monday close)`);
+      }
+    });
+  });
+
+  // ── Rule 10: Balance coverage across week (soft error — warning if spread > 2) ──
+  for (let w = 0; w < numWeeks; w++) {
+    const weekDks = getWeekDks(w);
+    const counts = weekDks.map(dk => ROLES.filter(r => isWork(schedule[r][dk])).length);
+    const maxC = Math.max(...counts), minC = Math.min(...counts);
+    if (maxC - minC > 2) {
+      v('warning', 'balance', null, w, null,
+        `Week ${w+1}: Coverage imbalance (${minC}-${maxC} managers/day, spread > 2)`);
+    }
+  }
+
+  return violations;
+}
+
+
+// ════════════════════════════════════════════════════
+// REPAIR ENGINE
+// Targeted fixes for each violation type.
+// ════════════════════════════════════════════════════
+
+function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dkToDate, isDkMonday, isDkSaturday, isDkSunday, isDkWeekend, dkDow, allWeekendPairs, names, aggressive, ROLES, ALL_KC, AMS, closerPool) {
+
+  // Group violations by rule for ordered processing
+  const byRule = {};
+  violations.forEach(v => {
+    if (!byRule[v.rule]) byRule[v.rule] = [];
+    byRule[v.rule].push(v);
+  });
+
+  // Helper: count scheduled days for role in week
+  const weekSched = (role, wIdx) => {
+    let c = 0;
+    getWeekDks(wIdx).forEach(dk => { if (isScheduled(schedule[role][dk])) c++; });
+    return c;
+  };
+
+  // Helper: count closes for role in week
+  const weekCloses = (role, wIdx) => {
+    return getWeekDks(wIdx).filter(dk => schedule[role][dk] === 'close').length;
+  };
+
+  // Helper: find the week index for a date key
+  const weekOf = (dk) => Math.floor(allDks.indexOf(dk) / 7);
+
+  // Helper: is a day an input-locked value?
+  const isInputLocked = (role, dk) => {
+    return inputs[role] && inputs[role][dk] !== undefined;
+  };
+
+  // ── Repair: No Monday close for managers (Rule 9) ──
+  // Must run before close-count repairs
+  if (byRule['no-monday-close']) {
+    byRule['no-monday-close'].forEach(v => {
+      const r = v.manager;
+      const dk = v.day;
+      const w = weekOf(dk);
+      const weekDks = getWeekDks(w);
+      // Move this close to a different non-Monday day in the week
+      const candidates = weekDks.filter(cdk =>
+        !isDkMonday(cdk) && schedule[r][cdk] && isWork(schedule[r][cdk]) && !isClose(schedule[r][cdk])
+      );
+      if (candidates.length > 0) {
+        const target = candidates[0];
+        const oldShift = schedule[r][target];
+        schedule[r][target] = 'close';
+        schedule[r][dk] = oldShift; // swap
+      } else {
+        // Just remove the close, give them mid on Monday
+        schedule[r][dk] = 'mid-early';
+      }
+    });
+  }
+
+  // ── Repair: Manager not on Monday (Rule 2) ──
+  if (byRule['monday-all']) {
+    byRule['monday-all'].forEach(v => {
+      const r = v.manager;
+      const dk = v.day; // the Monday
+      const w = weekOf(dk);
+      const weekDks = getWeekDks(w);
+
+      // Remove this Monday off/rto
+      if (schedule[r][dk] === 'off' || schedule[r][dk] === 'rto') {
+        delete schedule[r][dk];
+      }
+
+      // Now they need a work shift on Monday — assign open or mid
+      if (!schedule[r][dk] || !isWork(schedule[r][dk])) {
+        const prevDk = allDks.indexOf(dk) > 0 ? allDks[allDks.indexOf(dk) - 1] : null;
+        const closedYesterday = prevDk && isClose(schedule[r][prevDk]);
+        schedule[r][dk] = closedYesterday ? 'mid-early' : 'open-early';
+      }
+
+      // They may now have 6 working days this week — find a non-Monday to give off
+      if (weekSched(r, w) > 5) {
+        const offCandidates = weekDks.filter(cdk =>
+          !isDkMonday(cdk) && isWork(schedule[r][cdk]) && !isInputLocked(r, cdk)
+        ).sort((a, b) => {
+          // Prefer days with most other managers working (least coverage impact)
+          const aCount = ROLES.filter(rx => rx !== r && isWork(schedule[rx][a])).length;
+          const bCount = ROLES.filter(rx => rx !== r && isWork(schedule[rx][b])).length;
+          return bCount - aCount;
+        });
+        if (offCandidates.length > 0) {
+          schedule[r][offCandidates[0]] = 'off';
+        }
+      }
+    });
+  }
+
+  // ── Repair: Wrong number of working days (Rule 1) ──
+  if (byRule['five-day-week']) {
+    byRule['five-day-week'].forEach(v => {
+      const r = v.manager;
+      const w = v.week;
+      const weekDks = getWeekDks(w);
+      const rtos = weekDks.filter(dk => schedule[r][dk] === 'rto').length;
+      const target = Math.min(5, 7 - rtos);
+      let sched = weekSched(r, w);
+
+      if (sched > target) {
+        // Too many scheduled days — convert work days to off (not Monday, not input-locked)
+        const excess = weekDks.filter(dk =>
+          isWork(schedule[r][dk]) && !isDkMonday(dk) && !isInputLocked(r, dk)
+        ).sort((a, b) => {
+          // Prefer to remove from days with most other coverage
+          const aOthers = ROLES.filter(rx => rx !== r && isWork(schedule[rx][a])).length;
+          const bOthers = ROLES.filter(rx => rx !== r && isWork(schedule[rx][b])).length;
+          return bOthers - aOthers;
+        });
+        for (const dk of excess) {
+          if (weekSched(r, w) <= target) break;
+          schedule[r][dk] = 'off';
+        }
+      } else if (sched < target) {
+        // Too few scheduled days — convert off days to work (not Monday RTO, prefer non-weekend)
+        const addCandidates = weekDks.filter(dk =>
+          (schedule[r][dk] === 'off') && !isInputLocked(r, dk)
+        ).sort((a, b) => {
+          const aWe = isDkWeekend(a) ? 1 : 0;
+          const bWe = isDkWeekend(b) ? 1 : 0;
+          return aWe - bWe;
+        });
+        for (const dk of addCandidates) {
+          if (weekSched(r, w) >= target) break;
+          // Assign a work shift
+          const prevDk = allDks.indexOf(dk) > 0 ? allDks[allDks.indexOf(dk) - 1] : null;
+          const closedYesterday = prevDk && isClose(schedule[r][prevDk]);
+          const dayOpens = ROLES.filter(rx => isOpen(schedule[rx][dk])).length;
+          if (dayOpens === 0 && !closedYesterday) {
+            schedule[r][dk] = 'open-early';
+          } else {
+            schedule[r][dk] = closedYesterday ? 'mid-late' : 'mid-early';
+          }
+        }
+        // If still short, try filling unassigned slots
+        if (weekSched(r, w) < target) {
+          const empty = weekDks.filter(dk => !schedule[r][dk]);
+          for (const dk of empty) {
+            if (weekSched(r, w) >= target) break;
+            schedule[r][dk] = 'mid-early';
+          }
+        }
+      }
+    });
+  }
+
+  // ── Repair: SM close count (Rule 3) ──
+  if (byRule['sm-close-1']) {
+    byRule['sm-close-1'].forEach(v => {
+      const w = v.week;
+      const weekDks = getWeekDks(w);
+      const current = weekCloses('sm', w);
+
+      if (current < 1) {
+        // Need to add a close — find a non-Monday work day that isn't already close
+        const candidates = weekDks.filter(dk =>
+          !isDkMonday(dk) && isWork(schedule.sm[dk]) && !isClose(schedule.sm[dk])
+        );
+        if (candidates.length > 0) {
+          schedule.sm[candidates[0]] = 'close';
+        }
+      } else if (current > 1) {
+        // Too many closes — convert excess to mid
+        const closes = weekDks.filter(dk => schedule.sm[dk] === 'close' && !isInputLocked('sm', dk));
+        for (let i = 1; i < closes.length; i++) {
+          schedule.sm[closes[i]] = 'mid-early';
+        }
+      }
+    });
+  }
+
+  // ── Repair: Closer close count (Rule 4) ──
+  if (byRule['am-close-2']) {
+    byRule['am-close-2'].forEach(v => {
+      const closer = v.manager;
+      const w = v.week;
+      const weekDks = getWeekDks(w);
+      const current = weekCloses(closer, w);
+      const nonMonWork = weekDks.filter(dk =>
+        !isDkMonday(dk) && isWork(schedule[closer][dk])
+      ).length;
+
+      // Compute this closer's target
+      const remainingCloses = 5;
+      const closerCountLocal = closerPool.length;
+      const baseT = Math.floor(remainingCloses / closerCountLocal);
+      const extraT = remainingCloses % closerCountLocal;
+      const closerIdx = closerPool.indexOf(closer);
+      const target = baseT + ((closerIdx + w) % closerCountLocal < extraT ? 1 : 0);
+      const effectiveTarget = Math.min(target, nonMonWork <= 3 ? 1 : target);
+
+      if (current < effectiveTarget) {
+        // Add closes: convert non-close work days to close
+        const candidates = weekDks.filter(dk =>
+          !isDkMonday(dk) && isWork(schedule[closer][dk]) && !isClose(schedule[closer][dk])
+        ).sort((a, b) => {
+          // Prefer days where no other manager is closing
+          const aCloses = ROLES.filter(rx => schedule[rx][a] === 'close').length;
+          const bCloses = ROLES.filter(rx => schedule[rx][b] === 'close').length;
+          return aCloses - bCloses;
+        });
+        let needed = effectiveTarget - current;
+        for (const dk of candidates) {
+          if (needed <= 0) break;
+          schedule[closer][dk] = 'close';
+          needed--;
+        }
+      } else if (current > effectiveTarget + 1) {
+        // Remove excess closes
+        const closes = weekDks.filter(dk => schedule[closer][dk] === 'close' && !isInputLocked(closer, dk));
+        let toRemove = current - effectiveTarget;
+        for (let i = closes.length - 1; i >= 0 && toRemove > 0; i--) {
+          schedule[closer][closes[i]] = 'mid-early';
+          toRemove--;
+        }
+      }
+    });
+  }
+
+  // ── Repair: Clopens (Rule 6) ──
+  if (byRule['no-clopen']) {
+    byRule['no-clopen'].forEach(v => {
+      const r = v.manager;
+      const dk = v.day; // the day with the open shift (day after close)
+      const prevDk = allDks[allDks.indexOf(dk) - 1];
+
+      if (!isClose(schedule[r][prevDk]) || !isOpen(schedule[r][dk])) return; // already fixed
+
+      // Strategy 1: Swap with someone who has mid/open today and didn't close yesterday
+      const swapWith = ROLES.find(r2 => {
+        if (r2 === r) return false;
+        const s2 = schedule[r2][dk];
+        if (!isMid(s2) && !isOpen(s2)) return false;
+        if (isClose(schedule[r2][prevDk])) return false;
+        return true;
+      });
+
+      if (swapWith) {
+        const tmp = schedule[swapWith][dk];
+        schedule[swapWith][dk] = schedule[r][dk];
+        schedule[r][dk] = tmp;
+      } else {
+        // Strategy 2: Change open to mid (only if another opener exists or we'll lose coverage)
+        const otherOpens = ROLES.filter(r2 => r2 !== r && isOpen(schedule[r2][dk])).length;
+        if (otherOpens > 0) {
+          schedule[r][dk] = 'mid-late';
+        } else if (aggressive) {
+          // Strategy 3: Move yesterday's close to mid, keeping today's open
+          if (prevDk && !isInputLocked(r, prevDk)) {
+            // Check if another manager can take the close that day
+            const closeSwap = ROLES.find(r2 => {
+              if (r2 === r) return false;
+              const s2 = schedule[r2][prevDk];
+              if (!isMid(s2) && !isOpen(s2)) return false;
+              // Don't create a new clopen for them
+              const nextDkVal = dk;
+              return !isOpen(schedule[r2][nextDkVal]);
+            });
+            if (closeSwap) {
+              const tmp = schedule[closeSwap][prevDk];
+              schedule[closeSwap][prevDk] = schedule[r][prevDk];
+              schedule[r][prevDk] = tmp;
+            } else {
+              schedule[r][dk] = 'mid-late'; // last resort
+            }
+          } else {
+            schedule[r][dk] = 'mid-late';
+          }
+        }
+      }
+    });
+  }
+
+  // ── Repair: No consecutive weekend off (Rule 7) ──
+  if (byRule['weekend-off']) {
+    byRule['weekend-off'].forEach(v => {
+      const r = v.manager;
+      // Find a weekend pair where we can give both days off
+      const sorted = [...allWeekendPairs].sort((a, b) => {
+        // Prefer weekends where fewer managers are already off
+        const aOff = ROLES.filter(rx => {
+          const s1 = schedule[rx][a.sat], s2 = schedule[rx][a.sun];
+          return (s1 === 'off' || s1 === 'rto') && (s2 === 'off' || s2 === 'rto');
+        }).length;
+        const bOff = ROLES.filter(rx => {
+          const s1 = schedule[rx][b.sat], s2 = schedule[rx][b.sun];
+          return (s1 === 'off' || s1 === 'rto') && (s2 === 'off' || s2 === 'rto');
+        }).length;
+        return aOff - bOff;
+      });
+
+      for (const wp of sorted) {
+        const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
+        // Skip if input-locked to work
+        if (isInputLocked(r, wp.sat) && isWork(inputs[r][wp.sat])) continue;
+        if (isInputLocked(r, wp.sun) && isWork(inputs[r][wp.sun])) continue;
+        // Skip PTO days (they count as off for the weekend rule but we shouldn't overwrite)
+        const sat_ok = !s1 || s1 === 'off' || s1 === 'rto' || isWork(s1);
+        const sun_ok = !s2 || s2 === 'off' || s2 === 'rto' || isWork(s2);
+        if (!sat_ok || !sun_ok) continue;
+
+        // Set both to off
+        if (isWork(s1) || !s1) schedule[r][wp.sat] = 'off';
+        if (isWork(s2) || !s2) schedule[r][wp.sun] = 'off';
+
+        // This may have broken 5-day rule — handled in next pass
+        break;
+      }
+    });
+  }
+
+  // ── Repair: Coverage gaps (Rules 8) ──
+  if (byRule['coverage-open']) {
+    byRule['coverage-open'].forEach(v => {
+      const dk = v.day;
+      // No opener — find a mid person who didn't close yesterday and switch to open
+      const prevDk = allDks.indexOf(dk) > 0 ? allDks[allDks.indexOf(dk) - 1] : null;
+      const midders = ROLES.filter(r => isMid(schedule[r][dk]));
+      const safe = midders.find(r => !(prevDk && isClose(schedule[r][prevDk])));
+      if (safe) {
+        schedule[safe][dk] = 'open-early';
+      } else if (midders.length > 0 && aggressive) {
+        schedule[midders[0]][dk] = 'open-early'; // forced clopen — will be flagged
+      }
+    });
+  }
+
+  if (byRule['coverage-close']) {
+    byRule['coverage-close'].forEach(v => {
+      const dk = v.day;
+      if (isDkMonday(dk)) return; // KC should handle
+      // No closer — find someone to close this night
+      // Priority: mid > open (if 2+ openers) > any worker > off person
+      const midders = ROLES.filter(r => isMid(schedule[r][dk]));
+      if (midders.length > 0) {
+        schedule[midders[0]][dk] = 'close';
+      } else {
+        const openers = ROLES.filter(r => isOpen(schedule[r][dk]));
+        if (openers.length >= 2) {
+          // Safe to convert one opener to closer — still have coverage
+          schedule[openers[0]][dk] = 'close';
+        } else {
+          // Last resort: any worker including sole opener
+          const workers = ROLES.filter(r => isWork(schedule[r][dk]));
+          if (workers.length > 0) {
+            schedule[workers[workers.length - 1]][dk] = 'close';
+          } else if (aggressive) {
+            // Extreme last resort: pull someone from off day
+            const offManagers = ROLES.filter(r => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
+            if (offManagers.length > 0) {
+              schedule[offManagers[0]][dk] = 'close';
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
+// ── Render Schedule — Weekly Tables ──
+function renderSchedule(warnings, ROLES, ALL_KC) {
+  const names = getManagerNames();
+  const p = currentPeriod;
+  const periodLabel = `FY${fiscalYear} Period ${p.number} - ${p.approxMonth} (${formatDate(p.start)} - ${formatDate(p.end)})`;
+  document.getElementById('schedule-title').textContent = periodLabel;
+  document.getElementById('print-header').textContent = periodLabel;
+
+  let html = '';
+
+  p.weeks.forEach((week, wIdx) => {
+    const weekDates = [];
+    const d = new Date(week.start);
+    for (let i = 0; i < 7; i++) {
+      weekDates.push(new Date(d));
+      d.setDate(d.getDate() + 1);
+    }
+
+    html += '<div class="week-table-wrapper">';
+    html += `<div class="week-header">`;
+    html += `<span>Week ${wIdx + 1}</span>`;
+    html += `<span class="week-dates">${DAY_NAMES_FULL[weekDates[0].getDay()]} ${formatDate(weekDates[0])} - ${DAY_NAMES_FULL[weekDates[6].getDay()]} ${formatDate(weekDates[6])}</span>`;
+    html += `</div>`;
+
+    html += '<table class="week-table">';
+
+    // Header row 1: Day names
+    html += '<thead><tr><th class="name-col"></th>';
+    weekDates.forEach(wd => {
+      const dow = wd.getDay();
+      let cls = '';
+      if (dow === 0 || dow === 6) cls = 'weekend-col';
+      else if (dow === 1) cls = 'monday-col';
+      html += `<th class="${cls}">${DAY_NAMES[dow]}</th>`;
+    });
+    html += '</tr>';
+
+    // Header row 2: Dates
+    html += '<tr><th class="name-col"></th>';
+    weekDates.forEach(wd => {
+      const dow = wd.getDay();
+      let cls = '';
+      if (dow === 0 || dow === 6) cls = 'weekend-col';
+      else if (dow === 1) cls = 'monday-col';
+      html += `<th class="${cls}">${formatDate(wd)}</th>`;
+    });
+    html += '</tr></thead>';
+
+    // Body rows
+    html += '<tbody>';
+    ALL_KC.forEach(r => {
+      html += '<tr>';
+      const isKC = r.startsWith('kc');
+      const isAM = r.startsWith('am');
+      const roleBadge = r === 'sm' ? 'role-sm' : (isKC ? 'role-kc' : 'role-am');
+      const roleLabel = r.toUpperCase();
+      html += `<td class="name-col"><span class="role-badge ${roleBadge}" style="font-size:0.6rem;padding:1px 4px;margin-right:4px">${roleLabel}</span>${names[r] || r.toUpperCase()}</td>`;
+
+      weekDates.forEach(wd => {
+        const dk = dateKey(wd);
+        const s = schedule[r] && schedule[r][dk];
+        let cellCls = '';
+        let content = '';
+
+        if (s) {
+          cellCls = SHIFT_CSS[s] || '';
+          content = SHIFT_SHORT[s] || s.toUpperCase();
+        } else if (isKC) {
+          cellCls = 'shift-off';
+          content = '';
+        }
+
+        if (isWeekend(wd) && !s) cellCls += ' weekend-stripe';
+
+        cellCls += ' shift-editable';
+        html += `<td class="${cellCls}" data-role="${r}" data-dk="${dk}" data-week="${wIdx}" data-is-kc="${isKC}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})">${content}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    // Coverage row
+    html += '<tr class="coverage-row"><td class="name-col">Coverage</td>';
+    weekDates.forEach(wd => {
+      const dk = dateKey(wd);
+      let opens = 0, mids = 0, closes = 0, total = 0;
+      ALL_KC.forEach(r => {
+        const s = schedule[r] && schedule[r][dk];
+        if (isOpen(s)) { opens++; total++; }
+        if (isMid(s)) { mids++; total++; }
+        if (isClose(s) || s === 'kc-close') { closes++; total++; }
+      });
+
+      let coverageCls = 'coverage-ok';
+      if (opens === 0 || closes === 0) coverageCls = 'coverage-bad';
+      else if (mids === 0 && total < 3) coverageCls = 'coverage-warn';
+
+      html += `<td class="${coverageCls}">${opens}O ${mids}M ${closes}C</td>`;
+    });
+    html += '</tr>';
+
+    html += '</tbody></table></div>';
+  });
+
+  document.getElementById('schedule-grid').innerHTML = html;
+
+  // Also render the print-optimized version
+  renderPrintSchedule(ROLES, ALL_KC);
+}
+
+// ── Render Print Schedule (Bryan's format) ──
+function renderPrintSchedule(ROLES, ALL_KC) {
+  const names = getManagerNames();
+  const p = currentPeriod;
+  const storeNum = document.getElementById('store-number').value || '';
+
+  // Print shift code mapping — just times, no type prefixes
+  const PRINT_SHIFT = {
+    'open-early': '6-4',
+    'open-late': '7-5',
+    'mid-early': '8-6',
+    'mid-late': '9-7',
+    'close': '1230-10',
+    'off': 'OFF',
+    'pto': 'VAC',
+    'rto': 'OFF(RTO)',
+    'kc-close': '2p-10p'
+  };
+
+  const PRINT_DAY_NAMES = ['SUN','MON','TUES','WED','THURS','FRI','SAT'];
+
+  // Non-manager KCs (KC row — only show shifts where they actually work)
+  const nonMgrKCs = getNonManagerKCs();
+  const managerKCs = getManagerKCs();
+
+  let html = '';
+
+  // Title block
+  html += '<div class="print-title">';
+  html += '<div class="print-main-title">MANAGEMENT SCHEDULE</div>';
+  html += '<div class="print-sub-title">';
+  if (storeNum) html += 'Store: ' + storeNum + '&nbsp;&nbsp;';
+  html += 'Month: ' + p.approxMonth;
+  html += '</div>';
+  html += '</div>';
+
+  // One table per week
+  p.weeks.forEach((week, wIdx) => {
+    const weekDates = [];
+    const d = new Date(week.start);
+    for (let i = 0; i < 7; i++) {
+      weekDates.push(new Date(d));
+      d.setDate(d.getDate() + 1);
+    }
+
+    // Week ending = Saturday date
+    const satDate = weekDates[6]; // Saturday is always the last day
+    const weLabel = 'W/E: ' + (satDate.getMonth() + 1) + '/' + satDate.getDate();
+
+    html += '<table class="print-week">';
+
+    // Header row 1: day names
+    html += '<thead>';
+    html += '<tr>';
+    html += '<th class="we-label-col">' + weLabel + '</th>';
+    PRINT_DAY_NAMES.forEach(dn => {
+      html += '<th>' + dn + '</th>';
+    });
+    html += '</tr>';
+
+    // Header row 2: date numbers only
+    html += '<tr>';
+    html += '<th class="we-label-col"></th>';
+    weekDates.forEach(wd => {
+      html += '<th>' + wd.getDate() + '</th>';
+    });
+    html += '</tr>';
+    html += '</thead>';
+
+    // Body rows — managers first (ROLES), then non-manager KCs
+    html += '<tbody>';
+
+    // Manager rows (SM + AMs + manager-mode KCs) — use actual names, no role badges
+    ROLES.forEach(r => {
+      html += '<tr>';
+      html += '<td class="name-col">' + (names[r] || r.toUpperCase()) + '</td>';
+      weekDates.forEach(wd => {
+        const dk = dateKey(wd);
+        const s = schedule[r] && schedule[r][dk];
+        const label = s ? (PRINT_SHIFT[s] || s.toUpperCase()) : '';
+        html += '<td>' + label + '</td>';
+      });
+      html += '</tr>';
+    });
+
+    // Non-manager KC rows — only show cells where they're actually working, leave blanks otherwise
+    nonMgrKCs.forEach(kc => {
+      html += '<tr>';
+      html += '<td class="name-col">' + (names[kc.id] || kc.name) + '</td>';
+      weekDates.forEach(wd => {
+        const dk = dateKey(wd);
+        const s = schedule[kc.id] && schedule[kc.id][dk];
+        // Only show if they're actually working (not off, not blank)
+        let label = '';
+        if (s && isWork(s)) {
+          label = PRINT_SHIFT[s] || s.toUpperCase();
+        } else if (s === 'kc-close') {
+          label = PRINT_SHIFT['kc-close'];
+        } else if (s === 'pto') {
+          label = PRINT_SHIFT['pto'];
+        } else if (s === 'rto') {
+          label = PRINT_SHIFT['rto'];
+        }
+        // Off and unassigned → blank cell for KCs
+        html += '<td>' + label + '</td>';
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody>';
+    html += '</table>';
+  });
+
+  document.getElementById('print-schedule').innerHTML = html;
+}
+
+// ── Render Summary ──
+function renderSummary(warnings, ROLES, ALL_KC) {
+  const names = getManagerNames();
+  const numWeeks = currentPeriod.numWeeks;
+  const allDks = periodDates.map(d => dateKey(d));
+  const getWeekDks = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
+  let html = '';
+
+  // Per-week breakdown
+  html += '<div class="summary-panel"><h3>Weekly Breakdown</h3><table><thead><tr><th>Manager</th>';
+  for (let w = 0; w < numWeeks; w++) {
+    const startDate = periodDates[w * 7];
+    const endDate = periodDates[w * 7 + 6];
+    html += `<th>Wk ${w + 1}<br><span style="font-weight:400;font-size:0.65rem">${formatDate(startDate)}-${formatDate(endDate)}</span></th>`;
+  }
+  html += '<th>Total</th></tr></thead><tbody>';
+
+  ROLES.forEach(r => {
+    html += `<tr><td style="text-align:left;font-weight:600">${names[r] || r.toUpperCase()}</td>`;
+    let totalWork = 0, totalClose = 0;
+    for (let w = 0; w < numWeeks; w++) {
+      const weekDks = getWeekDks(w);
+      let work = 0, closes = 0;
+      weekDks.forEach(dk => {
+        const s = schedule[r][dk];
+        if (isScheduled(s)) work++;
+        if (isClose(s)) closes++;
+      });
+      totalWork += work;
+      totalClose += closes;
+      html += `<td>${work}d / ${closes}c</td>`;
+    }
+    html += `<td style="font-weight:700">${totalWork}d / ${totalClose}c</td>`;
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+
+  // Weekend off tracking
+  html += '<div class="summary-panel"><h3>Weekend Off Tracking (Period)</h3><table><thead><tr><th>Manager</th><th>Consecutive Sat+Sun</th><th>Extra Sat Off</th><th>Extra Sun Off</th></tr></thead><tbody>';
+
+  ROLES.forEach(r => {
+    let consecWeekends = [];
+    let extraSat = 0, extraSun = 0;
+    const consecSet = new Set();
+
+    for (let i = 0; i < allDks.length; i++) {
+      const dk = allDks[i];
+      const d = periodDates[i];
+      if (isSaturday(d) && i + 1 < allDks.length) {
+        const nextDk = allDks[i + 1];
+        const satOff = schedule[r][dk] === 'off' || isRto(schedule[r][dk]);
+        const sunOff = schedule[r][nextDk] === 'off' || isRto(schedule[r][nextDk]);
+        if (satOff && sunOff) {
+          consecWeekends.push(`${formatDate(d)}-${formatDate(periodDates[i + 1])}`);
+          consecSet.add(dk);
+          consecSet.add(nextDk);
+        }
+      }
+    }
+
+    for (let i = 0; i < allDks.length; i++) {
+      const dk = allDks[i];
+      const d = periodDates[i];
+      const s = schedule[r][dk];
+      if (isSaturday(d) && (s === 'off' || isRto(s)) && !consecSet.has(dk)) extraSat++;
+      if (isSunday(d) && (s === 'off' || isRto(s)) && !consecSet.has(dk)) extraSun++;
+    }
+
+    const consecLabel = consecWeekends.length > 0 ? consecWeekends.join(', ') : '<span style="color:#dc2626">NONE</span>';
+    html += `<tr><td style="text-align:left;font-weight:600">${names[r] || r.toUpperCase()}</td><td>${consecLabel}</td><td>${extraSat}</td><td>${extraSun}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+
+  // Warnings
+  html += '<div class="summary-panel warnings-panel"><h3>Warnings & Notes</h3>';
+  if (warnings.length === 0) {
+    html += '<p style="color:#059669;font-weight:600;font-size:0.85rem">All constraints satisfied.</p>';
+  } else {
+    warnings.forEach(w => {
+      const cls = w.type === 'error' ? 'warning-error' : (w.type === 'warn' ? 'warning-warn' : 'warning-info');
+      const icon = w.type === 'error' ? '!!' : (w.type === 'warn' ? '!' : 'i');
+      html += `<div class="warning-item ${cls}"><span class="warning-icon">${icon}</span>${w.msg}</div>`;
+    });
+  }
+  html += '</div>';
+
+  document.getElementById('summary-grid').innerHTML = html;
+}
+
+// ── Clear Generated ──
+function clearSchedule() {
+  schedule = {};
+  document.getElementById('schedule-section').style.display = 'none';
+  document.getElementById('summary-section').style.display = 'none';
+}
+
+// ── Save / Load ──
+function saveToStorage() {
+  const p = currentPeriod;
+  // Gather AM names from DOM
+  const amNames = {};
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    amNames['am' + i] = el ? el.value : ('AM' + i);
+  }
+  // Gather KC names from DOM
+  kcList.forEach(kc => {
+    const el = document.getElementById('name-' + kc.id);
+    if (el) kc.name = el.value;
+  });
+
+  const data = {
+    fiscalYear: fiscalYear,
+    periodIndex: currentPeriodIndex,
+    periodNumber: p.number,
+    amCount: amCount,
+    kcList: kcList,
+    storeNumber: document.getElementById('store-number').value || '',
+    names: {
+      sm: document.getElementById('name-sm').value,
+      ...amNames
+    },
+    inputs: inputs,
+    schedule: schedule
+  };
+  const key = `schedule_FY${fiscalYear}-P${p.number}`;
+  localStorage.setItem(key, JSON.stringify(data));
+  localStorage.setItem('schedule_last', key);
+  alert(`Schedule saved: FY${fiscalYear} Period ${p.number} (${p.approxMonth})`);
+}
+
+function loadFromStorage() {
+  const p = currentPeriod;
+  const key = `schedule_FY${fiscalYear}-P${p.number}`;
+  const raw = localStorage.getItem(key);
+  if (!raw) {
+    alert(`No saved schedule for FY${fiscalYear} Period ${p.number}`);
+    return;
+  }
+  const data = JSON.parse(raw);
+
+  // Restore AM count and KC list
+  if (data.amCount !== undefined) {
+    amCount = data.amCount;
+  } else {
+    // Legacy: infer from names
+    amCount = 3;
+  }
+  if (data.kcList !== undefined) {
+    kcList = data.kcList;
+  } else {
+    // Legacy
+    kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
+  }
+
+  // Restore store number
+  if (data.storeNumber !== undefined) {
+    document.getElementById('store-number').value = data.storeNumber;
+  }
+
+  // Rebuild UI rows
+  renderAMRows();
+  renderKCRows();
+
+  // Restore names
+  document.getElementById('name-sm').value = data.names.sm || 'Store Manager';
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    if (el && data.names['am' + i]) el.value = data.names['am' + i];
+  }
+  kcList.forEach(kc => {
+    const el = document.getElementById('name-' + kc.id);
+    if (el) el.value = kc.name;
+  });
+
+  // Restore inputs
+  inputs = {};
+  if (data.inputs) {
+    Object.keys(data.inputs).forEach(r => {
+      inputs[r] = {};
+      Object.keys(data.inputs[r]).forEach(dk => {
+        inputs[r][dk] = data.inputs[r][dk];
+      });
+    });
+  }
+
+  // Restore schedule
+  schedule = {};
+  if (data.schedule) {
+    Object.keys(data.schedule).forEach(r => {
+      schedule[r] = {};
+      Object.keys(data.schedule[r]).forEach(dk => {
+        schedule[r][dk] = data.schedule[r][dk];
+      });
+    });
+  }
+
+  buildInputTabs();
+  buildInputCalendar(activeTab);
+
+  if (Object.keys(schedule).length > 0 && Object.keys(schedule.sm || {}).length > 0) {
+    const ROLES = getRoles();
+    const ALL_KC = getAllWithKC();
+    renderSchedule([], ROLES, ALL_KC);
+    renderSummary([], ROLES, ALL_KC);
+    document.getElementById('schedule-section').style.display = '';
+    document.getElementById('summary-section').style.display = '';
+  }
+
+  alert(`Schedule loaded: FY${fiscalYear} Period ${p.number} (${p.approxMonth})`);
+}
+
+// ════════════════════════════════════════════════════
+// SCHEDULE EDIT POPUP — click cells to change shifts
+// ════════════════════════════════════════════════════
+
+const MANAGER_EDIT_OPTIONS = [
+  { label: 'Open (6-4)',  value: 'open-early',  color: '#d1fae5' },
+  { label: 'Open (7-5)',  value: 'open-late',   color: '#d1fae5' },
+  { label: 'Mid (8-6)',   value: 'mid-early',   color: '#e0e7ff' },
+  { label: 'Mid (9-7)',   value: 'mid-late',    color: '#e0e7ff' },
+  { label: 'Close',       value: 'close',       color: '#fce7f3' },
+  { label: 'Off',         value: 'off',         color: '#f3f4f6' },
+  { label: 'PTO',         value: 'pto',         color: '#dbeafe' },
+  { label: 'RTO',         value: 'rto',         color: '#ffedd5' },
+];
+
+const KC_EDIT_OPTIONS = [
+  { label: 'KC Close',    value: 'kc-close',    color: '#fef3c7' },
+  { label: 'Mid (8-6)',   value: 'mid-early',   color: '#e0e7ff' },
+  { label: 'Mid (9-7)',   value: 'mid-late',    color: '#e0e7ff' },
+  { label: 'Off',         value: 'off',         color: '#f3f4f6' },
+  { label: '(clear)',     value: null,           color: '#fff'    },
+];
+
+let schedEditOpen = false;
+
+function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
+  e.stopPropagation();
+  closeSchedEditMenu();
+
+  const cell = e.currentTarget;
+  const rect = cell.getBoundingClientRect();
+  const options = isKCRole ? KC_EDIT_OPTIONS : MANAGER_EDIT_OPTIONS;
+
+  const portal = document.getElementById('sched-edit-portal');
+  let html = '<div class="sched-edit-overlay" onclick="closeSchedEditMenu()"></div>';
+  html += `<div class="sched-edit-menu" style="top:${rect.bottom + 4}px;left:${rect.left}px">`;
+
+  options.forEach((o, i) => {
+    const valArg = o.value === null ? 'null' : "'" + o.value + "'";
+    html += `<button onclick="applySchedEdit('${role}','${dk}',${weekIdx},${valArg}); event.stopPropagation();">`;
+    html += `<span class="swatch" style="background:${o.color}"></span>`;
+    html += o.label;
+    html += `</button>`;
+  });
+
+  html += '</div>';
+  portal.innerHTML = html;
+  schedEditOpen = true;
+
+  // Adjust position if off-screen
+  requestAnimationFrame(() => {
+    const menu = portal.querySelector('.sched-edit-menu');
+    if (!menu) return;
+    const mr = menu.getBoundingClientRect();
+    // Bottom overflow
+    if (mr.bottom > window.innerHeight) {
+      menu.style.top = Math.max(4, rect.top - mr.height - 4) + 'px';
+    }
+    // Right overflow
+    if (mr.right > window.innerWidth) {
+      menu.style.left = Math.max(4, window.innerWidth - mr.width - 8) + 'px';
+    }
+    // Left overflow
+    if (mr.left < 0) {
+      menu.style.left = '4px';
+    }
+  });
+}
+
+function closeSchedEditMenu() {
+  document.getElementById('sched-edit-portal').innerHTML = '';
+  schedEditOpen = false;
+}
+
+function applySchedEdit(role, dk, weekIdx, value) {
+  // Update the schedule data
+  if (!schedule[role]) schedule[role] = {};
+  if (value === null) {
+    delete schedule[role][dk];
+  } else {
+    schedule[role][dk] = value;
+  }
+
+  closeSchedEditMenu();
+
+  // Re-render and re-validate
+  const ROLES = getRoles();
+  const ALL_KC = getAllWithKC();
+
+  // Re-run validation to get fresh warnings
+  const allDks = periodDates.map(d => dateKey(d)).filter(dk => typeof dk === 'string' && dk.includes('-'));
+  const numWeeks = currentPeriod.numWeeks;
+  const names = getManagerNames();
+  const AMS = getAMs();
+  const closerPool = ROLES.filter(r => r !== 'sm');
+
+  const dkToDate = (dk) => {
+    if (!dk || typeof dk !== 'string') return new Date(NaN);
+    const parts = dk.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  };
+  const isDkMondayL   = (dk) => dkToDate(dk).getDay() === 1;
+  const isDkSaturdayL = (dk) => dkToDate(dk).getDay() === 6;
+  const isDkSundayL   = (dk) => dkToDate(dk).getDay() === 0;
+  const isDkWeekendL  = (dk) => { const dow = dkToDate(dk).getDay(); return dow === 0 || dow === 6; };
+  const dkDowL        = (dk) => dkToDate(dk).getDay();
+  const getWeekDksL   = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
+
+  const allWeekendPairsL = [];
+  for (let i = 0; i < allDks.length; i++) {
+    if (isDkSaturdayL(allDks[i]) && i + 1 < allDks.length && isDkSundayL(allDks[i + 1])) {
+      allWeekendPairsL.push({ sat: allDks[i], sun: allDks[i + 1] });
+    }
+  }
+
+  const finalViolations = validateSchedule(schedule, allDks, numWeeks, getWeekDksL, dkToDate, isDkMondayL, isDkSaturdayL, isDkSundayL, isDkWeekendL, dkDowL, allWeekendPairsL, names, ROLES, ALL_KC, AMS, closerPool);
+  const warnings = finalViolations.map(v => ({
+    type: v.severity === 'error' ? 'error' : (v.severity === 'warning' ? 'warn' : 'info'),
+    msg: v.detail
+  }));
+
+  const nonMgrKCs = getNonManagerKCs();
+  allDks.forEach(dk => {
+    nonMgrKCs.forEach(kc => {
+      if (isMid(schedule[kc.id][dk])) {
+        warnings.push({ type: 'info', msg: `${names[kc.id]}: mid coverage ${formatDate(dkToDate(dk))} (low manager count)` });
+      }
+    });
+  });
+
+  const hasErrors = finalViolations.some(v => v.severity === 'error');
+  if (!hasErrors) {
+    warnings.unshift({ type: 'info', msg: 'All hard constraints satisfied. (manual edit)' });
+  } else {
+    warnings.unshift({ type: 'warn', msg: `${finalViolations.filter(v=>v.severity==='error').length} hard constraint(s) after manual edit.` });
+  }
+
+  // Re-render schedule table and summary
+  renderSchedule(warnings, ROLES, ALL_KC);
+  renderSummary(warnings, ROLES, ALL_KC);
+}
+
+// Close schedule edit menu on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (schedEditOpen) closeSchedEditMenu();
+    if (openMenu) closeCellMenu();
+  }
+});
+
+// Close schedule edit menu on outside click
+document.addEventListener('click', (e) => {
+  if (schedEditOpen && !e.target.closest('.sched-edit-menu')) {
+    closeSchedEditMenu();
+  }
+});
+</script>
+</body>
+</html>

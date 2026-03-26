@@ -684,6 +684,131 @@ button:active { transform: scale(0.98); }
     font-size: 0.85rem;
   }
 }
+
+/* ========== SAVED SCHEDULES MODAL ========== */
+.saved-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.saved-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 560px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.saved-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: #f8f9fb;
+  border-bottom: 1px solid #e8eaed;
+}
+.saved-modal-header h3 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; }
+.saved-modal-body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+.saved-modal-body .empty-msg {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  padding: 2rem 0;
+}
+.saved-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.saved-entry:hover { background: #f0f7ff; border-color: #93c5fd; }
+.saved-entry-info { flex: 1; }
+.saved-entry-info .saved-title { font-weight: 700; font-size: 0.9rem; color: #1a1a2e; }
+.saved-entry-info .saved-meta { font-size: 0.75rem; color: #6b7280; margin-top: 2px; }
+.saved-entry-actions { display: flex; gap: 0.4rem; }
+.saved-entry-actions button { font-size: 0.75rem; padding: 0.3rem 0.6rem; min-height: auto; }
+
+/* ========== SHIFT TIMES SETTINGS ========== */
+.shift-times-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.shift-time-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fafbfc;
+}
+.shift-time-row .st-label {
+  font-weight: 600;
+  font-size: 0.8rem;
+  min-width: 70px;
+  color: #374151;
+}
+.shift-time-row input[type="text"] {
+  width: 60px;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.shift-time-row input[type="text"]:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+.shift-time-row .st-dash { color: #9ca3af; font-weight: 700; }
+.shift-times-note {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+/* ========== CUSTOM SHIFT ========== */
+.shift-custom { background: #fdf4ff !important; color: #7e22ce; font-weight: 600; }
+.tag-custom { background: #f3e8ff; color: #7e22ce; }
+.custom-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+}
+.custom-input-row input[type="text"] {
+  width: 52px;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  text-align: center;
+}
+.custom-input-row input[type="text"]:focus {
+  outline: none;
+  border-color: #7e22ce;
+  box-shadow: 0 0 0 2px rgba(126,34,206,0.15);
+}
+.custom-input-row .ci-dash { color: #9ca3af; font-weight: 700; font-size: 0.8rem; }
+.custom-input-row button { padding: 0.25rem 0.5rem; font-size: 0.75rem; min-height: auto; }
 </style>
 </head>
 <body>
@@ -695,6 +820,7 @@ button:active { transform: scale(0.98); }
     <div class="subtitle">NRF 4-5-4 Retail Fiscal Calendar</div>
   </div>
   <div class="header-actions no-print">
+    <button class="btn-outline" onclick="openSavedSchedulesModal()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Saved Schedules</button>
     <button class="btn-outline" onclick="saveToStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Save</button>
     <button class="btn-outline" onclick="loadFromStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Load</button>
     <button class="btn-outline" onclick="window.print()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Print</button>
@@ -717,7 +843,7 @@ button:active { transform: scale(0.98); }
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store Manager</label>
             <div class="manager-row">
               <span class="role-badge role-sm">SM</span>
-              <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name">
+              <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name" onblur="persistManagerNames()" onchange="persistManagerNames()">
             </div>
           </div>
 
@@ -770,6 +896,20 @@ button:active { transform: scale(0.98); }
             <div class="legend-item"><span class="legend-swatch" style="background:#ffedd5"></span> RTO</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#f3f4f6"></span> Off</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#fef3c7"></span> KC Close</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#fdf4ff"></span> Custom</div>
+          </div>
+
+          <!-- Shift Times Settings (Feature 3) -->
+          <div style="margin-top:0.75rem">
+            <div style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none" onclick="toggleShiftTimesPanel()">
+              <span style="font-weight:600;font-size:0.9rem">Shift Times</span>
+              <span id="shift-times-toggle" style="font-size:0.8rem;color:#666;transition:transform 0.2s">&#9660;</span>
+            </div>
+            <div id="shift-times-panel" style="display:none;margin-top:0.5rem">
+              <div class="shift-times-grid" id="shift-times-grid"></div>
+              <div class="shift-times-note">Edit start/end times for each shift type. Changes are saved automatically.</div>
+              <button class="btn-secondary" onclick="resetShiftTimes()" style="margin-top:0.5rem;font-size:0.75rem">Reset to Defaults</button>
+            </div>
           </div>
         </div>
       </div>
@@ -827,6 +967,8 @@ button:active { transform: scale(0.98); }
 <div id="cell-menu-portal"></div>
 <!-- Schedule edit menu (portal) -->
 <div id="sched-edit-portal"></div>
+<!-- Saved schedules modal (portal) -->
+<div id="saved-modal-portal"></div>
 
 <script>
 /* ====================================================================
@@ -884,20 +1026,84 @@ const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DAY_NAMES_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const PERIOD_WEEKS = [4, 5, 4, 4, 5, 4, 4, 5, 4, 4, 5, 4]; // NRF 4-5-4 pattern
-const SHIFT_LABELS = {
-  'open-early':'O 6-4', 'open-late':'O 7-5',
-  'mid-early':'M 8-6', 'mid-late':'M 9-7',
-  'close':'C 12:30-10:30',
-  'pto':'PTO', 'rto':'RTO', 'off':'OFF',
-  'kc-close':'KC Close'
+
+// ── Default Shift Times (Feature 3) ──
+const DEFAULT_SHIFT_TIMES = {
+  'open-early': { start: '6a', end: '4p' },
+  'open-late':  { start: '7a', end: '5p' },
+  'mid-early':  { start: '8a', end: '6p' },
+  'mid-late':   { start: '9a', end: '7p' },
+  'close':      { start: '12:30p', end: '10:30p' },
+  'kc-close':   { start: '2p', end: '10p' }
 };
-const SHIFT_SHORT = {
-  'open-early':'O 6-4', 'open-late':'O 7-5',
-  'mid-early':'M 8-6', 'mid-late':'M 9-7',
-  'close':'C',
-  'pto':'PTO', 'rto':'RTO', 'off':'OFF',
-  'kc-close':'KC-C'
-};
+
+// Load custom shift times from localStorage or use defaults
+let customShiftTimes = JSON.parse(JSON.stringify(DEFAULT_SHIFT_TIMES));
+(function loadShiftTimes() {
+  try {
+    const stored = localStorage.getItem('schedule_shift_times');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      Object.keys(DEFAULT_SHIFT_TIMES).forEach(k => {
+        if (parsed[k]) customShiftTimes[k] = parsed[k];
+      });
+    }
+  } catch(e) {}
+})();
+
+function saveShiftTimesToStorage() {
+  localStorage.setItem('schedule_shift_times', JSON.stringify(customShiftTimes));
+}
+
+function getShiftTimeStr(key) {
+  const t = customShiftTimes[key] || DEFAULT_SHIFT_TIMES[key];
+  if (!t) return '';
+  return t.start + '-' + t.end;
+}
+
+// Dynamic label builders that use custom shift times
+function getShiftLabels() {
+  return {
+    'open-early':'O ' + getShiftTimeStr('open-early'),
+    'open-late':'O ' + getShiftTimeStr('open-late'),
+    'mid-early':'M ' + getShiftTimeStr('mid-early'),
+    'mid-late':'M ' + getShiftTimeStr('mid-late'),
+    'close':'C ' + getShiftTimeStr('close'),
+    'pto':'PTO', 'rto':'RTO', 'off':'OFF',
+    'kc-close':'KC Close'
+  };
+}
+
+function getShiftShort() {
+  return {
+    'open-early':'O ' + getShiftTimeStr('open-early'),
+    'open-late':'O ' + getShiftTimeStr('open-late'),
+    'mid-early':'M ' + getShiftTimeStr('mid-early'),
+    'mid-late':'M ' + getShiftTimeStr('mid-late'),
+    'close':'C',
+    'pto':'PTO', 'rto':'RTO', 'off':'OFF',
+    'kc-close':'KC-C'
+  };
+}
+
+function getPrintShift() {
+  return {
+    'open-early': getShiftTimeStr('open-early'),
+    'open-late': getShiftTimeStr('open-late'),
+    'mid-early': getShiftTimeStr('mid-early'),
+    'mid-late': getShiftTimeStr('mid-late'),
+    'close': getShiftTimeStr('close'),
+    'off': 'OFF',
+    'pto': 'VAC',
+    'rto': 'OFF(RTO)',
+    'kc-close': getShiftTimeStr('kc-close')
+  };
+}
+
+// Helper: check if a value is a custom shift (Feature 4)
+function isCustomShift(s) { return s && typeof s === 'string' && s.startsWith('custom:'); }
+function getCustomShiftLabel(s) { return s ? s.replace('custom:', '') : ''; }
+
 const SHIFT_CSS = {
   'open-early':'shift-open', 'open-late':'shift-open',
   'mid-early':'shift-mid', 'mid-late':'shift-mid',
@@ -911,6 +1117,28 @@ const TAG_CSS = {
   'mid-early':'tag-mid', 'mid-late':'tag-mid',
   'close':'tag-close', 'off':'tag-off'
 };
+
+// Get CSS class for a shift value (supports custom)
+function getShiftCssClass(s) {
+  if (isCustomShift(s)) return 'shift-custom';
+  return SHIFT_CSS[s] || '';
+}
+function getTagCssClass(s) {
+  if (isCustomShift(s)) return 'tag-custom';
+  return TAG_CSS[s] || 'tag-off';
+}
+function getShiftDisplayLabel(s) {
+  if (isCustomShift(s)) return getCustomShiftLabel(s);
+  return getShiftLabels()[s] || (s ? s.toUpperCase() : '');
+}
+function getShiftShortLabel(s) {
+  if (isCustomShift(s)) return getCustomShiftLabel(s);
+  return getShiftShort()[s] || (s ? s.toUpperCase() : '');
+}
+function getPrintShiftLabel(s) {
+  if (isCustomShift(s)) return getCustomShiftLabel(s);
+  return getPrintShift()[s] || (s ? s.toUpperCase() : '');
+}
 
 // ── NRF 4-5-4 Fiscal Calendar ──
 function getFiscalYearStart(year) {
@@ -1002,7 +1230,7 @@ function renderAMRows() {
     const val = existing ? existing.value : 'AM' + i;
     html += `<div class="manager-row">
       <span class="role-badge role-am">AM${i}</span>
-      <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}">
+      <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}" onblur="persistManagerNames()" onchange="persistManagerNames()">
     </div>`;
   }
   container.innerHTML = html;
@@ -1016,7 +1244,7 @@ function renderKCRows() {
     html += `<div class="manager-row">
       <span class="role-badge role-kc">KC${idx + 1}</span>
       <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="Key Carrier ${idx + 1}"
-        onchange="kcList[${idx}].name = this.value">
+        onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
       <label class="kc-toggle-label">
         <input type="checkbox" ${kc.asManager ? 'checked' : ''}
           onchange="kcList[${idx}].asManager = this.checked; rebuildAfterConfigChange()">
@@ -1210,8 +1438,8 @@ function buildInputCalendar(role) {
       const val = inputs[role] && inputs[role][dk];
       let tagHtml = '';
       if (val) {
-        const tagCls = TAG_CSS[val] || 'tag-off';
-        tagHtml = `<span class="cell-tag ${tagCls}">${SHIFT_LABELS[val] || val.toUpperCase()}</span>`;
+        const tagCls = getTagCssClass(val);
+        tagHtml = `<span class="cell-tag ${tagCls}">${getShiftDisplayLabel(val)}</span>`;
       }
 
       html += `<div class="${cls}" data-dk="${dk}" data-role="${role}" onclick="openCellMenu(event, '${role}', '${dk}')">`;
@@ -1236,12 +1464,13 @@ function openCellMenu(e, role, dk) {
   const options = [
     { label: 'PTO (vacation)', value: 'pto' },
     { label: 'RTO (day off)', value: 'rto' },
-    { label: 'Open (6am-4pm)', value: 'open-early' },
-    { label: 'Open (7am-5pm)', value: 'open-late' },
-    { label: 'Mid (8am-6pm)', value: 'mid-early' },
-    { label: 'Mid (9am-7pm)', value: 'mid-late' },
+    { label: 'Open (' + getShiftTimeStr('open-early') + ')', value: 'open-early' },
+    { label: 'Open (' + getShiftTimeStr('open-late') + ')', value: 'open-late' },
+    { label: 'Mid (' + getShiftTimeStr('mid-early') + ')', value: 'mid-early' },
+    { label: 'Mid (' + getShiftTimeStr('mid-late') + ')', value: 'mid-late' },
     { label: 'Close', value: 'close' },
     { label: 'Off (request)', value: 'off' },
+    { label: 'Custom...', value: '__custom__' },
     { label: 'Clear', value: null }
   ];
 
@@ -1249,7 +1478,18 @@ function openCellMenu(e, role, dk) {
   let html = '<div class="overlay" onclick="closeCellMenu()"></div>';
   html += `<div class="cell-menu" style="position:fixed;top:${rect.bottom + 4}px;left:${rect.left}px;z-index:100">`;
   options.forEach(o => {
-    html += `<button onclick="setCellValue('${role}','${dk}',${o.value === null ? 'null' : "'" + o.value + "'"})">${o.label}</button>`;
+    if (o.value === '__custom__') {
+      html += `<button onclick="showCustomInputInCellMenu('${role}','${dk}'); event.stopPropagation();" style="color:#7e22ce;font-weight:600">${o.label}</button>`;
+      html += `<div id="cell-custom-input-${role}-${dk}" style="display:none">`;
+      html += `<div class="custom-input-row">`;
+      html += `<input type="text" id="cell-custom-start-${role}-${dk}" placeholder="10a">`;
+      html += `<span class="ci-dash">-</span>`;
+      html += `<input type="text" id="cell-custom-end-${role}-${dk}" placeholder="6p">`;
+      html += `<button class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onclick="applyCustomCellValue('${role}','${dk}'); event.stopPropagation();">OK</button>`;
+      html += `</div></div>`;
+    } else {
+      html += `<button onclick="setCellValue('${role}','${dk}',${o.value === null ? 'null' : "'" + o.value + "'"})">${o.label}</button>`;
+    }
   });
   html += '</div>';
   portal.innerHTML = html;
@@ -1264,6 +1504,23 @@ function openCellMenu(e, role, dk) {
       if (mr.right > window.innerWidth) menu.style.left = (rect.right - mr.width) + 'px';
     }
   });
+}
+
+function showCustomInputInCellMenu(role, dk) {
+  const el = document.getElementById('cell-custom-input-' + role + '-' + dk);
+  if (el) {
+    el.style.display = 'block';
+    const startInput = document.getElementById('cell-custom-start-' + role + '-' + dk);
+    if (startInput) startInput.focus();
+  }
+}
+
+function applyCustomCellValue(role, dk) {
+  const startVal = (document.getElementById('cell-custom-start-' + role + '-' + dk).value || '').trim();
+  const endVal = (document.getElementById('cell-custom-end-' + role + '-' + dk).value || '').trim();
+  if (!startVal || !endVal) return;
+  const customVal = 'custom:' + startVal + '-' + endVal;
+  setCellValue(role, dk, customVal);
 }
 
 function closeCellMenu() {
@@ -1296,7 +1553,7 @@ function toggleSection(header) {
 function isClose(shift) { return shift === 'close' || shift === 'kc-close'; }
 function isOpen(shift) { return shift === 'open-early' || shift === 'open-late'; }
 function isMid(shift) { return shift === 'mid-early' || shift === 'mid-late'; }
-function isWork(shift) { return isOpen(shift) || isMid(shift) || isClose(shift); }
+function isWork(shift) { return isOpen(shift) || isMid(shift) || isClose(shift) || isCustomShift(shift); }
 function isPto(shift) { return shift === 'pto'; }
 function isRto(shift) { return shift === 'rto'; }
 function isOff(shift) { return shift === 'off' || shift === 'rto'; }
@@ -2630,8 +2887,8 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
         let content = '';
 
         if (s) {
-          cellCls = SHIFT_CSS[s] || '';
-          content = SHIFT_SHORT[s] || s.toUpperCase();
+          cellCls = getShiftCssClass(s);
+          content = getShiftShortLabel(s);
         } else if (isKC) {
           cellCls = 'shift-off';
           content = '';
@@ -2680,18 +2937,8 @@ function renderPrintSchedule(ROLES, ALL_KC) {
   const p = currentPeriod;
   const storeNum = document.getElementById('store-number').value || '';
 
-  // Print shift code mapping — just times, no type prefixes
-  const PRINT_SHIFT = {
-    'open-early': '6-4',
-    'open-late': '7-5',
-    'mid-early': '8-6',
-    'mid-late': '9-7',
-    'close': '1230-10',
-    'off': 'OFF',
-    'pto': 'VAC',
-    'rto': 'OFF(RTO)',
-    'kc-close': '2p-10p'
-  };
+  // Print shift code mapping — uses dynamic shift times
+  const PRINT_SHIFT = getPrintShift();
 
   const PRINT_DAY_NAMES = ['SUN','MON','TUES','WED','THURS','FRI','SAT'];
 
@@ -2753,7 +3000,7 @@ function renderPrintSchedule(ROLES, ALL_KC) {
       weekDates.forEach(wd => {
         const dk = dateKey(wd);
         const s = schedule[r] && schedule[r][dk];
-        const label = s ? (PRINT_SHIFT[s] || s.toUpperCase()) : '';
+        const label = s ? getPrintShiftLabel(s) : '';
         html += '<td>' + label + '</td>';
       });
       html += '</tr>';
@@ -2769,13 +3016,13 @@ function renderPrintSchedule(ROLES, ALL_KC) {
         // Only show if they're actually working (not off, not blank)
         let label = '';
         if (s && isWork(s)) {
-          label = PRINT_SHIFT[s] || s.toUpperCase();
+          label = getPrintShiftLabel(s);
         } else if (s === 'kc-close') {
-          label = PRINT_SHIFT['kc-close'];
+          label = getPrintShiftLabel('kc-close');
         } else if (s === 'pto') {
-          label = PRINT_SHIFT['pto'];
+          label = getPrintShiftLabel('pto');
         } else if (s === 'rto') {
-          label = PRINT_SHIFT['rto'];
+          label = getPrintShiftLabel('rto');
         }
         // Off and unassigned → blank cell for KCs
         html += '<td>' + label + '</td>';
@@ -2913,7 +3160,8 @@ function saveToStorage() {
       ...amNames
     },
     inputs: inputs,
-    schedule: schedule
+    schedule: schedule,
+    _savedAt: new Date().toISOString()
   };
   const key = `schedule_FY${fiscalYear}-P${p.number}`;
   localStorage.setItem(key, JSON.stringify(data));
@@ -3006,24 +3254,30 @@ function loadFromStorage() {
 // SCHEDULE EDIT POPUP — click cells to change shifts
 // ════════════════════════════════════════════════════
 
-const MANAGER_EDIT_OPTIONS = [
-  { label: 'Open (6-4)',  value: 'open-early',  color: '#d1fae5' },
-  { label: 'Open (7-5)',  value: 'open-late',   color: '#d1fae5' },
-  { label: 'Mid (8-6)',   value: 'mid-early',   color: '#e0e7ff' },
-  { label: 'Mid (9-7)',   value: 'mid-late',    color: '#e0e7ff' },
-  { label: 'Close',       value: 'close',       color: '#fce7f3' },
-  { label: 'Off',         value: 'off',         color: '#f3f4f6' },
-  { label: 'PTO',         value: 'pto',         color: '#dbeafe' },
-  { label: 'RTO',         value: 'rto',         color: '#ffedd5' },
-];
+function getManagerEditOptions() {
+  return [
+    { label: 'Open (' + getShiftTimeStr('open-early') + ')',  value: 'open-early',  color: '#d1fae5' },
+    { label: 'Open (' + getShiftTimeStr('open-late') + ')',   value: 'open-late',   color: '#d1fae5' },
+    { label: 'Mid (' + getShiftTimeStr('mid-early') + ')',    value: 'mid-early',   color: '#e0e7ff' },
+    { label: 'Mid (' + getShiftTimeStr('mid-late') + ')',     value: 'mid-late',    color: '#e0e7ff' },
+    { label: 'Close',       value: 'close',       color: '#fce7f3' },
+    { label: 'Off',         value: 'off',         color: '#f3f4f6' },
+    { label: 'PTO',         value: 'pto',         color: '#dbeafe' },
+    { label: 'RTO',         value: 'rto',         color: '#ffedd5' },
+    { label: 'Custom...',   value: '__custom__',  color: '#fdf4ff' },
+  ];
+}
 
-const KC_EDIT_OPTIONS = [
-  { label: 'KC Close',    value: 'kc-close',    color: '#fef3c7' },
-  { label: 'Mid (8-6)',   value: 'mid-early',   color: '#e0e7ff' },
-  { label: 'Mid (9-7)',   value: 'mid-late',    color: '#e0e7ff' },
-  { label: 'Off',         value: 'off',         color: '#f3f4f6' },
-  { label: '(clear)',     value: null,           color: '#fff'    },
-];
+function getKCEditOptions() {
+  return [
+    { label: 'KC Close',    value: 'kc-close',    color: '#fef3c7' },
+    { label: 'Mid (' + getShiftTimeStr('mid-early') + ')',   value: 'mid-early',   color: '#e0e7ff' },
+    { label: 'Mid (' + getShiftTimeStr('mid-late') + ')',    value: 'mid-late',    color: '#e0e7ff' },
+    { label: 'Off',         value: 'off',         color: '#f3f4f6' },
+    { label: 'Custom...',   value: '__custom__',  color: '#fdf4ff' },
+    { label: '(clear)',     value: null,           color: '#fff'    },
+  ];
+}
 
 let schedEditOpen = false;
 
@@ -3033,18 +3287,32 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
 
   const cell = e.currentTarget;
   const rect = cell.getBoundingClientRect();
-  const options = isKCRole ? KC_EDIT_OPTIONS : MANAGER_EDIT_OPTIONS;
+  const options = isKCRole ? getKCEditOptions() : getManagerEditOptions();
 
   const portal = document.getElementById('sched-edit-portal');
   let html = '<div class="sched-edit-overlay" onclick="closeSchedEditMenu()"></div>';
   html += `<div class="sched-edit-menu" style="top:${rect.bottom + 4}px;left:${rect.left}px">`;
 
   options.forEach((o, i) => {
-    const valArg = o.value === null ? 'null' : "'" + o.value + "'";
-    html += `<button onclick="applySchedEdit('${role}','${dk}',${weekIdx},${valArg}); event.stopPropagation();">`;
-    html += `<span class="swatch" style="background:${o.color}"></span>`;
-    html += o.label;
-    html += `</button>`;
+    if (o.value === '__custom__') {
+      html += `<button onclick="showSchedCustomInput('${role}','${dk}',${weekIdx}); event.stopPropagation();" style="color:#7e22ce;font-weight:600">`;
+      html += `<span class="swatch" style="background:${o.color}"></span>`;
+      html += o.label;
+      html += `</button>`;
+      html += `<div id="sched-custom-input-${role}-${dk}" style="display:none">`;
+      html += `<div class="custom-input-row">`;
+      html += `<input type="text" id="sched-custom-start-${role}-${dk}" placeholder="10a">`;
+      html += `<span class="ci-dash">-</span>`;
+      html += `<input type="text" id="sched-custom-end-${role}-${dk}" placeholder="6p">`;
+      html += `<button class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onclick="applySchedCustom('${role}','${dk}',${weekIdx}); event.stopPropagation();">OK</button>`;
+      html += `</div></div>`;
+    } else {
+      const valArg = o.value === null ? 'null' : "'" + o.value + "'";
+      html += `<button onclick="applySchedEdit('${role}','${dk}',${weekIdx},${valArg}); event.stopPropagation();">`;
+      html += `<span class="swatch" style="background:${o.color}"></span>`;
+      html += o.label;
+      html += `</button>`;
+    }
   });
 
   html += '</div>';
@@ -3069,6 +3337,23 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
       menu.style.left = '4px';
     }
   });
+}
+
+function showSchedCustomInput(role, dk, weekIdx) {
+  const el = document.getElementById('sched-custom-input-' + role + '-' + dk);
+  if (el) {
+    el.style.display = 'block';
+    const startInput = document.getElementById('sched-custom-start-' + role + '-' + dk);
+    if (startInput) startInput.focus();
+  }
+}
+
+function applySchedCustom(role, dk, weekIdx) {
+  const startVal = (document.getElementById('sched-custom-start-' + role + '-' + dk).value || '').trim();
+  const endVal = (document.getElementById('sched-custom-end-' + role + '-' + dk).value || '').trim();
+  if (!startVal || !endVal) return;
+  const customVal = 'custom:' + startVal + '-' + endVal;
+  applySchedEdit(role, dk, weekIdx, customVal);
 }
 
 function closeSchedEditMenu() {
@@ -3158,6 +3443,330 @@ document.addEventListener('click', (e) => {
     closeSchedEditMenu();
   }
 });
+
+// ════════════════════════════════════════════════════
+// FEATURE 1: SAVED SCHEDULES MODAL
+// Scan localStorage for all schedule keys, show in modal
+// ════════════════════════════════════════════════════
+
+function getSavedScheduleKeys() {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.match(/^schedule_FY\d+-P\d+$/)) {
+      keys.push(key);
+    }
+  }
+  // Sort by key name (FY then period)
+  keys.sort((a, b) => {
+    const parseKey = k => {
+      const m = k.match(/^schedule_FY(\d+)-P(\d+)$/);
+      return m ? { fy: parseInt(m[1]), p: parseInt(m[2]) } : { fy: 0, p: 0 };
+    };
+    const pa = parseKey(a), pb = parseKey(b);
+    if (pa.fy !== pb.fy) return pb.fy - pa.fy; // newest FY first
+    return pb.p - pa.p; // newest period first
+  });
+  return keys;
+}
+
+function openSavedSchedulesModal() {
+  const keys = getSavedScheduleKeys();
+  const portal = document.getElementById('saved-modal-portal');
+  let html = '<div class="saved-modal-overlay" onclick="closeSavedSchedulesModal(event)">';
+  html += '<div class="saved-modal" onclick="event.stopPropagation()">';
+  html += '<div class="saved-modal-header"><h3>Saved Schedules</h3>';
+  html += '<button class="btn-secondary" onclick="closeSavedSchedulesModal()" style="font-size:0.8rem;padding:0.3rem 0.6rem">Close</button>';
+  html += '</div>';
+  html += '<div class="saved-modal-body">';
+
+  if (keys.length === 0) {
+    html += '<p class="empty-msg">No saved schedules found.<br>Use the Save button to save your current schedule.</p>';
+  } else {
+    keys.forEach(key => {
+      let data = null;
+      try { data = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+      if (!data) return;
+
+      const match = key.match(/^schedule_FY(\d+)-P(\d+)$/);
+      const fy = match ? match[1] : '?';
+      const pNum = match ? match[2] : '?';
+
+      // Try to determine approximate month from the saved data
+      let month = '';
+      try {
+        const periods = getFiscalPeriods(parseInt(fy));
+        const pIdx = parseInt(pNum) - 1;
+        if (periods[pIdx]) month = periods[pIdx].approxMonth;
+      } catch(e) {}
+
+      // Try to get saved date from the data (we'll add this to save)
+      let savedDate = data._savedAt ? new Date(data._savedAt).toLocaleDateString() + ' ' + new Date(data._savedAt).toLocaleTimeString() : '';
+
+      // Manager count info
+      const amCnt = data.amCount || '?';
+      const kcCnt = data.kcList ? data.kcList.length : '?';
+      const smName = data.names && data.names.sm ? data.names.sm : '';
+      const hasSchedule = data.schedule && Object.keys(data.schedule).length > 0;
+
+      html += `<div class="saved-entry" onclick="loadSavedSchedule('${key}')">`;
+      html += `<div class="saved-entry-info">`;
+      html += `<div class="saved-title">FY${fy} Period ${pNum}${month ? ' - ' + month : ''}</div>`;
+      html += `<div class="saved-meta">`;
+      if (smName) html += smName + ' &middot; ';
+      html += `${amCnt} AMs, ${kcCnt} KCs`;
+      if (hasSchedule) html += ' &middot; Generated';
+      if (savedDate) html += ' &middot; Saved: ' + savedDate;
+      html += `</div></div>`;
+      html += `<div class="saved-entry-actions">`;
+      html += `<button class="btn-primary" onclick="loadSavedSchedule('${key}'); event.stopPropagation();">Load</button>`;
+      html += `<button class="btn-danger" onclick="deleteSavedSchedule('${key}', event)">Delete</button>`;
+      html += `</div></div>`;
+    });
+  }
+
+  html += '</div></div></div>';
+  portal.innerHTML = html;
+}
+
+function closeSavedSchedulesModal(e) {
+  // Close if called with no args, or if clicking overlay background
+  if (e && e.target && e.target.classList && !e.target.classList.contains('saved-modal-overlay')) return;
+  document.getElementById('saved-modal-portal').innerHTML = '';
+}
+
+function loadSavedSchedule(key) {
+  const raw = localStorage.getItem(key);
+  if (!raw) { alert('Schedule not found.'); return; }
+  const data = JSON.parse(raw);
+
+  // Extract FY and period from key
+  const match = key.match(/^schedule_FY(\d+)-P(\d+)$/);
+  if (match) {
+    const fy = parseInt(match[1]);
+    const pNum = parseInt(match[2]);
+
+    // Set FY and period in the UI
+    document.getElementById('pick-year').value = fy;
+    fiscalYear = fy;
+    buildPeriodDropdown();
+    document.getElementById('pick-period').value = pNum - 1;
+    currentPeriodIndex = pNum - 1;
+  }
+
+  // Load the period first
+  loadPeriod();
+
+  // Now restore the data (same logic as loadFromStorage)
+  if (data.amCount !== undefined) amCount = data.amCount;
+  if (data.kcList !== undefined) kcList = data.kcList;
+
+  if (data.storeNumber !== undefined) {
+    document.getElementById('store-number').value = data.storeNumber;
+  }
+
+  renderAMRows();
+  renderKCRows();
+
+  document.getElementById('name-sm').value = (data.names && data.names.sm) || 'Store Manager';
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    if (el && data.names && data.names['am' + i]) el.value = data.names['am' + i];
+  }
+  kcList.forEach(kc => {
+    const el = document.getElementById('name-' + kc.id);
+    if (el) el.value = kc.name;
+  });
+
+  inputs = {};
+  if (data.inputs) {
+    Object.keys(data.inputs).forEach(r => {
+      inputs[r] = {};
+      Object.keys(data.inputs[r]).forEach(dk => {
+        inputs[r][dk] = data.inputs[r][dk];
+      });
+    });
+  }
+
+  schedule = {};
+  if (data.schedule) {
+    Object.keys(data.schedule).forEach(r => {
+      schedule[r] = {};
+      Object.keys(data.schedule[r]).forEach(dk => {
+        schedule[r][dk] = data.schedule[r][dk];
+      });
+    });
+  }
+
+  buildInputTabs();
+  buildInputCalendar(activeTab);
+
+  if (Object.keys(schedule).length > 0 && Object.keys(schedule.sm || {}).length > 0) {
+    const ROLES = getRoles();
+    const ALL_KC = getAllWithKC();
+    renderSchedule([], ROLES, ALL_KC);
+    renderSummary([], ROLES, ALL_KC);
+    document.getElementById('schedule-section').style.display = '';
+    document.getElementById('summary-section').style.display = '';
+  }
+
+  closeSavedSchedulesModal(); // close the modal
+  // Persist names after loading
+  persistManagerNames();
+}
+
+function deleteSavedSchedule(key, event) {
+  if (event) event.stopPropagation();
+  if (!confirm('Delete saved schedule "' + key.replace('schedule_', '') + '"?')) return;
+  localStorage.removeItem(key);
+  // Check if this was the 'last' key
+  if (localStorage.getItem('schedule_last') === key) {
+    localStorage.removeItem('schedule_last');
+  }
+  // Refresh modal
+  openSavedSchedulesModal();
+}
+
+
+// ════════════════════════════════════════════════════
+// FEATURE 2: PERSIST MANAGER NAMES
+// Save names to localStorage on blur/change, restore on load
+// ════════════════════════════════════════════════════
+
+function persistManagerNames() {
+  const names = {
+    sm: document.getElementById('name-sm').value || 'Store Manager',
+    amCount: amCount,
+    kcList: kcList.map((kc, idx) => {
+      const el = document.getElementById('name-' + kc.id);
+      return { id: kc.id, name: el ? el.value : kc.name, asManager: kc.asManager };
+    }),
+    ams: {}
+  };
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    names.ams['am' + i] = el ? el.value : ('AM' + i);
+  }
+  localStorage.setItem('schedule_manager_names', JSON.stringify(names));
+}
+
+function restoreManagerNames() {
+  try {
+    const stored = localStorage.getItem('schedule_manager_names');
+    if (!stored) return;
+    const names = JSON.parse(stored);
+
+    if (names.sm) {
+      document.getElementById('name-sm').value = names.sm;
+    }
+
+    if (names.amCount !== undefined) {
+      amCount = names.amCount;
+      renderAMRows();
+    }
+
+    if (names.kcList && Array.isArray(names.kcList)) {
+      kcList = names.kcList.map(kc => ({
+        id: kc.id,
+        name: kc.name,
+        asManager: kc.asManager || false
+      }));
+      renderKCRows();
+    }
+
+    if (names.ams) {
+      Object.keys(names.ams).forEach(id => {
+        const el = document.getElementById('name-' + id);
+        if (el) el.value = names.ams[id];
+      });
+    }
+
+    // Update KC names in inputs
+    kcList.forEach(kc => {
+      const el = document.getElementById('name-' + kc.id);
+      if (el) el.value = kc.name;
+    });
+
+  } catch(e) {
+    console.warn('Could not restore manager names:', e);
+  }
+}
+
+
+// ════════════════════════════════════════════════════
+// FEATURE 3: SHIFT TIMES SETTINGS
+// Collapsible panel to edit shift start/end times
+// ════════════════════════════════════════════════════
+
+function toggleShiftTimesPanel() {
+  const panel = document.getElementById('shift-times-panel');
+  const toggle = document.getElementById('shift-times-toggle');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    toggle.style.transform = 'rotate(0deg)';
+    renderShiftTimesGrid();
+  } else {
+    panel.style.display = 'none';
+    toggle.style.transform = 'rotate(-90deg)';
+  }
+}
+
+function renderShiftTimesGrid() {
+  const grid = document.getElementById('shift-times-grid');
+  const shiftNames = {
+    'open-early': 'Open Early',
+    'open-late': 'Open Late',
+    'mid-early': 'Mid Early',
+    'mid-late': 'Mid Late',
+    'close': 'Close',
+    'kc-close': 'KC Close'
+  };
+
+  let html = '';
+  Object.keys(shiftNames).forEach(key => {
+    const t = customShiftTimes[key] || DEFAULT_SHIFT_TIMES[key];
+    html += `<div class="shift-time-row">`;
+    html += `<span class="st-label">${shiftNames[key]}</span>`;
+    html += `<input type="text" value="${t.start}" id="st-start-${key}" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
+    html += `<span class="st-dash">-</span>`;
+    html += `<input type="text" value="${t.end}" id="st-end-${key}" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
+    html += `</div>`;
+  });
+  grid.innerHTML = html;
+}
+
+function updateShiftTime(key) {
+  const startEl = document.getElementById('st-start-' + key);
+  const endEl = document.getElementById('st-end-' + key);
+  if (!startEl || !endEl) return;
+  const start = startEl.value.trim();
+  const end = endEl.value.trim();
+  if (start && end) {
+    customShiftTimes[key] = { start, end };
+    saveShiftTimesToStorage();
+    // Refresh input calendar to show updated labels
+    buildInputCalendar(activeTab);
+  }
+}
+
+function resetShiftTimes() {
+  customShiftTimes = JSON.parse(JSON.stringify(DEFAULT_SHIFT_TIMES));
+  saveShiftTimesToStorage();
+  renderShiftTimesGrid();
+  buildInputCalendar(activeTab);
+}
+
+
+// ════════════════════════════════════════════════════
+// BOOT: Restore persisted manager names (Feature 2)
+// Must run after initial renderAMRows/renderKCRows
+// ════════════════════════════════════════════════════
+restoreManagerNames();
+// Rebuild tabs after name restore
+buildInputTabs();
+buildInputCalendar(activeTab);
+
+
 </script>
 </body>
 </html>

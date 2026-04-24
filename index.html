@@ -1820,22 +1820,20 @@ function _generateScheduleInner() {
   const hasConsecWeekend = {};
   ROLES.forEach(r => { hasConsecWeekend[r] = false; });
 
+  const isDayOff = (s) => s === 'off' || s === 'rto' || s === 'pto' || s === 'loa';
+
   // Detect existing consecutive weekends off from inputs
   ROLES.forEach(r => {
     allWeekendPairs.forEach(wp => {
       const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
-      if ((s1 === 'off' || s1 === 'rto' || s1 === 'pto') &&
-          (s2 === 'off' || s2 === 'rto' || s2 === 'pto')) {
-        hasConsecWeekend[r] = true;
-      }
+      if (isDayOff(s1) && isDayOff(s2)) hasConsecWeekend[r] = true;
     });
   });
 
   // Count how many managers already have a full weekend off on this pair
   const wpOffCount = (wp) => ROLES.filter(r => {
     const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
-    return (s1 === 'off' || s1 === 'rto' || s1 === 'pto') &&
-           (s2 === 'off' || s2 === 'rto' || s2 === 'pto');
+    return isDayOff(s1) && isDayOff(s2);
   }).length;
 
   // Assign weekend off to managers who don't have one yet
@@ -1920,7 +1918,7 @@ function _generateScheduleInner() {
     // Who CAN close this night?
     const candidates = ROLES.filter(r => {
       const s = schedule[r][dk];
-      if (s === 'off' || s === 'rto' || s === 'pto' || s === 'close') return false;
+      if (s === 'off' || s === 'rto' || s === 'pto' || s === 'loa' || s === 'close') return false;
       // Clopen: don't close if tomorrow already has an open assigned
       if (ndk && isOpen(schedule[r][ndk])) return false;
       return true;
@@ -1988,10 +1986,11 @@ function _generateScheduleInner() {
     const weekDks = getWeekDks(w);
     ROLES.forEach(r => {
       const rtos = weekDks.filter(dk => schedule[r][dk] === 'rto').length;
+      const loaDays = weekDks.filter(dk => schedule[r][dk] === 'loa').length;
       const ptos = weekDks.filter(dk => schedule[r][dk] === 'pto').length;
       const currentOffs = weekDks.filter(dk => schedule[r][dk] === 'off').length;
       const currentWork = weekDks.filter(dk => isWork(schedule[r][dk])).length;
-      const availDays = 7 - rtos;
+      const availDays = 7 - rtos - loaDays;  // LOA days are not available for scheduling
       const targetSched = Math.min(5, availDays);
       // Scheduled = work + PTO. We need targetSched of these.
       // Offs needed = availDays - targetSched - currentOffs (already placed weekends/inputs)

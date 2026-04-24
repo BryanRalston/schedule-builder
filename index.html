@@ -788,6 +788,23 @@ button:active { transform: scale(0.98); }
 /* ========== CUSTOM SHIFT ========== */
 .shift-custom { background: #fdf4ff !important; color: #7e22ce; font-weight: 600; }
 .tag-custom { background: #f3e8ff; color: #7e22ce; }
+.shift-close-ext { background: #fae8ff !important; color: #86198f; font-weight: 600; }
+.tag-close-ext { background: #fae8ff; color: #86198f; }
+.shift-loa { background: #ccfbf1 !important; color: #0f766e; font-weight: 600; }
+.tag-loa { background: #ccfbf1; color: #0f766e; }
+
+/* Cell menu groups */
+.cell-menu-group { padding: 4px 10px 2px; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; pointer-events: none; cursor: default; }
+.cell-menu-divider { height: 1px; background: #f3f4f6; margin: 2px 0; }
+
+/* LOA date range modal */
+.loa-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 500; display: flex; align-items: center; justify-content: center; }
+.loa-modal { background: #fff; border-radius: 10px; padding: 1.25rem 1.5rem; min-width: 290px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+.loa-modal h3 { font-size: 1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.75rem; }
+.loa-modal-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.9rem; }
+.loa-modal-row label { min-width: 80px; color: #6b7280; font-weight: 500; }
+.loa-modal-row input[type="date"] { border: 1px solid #d1d5db; border-radius: 6px; padding: 0.35rem 0.6rem; font-size: 0.9rem; }
+.loa-modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: flex-end; }
 .custom-input-row {
   display: flex;
   align-items: center;
@@ -824,6 +841,7 @@ button:active { transform: scale(0.98); }
     <button class="btn-outline" onclick="saveToStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Save</button>
     <button class="btn-outline" onclick="loadFromStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Load</button>
     <button class="btn-outline" onclick="window.print()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Print</button>
+    <button class="btn-outline" onclick="exportSchedule()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Email / Export</button>
   </div>
 </header>
 
@@ -892,8 +910,10 @@ button:active { transform: scale(0.98); }
             <div class="legend-item"><span class="legend-swatch" style="background:#d1fae5"></span> Open</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#e0e7ff"></span> Mid</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#fce7f3"></span> Close</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#fae8ff"></span> Ext. Close</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#dbeafe"></span> PTO</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#ffedd5"></span> RTO</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:#ccfbf1"></span> LOA</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#f3f4f6"></span> Off</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#fef3c7"></span> KC Close</div>
             <div class="legend-item"><span class="legend-swatch" style="background:#fdf4ff"></span> Custom</div>
@@ -1034,6 +1054,7 @@ const DEFAULT_SHIFT_TIMES = {
   'mid-early':  { start: '8a', end: '6p' },
   'mid-late':   { start: '9a', end: '7p' },
   'close':      { start: '12:30p', end: '10:30p' },
+  'close-ext':  { start: '12:30p', end: '11:30p' },
   'kc-close':   { start: '2p', end: '10p' }
 };
 
@@ -1069,7 +1090,8 @@ function getShiftLabels() {
     'mid-early':'M ' + getShiftTimeStr('mid-early'),
     'mid-late':'M ' + getShiftTimeStr('mid-late'),
     'close':'C ' + getShiftTimeStr('close'),
-    'pto':'PTO', 'rto':'RTO', 'off':'OFF',
+    'close-ext':'C ' + getShiftTimeStr('close-ext'),
+    'pto':'PTO', 'rto':'RTO', 'loa':'LOA', 'off':'OFF',
     'kc-close':'KC Close'
   };
 }
@@ -1081,7 +1103,8 @@ function getShiftShort() {
     'mid-early':'M ' + getShiftTimeStr('mid-early'),
     'mid-late':'M ' + getShiftTimeStr('mid-late'),
     'close':'C',
-    'pto':'PTO', 'rto':'RTO', 'off':'OFF',
+    'close-ext':'C-EXT',
+    'pto':'PTO', 'rto':'RTO', 'loa':'LOA', 'off':'OFF',
     'kc-close':'KC-C'
   };
 }
@@ -1093,9 +1116,11 @@ function getPrintShift() {
     'mid-early': getShiftTimeStr('mid-early'),
     'mid-late': getShiftTimeStr('mid-late'),
     'close': getShiftTimeStr('close'),
+    'close-ext': getShiftTimeStr('close-ext'),
     'off': 'OFF',
     'pto': 'VAC',
     'rto': 'OFF(RTO)',
+    'loa': 'LOA',
     'kc-close': getShiftTimeStr('kc-close')
   };
 }
@@ -1107,15 +1132,15 @@ function getCustomShiftLabel(s) { return s ? s.replace('custom:', '') : ''; }
 const SHIFT_CSS = {
   'open-early':'shift-open', 'open-late':'shift-open',
   'mid-early':'shift-mid', 'mid-late':'shift-mid',
-  'close':'shift-close',
-  'pto':'shift-pto', 'rto':'shift-rto', 'off':'shift-off',
+  'close':'shift-close', 'close-ext':'shift-close-ext',
+  'pto':'shift-pto', 'rto':'shift-rto', 'loa':'shift-loa', 'off':'shift-off',
   'kc-close':'shift-kc-close'
 };
 const TAG_CSS = {
-  'pto':'tag-pto', 'rto':'tag-rto',
+  'pto':'tag-pto', 'rto':'tag-rto', 'loa':'tag-loa',
   'open-early':'tag-open', 'open-late':'tag-open',
   'mid-early':'tag-mid', 'mid-late':'tag-mid',
-  'close':'tag-close', 'off':'tag-off'
+  'close':'tag-close', 'close-ext':'tag-close-ext', 'off':'tag-off'
 };
 
 // Get CSS class for a shift value (supports custom)
@@ -1461,36 +1486,72 @@ function openCellMenu(e, role, dk) {
   const cell = e.currentTarget;
   const rect = cell.getBoundingClientRect();
 
-  const options = [
-    { label: 'PTO (vacation)', value: 'pto' },
-    { label: 'RTO (day off)', value: 'rto' },
-    { label: 'Open (' + getShiftTimeStr('open-early') + ')', value: 'open-early' },
-    { label: 'Open (' + getShiftTimeStr('open-late') + ')', value: 'open-late' },
-    { label: 'Mid (' + getShiftTimeStr('mid-early') + ')', value: 'mid-early' },
-    { label: 'Mid (' + getShiftTimeStr('mid-late') + ')', value: 'mid-late' },
-    { label: 'Close', value: 'close' },
-    { label: 'Off (request)', value: 'off' },
-    { label: 'Custom...', value: '__custom__' },
-    { label: 'Clear', value: null }
+  const groups = [
+    {
+      label: 'Opening',
+      items: [
+        { label: 'Early Opening (' + getShiftTimeStr('open-early') + ')', value: 'open-early' },
+        { label: 'Regular Opening (' + getShiftTimeStr('open-late') + ')', value: 'open-late' },
+      ]
+    },
+    {
+      label: 'Mid',
+      items: [
+        { label: 'Early Mid (' + getShiftTimeStr('mid-early') + ')', value: 'mid-early' },
+        { label: 'Late Mid (' + getShiftTimeStr('mid-late') + ')', value: 'mid-late' },
+      ]
+    },
+    {
+      label: 'Closing',
+      items: [
+        { label: 'Regular Close (' + getShiftTimeStr('close') + ')', value: 'close' },
+        { label: 'Extended Close (' + getShiftTimeStr('close-ext') + ')', value: 'close-ext' },
+        { label: 'KC Close (' + getShiftTimeStr('kc-close') + ')', value: 'kc-close' },
+      ]
+    },
+    {
+      label: 'Time Off',
+      items: [
+        { label: 'PTO (vacation)', value: 'pto' },
+        { label: 'RTO (day off)', value: 'rto' },
+        { label: 'LOA (leave of absence)...', value: '__loa__' },
+        { label: 'Off (request)', value: 'off' },
+      ]
+    },
+    {
+      label: 'Other',
+      items: [
+        { label: 'Custom...', value: '__custom__' },
+        { label: 'Clear', value: null }
+      ]
+    }
   ];
 
   const portal = document.getElementById('cell-menu-portal');
   let html = '<div class="overlay" onclick="closeCellMenu()"></div>';
   html += `<div class="cell-menu" style="position:fixed;top:${rect.bottom + 4}px;left:${rect.left}px;z-index:100">`;
-  options.forEach(o => {
-    if (o.value === '__custom__') {
-      html += `<button onclick="showCustomInputInCellMenu('${role}','${dk}'); event.stopPropagation();" style="color:#7e22ce;font-weight:600">${o.label}</button>`;
-      html += `<div id="cell-custom-input-${role}-${dk}" style="display:none">`;
-      html += `<div class="custom-input-row">`;
-      html += `<input type="text" id="cell-custom-start-${role}-${dk}" placeholder="10a">`;
-      html += `<span class="ci-dash">-</span>`;
-      html += `<input type="text" id="cell-custom-end-${role}-${dk}" placeholder="6p">`;
-      html += `<button class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onclick="applyCustomCellValue('${role}','${dk}'); event.stopPropagation();">OK</button>`;
-      html += `</div></div>`;
-    } else {
-      html += `<button onclick="setCellValue('${role}','${dk}',${o.value === null ? 'null' : "'" + o.value + "'"})">${o.label}</button>`;
-    }
+
+  groups.forEach((group, gi) => {
+    if (gi > 0) html += '<div class="cell-menu-divider"></div>';
+    html += `<div class="cell-menu-group">${group.label}</div>`;
+    group.items.forEach(o => {
+      if (o.value === '__custom__') {
+        html += `<button onclick="showCustomInputInCellMenu('${role}','${dk}'); event.stopPropagation();" style="color:#7e22ce;font-weight:600">${o.label}</button>`;
+        html += `<div id="cell-custom-input-${role}-${dk}" style="display:none">`;
+        html += `<div class="custom-input-row">`;
+        html += `<input type="text" id="cell-custom-start-${role}-${dk}" placeholder="10a">`;
+        html += `<span class="ci-dash">-</span>`;
+        html += `<input type="text" id="cell-custom-end-${role}-${dk}" placeholder="6p">`;
+        html += `<button class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onclick="applyCustomCellValue('${role}','${dk}'); event.stopPropagation();">OK</button>`;
+        html += `</div></div>`;
+      } else if (o.value === '__loa__') {
+        html += `<button onclick="closeCellMenu(); openLoaModal('${role}','${dk}'); event.stopPropagation();" style="color:#0f766e;font-weight:600">${o.label}</button>`;
+      } else {
+        html += `<button onclick="setCellValue('${role}','${dk}',${o.value === null ? 'null' : "'" + o.value + "'"})">${o.label}</button>`;
+      }
+    });
   });
+
   html += '</div>';
   portal.innerHTML = html;
   openMenu = true;
@@ -1528,6 +1589,71 @@ function closeCellMenu() {
   openMenu = null;
 }
 
+function openLoaModal(role, dk) {
+  const names = getManagerNames();
+  const personName = names[role] || role.toUpperCase();
+
+  // Convert dk (YYYY-MM-DD) to date input format
+  const startDate = dk;
+
+  const existing = document.getElementById('loa-modal-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'loa-modal-overlay';
+  overlay.className = 'loa-modal-overlay';
+  overlay.innerHTML = `
+    <div class="loa-modal" onclick="event.stopPropagation()">
+      <h3>LOA — ${personName}</h3>
+      <div class="loa-modal-row">
+        <label>Start date</label>
+        <input type="date" id="loa-start-input" value="${startDate}">
+      </div>
+      <div class="loa-modal-row">
+        <label>End date</label>
+        <input type="date" id="loa-end-input" value="${startDate}">
+      </div>
+      <div class="loa-modal-actions">
+        <button class="btn-secondary" onclick="closeLoaModal()">Cancel</button>
+        <button class="btn-primary" onclick="applyLoaRange('${role}')">Apply LOA</button>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', closeLoaModal);
+  document.body.appendChild(overlay);
+  document.getElementById('loa-end-input').focus();
+}
+
+function closeLoaModal() {
+  const el = document.getElementById('loa-modal-overlay');
+  if (el) el.remove();
+}
+
+function applyLoaRange(role) {
+  const startVal = document.getElementById('loa-start-input').value;
+  const endVal = document.getElementById('loa-end-input').value;
+  if (!startVal || !endVal) return;
+
+  const start = new Date(startVal + 'T00:00:00');
+  const end = new Date(endVal + 'T00:00:00');
+  if (end < start) { alert('End date must be on or after start date.'); return; }
+
+  if (!inputs[role]) inputs[role] = {};
+
+  // Fill every date in range that belongs to the current period
+  const periodDks = new Set(periodDates.map(d => dateKey(d)));
+  const cur = new Date(start);
+  while (cur <= end) {
+    const dk = dateKey(cur);
+    if (periodDks.has(dk)) {
+      inputs[role][dk] = 'loa';
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  closeLoaModal();
+  buildInputCalendar(role);
+}
+
 function setCellValue(role, dk, value) {
   if (!inputs[role]) inputs[role] = {};
   if (value === null) {
@@ -1550,14 +1676,15 @@ function toggleSection(header) {
 }
 
 // ── Helpers ──
-function isClose(shift) { return shift === 'close' || shift === 'kc-close'; }
+function isClose(shift) { return shift === 'close' || shift === 'close-ext' || shift === 'kc-close'; }
 function isOpen(shift) { return shift === 'open-early' || shift === 'open-late'; }
 function isMid(shift) { return shift === 'mid-early' || shift === 'mid-late'; }
 function isWork(shift) { return isOpen(shift) || isMid(shift) || isClose(shift) || isCustomShift(shift); }
 function isPto(shift) { return shift === 'pto'; }
 function isRto(shift) { return shift === 'rto'; }
+function isLoa(shift) { return shift === 'loa'; }
 function isOff(shift) { return shift === 'off' || shift === 'rto'; }
-function isScheduled(shift) { return isWork(shift) || isPto(shift); }
+function isScheduled(shift) { return isWork(shift) || isPto(shift) || isLoa(shift); }
 
 function isMonday(d) { return d.getDay() === 1; }
 function isSaturday(d) { return d.getDay() === 6; }
@@ -3037,6 +3164,60 @@ function renderPrintSchedule(ROLES, ALL_KC) {
   document.getElementById('print-schedule').innerHTML = html;
 }
 
+// ── Export as standalone HTML (for email attachment) ──
+function exportSchedule() {
+  const printEl = document.getElementById('print-schedule');
+  if (!printEl || !printEl.innerHTML.trim()) {
+    alert('No schedule loaded. Please load a period first.');
+    return;
+  }
+
+  const storeNum = document.getElementById('store-number').value || '';
+  const p = currentPeriod;
+
+  let filename = 'Manager_Schedule';
+  if (storeNum) filename += '_Store' + storeNum;
+  if (p) filename += '_P' + String(p.number).padStart(2, '0') + '_' + fiscalYear;
+  filename += '.html';
+
+  const css = `
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #000; background: #fff; padding: 1.5rem; }
+    .print-title { text-align: center; margin-bottom: 1rem; }
+    .print-main-title { font-size: 16pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .print-sub-title { font-size: 12pt; font-weight: 400; margin-top: 4px; }
+    .print-week { width: 100%; border-collapse: collapse; font-size: 10pt; table-layout: fixed; margin-bottom: 1rem; }
+    .print-week th, .print-week td { border: 1px solid #000; padding: 3px 4px; text-align: center; vertical-align: middle; }
+    .print-week thead th { font-weight: 700; font-size: 9pt; background: #fff; color: #000; }
+    .print-week .we-label-col { text-align: left; padding-left: 6px; font-weight: 700; width: 120px; min-width: 100px; }
+    .print-week .name-col { text-align: left; padding-left: 6px; font-weight: 600; width: 120px; min-width: 100px; }
+    .print-week tbody td { font-size: 9pt; font-weight: 400; }
+    .print-week tbody td.name-col { font-weight: 600; }
+  `;
+
+  const doc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${filename.replace('.html', '').replace(/_/g, ' ')}</title>
+  <style>${css}</style>
+</head>
+<body>
+${printEl.innerHTML}
+</body>
+</html>`;
+
+  const blob = new Blob([doc], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 // ── Render Summary ──
 function renderSummary(warnings, ROLES, ALL_KC) {
   const names = getManagerNames();
@@ -3714,11 +3895,12 @@ function toggleShiftTimesPanel() {
 function renderShiftTimesGrid() {
   const grid = document.getElementById('shift-times-grid');
   const shiftNames = {
-    'open-early': 'Open Early',
-    'open-late': 'Open Late',
-    'mid-early': 'Mid Early',
-    'mid-late': 'Mid Late',
-    'close': 'Close',
+    'open-early': 'Early Opening (mid coverage)',
+    'open-late': 'Regular Opening',
+    'mid-early': 'Early Mid',
+    'mid-late': 'Late Mid',
+    'close': 'Regular Close',
+    'close-ext': 'Extended Close (holiday)',
     'kc-close': 'KC Close'
   };
 

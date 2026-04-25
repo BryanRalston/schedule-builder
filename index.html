@@ -604,6 +604,9 @@ button:active { transform: scale(0.98); }
 /* Input week separator */
 .input-week-label {
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 0.8rem;
   font-weight: 700;
   color: #1e40af;
@@ -612,6 +615,9 @@ button:active { transform: scale(0.98); }
   margin-top: 0.25rem;
 }
 .input-week-label:first-of-type { border-top: none; margin-top: 0; }
+.holiday-week-toggle { display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 600; color: #b45309; cursor: pointer; user-select: none; }
+.holiday-week-toggle input[type="checkbox"] { cursor: pointer; accent-color: #b45309; width: 14px; height: 14px; }
+.input-week-label.is-holiday-week { background: #fffbeb; border-top-color: #fcd34d; color: #92400e; border-radius: 4px 4px 0 0; padding-left: 0.4rem; }
 
 /* Overlay for cell menu */
 .overlay { position: fixed; inset: 0; z-index: 50; }
@@ -1234,6 +1240,7 @@ let currentPeriod = null; // the selected period object
 let periodDates = []; // flat array of Date objects for every day in the period
 let inputs = {}; // { 'sm': { 'YYYY-MM-DD': 'pto', ... }, ... }
 let schedule = {}; // same shape but final
+let holidayWeeks = {}; // { wIdx: true } — weeks with a company holiday (target 4 days)
 let activeTab = 'sm';
 let openMenu = null;
 
@@ -1397,6 +1404,8 @@ function loadPeriod() {
   allPeriods = getFiscalPeriods(fiscalYear);
   currentPeriod = allPeriods[currentPeriodIndex];
 
+  holidayWeeks = {}; // reset when a new period is loaded
+
   // Build flat date list
   periodDates = [];
   for (const week of currentPeriod.weeks) {
@@ -1439,7 +1448,11 @@ function buildInputCalendar(role) {
 
   // Show each week in the period
   currentPeriod.weeks.forEach((week, wIdx) => {
-    html += `<div class="input-week-label">Week ${wIdx + 1}: ${formatDate(week.start)} - ${formatDate(week.end)}</div>`;
+    const isHoliday = !!holidayWeeks[wIdx];
+    html += `<div class="input-week-label${isHoliday ? ' is-holiday-week' : ''}">`;
+    html += `<span>Week ${wIdx + 1}: ${formatDate(week.start)} - ${formatDate(week.end)}${isHoliday ? ' 🏖 Holiday (4-day)' : ''}</span>`;
+    html += `<label class="holiday-week-toggle"><input type="checkbox" onchange="toggleHolidayWeek(${wIdx}, this.checked)"${isHoliday ? ' checked' : ''}> Company Holiday</label>`;
+    html += `</div>`;
     html += '<div class="input-calendar">';
 
     // Headers
@@ -1587,6 +1600,12 @@ function applyCustomCellValue(role, dk) {
 function closeCellMenu() {
   document.getElementById('cell-menu-portal').innerHTML = '';
   openMenu = null;
+}
+
+function toggleHolidayWeek(wIdx, checked) {
+  if (checked) holidayWeeks[wIdx] = true;
+  else delete holidayWeeks[wIdx];
+  buildInputCalendar(activeTab);
 }
 
 function openLoaModal(role, dk) {
@@ -1991,7 +2010,8 @@ function _generateScheduleInner() {
       const currentOffs = weekDks.filter(dk => schedule[r][dk] === 'off').length;
       const currentWork = weekDks.filter(dk => isWork(schedule[r][dk])).length;
       const availDays = 7 - rtos - loaDays;  // LOA days are not available for scheduling
-      const targetSched = Math.min(5, availDays);
+      const targetDays = holidayWeeks[w] ? 4 : 5;  // company holiday weeks = 4-day schedule
+      const targetSched = Math.min(targetDays, availDays);
       // Scheduled = work + PTO. We need targetSched of these.
       // Offs needed = availDays - targetSched - currentOffs (already placed weekends/inputs)
       const alreadySched = currentWork + ptos;
@@ -3341,6 +3361,7 @@ function saveToStorage() {
     },
     inputs: inputs,
     schedule: schedule,
+    holidayWeeks: holidayWeeks,
     _savedAt: new Date().toISOString()
   };
   const key = `schedule_FY${fiscalYear}-P${p.number}`;
@@ -3392,6 +3413,9 @@ function loadFromStorage() {
     const el = document.getElementById('name-' + kc.id);
     if (el) el.value = kc.name;
   });
+
+  // Restore holiday weeks
+  holidayWeeks = data.holidayWeeks || {};
 
   // Restore inputs
   inputs = {};

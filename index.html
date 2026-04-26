@@ -833,6 +833,7 @@ button:active { transform: scale(0.98); }
 .custom-input-row .ci-dash { color: #9ca3af; font-weight: 700; font-size: 0.8rem; }
 .custom-input-row button { padding: 0.25rem 0.5rem; font-size: 0.75rem; min-height: auto; }
 </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -3185,56 +3186,82 @@ function renderPrintSchedule(ROLES, ALL_KC) {
 
 // ── Export as standalone HTML (for email attachment) ──
 function exportSchedule() {
-  const printEl = document.getElementById('print-schedule');
-  if (!printEl || !printEl.innerHTML.trim()) {
-    alert('No schedule loaded. Please load a period first.');
+  if (!currentPeriod) {
+    alert('Please load a period first.');
+    return;
+  }
+  const hasSchedule = Object.keys(schedule).some(r => Object.keys(schedule[r] || {}).length > 0);
+  if (!hasSchedule) {
+    alert('Please generate the schedule first before exporting.');
+    return;
+  }
+  if (typeof XLSX === 'undefined') {
+    alert('Excel library not loaded. Check your internet connection and try again.');
     return;
   }
 
-  const storeNum = document.getElementById('store-number').value || '';
+  const names = getManagerNames();
   const p = currentPeriod;
+  const storeNum = document.getElementById('store-number').value || '';
+  const ROLES = getRoles();
+  const nonMgrKCs = getNonManagerKCs();
+  const DAY_HDR = ['SUN', 'MON', 'TUES', 'WED', 'THURS', 'FRI', 'SAT'];
 
   let filename = 'Manager_Schedule';
   if (storeNum) filename += '_Store' + storeNum;
-  if (p) filename += '_P' + String(p.number).padStart(2, '0') + '_' + fiscalYear;
-  filename += '.html';
+  filename += '_P' + String(p.number).padStart(2, '0') + '_' + fiscalYear + '.xlsx';
 
-  const css = `
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, Helvetica, sans-serif; font-size: 11pt; color: #000; background: #fff; padding: 1.5rem; }
-    .print-title { text-align: center; margin-bottom: 1rem; }
-    .print-main-title { font-size: 16pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-    .print-sub-title { font-size: 12pt; font-weight: 400; margin-top: 4px; }
-    .print-week { width: 100%; border-collapse: collapse; font-size: 10pt; table-layout: fixed; margin-bottom: 1rem; }
-    .print-week th, .print-week td { border: 1px solid #000; padding: 3px 4px; text-align: center; vertical-align: middle; }
-    .print-week thead th { font-weight: 700; font-size: 9pt; background: #fff; color: #000; }
-    .print-week .we-label-col { text-align: left; padding-left: 6px; font-weight: 700; width: 120px; min-width: 100px; }
-    .print-week .name-col { text-align: left; padding-left: 6px; font-weight: 600; width: 120px; min-width: 100px; }
-    .print-week tbody td { font-size: 9pt; font-weight: 400; }
-    .print-week tbody td.name-col { font-weight: 600; }
-  `;
+  const rows = [];
 
-  const doc = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${filename.replace('.html', '').replace(/_/g, ' ')}</title>
-  <style>${css}</style>
-</head>
-<body>
-${printEl.innerHTML}
-</body>
-</html>`;
+  // Title block
+  rows.push(['MANAGEMENT SCHEDULE']);
+  let subtitle = 'Month: ' + p.approxMonth;
+  if (storeNum) subtitle = 'Store: ' + storeNum + '     ' + subtitle;
+  rows.push([subtitle]);
+  rows.push([]);
 
-  const blob = new Blob([doc], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  p.weeks.forEach((week, wIdx) => {
+    const weekDates = [];
+    const d = new Date(week.start);
+    for (let i = 0; i < 7; i++) { weekDates.push(new Date(d)); d.setDate(d.getDate() + 1); }
+
+    const sat = weekDates[6];
+    const weLabel = 'W/E ' + (sat.getMonth() + 1) + '/' + sat.getDate() + (holidayWeeks[wIdx] ? ' 🏖' : '');
+
+    rows.push([weLabel, ...DAY_HDR]);
+    rows.push(['', ...weekDates.map(wd => wd.getDate())]);
+
+    ROLES.forEach(r => {
+      rows.push([
+        names[r] || r.toUpperCase(),
+        ...weekDates.map(wd => {
+          const s = schedule[r] && schedule[r][dateKey(wd)];
+          return s ? getPrintShiftLabel(s) : '';
+        })
+      ]);
+    });
+
+    nonMgrKCs.forEach(kc => {
+      rows.push([
+        names[kc.id] || kc.name,
+        ...weekDates.map(wd => {
+          const s = schedule[kc.id] && schedule[kc.id][dateKey(wd)];
+          return (s && (isWork(s) || s === 'pto' || s === 'rto' || s === 'loa')) ? getPrintShiftLabel(s) : '';
+        })
+      ]);
+    });
+
+    rows.push([]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths: name col wide, 7 day cols medium
+  ws['!cols'] = [{ wch: 24 }, ...Array(7).fill({ wch: 13 })];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
+  XLSX.writeFile(wb, filename);
 }
 
 // ── Render Summary ──

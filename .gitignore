@@ -1,0 +1,26 @@
+# OS / editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# Local tooling / secrets
+*.keystore
+*.jks
+*.p12
+local.properties
+.env
+.env.*
+
+# Node / Bubblewrap (if run from this tree)
+node_modules/
+.twa-*/
+android/
+package-lock.json
+
+# Logs
+*.log
+npm-debug.log*

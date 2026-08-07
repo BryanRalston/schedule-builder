@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play Store Listing Pack · Schedule Pro</title>
+  <link rel="icon" href="../icons/favicon-32.png">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 1.25rem; color: #1a1a2e; line-height: 1.55; }
+    h1 { font-size: 1.35rem; }
+    h2 { font-size: 1.05rem; margin-top: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem; }
+    .box { background: #f8f9fb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.9rem 1rem; position: relative; }
+    .box pre { margin: 0; white-space: pre-wrap; font-family: inherit; font-size: 0.92rem; }
+    button.copy { position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.75rem; font-weight: 700; border: 1px solid #d1d5db; background: #fff; border-radius: 6px; padding: 0.3rem 0.55rem; cursor: pointer; }
+    .meta { color: #6b7280; font-size: 0.88rem; }
+    a { color: #2563eb; }
+    ul { padding-left: 1.2rem; }
+  </style>
+</head>
+<body>
+  <p><a href="../install.html">← Publish setup</a></p>
+  <h1>Google Play listing pack</h1>
+  <p class="meta">Copy these fields into Play Console. Screenshots: use the app on a phone (or the store/screenshots folder when available).</p>
+
+  <h2>App name <span class="meta">(30 chars max)</span></h2>
+  <div class="box"><button class="copy" type="button" data-copy="Schedule Pro: Manager Shifts">Copy</button><pre>Schedule Pro: Manager Shifts</pre></div>
+
+  <h2>Short description <span class="meta">(80 chars max)</span></h2>
+  <div class="box"><button class="copy" type="button" data-copy="Fair retail schedules in minutes. NRF calendar, no clopens, offline.">Copy</button><pre>Fair retail schedules in minutes. NRF calendar, no clopens, offline.</pre></div>
+
+  <h2>Full description</h2>
+  <div class="box"><button class="copy" type="button" id="copy-full">Copy</button><pre id="full-desc">Manager Schedule Builder Pro — build fair retail manager schedules without the spreadsheet fight.
+
+WHO IT'S FOR
+Store managers and multi-unit leaders who schedule assistant managers and key carriers.
+
+WHAT YOU GET
+• NRF 4-5-4 fiscal period calendar
+• Preference engine: weekends, clopening ban, consecutive days, role rules
+• Hard locks for PTO, RTO, LOA, and requested shifts
+• Quality score with labor hours
+• Edit after generate, then print / Word / Excel / JSON backup
+• Works offline — your data stays on the device
+
+HOW IT WORKS
+1. Set up your team and store period
+2. Enter time-off and shift requests
+3. Tune preferences & role rules
+4. Generate, review the score, export
+
+Privacy-first: schedules are stored on your device. No account required for core use.
+
+Note: Always review generated schedules for policy and labor compliance before posting.</pre></div>
+
+  <h2>Category & tags</h2>
+  <div class="box"><pre>Category: Business
+Tags: scheduling, retail, workforce, productivity, store manager</pre></div>
+
+  <h2>Contact & policy URLs</h2>
+  <div class="box"><pre>Privacy policy: https://YOUR_DOMAIN/legal/privacy.html
+Terms: https://YOUR_DOMAIN/legal/terms.html
+Support email: you@yourdomain.com
+App package: com.managerschedulebuilder.pro</pre></div>
+
+  <h2>Content rating questionnaire tips</h2>
+  <ul>
+    <li>No user-generated public content feed</li>
+    <li>No ads / no gambling / no violence</li>
+    <li>Business utility; not targeted at children</li>
+    <li>Does not require account for core features</li>
+  </ul>
+
+  <h2>Graphic assets needed</h2>
+  <ul>
+    <li>App icon — already generated (512px)</li>
+    <li>Feature graphic 1024×500 — create in Canva (“Fair schedules in minutes”)</li>
+    <li>Phone screenshots — Setup, Requests, Schedule score, Excel export (min 2)</li>
+  </ul>
+
+  <p class="meta">Icon files ship with the app under /icons/</p>
+
+  <script>
+    document.querySelectorAll('button.copy').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const text = btn.dataset.copy || btn.parentElement.querySelector('pre')?.innerText || '';
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = 'Copied';
+          setTimeout(() => btn.textContent = 'Copy', 1200);
+        } catch {
+          alert('Select the text and copy manually.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

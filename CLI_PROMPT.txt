@@ -1,0 +1,11 @@
+Read HANDOFF.md and explore this project. It is Manager Schedule Builder Pro — a complete offline PWA.
+
+My goal: get it live on HTTPS and packaged for Google Play (TWA / Bubblewrap), package id com.managerschedulebuilder.pro.
+
+Please:
+1. Confirm the PWA is valid (manifest, service worker, icons, privacy page).
+2. Set up deploy to GitHub Pages OR Vercel from this folder (ask me which if unclear; I may already have github.com/BryanRalston/schedule-builder).
+3. After deploy (or with clear deploy steps I can run), prepare Bubblewrap/TWA packaging and assetlinks.json instructions with my real domain.
+4. Keep the app offline-first; do not rebuild from scratch.
+
+Start by summarizing the repo structure, then execute the deploy path.

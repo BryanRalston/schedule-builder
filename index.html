@@ -2,8 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manager Schedule Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Manager Schedule Builder Pro — preference-driven retail scheduling for store managers. NRF 4-5-4 calendar, fair weekends, clopen prevention, role rules, labor hours, Word/Excel export. Works offline.">
+<meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
+<meta name="application-name" content="Schedule Pro">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Schedule Pro">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="light">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192.png">
+<meta property="og:title" content="Manager Schedule Builder Pro">
+<meta property="og:description" content="Fair retail schedules in minutes. NRF 4-5-4, no clopens, role rules, offline.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icons/icon-512.png">
+<title>Manager Schedule Builder Pro · Retail Scheduling Engine</title>
 <style>
 /* ========== RESET & BASE ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -875,6 +894,1061 @@ button:active { transform: scale(0.98); }
 }
 .custom-input-row .ci-dash { color: #9ca3af; font-weight: 700; font-size: 0.8rem; }
 .custom-input-row button { padding: 0.25rem 0.5rem; font-size: 0.75rem; min-height: auto; }
+
+/* ========== SCHEDULING PREFERENCES & ROLE RULES ========== */
+.prefs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.pref-card {
+  background: #f8f9fb;
+  border: 1px solid #e8eaed;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.pref-card label.pref-label {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #1a1a2e;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.pref-card .pref-desc {
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+.pref-card input[type="number"] {
+  width: 72px;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.pref-card input[type="number"]:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+.pref-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-track {
+  width: 40px;
+  height: 22px;
+  background: #d1d5db;
+  border-radius: 11px;
+  position: relative;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.15s;
+}
+.toggle-switch input:checked + .toggle-track {
+  background: #2563eb;
+}
+.toggle-switch input:checked + .toggle-track::after {
+  transform: translateX(18px);
+}
+.pref-inline-num {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+.pref-inline-num input[type="number"] {
+  width: 56px;
+}
+
+/* Role rules */
+.role-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.role-rule-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.role-rule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: #f8f9fb;
+  border-bottom: 1px solid #e8eaed;
+  cursor: pointer;
+  user-select: none;
+}
+.role-rule-header .role-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.role-rule-body {
+  padding: 0.85rem 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+.role-rule-body.collapsed { display: none; }
+.role-field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.25rem;
+}
+.role-field input[type="number"],
+.role-field select,
+.role-field input[type="text"] {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+.role-field input:focus,
+.role-field select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+.shift-pref-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+}
+.shift-pref-checks label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  margin: 0;
+}
+.role-badge-sm { background: #7c3aed; }
+.role-badge-am { background: #2563eb; }
+.role-badge-kc { background: #d97706; }
+.role-badge-custom { background: #059669; }
+.add-role-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #e5e7eb;
+}
+.add-role-row input[type="text"] {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.add-role-row select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* Generation quality summary */
+.gen-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.gen-stat-card {
+  background: #f8f9fb;
+  border: 1px solid #e8eaed;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+.gen-stat-card h4 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+}
+.gen-stat-card .stat-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.2;
+}
+.gen-stat-card .stat-value.ok { color: #059669; }
+.gen-stat-card .stat-value.warn { color: #d97706; }
+.gen-stat-card .stat-value.bad { color: #dc2626; }
+.gen-stat-card .stat-sub {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.2rem;
+}
+.quality-banner {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.quality-banner.ok { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+.quality-banner.warn { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; }
+.quality-banner.bad { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.unmet-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+.unmet-list li { margin-bottom: 0.25rem; }
+.dist-table td, .dist-table th { font-size: 0.8rem; }
+.badge-pill {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.badge-ok { background: #d1fae5; color: #065f46; }
+.badge-miss { background: #fee2e2; color: #991b1b; }
+.badge-soft { background: #fef3c7; color: #92400e; }
+
+@media (max-width: 640px) {
+  .prefs-grid { grid-template-columns: 1fr; }
+  .role-rule-body { grid-template-columns: 1fr; }
+  .gen-summary { grid-template-columns: 1fr 1fr; }
+}
+
+
+/* ========== MARKET POLISH ========== */
+.app-header {
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-header .brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #1a1a2e;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  line-height: 1;
+}
+.offline-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+.offline-pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 2px rgba(52,211,153,0.25);
+}
+.header-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.header-actions .btn-outline {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+}
+.btn-demo {
+  background: #f59e0b !important;
+  color: #1a1a2e !important;
+  border: none !important;
+  font-weight: 700;
+}
+.btn-demo:hover { filter: brightness(1.05); }
+
+.welcome-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #1e3a5f 55%, #1d4ed8 100%);
+  color: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(26,26,46,0.18);
+  position: relative;
+  overflow: hidden;
+}
+.welcome-card::after {
+  content: '';
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%);
+  pointer-events: none;
+}
+.welcome-card h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.02em;
+}
+.welcome-card p {
+  font-size: 0.88rem;
+  opacity: 0.88;
+  max-width: 640px;
+  line-height: 1.5;
+  margin-bottom: 0.9rem;
+}
+.welcome-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.welcome-step {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  padding: 0.65rem 0.7rem;
+  backdrop-filter: blur(4px);
+}
+.welcome-step .step-num {
+  font-size: 0.68rem;
+  font-weight: 800;
+  opacity: 0.7;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2rem;
+}
+.welcome-step .step-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.welcome-step .step-desc {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  margin-top: 0.15rem;
+  line-height: 1.35;
+}
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.welcome-actions button {
+  border: none;
+}
+.welcome-dismiss {
+  background: transparent;
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  font-size: 0.78rem;
+}
+.feature-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+}
+.feature-pill {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  opacity: 0.95;
+}
+
+.generate-panel {
+  text-align: center;
+  padding: 1.25rem 1.5rem 1.5rem !important;
+}
+.ready-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem 0.75rem;
+  margin-bottom: 1rem;
+}
+.ready-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f8f9fb;
+  border: 1px solid #e8eaed;
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+}
+.ready-item.ok { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
+.ready-item.miss { color: #92400e; background: #fffbeb; border-color: #fcd34d; }
+.ready-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.generate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+  align-items: center;
+}
+.gen-meta {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+/* Quality score ring */
+.score-hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e8eaed;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.score-ring-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+}
+.score-ring-wrap svg { transform: rotate(-90deg); width: 96px; height: 96px; }
+.score-ring-wrap .score-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #1a1a2e;
+}
+.score-ring-wrap .score-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-top: 2px;
+}
+.score-details { flex: 1; min-width: 200px; }
+.score-details h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.25rem;
+}
+.score-details p {
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin-bottom: 0.65rem;
+}
+.score-bars { display: flex; flex-direction: column; gap: 0.35rem; }
+.score-bar-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 36px;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+.score-bar-track {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: #2563eb;
+  transition: width 0.4s ease;
+}
+.score-bar-fill.ok { background: #059669; }
+.score-bar-fill.warn { background: #d97706; }
+.score-bar-fill.bad { background: #dc2626; }
+.score-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.labor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+.labor-card {
+  background: #f8f9fb;
+  border: 1px solid #e8eaed;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+.labor-card .l-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+.labor-card .l-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-top: 0.15rem;
+}
+.labor-card .l-sub {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+/* Toast */
+.toast-host {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+  max-width: min(360px, calc(100vw - 2rem));
+}
+.toast {
+  pointer-events: auto;
+  background: #1a1a2e;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  animation: toastIn 0.25s ease;
+  border-left: 4px solid #2563eb;
+}
+.toast.success { border-left-color: #059669; }
+.toast.warn { border-left-color: #d97706; }
+.toast.error { border-left-color: #dc2626; }
+.toast .toast-msg { flex: 1; line-height: 1.4; font-weight: 500; }
+.toast button {
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  min-width: auto;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.app-footer {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  padding: 0 1.5rem;
+  color: #9ca3af;
+  font-size: 0.78rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+.app-footer strong { color: #6b7280; }
+.app-footer .footer-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.app-footer button {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.app-footer button:hover { color: #2563eb; }
+
+.store-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.store-name-row input[type="text"] {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.schedule-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+  align-items: center;
+}
+.schedule-toolbar .toolbar-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-right: 0.25rem;
+}
+.gen-timestamp {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .welcome-steps { grid-template-columns: 1fr 1fr; }
+  .app-header { padding: 0.85rem 1rem; }
+  .header-actions { width: 100%; }
+  .score-bar-row { grid-template-columns: 90px 1fr 32px; }
+}
+@media (max-width: 420px) {
+  .welcome-steps { grid-template-columns: 1fr; }
+}
+@media print {
+  .welcome-card, .toast-host, .app-footer, .schedule-toolbar, .generate-panel { display: none !important; }
+  .app-header { position: static; }
+}
+
+
+.header-menu { position: relative; }
+.header-menu-btn { min-width: auto; }
+.header-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #fff;
+  color: #1a1a2e;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  min-width: 180px;
+  padding: 0.35rem;
+  z-index: 200;
+  border: 1px solid #e5e7eb;
+}
+.header-menu-panel[hidden] { display: none !important; }
+.header-menu-panel button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: #1a1a2e;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  border: none;
+}
+.header-menu-panel button:hover { background: #f3f4f6; filter: none; }
+
+/* ========== APP TABS (clean workspace) ========== */
+
+/* Hide redundant section titles inside tabs (tab panel title is enough) */
+#tab-setup > .section > .section-header,
+#tab-requests > .section > .section-header,
+#sub-prefs > .section > .section-header,
+#sub-roles > .section > .section-header,
+#tab-schedule > .section.generate-section-hide > .section-header { display: none; }
+#tab-setup > .section > .section-body,
+#tab-requests > .section > .section-body,
+#sub-prefs > .section > .section-body,
+#sub-roles > .section > .section-body { padding-top: 1rem; }
+
+/* Generate section inside schedule tab — no nested white box */
+#tab-schedule > #generate-section {
+  border: none;
+  margin-bottom: 0;
+  background: transparent;
+}
+#tab-schedule > #generate-section > .section-body {
+  padding: 0 0 1.25rem !important;
+}
+
+/* Results sections cleaner titles */
+#schedule-results > .section {
+  border: none;
+  border-top: 1px solid #e8eaed;
+  border-radius: 0;
+  margin-bottom: 0;
+}
+#schedule-results > .section:first-child { border-top: none; }
+#schedule-results > .section > .section-header {
+  background: transparent;
+  padding: 1rem 0 0.5rem;
+  border-bottom: none;
+  cursor: default;
+}
+#schedule-results > .section > .section-header h2 {
+  font-size: 1rem;
+}
+#schedule-results > .section > .section-body {
+  padding: 0.5rem 0 1.25rem;
+}
+
+.workspace {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.app-tabs {
+  display: flex;
+  gap: 0;
+  background: #f8f9fb;
+  border-bottom: 1px solid #e8eaed;
+  padding: 0 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.app-tabs::-webkit-scrollbar { display: none; }
+.app-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: #6b7280;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.9rem 1.1rem;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  margin-bottom: -1px;
+}
+.app-tab:hover {
+  color: #1a1a2e;
+  background: rgba(255,255,255,0.6);
+  filter: none;
+}
+.app-tab:active { transform: none; }
+.app-tab.active {
+  color: #1d4ed8;
+  border-bottom-color: #2563eb;
+  background: #fff;
+}
+.app-tab .tab-count {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #e5e7eb;
+  color: #374151;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  min-width: 1.1rem;
+  text-align: center;
+}
+.app-tab.active .tab-count {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.app-tab .tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #059669;
+  display: none;
+}
+.app-tab.has-result .tab-dot { display: inline-block; }
+
+.tab-panel {
+  display: none;
+  padding: 1.25rem 1.4rem 1.5rem;
+  animation: tabFade 0.18s ease;
+}
+.tab-panel.active { display: block; }
+@keyframes tabFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-panel-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+.tab-panel-desc {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 1.15rem;
+  line-height: 1.45;
+}
+
+/* Nested content inside tabs — drop heavy section chrome */
+.tab-panel .section {
+  box-shadow: none;
+  border: 1px solid #e8eaed;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+}
+.tab-panel .section:last-child { margin-bottom: 0; }
+.tab-panel .section-header {
+  cursor: default;
+  background: #fafbfc;
+}
+.tab-panel .section-header .toggle { display: none; }
+.tab-panel .section-body { display: block !important; }
+
+/* Rules sub-tabs */
+.sub-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.sub-tab {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.sub-tab:hover { background: #e5e7eb; filter: none; }
+.sub-tab.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+.sub-panel { display: none; }
+.sub-panel.active { display: block; }
+
+/* Compact welcome */
+.welcome-card {
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.welcome-card.compact .welcome-steps { display: none; }
+.welcome-card.compact .feature-pills { display: none; }
+.welcome-card.compact p { margin-bottom: 0.65rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.welcome-card h2 { font-size: 1.05rem; }
+
+/* Generate bar inside schedule tab — less boxy */
+.tab-panel .generate-panel {
+  padding: 0 0 1.25rem !important;
+  border-bottom: 1px solid #e8eaed;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+.tab-panel .generate-actions { justify-content: flex-start; }
+.tab-panel .ready-checklist { justify-content: flex-start; }
+.tab-panel #schedule-section,
+.tab-panel #summary-section {
+  display: block;
+  border: none;
+  box-shadow: none;
+  margin: 0 0 1.25rem;
+}
+.tab-panel #schedule-section .section-header,
+.tab-panel #summary-section .section-header {
+  padding-left: 0;
+  padding-right: 0;
+  background: transparent;
+  border-bottom: 1px solid #e8eaed;
+}
+.tab-panel #schedule-section .section-body,
+.tab-panel #summary-section .section-body {
+  padding: 1rem 0 0;
+}
+.empty-schedule {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #9ca3af;
+  border: 1px dashed #e5e7eb;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+.empty-schedule strong {
+  display: block;
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+.tab-footer-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+  flex-wrap: wrap;
+}
+.tab-footer-nav button { font-size: 0.85rem; }
+
+@media (max-width: 640px) {
+  .app-tab { padding: 0.85rem 0.75rem; font-size: 0.82rem; }
+  .tab-panel { padding: 1rem; }
+}
+@media print {
+  .app-tabs, .tab-footer-nav, .empty-schedule, .sub-tabs { display: none !important; }
+  .workspace { box-shadow: none; border: none; }
+  .tab-panel { display: block !important; padding: 0 !important; animation: none; }
+  .tab-panel:not(#tab-schedule) { display: none !important; }
+  #tab-schedule .generate-panel { display: none !important; }
+  #schedule-results, #schedule-section, #summary-section { display: block !important; }
+  #schedule-empty { display: none !important; }
+}
+
+
+/* ========== PWA INSTALL ========== */
+.install-banner {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, #0f172a, #1e3a5f);
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 10px rgba(15,23,42,0.18);
+}
+.install-banner.show { display: flex; }
+.install-banner .ib-icon {
+  width: 40px; height: 40px; border-radius: 9px;
+  flex-shrink: 0;
+  background: #1a1a2e url('icons/icon-192.png') center/cover no-repeat;
+}
+.install-banner .ib-text { flex: 1; min-width: 160px; }
+.install-banner .ib-text strong { display: block; font-size: 0.9rem; }
+.install-banner .ib-text span { font-size: 0.78rem; opacity: 0.85; }
+.install-banner .ib-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.install-banner .ib-actions button {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+}
+.install-banner .btn-install {
+  background: #f59e0b;
+  color: #1a1a2e;
+  font-weight: 700;
+}
+.pwa-mode-badge {
+  display: none;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(52,211,153,0.2);
+  color: #6ee7b7;
+  border: 1px solid rgba(52,211,153,0.35);
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+html.pwa-standalone .pwa-mode-badge { display: inline-flex; }
+html.pwa-standalone .install-banner { display: none !important; }
+@media print {
+  .install-banner { display: none !important; }
+}
+
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -883,28 +1957,76 @@ button:active { transform: scale(0.98); }
 <!-- HEADER -->
 <header class="app-header">
   <div>
-    <h1>Manager Schedule Builder</h1>
-    <div class="subtitle">NRF 4-5-4 Retail Fiscal Calendar</div>
+    <div class="brand-row">
+      <h1>Manager Schedule Builder</h1>
+      <span class="pro-badge">Pro</span>
+      <span class="offline-pill"><span class="dot"></span> Works offline</span>
+      <span class="pwa-mode-badge">App mode</span>
+    </div>
+    <div class="subtitle">Retail scheduling engine · NRF 4-5-4 · Fair weekends · No clopens</div>
   </div>
   <div class="header-actions no-print">
-    <button class="btn-outline" onclick="openSavedSchedulesModal()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Saved Schedules</button>
+    <button class="btn-demo" onclick="loadDemoStore()" title="Load sample store & generate">Demo</button>
     <button class="btn-outline" onclick="saveToStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Save</button>
-    <button class="btn-outline" onclick="loadFromStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Load</button>
-    <button class="btn-outline" onclick="window.print()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Print</button>
-    <button class="btn-outline" onclick="exportSchedule()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Export Word</button>
-    <button class="btn-outline" onclick="exportScheduleExcel()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Excel</button>
+    <button class="btn-outline" onclick="openSavedSchedulesModal()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Load</button>
+    <div class="header-menu">
+      <button type="button" class="btn-outline header-menu-btn" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false" id="header-more-btn">More ▾</button>
+      <div class="header-menu-panel" id="header-menu-panel" hidden>
+        <button type="button" onclick="window.print(); closeHeaderMenu()">Print</button>
+        <button type="button" onclick="exportSchedule(); closeHeaderMenu()">Export Word</button>
+        <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()">Export Excel</button>
+        <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON</button>
+        <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
+        <button type="button" onclick="showHowItWorks(); closeHeaderMenu()">How it works</button>
+        <button type="button" onclick="location.href='install.html'; closeHeaderMenu()">Install / Play path</button>
+      </div>
+    </div>
   </div>
 </header>
 
 <div class="container">
 
-  <!-- SETUP SECTION -->
-  <div class="section no-print">
-    <div class="section-header" onclick="toggleSection(this)">
-      <h2>Setup</h2>
-      <span class="toggle">&#9660;</span>
+  <!-- PWA INSTALL BANNER -->
+  <div class="install-banner no-print" id="install-banner" role="region" aria-label="Install app">
+    <div class="ib-icon" aria-hidden="true"></div>
+    <div class="ib-text">
+      <strong>Install Schedule Pro</strong>
+      <span>Add to your home screen or desktop — works offline like a real app.</span>
     </div>
-    <div class="section-body" id="setup-body">
+    <div class="ib-actions">
+      <button type="button" class="btn-install" id="btn-install-pwa" onclick="promptPwaInstall()">Install</button>
+      <button type="button" class="btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="dismissInstallBanner()">Not now</button>
+    </div>
+  </div>
+
+  <!-- WELCOME / ONBOARDING -->
+  <div class="welcome-card no-print compact" id="welcome-card">
+    <h2>Fair retail schedules in minutes</h2>
+    <p>Preference-driven engine for store managers — weekends, clopens, role rules, export. Fully offline.</p>
+    <div class="welcome-actions">
+      <button class="btn-demo" onclick="loadDemoStore()">Try Demo</button>
+      <button class="btn-primary" onclick="switchTab('setup')">Get started</button>
+      <button class="welcome-dismiss" onclick="dismissWelcome()">Dismiss</button>
+    </div>
+  </div>
+
+  <div class="workspace no-print-workspace">
+    <nav class="app-tabs no-print" role="tablist" aria-label="Main">
+      <button type="button" class="app-tab active" role="tab" id="tabbtn-setup" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')">Setup</button>
+      <button type="button" class="app-tab" role="tab" id="tabbtn-requests" aria-selected="false" aria-controls="tab-requests" onclick="switchTab('requests')">Requests</button>
+      <button type="button" class="app-tab" role="tab" id="tabbtn-rules" aria-selected="false" aria-controls="tab-rules" onclick="switchTab('rules')">Rules</button>
+      <button type="button" class="app-tab" role="tab" id="tabbtn-schedule" aria-selected="false" aria-controls="tab-schedule" onclick="switchTab('schedule')">
+        Schedule <span class="tab-dot" title="Schedule ready"></span>
+      </button>
+    </nav>
+
+    <!-- TAB: SETUP -->
+    <div class="tab-panel active" id="tab-setup" role="tabpanel" aria-labelledby="tabbtn-setup">
+      <div class="tab-panel-title">Store & team</div>
+      <div class="tab-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating.</div>
+<!-- SETUP SECTION -->
+  <div class="section no-print" style="border:none">
+    <div class="section-body" id="setup-body" style="padding:0">
       <div class="setup-grid">
         <div class="setup-left">
           <!-- SM (always 1) -->
@@ -940,10 +2062,14 @@ button:active { transform: scale(0.98); }
         </div>
         <div class="setup-right">
           <div>
-            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store Number</label>
+            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store</label>
+            <div class="store-name-row">
+              <label style="font-weight:600;font-size:0.9rem;white-space:nowrap">Name:</label>
+              <input type="text" id="store-name" value="" placeholder="e.g. Harbor East #851" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+            </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
               <label style="font-weight:600;font-size:0.9rem">Store #:</label>
-              <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.9rem">
+              <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.9rem" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
           </div>
           <div>
@@ -986,53 +2112,154 @@ button:active { transform: scale(0.98); }
       </div>
     </div>
   </div>
-
-  <!-- INPUT SECTION -->
-  <div class="section no-print" id="input-section">
-    <div class="section-header" onclick="toggleSection(this)">
-      <h2>Shift Requests & Time Off</h2>
-      <span class="toggle">&#9660;</span>
+      <div class="tab-footer-nav">
+        <span></span>
+        <button type="button" class="btn-primary" onclick="switchTab('requests')">Next: Requests →</button>
+      </div>
     </div>
-    <div class="section-body" id="input-body">
+
+    <!-- TAB: REQUESTS -->
+    <div class="tab-panel" id="tab-requests" role="tabpanel" aria-labelledby="tabbtn-requests">
+      <div class="tab-panel-title">Shift requests & time off</div>
+      <div class="tab-panel-desc">Lock PTO, RTO, LOA, and preferred shifts. The generator treats these as hard constraints.</div>
+<!-- INPUT SECTION -->
+  <div class="section no-print" id="input-section" style="border:none">
+    <div class="section-body" id="input-body" style="padding:0">
       <div class="input-tabs" id="input-tabs"></div>
       <div id="input-calendars"></div>
       <p class="text-muted mt-1">Click any day to set: PTO, RTO, Open, Mid, Close, Off, or Clear.</p>
     </div>
   </div>
+      <div class="tab-footer-nav">
+        <button type="button" class="btn-secondary" onclick="switchTab('setup')">← Setup</button>
+        <button type="button" class="btn-primary" onclick="switchTab('rules')">Next: Rules →</button>
+      </div>
+    </div>
 
-  <!-- GENERATE -->
-  <div class="section no-print">
-    <div class="section-body" style="text-align:center;padding:1.5rem">
-      <button class="btn-success btn-large" onclick="generateSchedule()">Generate Schedule</button>
-      <button class="btn-danger" onclick="clearSchedule()" style="margin-left:1rem">Clear Generated</button>
+    <!-- TAB: RULES -->
+    <div class="tab-panel" id="tab-rules" role="tabpanel" aria-labelledby="tabbtn-rules">
+      <div class="tab-panel-title">Preferences & role rules</div>
+      <div class="tab-panel-desc">Tune fairness, weekends, clopening, and per-role targets. Soft goals yield to hard coverage rules.</div>
+      <div class="sub-tabs" role="tablist">
+        <button type="button" class="sub-tab active" id="subbtn-prefs" onclick="switchSubTab('prefs')">Preferences</button>
+        <button type="button" class="sub-tab" id="subbtn-roles" onclick="switchSubTab('roles')">Role rules</button>
+      </div>
+      <div class="sub-panel active" id="sub-prefs">
+<!-- SCHEDULING PREFERENCES -->
+  <div class="section no-print" id="prefs-section" style="border:none">
+    <div class="section-body" id="prefs-body" style="padding:0">
+      <div class="prefs-grid" id="prefs-grid">
+        <!-- filled by renderPreferencesUI() -->
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;margin-top:0.75rem">
+        <p class="text-muted mt-1" style="margin:0">These preferences guide Generate Schedule. Hard constraints (PTO/RTO/LOA, coverage, clopening ban when on) always win over soft goals.</p>
+        <button class="btn-secondary" onclick="resetPreferences()" style="font-size:0.75rem;white-space:nowrap">Reset Preferences</button>
+      </div>
     </div>
   </div>
+      </div>
+      <div class="sub-panel" id="sub-roles">
+<!-- ROLE RULES -->
+  <div class="section no-print" id="role-rules-section" style="border:none">
+    <div class="section-body" id="role-rules-body" style="padding:0">
+      <div class="role-rules-list" id="role-rules-list">
+        <!-- filled by renderRoleRulesUI() -->
+      </div>
+      <div class="add-role-row">
+        <input type="text" id="new-role-label" placeholder="New role name (e.g. Operations Manager)">
+        <select id="new-role-base">
+          <option value="am">Base: Assistant Manager</option>
+          <option value="kc">Base: Key Carrier</option>
+          <option value="sm">Base: Store Manager</option>
+        </select>
+        <button class="btn-primary" onclick="addCustomRoleRule()">Add Role Type</button>
+        <button class="btn-secondary" onclick="resetRoleRules()">Reset Defaults</button>
+      </div>
+      <p class="text-muted mt-1" style="margin-top:0.5rem">Role rules customize weekend targets, preferred shifts, and close expectations. Custom role types are templates you can assign when naming staff; SM / AM / KC defaults apply automatically by role family.</p>
+    </div>
+  </div>
+      </div>
+      <div class="tab-footer-nav">
+        <button type="button" class="btn-secondary" onclick="switchTab('requests')">← Requests</button>
+        <button type="button" class="btn-primary" onclick="switchTab('schedule')">Next: Schedule →</button>
+      </div>
+    </div>
 
-  <!-- SCHEDULE OUTPUT -->
-  <div class="section" id="schedule-section" style="display:none">
-    <div class="section-header" onclick="toggleSection(this)">
+    <!-- TAB: SCHEDULE -->
+    <div class="tab-panel" id="tab-schedule" role="tabpanel" aria-labelledby="tabbtn-schedule">
+      <div class="tab-panel-title">Generate & review</div>
+      <div class="tab-panel-desc">Build the period schedule, check quality score, then print or export.</div>
+<!-- GENERATE -->
+  <div class="section no-print" id="generate-section" style="border:none;background:transparent">
+    <div class="section-body generate-panel">
+      <div class="ready-checklist" id="ready-checklist"></div>
+      <div class="generate-actions">
+        <button class="btn-success btn-large" id="btn-generate" onclick="generateSchedule()">Generate Schedule</button>
+        <button class="btn-secondary" onclick="clearSchedule()">Clear Generated</button>
+        <button class="btn-outline" onclick="loadDemoStore()">Load Demo</button>
+      </div>
+      <div class="gen-meta" id="gen-meta">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
+    </div>
+  </div>
+      <div id="schedule-empty" class="empty-schedule no-print">
+        <strong>No schedule yet</strong>
+        Load a period, set any requests, then generate. Or try the demo.
+        <div style="margin-top:0.85rem">
+          <button type="button" class="btn-success" onclick="generateSchedule()">Generate Schedule</button>
+          <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="loadDemoStore()">Try Demo</button>
+        </div>
+      </div>
+      <div id="schedule-results" style="display:none">
+<!-- SCHEDULE OUTPUT -->
+  <div class="section" id="schedule-section">
+    <div class="section-header">
       <h2 id="schedule-title">Schedule</h2>
-      <span class="toggle">&#9660;</span>
     </div>
     <div class="section-body" id="schedule-body">
+      <div class="schedule-toolbar no-print" id="schedule-toolbar">
+        <span class="toolbar-label">Actions</span>
+        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="window.print()">Print</button>
+        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportSchedule()">Word</button>
+        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
+        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
+        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON</button>
+        <span class="gen-timestamp" id="gen-timestamp"></span>
+      </div>
       <div class="period-print-header" id="print-header"></div>
       <div id="schedule-grid"></div>
       <div class="print-schedule" id="print-schedule"></div>
     </div>
   </div>
-
-  <!-- SUMMARY -->
-  <div class="section" id="summary-section" style="display:none">
-    <div class="section-header" onclick="toggleSection(this)">
-      <h2>Coverage Summary</h2>
-      <span class="toggle">&#9660;</span>
+<!-- SUMMARY -->
+  <div class="section" id="summary-section">
+    <div class="section-header">
+      <h2>Coverage & Quality Summary</h2>
     </div>
     <div class="section-body" id="summary-body">
       <div class="summary-grid" id="summary-grid"></div>
     </div>
   </div>
+      </div>
+      <div class="tab-footer-nav">
+        <button type="button" class="btn-secondary" onclick="switchTab('rules')">← Rules</button>
+        <span></span>
+      </div>
+    </div>
+  </div>
 
 </div>
+
+
+<footer class="app-footer no-print">
+  <div><strong>Manager Schedule Builder Pro</strong> · v2.1 PWA · Offline · Data stays in this browser</div>
+  <div class="footer-links">
+    <button type="button" onclick="showHowItWorks()">Help</button>
+    <button type="button" onclick="location.href='install.html'">Publish setup</button>
+    <button type="button" onclick="location.href='legal/privacy.html'">Privacy</button>
+  </div>
+</footer>
+
+<div class="toast-host" id="toast-host" aria-live="polite"></div>
 
 <!-- Cell menu (portal) -->
 <div id="cell-menu-portal"></div>
@@ -1046,6 +2273,93 @@ button:active { transform: scale(0.98); }
    MANAGER SCHEDULE BUILDER — NRF 4-5-4 Fiscal Calendar
    Dynamic managers + key carriers
    ==================================================================== */
+
+
+
+function toggleHeaderMenu(e) {
+  if (e) e.stopPropagation();
+  const panel = document.getElementById('header-menu-panel');
+  const btn = document.getElementById('header-more-btn');
+  if (!panel) return;
+  const open = panel.hasAttribute('hidden');
+  if (open) {
+    panel.removeAttribute('hidden');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  } else {
+    closeHeaderMenu();
+  }
+}
+function closeHeaderMenu() {
+  const panel = document.getElementById('header-menu-panel');
+  const btn = document.getElementById('header-more-btn');
+  if (panel) panel.setAttribute('hidden', '');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('click', (e) => {
+  const menu = document.querySelector('.header-menu');
+  if (menu && !menu.contains(e.target)) closeHeaderMenu();
+});
+
+// ── App tabs ──
+let currentAppTab = 'setup';
+
+function switchTab(name) {
+  currentAppTab = name;
+  ['setup', 'requests', 'rules', 'schedule'].forEach(t => {
+    const panel = document.getElementById('tab-' + t);
+    const btn = document.getElementById('tabbtn-' + t);
+    if (panel) panel.classList.toggle('active', t === name);
+    if (btn) {
+      btn.classList.toggle('active', t === name);
+      btn.setAttribute('aria-selected', t === name ? 'true' : 'false');
+    }
+  });
+  try { localStorage.setItem('msb_active_tab', name); } catch(e) {}
+  // Refresh dynamic bits when entering tabs
+  if (name === 'requests') {
+    try { buildInputTabs(); buildInputCalendar(activeTab); } catch(e) {}
+  }
+  if (name === 'rules') {
+    try { renderPreferencesUI(); renderRoleRulesUI(); } catch(e) {}
+  }
+  if (name === 'schedule') {
+    try { updateReadyChecklist(); } catch(e) {}
+  }
+  // Scroll workspace into view on mobile
+  const ws = document.querySelector('.workspace');
+  if (ws && window.innerWidth < 720) {
+    ws.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function switchSubTab(name) {
+  document.getElementById('sub-prefs')?.classList.toggle('active', name === 'prefs');
+  document.getElementById('sub-roles')?.classList.toggle('active', name === 'roles');
+  document.getElementById('subbtn-prefs')?.classList.toggle('active', name === 'prefs');
+  document.getElementById('subbtn-roles')?.classList.toggle('active', name === 'roles');
+}
+
+function setScheduleResultsVisible(visible) {
+  const empty = document.getElementById('schedule-empty');
+  const results = document.getElementById('schedule-results');
+  const tabBtn = document.getElementById('tabbtn-schedule');
+  if (empty) empty.style.display = visible ? 'none' : '';
+  if (results) results.style.display = visible ? '' : 'none';
+  if (tabBtn) tabBtn.classList.toggle('has-result', !!visible);
+  // Keep legacy section display flags for any code that checks them
+  const ss = document.getElementById('schedule-section');
+  const sum = document.getElementById('summary-section');
+  if (ss) ss.style.display = visible ? '' : 'none';
+  if (sum) sum.style.display = visible ? '' : 'none';
+}
+
+function restoreAppTab() {
+  try {
+    const t = localStorage.getItem('msb_active_tab');
+    if (t && ['setup','requests','rules','schedule'].includes(t)) switchTab(t);
+  } catch(e) {}
+}
+
 
 // ── Dynamic Configuration State ──
 let amCount = 3;
@@ -1091,6 +2405,691 @@ function getAllPersonIds() {
   kcList.forEach(kc => ids.push(kc.id));
   return ids;
 }
+
+
+// ── Scheduling Preferences (Feature upgrade) ──
+const DEFAULT_PREFERENCES = {
+  targetWeekendDaysOff: 2,
+  preferConsecutiveDaysOff: true,
+  minConsecutiveDaysOff: 2,
+  maxConsecutiveWorkDays: 6,
+  avoidClopening: true,
+  fairDistribution: true,
+  minHoursBetweenShifts: 0
+};
+
+let preferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
+
+const DEFAULT_ROLE_RULES = {
+  sm: {
+    id: 'sm',
+    label: 'Store Manager',
+    family: 'sm',
+    isBuiltin: true,
+    targetWeekendDaysOff: null, // null = use global preference
+    preferredShiftTypes: ['open-early', 'open-late'],
+    preferCloses: false,
+    requireMoreCloses: false,
+    closesPerWeek: 1,
+    coveragePriority: 10,
+    notes: 'Higher coverage priority; prefers Opens; typically 1 close/week'
+  },
+  am: {
+    id: 'am',
+    label: 'Assistant Manager',
+    family: 'am',
+    isBuiltin: true,
+    targetWeekendDaysOff: null,
+    preferredShiftTypes: [],
+    preferCloses: false,
+    requireMoreCloses: false,
+    closesPerWeek: null, // auto fair distribute
+    coveragePriority: 5,
+    notes: 'Even rotation of Opens, Mids, and Closes'
+  },
+  kc: {
+    id: 'kc',
+    label: 'Key Carrier',
+    family: 'kc',
+    isBuiltin: true,
+    targetWeekendDaysOff: null,
+    preferredShiftTypes: ['close', 'close-ext', 'kc-close'],
+    preferCloses: true,
+    requireMoreCloses: true,
+    closesPerWeek: null,
+    coveragePriority: 3,
+    notes: 'Prefers Closes / Ext. Closes / KC Closes'
+  }
+};
+
+let roleRules = JSON.parse(JSON.stringify(DEFAULT_ROLE_RULES));
+
+const SHIFT_PREF_OPTIONS = [
+  { value: 'open-early', label: 'Open early' },
+  { value: 'open-late', label: 'Open late' },
+  { value: 'mid-early', label: 'Mid early' },
+  { value: 'mid-late', label: 'Mid late' },
+  { value: 'close', label: 'Close' },
+  { value: 'close-ext', label: 'Ext. Close' },
+  { value: 'kc-close', label: 'KC Close' }
+];
+
+function getRoleRuleForPerson(personId) {
+  // Exact custom role id match
+  if (roleRules[personId]) return roleRules[personId];
+  if (personId === 'sm') return roleRules.sm || DEFAULT_ROLE_RULES.sm;
+  if (personId.startsWith('am')) return roleRules.am || DEFAULT_ROLE_RULES.am;
+  if (personId.startsWith('kc')) return roleRules.kc || DEFAULT_ROLE_RULES.kc;
+  // Custom role assigned via family
+  const custom = Object.values(roleRules).find(r => r.id === personId);
+  if (custom) return custom;
+  return roleRules.am || DEFAULT_ROLE_RULES.am;
+}
+
+function getWeekendTargetForPerson(personId) {
+  const rule = getRoleRuleForPerson(personId);
+  if (rule && rule.targetWeekendDaysOff != null && rule.targetWeekendDaysOff !== '') {
+    return Number(rule.targetWeekendDaysOff);
+  }
+  return Number(preferences.targetWeekendDaysOff) || 2;
+}
+
+function readPreferencesFromUI() {
+  const g = (id) => document.getElementById(id);
+  if (!g('pref-weekend-target')) return preferences;
+  preferences = {
+    targetWeekendDaysOff: Math.max(0, parseInt(g('pref-weekend-target').value, 10) || 0),
+    preferConsecutiveDaysOff: !!g('pref-consec-off').checked,
+    minConsecutiveDaysOff: Math.max(1, parseInt(g('pref-min-consec').value, 10) || 2),
+    maxConsecutiveWorkDays: Math.max(1, parseInt(g('pref-max-work').value, 10) || 6),
+    avoidClopening: !!g('pref-avoid-clopen').checked,
+    fairDistribution: !!g('pref-fair-dist').checked,
+    minHoursBetweenShifts: Math.max(0, parseInt(g('pref-min-hours').value, 10) || 0)
+  };
+  return preferences;
+}
+
+function renderPreferencesUI() {
+  const el = document.getElementById('prefs-grid');
+  if (!el) return;
+  const p = preferences;
+  el.innerHTML = `
+    <div class="pref-card">
+      <label class="pref-label">Target weekend days off
+        <input type="number" id="pref-weekend-target" min="0" max="10" value="${p.targetWeekendDaysOff}" onchange="readPreferencesFromUI()">
+      </label>
+      <div class="pref-desc">Weekend (Sat+Sun) days off per person per period. Default 2 (one full weekend).</div>
+    </div>
+    <div class="pref-card">
+      <label class="toggle-switch">
+        <input type="checkbox" id="pref-consec-off" ${p.preferConsecutiveDaysOff ? 'checked' : ''} onchange="readPreferencesFromUI(); document.getElementById('pref-min-consec-wrap').style.opacity = this.checked ? '1' : '0.45'">
+        <span class="toggle-track"></span>
+        Prefer consecutive days off
+      </label>
+      <div class="pref-row" id="pref-min-consec-wrap" style="opacity:${p.preferConsecutiveDaysOff ? '1' : '0.45'}">
+        <span class="pref-inline-num">Minimum consecutive
+          <input type="number" id="pref-min-consec" min="1" max="5" value="${p.minConsecutiveDaysOff}" onchange="readPreferencesFromUI()">
+        </span>
+      </div>
+      <div class="pref-desc">Try to cluster days off together (e.g. Sat+Sun, or Fri–Sat).</div>
+    </div>
+    <div class="pref-card">
+      <label class="pref-label">Max consecutive work days
+        <input type="number" id="pref-max-work" min="3" max="14" value="${p.maxConsecutiveWorkDays}" onchange="readPreferencesFromUI()">
+      </label>
+      <div class="pref-desc">Hard cap on work streaks. Generator avoids exceeding this when possible.</div>
+    </div>
+    <div class="pref-card">
+      <label class="toggle-switch">
+        <input type="checkbox" id="pref-avoid-clopen" ${p.avoidClopening ? 'checked' : ''} onchange="readPreferencesFromUI()">
+        <span class="toggle-track"></span>
+        Avoid clopening
+      </label>
+      <div class="pref-desc">No Close / Ext. Close followed by Open the next day. On by default (hard constraint).</div>
+    </div>
+    <div class="pref-card">
+      <label class="toggle-switch">
+        <input type="checkbox" id="pref-fair-dist" ${p.fairDistribution ? 'checked' : ''} onchange="readPreferencesFromUI()">
+        <span class="toggle-track"></span>
+        Fair distribution
+      </label>
+      <div class="pref-desc">Balance Opens, Closes, and weekend offs fairly across the team (respects role preferences).</div>
+    </div>
+    <div class="pref-card">
+      <label class="pref-label">Min hours between shifts
+        <input type="number" id="pref-min-hours" min="0" max="24" value="${p.minHoursBetweenShifts}" onchange="readPreferencesFromUI()">
+      </label>
+      <div class="pref-desc">Optional rest gap. 0 = disabled. Uses shift end/start times when set (e.g. 10–12).</div>
+    </div>
+  `;
+}
+
+function renderRoleRulesUI() {
+  const el = document.getElementById('role-rules-list');
+  if (!el) return;
+  const rules = Object.values(roleRules);
+  let html = '';
+  rules.forEach((rule, idx) => {
+    const badgeCls = rule.family === 'sm' ? 'role-badge-sm' : (rule.family === 'kc' ? 'role-badge-kc' : (rule.family === 'custom' || !rule.isBuiltin ? 'role-badge-custom' : 'role-badge-am'));
+    const badgeText = rule.family === 'sm' ? 'SM' : (rule.family === 'kc' ? 'KC' : (rule.isBuiltin ? 'AM' : 'ROLE'));
+    const bodyId = 'role-body-' + rule.id;
+    const collapsed = idx > 0; // SM open by default
+    const prefSet = new Set(rule.preferredShiftTypes || []);
+    const checks = SHIFT_PREF_OPTIONS.map(o =>
+      `<label><input type="checkbox" data-role="${rule.id}" data-shift="${o.value}" ${prefSet.has(o.value) ? 'checked' : ''} onchange="updateRolePreferredShifts('${rule.id}')"> ${o.label}</label>`
+    ).join('');
+    html += `
+      <div class="role-rule-card" data-rule-id="${rule.id}">
+        <div class="role-rule-header" onclick="toggleRoleRuleBody('${bodyId}', this)">
+          <div class="role-title">
+            <span class="role-badge ${badgeCls}" style="color:#fff;font-size:0.7rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:4px">${badgeText}</span>
+            <span>${esc(rule.label)}</span>
+          </div>
+          <span class="toggle" style="font-size:1rem;color:#666;transition:transform 0.2s;${collapsed ? 'transform:rotate(-90deg)' : ''}">&#9660;</span>
+        </div>
+        <div class="role-rule-body ${collapsed ? 'collapsed' : ''}" id="${bodyId}">
+          <div class="role-field">
+            <label>Display name</label>
+            <input type="text" value="${esc(rule.label)}" onchange="roleRules['${rule.id}'].label=this.value; renderRoleRulesUI()">
+          </div>
+          <div class="role-field">
+            <label>Weekend days off (blank = global)</label>
+            <input type="number" min="0" max="10" placeholder="global" value="${rule.targetWeekendDaysOff == null ? '' : rule.targetWeekendDaysOff}"
+              onchange="roleRules['${rule.id}'].targetWeekendDaysOff = this.value === '' ? null : parseInt(this.value,10)">
+          </div>
+          <div class="role-field">
+            <label>Closes per week (blank = auto)</label>
+            <input type="number" min="0" max="6" placeholder="auto" value="${rule.closesPerWeek == null ? '' : rule.closesPerWeek}"
+              onchange="roleRules['${rule.id}'].closesPerWeek = this.value === '' ? null : parseInt(this.value,10)">
+          </div>
+          <div class="role-field">
+            <label>Coverage priority (1–10)</label>
+            <input type="number" min="1" max="10" value="${rule.coveragePriority != null ? rule.coveragePriority : 5}"
+              onchange="roleRules['${rule.id}'].coveragePriority = parseInt(this.value,10) || 5">
+          </div>
+          <div class="role-field">
+            <label>Prefer closes</label>
+            <label class="toggle-switch" style="margin-top:0.25rem">
+              <input type="checkbox" ${rule.preferCloses ? 'checked' : ''} onchange="roleRules['${rule.id}'].preferCloses=this.checked; this.parentElement.querySelector('.tog-txt').textContent=this.checked?'On':'Off'">
+              <span class="toggle-track"></span>
+              <span class="tog-txt">${rule.preferCloses ? 'On' : 'Off'}</span>
+            </label>
+          </div>
+          <div class="role-field">
+            <label>Require more closes</label>
+            <label class="toggle-switch" style="margin-top:0.25rem">
+              <input type="checkbox" ${rule.requireMoreCloses ? 'checked' : ''} onchange="roleRules['${rule.id}'].requireMoreCloses=this.checked; this.parentElement.querySelector('.tog-txt').textContent=this.checked?'On':'Off'">
+              <span class="toggle-track"></span>
+              <span class="tog-txt">${rule.requireMoreCloses ? 'On' : 'Off'}</span>
+            </label>
+          </div>
+          <div class="role-field" style="grid-column:1/-1">
+            <label>Preferred shift types</label>
+            <div class="shift-pref-checks">${checks}</div>
+          </div>
+          <div class="role-field" style="grid-column:1/-1">
+            <label>Notes</label>
+            <input type="text" value="${esc(rule.notes || '')}" onchange="roleRules['${rule.id}'].notes=this.value">
+          </div>
+          ${!rule.isBuiltin ? `<div class="role-field" style="grid-column:1/-1"><button class="btn-danger" style="font-size:0.75rem" onclick="removeCustomRoleRule('${rule.id}')">Remove role type</button></div>` : ''}
+        </div>
+      </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function toggleRoleRuleBody(bodyId, header) {
+  const body = document.getElementById(bodyId);
+  if (!body) return;
+  const collapsed = body.classList.toggle('collapsed');
+  const t = header.querySelector('.toggle');
+  if (t) t.style.transform = collapsed ? 'rotate(-90deg)' : '';
+}
+
+function updateRolePreferredShifts(ruleId) {
+  const checks = document.querySelectorAll(`input[data-role="${ruleId}"][data-shift]`);
+  const list = [];
+  checks.forEach(c => { if (c.checked) list.push(c.getAttribute('data-shift')); });
+  if (roleRules[ruleId]) roleRules[ruleId].preferredShiftTypes = list;
+}
+
+function addCustomRoleRule() {
+  const labelEl = document.getElementById('new-role-label');
+  const baseEl = document.getElementById('new-role-base');
+  const label = (labelEl && labelEl.value.trim()) || '';
+  if (!label) { alert('Enter a role name.'); return; }
+  const base = (baseEl && baseEl.value) || 'am';
+  const id = 'custom_' + label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') + '_' + Date.now().toString(36);
+  const template = JSON.parse(JSON.stringify(DEFAULT_ROLE_RULES[base] || DEFAULT_ROLE_RULES.am));
+  template.id = id;
+  template.label = label;
+  template.family = 'custom';
+  template.isBuiltin = false;
+  template.notes = 'Custom role based on ' + (DEFAULT_ROLE_RULES[base] ? DEFAULT_ROLE_RULES[base].label : base);
+  roleRules[id] = template;
+  if (labelEl) labelEl.value = '';
+  renderRoleRulesUI();
+}
+
+function removeCustomRoleRule(id) {
+  if (!roleRules[id] || roleRules[id].isBuiltin) return;
+  if (!confirm('Remove role type "' + roleRules[id].label + '"?')) return;
+  delete roleRules[id];
+  renderRoleRulesUI();
+}
+
+function resetRoleRules() {
+  if (!confirm('Reset all role rules to defaults? Custom role types will be removed.')) return;
+  roleRules = JSON.parse(JSON.stringify(DEFAULT_ROLE_RULES));
+  renderRoleRulesUI();
+}
+
+function resetPreferences() {
+  preferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
+  renderPreferencesUI();
+}
+
+
+// ── Market polish utilities ──
+const APP_VERSION = '2.1.0';
+
+function showToast(message, type) {
+  type = type || 'info';
+  const host = document.getElementById('toast-host');
+  if (!host) { console.log('[toast]', message); return; }
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type === 'success' ? 'success' : type === 'warn' ? 'warn' : type === 'error' ? 'error' : '');
+  el.innerHTML = '<div class="toast-msg"></div><button type="button" aria-label="Dismiss">&times;</button>';
+  el.querySelector('.toast-msg').textContent = message;
+  el.querySelector('button').onclick = () => el.remove();
+  host.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 4200);
+}
+
+function dismissWelcome() {
+  const c = document.getElementById('welcome-card');
+  if (c) c.style.display = 'none';
+  try { localStorage.setItem('msb_welcome_dismissed', '1'); } catch(e) {}
+}
+
+function restoreWelcomeState() {
+  try {
+    if (localStorage.getItem('msb_welcome_dismissed') === '1') {
+      const c = document.getElementById('welcome-card');
+      if (c) c.style.display = 'none';
+    }
+  } catch(e) {}
+}
+
+function showHowItWorks() {
+  const c = document.getElementById('welcome-card');
+  if (c) {
+    c.style.display = '';
+    c.classList.remove('compact');
+    c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  switchTab('setup');
+  showToast('Tabs: Setup → Requests → Rules → Schedule. Try Demo for a full walkthrough.', 'info');
+}
+
+function persistStoreMeta() {
+  try {
+    localStorage.setItem('msb_store_meta', JSON.stringify({
+      storeName: (document.getElementById('store-name') || {}).value || '',
+      storeNumber: (document.getElementById('store-number') || {}).value || ''
+    }));
+  } catch(e) {}
+  updateReadyChecklist();
+}
+
+function restoreStoreMeta() {
+  try {
+    const raw = localStorage.getItem('msb_store_meta');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    const sn = document.getElementById('store-name');
+    const num = document.getElementById('store-number');
+    if (sn && d.storeName) sn.value = d.storeName;
+    if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
+  } catch(e) {}
+}
+
+function estimateShiftHours(shift) {
+  if (!isWork(shift)) return 0;
+  if (isCustomShift(shift)) {
+    // custom: "custom:10a-6p" style
+    const label = getCustomShiftLabel(shift);
+    const m = label.match(/(\d{1,2}(?::\d{2})?\s*[ap]m?)\s*[-–]\s*(\d{1,2}(?::\d{2})?\s*[ap]m?)/i);
+    if (m) {
+      const a = parseTimeToHour(m[1]), b = parseTimeToHour(m[2]);
+      if (a != null && b != null) return Math.max(0, b > a ? b - a : (24 - a) + b);
+    }
+    return 8; // fallback
+  }
+  const start = getShiftStartHour(shift);
+  const end = getShiftEndHour(shift);
+  if (start == null || end == null) return 10;
+  let h = end - start;
+  if (h <= 0) h += 24;
+  return Math.round(h * 10) / 10;
+}
+
+function computeLaborStats(ROLES, ALL_KC) {
+  const allDks = periodDates.map(d => dateKey(d));
+  const names = getManagerNames();
+  let totalHours = 0;
+  let totalShifts = 0;
+  const byPerson = {};
+  (ALL_KC || ROLES).forEach(r => {
+    let hrs = 0, shifts = 0;
+    allDks.forEach(dk => {
+      const s = schedule[r] && schedule[r][dk];
+      if (isWork(s)) {
+        const h = estimateShiftHours(s);
+        hrs += h;
+        shifts++;
+        totalHours += h;
+        totalShifts++;
+      }
+    });
+    byPerson[r] = { hours: Math.round(hrs * 10) / 10, shifts, name: names[r] || r };
+  });
+  const weeks = currentPeriod ? currentPeriod.numWeeks : 4;
+  return {
+    totalHours: Math.round(totalHours * 10) / 10,
+    totalShifts,
+    avgPerWeek: weeks ? Math.round((totalHours / weeks) * 10) / 10 : 0,
+    byPerson,
+    managers: ROLES.length,
+    weeks
+  };
+}
+
+function computeQualityScore(genReport, ROLES) {
+  if (!genReport) return { score: 0, parts: {} };
+  const parts = {};
+  // Hard constraints: 40 pts
+  const hard = genReport.hardErrorCount || 0;
+  parts.hard = hard === 0 ? 40 : Math.max(0, 40 - hard * 8);
+  // Clopens: 20 pts
+  const avoidOn = genReport.prefs && genReport.prefs.avoidClopening;
+  const cl = genReport.totalClopens || 0;
+  parts.clopen = (!avoidOn || cl === 0) ? 20 : Math.max(0, 20 - cl * 10);
+  // Weekend targets: 20 pts
+  const met = ROLES.filter(r => (genReport.weekendOffs[r] || 0) >= getWeekendTargetForPerson(r)).length;
+  parts.weekend = ROLES.length ? Math.round(20 * (met / ROLES.length)) : 20;
+  // Streak compliance: 10 pts
+  const maxLim = (genReport.prefs && genReport.prefs.maxConsecutiveWorkDays) || 6;
+  const over = ROLES.filter(r => (genReport.maxStreak[r] || 0) > maxLim).length;
+  parts.streak = over === 0 ? 10 : Math.max(0, 10 - over * 4);
+  // Soft prefs / unmet (non-hard): 10 pts
+  const softUnmet = (genReport.unmet || []).filter(u => !/hard|No opener|No closer|closes \(need/i.test(u)).length;
+  // Subtract hard-like from unmet already counted
+  const softOnly = Math.max(0, (genReport.unmet || []).length - hard - (cl > 0 && avoidOn ? 1 : 0));
+  parts.soft = softOnly === 0 ? 10 : Math.max(0, 10 - softOnly * 2);
+  const score = Math.max(0, Math.min(100, parts.hard + parts.clopen + parts.weekend + parts.streak + parts.soft));
+  let grade = 'Needs work';
+  if (score >= 95) grade = 'Excellent';
+  else if (score >= 85) grade = 'Strong';
+  else if (score >= 70) grade = 'Good';
+  else if (score >= 55) grade = 'Fair';
+  return { score, parts, grade };
+}
+
+function scoreRingSVG(score) {
+  const r = 40, c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, score)) / 100;
+  const color = score >= 85 ? '#059669' : score >= 70 ? '#2563eb' : score >= 55 ? '#d97706' : '#dc2626';
+  const dash = (pct * c).toFixed(1);
+  return `<svg viewBox="0 0 96 96" aria-hidden="true">
+    <circle cx="48" cy="48" r="${r}" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+    <circle cx="48" cy="48" r="${r}" fill="none" stroke="${color}" stroke-width="8"
+      stroke-linecap="round" stroke-dasharray="${dash} ${c.toFixed(1)}" />
+  </svg>`;
+}
+
+function updateReadyChecklist() {
+  const el = document.getElementById('ready-checklist');
+  if (!el) return;
+  const hasPeriod = !!(periodDates && periodDates.length && currentPeriod);
+  const names = getManagerNames ? getManagerNames() : {};
+  const hasNames = !!(names.sm && names.sm.trim() && names.sm !== 'Store Manager' ? true : (names.sm && names.sm.length > 0));
+  // Consider ready if period loaded; names optional but recommended
+  const named = Object.values(names).filter(n => n && String(n).trim()).length >= 2;
+  const hasPrefs = typeof preferences !== 'undefined';
+  const items = [
+    { ok: hasPeriod, label: hasPeriod ? 'Period loaded' : 'Load a fiscal period' },
+    { ok: named, label: named ? 'Team named' : 'Add team names' },
+    { ok: hasPrefs, label: 'Preferences ready' },
+    { ok: true, label: 'PTO optional' }
+  ];
+  el.innerHTML = items.map(i =>
+    `<span class="ready-item ${i.ok ? 'ok' : 'miss'}"><span class="ready-dot"></span>${i.label}</span>`
+  ).join('');
+  const btn = document.getElementById('btn-generate');
+  if (btn) {
+    btn.disabled = !hasPeriod;
+    btn.style.opacity = hasPeriod ? '1' : '0.55';
+    btn.title = hasPeriod ? 'Generate optimized schedule' : 'Load a fiscal period first';
+  }
+  const meta = document.getElementById('gen-meta');
+  if (meta && hasPeriod && currentPeriod) {
+    meta.textContent = `Ready · FY${fiscalYear} Period ${currentPeriod.number} · ${currentPeriod.numWeeks} weeks · ${getRoles().length} managers on roster`;
+  } else if (meta) {
+    meta.textContent = 'Tip: set PTO/RTO first — the engine treats them as hard locks.';
+  }
+}
+
+function loadDemoStore() {
+  try {
+    // Team
+    amCount = 3;
+    kcList = [
+      { id: 'kc1', name: 'Jordan Lee', asManager: false },
+      { id: 'kc2', name: 'Sam Rivera', asManager: false }
+    ];
+    renderAMRows();
+    renderKCRows();
+    document.getElementById('name-sm').value = 'Alex Morgan';
+    document.getElementById('name-am1').value = 'Casey Brooks';
+    document.getElementById('name-am2').value = 'Riley Quinn';
+    document.getElementById('name-am3').value = 'Taylor Hayes';
+    const sn = document.getElementById('store-name');
+    if (sn) sn.value = 'Harbor East Demo Store';
+    document.getElementById('store-number').value = '851';
+    persistManagerNames();
+    persistStoreMeta();
+
+    // Period — current FY / period already in dropdown
+    if (!periodDates || !periodDates.length) {
+      loadPeriod();
+    } else {
+      // refresh
+      loadPeriod();
+    }
+
+    // Sample PTO / RTO / requests after period loads
+    setTimeout(() => {
+      if (!periodDates || !periodDates.length) {
+        showToast('Could not load period for demo.', 'error');
+        return;
+      }
+      const dks = periodDates.map(d => dateKey(d));
+      inputs = { sm: {}, am1: {}, am2: {}, am3: {}, kc1: {}, kc2: {} };
+      // SM wants a mid one day
+      if (dks[2]) inputs.sm[dks[2]] = 'mid-early';
+      // AM1 PTO mid-week week 2
+      if (dks[9]) inputs.am1[dks[9]] = 'pto';
+      if (dks[10]) inputs.am1[dks[10]] = 'pto';
+      // AM2 RTO one day
+      if (dks[16]) inputs.am2[dks[16]] = 'rto';
+      // AM3 requested open
+      if (dks[4]) inputs.am3[dks[4]] = 'open-early';
+      // Prefer reasonable defaults
+      preferences = Object.assign({}, DEFAULT_PREFERENCES, {
+        targetWeekendDaysOff: 2,
+        preferConsecutiveDaysOff: true,
+        maxConsecutiveWorkDays: 6,
+        avoidClopening: true,
+        fairDistribution: true
+      });
+      renderPreferencesUI();
+      buildInputTabs();
+      buildInputCalendar(activeTab || 'sm');
+      updateReadyChecklist();
+      showToast('Demo store loaded — generating schedule…', 'success');
+      setTimeout(() => {
+        generateSchedule();
+        dismissWelcome();
+      }, 200);
+    }, 100);
+  } catch (e) {
+    console.error(e);
+    showToast('Demo failed: ' + e.message, 'error');
+  }
+}
+
+function buildSnapshotData() {
+  readPreferencesFromUI();
+  const amNames = {};
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    amNames['am' + i] = el ? el.value : ('AM' + i);
+  }
+  kcList.forEach(kc => {
+    const el = document.getElementById('name-' + kc.id);
+    if (el) kc.name = el.value;
+  });
+  return {
+    appVersion: APP_VERSION,
+    fiscalYear: fiscalYear,
+    periodIndex: currentPeriodIndex,
+    periodNumber: currentPeriod ? currentPeriod.number : null,
+    amCount: amCount,
+    kcList: kcList,
+    storeNumber: (document.getElementById('store-number') || {}).value || '',
+    storeName: (document.getElementById('store-name') || {}).value || '',
+    names: {
+      sm: (document.getElementById('name-sm') || {}).value,
+      ...amNames
+    },
+    inputs: inputs,
+    schedule: schedule,
+    holidayWeeks: holidayWeeks,
+    preferences: preferences,
+    roleRules: roleRules,
+    qualityScore: window._lastGenReport ? computeQualityScore(window._lastGenReport, getRoles()) : null,
+    labor: (periodDates && Object.keys(schedule).length) ? computeLaborStats(getRoles(), getAllWithKC()) : null,
+    _savedAt: new Date().toISOString()
+  };
+}
+
+function exportBackupJSON() {
+  if (!currentPeriod) {
+    showToast('Load a period first.', 'warn');
+    return;
+  }
+  const data = buildSnapshotData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  const store = data.storeNumber || 'store';
+  a.href = URL.createObjectURL(blob);
+  a.download = `schedule-backup_FY${fiscalYear}-P${currentPeriod.number}_${store}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Backup JSON downloaded.', 'success');
+}
+
+function copySummaryText() {
+  const report = window._lastGenReport;
+  if (!report || !currentPeriod) {
+    showToast('Generate a schedule first.', 'warn');
+    return;
+  }
+  const names = getManagerNames();
+  const ROLES = getRoles();
+  const q = computeQualityScore(report, ROLES);
+  const labor = computeLaborStats(ROLES, getAllWithKC());
+  const storeName = (document.getElementById('store-name') || {}).value || '';
+  const storeNum = (document.getElementById('store-number') || {}).value || '';
+  let lines = [];
+  lines.push('MANAGER SCHEDULE SUMMARY');
+  lines.push(`${storeName || 'Store'}${storeNum ? ' #' + storeNum : ''} · FY${fiscalYear} Period ${currentPeriod.number}`);
+  lines.push(`Quality score: ${q.score}/100 (${q.grade})`);
+  lines.push(`Labor: ${labor.totalHours} hrs · ${labor.totalShifts} shifts · ~${labor.avgPerWeek} hrs/week`);
+  lines.push(`Clopens: ${report.totalClopens || 0}`);
+  lines.push('');
+  lines.push('WEEKEND DAYS OFF');
+  ROLES.forEach(r => {
+    lines.push(`  ${names[r] || r}: ${report.weekendOffs[r] || 0} (target ${getWeekendTargetForPerson(r)}) · O${report.opens[r]||0} M${report.mids[r]||0} C${report.closes[r]||0}`);
+  });
+  if (report.unmet && report.unmet.length) {
+    lines.push('');
+    lines.push('UNMET / NOTES');
+    report.unmet.forEach(u => lines.push('  - ' + u));
+  }
+  lines.push('');
+  lines.push('Generated with Manager Schedule Builder Pro');
+  const text = lines.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast('Summary copied to clipboard.', 'success'))
+      .catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('Summary copied to clipboard.', 'success');
+  } catch(e) {
+    showToast('Could not copy — select text manually.', 'warn');
+  }
+  ta.remove();
+}
+
+
+
+// Approximate hours between end of shift A and start of shift B (for min rest)
+function parseTimeToHour(str) {
+  if (!str) return null;
+  const s = String(str).trim().toLowerCase().replace(/\s/g, '');
+  const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(a|p|am|pm)?$/i);
+  if (!m) return null;
+  let h = parseInt(m[1], 10);
+  const mins = m[2] ? parseInt(m[2], 10) : 0;
+  const ap = (m[3] || '').charAt(0);
+  if (ap === 'p' && h < 12) h += 12;
+  if (ap === 'a' && h === 12) h = 0;
+  return h + mins / 60;
+}
+
+function getShiftEndHour(shift) {
+  if (isCustomShift(shift)) return null;
+  const key = shift;
+  const t = customShiftTimes[key] || DEFAULT_SHIFT_TIMES[key];
+  return t ? parseTimeToHour(t.end) : null;
+}
+function getShiftStartHour(shift) {
+  if (isCustomShift(shift)) return null;
+  const key = shift;
+  const t = customShiftTimes[key] || DEFAULT_SHIFT_TIMES[key];
+  return t ? parseTimeToHour(t.start) : null;
+}
+
+function hoursBetweenShifts(prevShift, nextShift) {
+  const endH = getShiftEndHour(prevShift);
+  const startH = getShiftStartHour(nextShift);
+  if (endH == null || startH == null) return 24; // unknown = allow
+  // next day start after prev end
+  return (24 - endH) + startH;
+}
+
 
 // ── Constants ──
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -1457,6 +3456,7 @@ function buildPeriodDropdown() {
 }
 
 function updatePeriodInfo() {
+  setTimeout(updateReadyChecklist, 0);
   const idx = parseInt(document.getElementById('pick-period').value);
   const p = allPeriods[idx];
   if (!p) return;
@@ -1809,6 +3809,9 @@ function generateSchedule() {
 function _generateScheduleInner() {
   schedule = {};
   const names = getManagerNames();
+  readPreferencesFromUI();
+  const PREFS = JSON.parse(JSON.stringify(preferences));
+  let lastGenReport = null; // filled before render
 
   // Snapshot current roles at generation time
   const ROLES = getRoles();      // SM + AMs + manager-mode KCs
@@ -1914,62 +3917,96 @@ function _generateScheduleInner() {
   });
 
   // ════════════════════════════════════════════════════
-  // STEP 2: GIVE EACH MANAGER THEIR FULL WEEKEND OFF
-  // At least 1 consecutive Sat+Sun off per period.
+  // STEP 2: WEEKEND DAYS OFF (preference-driven)
+  // Target weekend days off per person (global or role override).
+  // Prefer consecutive Sat+Sun when preferConsecutiveDaysOff is on.
   // Spread across different weekends — max 2 managers sharing the same weekend.
-  // Skip weekends where the manager has an input-locked shift.
   // ════════════════════════════════════════════════════
-
-  const hasConsecWeekend = {};
-  ROLES.forEach(r => { hasConsecWeekend[r] = false; });
 
   const isDayOff = (s) => s === 'off' || s === 'rto' || s === 'pto' || s === 'loa';
 
-  // Detect existing consecutive weekends off from inputs
-  ROLES.forEach(r => {
-    allWeekendPairs.forEach(wp => {
-      const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
-      if (isDayOff(s1) && isDayOff(s2)) hasConsecWeekend[r] = true;
-    });
-  });
+  const countWeekendDaysOff = (r) => allDks.filter(dk => isDkWeekend(dk) && isDayOff(schedule[r][dk])).length;
 
-  // Count how many managers already have a full weekend off on this pair
   const wpOffCount = (wp) => ROLES.filter(r => {
     const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
     return isDayOff(s1) && isDayOff(s2);
   }).length;
 
-  // Assign weekend off to managers who don't have one yet
+  const canPlaceWeekendDay = (r, dk) => {
+    if (!dk) return false;
+    if (isInputLocked(r, dk) && isWork(inputs[r][dk])) return false;
+    const s = schedule[r][dk];
+    if (s && s !== 'off' && s !== 'rto') return false;
+    return true;
+  };
+
+  // Pass A: place full consecutive weekends toward target (2 days each)
+  // Place at most floor(target/2) full pairs so we don't overshoot (remainder → Pass B).
   ROLES.forEach(r => {
-    if (hasConsecWeekend[r]) return;
+    const target = getWeekendTargetForPerson(r);
+    if (target <= 0) return;
+    const maxFullWeekends = Math.max(PREFS.preferConsecutiveDaysOff && target >= 2 ? 1 : 0, Math.floor(target / 2));
+    let fullPlaced = 0;
+    // Count already-complete consecutive weekends from inputs
+    allWeekendPairs.forEach(wp => {
+      if (isDayOff(schedule[r][wp.sat]) && isDayOff(schedule[r][wp.sun])) fullPlaced++;
+    });
     const sorted = [...allWeekendPairs].sort((a, b) => wpOffCount(a) - wpOffCount(b));
+    const maxShare = ROLES.length <= 3 ? 1 : 2;
     for (const wp of sorted) {
+      if (fullPlaced >= maxFullWeekends) break;
+      if (countWeekendDaysOff(r) >= target) break;
       const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
-      // Skip if the manager has an input-locked work shift on either day
-      if (isInputLocked(r, wp.sat) && isWork(inputs[r][wp.sat])) continue;
-      if (isInputLocked(r, wp.sun) && isWork(inputs[r][wp.sun])) continue;
-      // Can't override other locked inputs (work shifts from user)
-      if (s1 && s1 !== 'off' && s1 !== 'rto') continue;
-      if (s2 && s2 !== 'off' && s2 !== 'rto') continue;
-      if (wpOffCount(wp) >= 2) continue;
-      if (!s1) schedule[r][wp.sat] = 'off';
-      if (!s2) schedule[r][wp.sun] = 'off';
-      hasConsecWeekend[r] = true;
-      break;
+      if (isDayOff(s1) && isDayOff(s2)) continue; // already counted
+      if (!canPlaceWeekendDay(r, wp.sat) && !isDayOff(s1)) continue;
+      if (!canPlaceWeekendDay(r, wp.sun) && !isDayOff(s2)) continue;
+      if (wpOffCount(wp) >= maxShare) continue;
+      if (!isDayOff(s1) && canPlaceWeekendDay(r, wp.sat)) schedule[r][wp.sat] = 'off';
+      if (!isDayOff(s2) && canPlaceWeekendDay(r, wp.sun)) schedule[r][wp.sun] = 'off';
+      if (isDayOff(schedule[r][wp.sat]) && isDayOff(schedule[r][wp.sun])) fullPlaced++;
     }
-    // Relax the 2-per-weekend limit if needed (all weekends already have 2)
-    if (!hasConsecWeekend[r]) {
+    // Guarantee at least one consecutive weekend when preferred and target >= 2
+    if (PREFS.preferConsecutiveDaysOff && target >= 2 && fullPlaced < 1) {
       for (const wp of [...allWeekendPairs].sort((a, b) => wpOffCount(a) - wpOffCount(b))) {
+        if (fullPlaced >= 1) break;
         const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
-        if (isInputLocked(r, wp.sat) && isWork(inputs[r][wp.sat])) continue;
-        if (isInputLocked(r, wp.sun) && isWork(inputs[r][wp.sun])) continue;
-        if (s1 && s1 !== 'off' && s1 !== 'rto') continue;
-        if (s2 && s2 !== 'off' && s2 !== 'rto') continue;
-        if (!s1) schedule[r][wp.sat] = 'off';
-        if (!s2) schedule[r][wp.sun] = 'off';
-        hasConsecWeekend[r] = true;
-        break;
+        if (!canPlaceWeekendDay(r, wp.sat) && !isDayOff(s1)) continue;
+        if (!canPlaceWeekendDay(r, wp.sun) && !isDayOff(s2)) continue;
+        if (!isDayOff(s1) && canPlaceWeekendDay(r, wp.sat)) schedule[r][wp.sat] = 'off';
+        if (!isDayOff(s2) && canPlaceWeekendDay(r, wp.sun)) schedule[r][wp.sun] = 'off';
+        if (isDayOff(schedule[r][wp.sat]) && isDayOff(schedule[r][wp.sun])) fullPlaced++;
       }
+    }
+  });
+
+  // Pass B: fill remaining single weekend days toward target (if odd targets or leftover)
+  // Never leave fewer than 2 managers available that day (coverage guard).
+  ROLES.forEach(r => {
+    const target = getWeekendTargetForPerson(r);
+    let need = target - countWeekendDaysOff(r);
+    if (need <= 0) return;
+    const weekendDays = allDks.filter(dk => isDkWeekend(dk));
+    const scored = weekendDays.filter(dk => canPlaceWeekendDay(r, dk) && !isDayOff(schedule[r][dk])).map(dk => {
+      let score = 0;
+      const idx = allDks.indexOf(dk);
+      const prev = idx > 0 ? allDks[idx - 1] : null;
+      const next = idx < allDks.length - 1 ? allDks[idx + 1] : null;
+      if (PREFS.preferConsecutiveDaysOff) {
+        if (prev && isDayOff(schedule[r][prev])) score -= 10;
+        if (next && isDayOff(schedule[r][next])) score -= 10;
+      }
+      const alreadyOff = ROLES.filter(rx => isDayOff(schedule[rx][dk])).length;
+      score += alreadyOff * 3;
+      // Prefer not stacking beyond half the team
+      if (alreadyOff >= Math.max(1, ROLES.length - 2)) score += 50;
+      return { dk, score };
+    }).sort((a, b) => a.score - b.score);
+    for (const { dk } of scored) {
+      if (need <= 0) break;
+      const alreadyOff = ROLES.filter(rx => isDayOff(schedule[rx][dk])).length;
+      if (alreadyOff >= ROLES.length - 2) continue; // keep ≥2 potential workers
+      schedule[r][dk] = 'off';
+      need--;
     }
   });
 
@@ -2128,8 +4165,8 @@ function _generateScheduleInner() {
       if (s === 'off' || s === 'rto' || s === 'pto' || s === 'loa' || isClose(s)) return false;
       // Input-locked to open/mid/custom — user requested that shift; don't overwrite with close
       if (isInputLocked(r, dk)) return false;
-      // Clopen: don't close if tomorrow already has an open assigned
-      if (ndk && isOpen(schedule[r][ndk])) return false;
+      // Clopen: don't close if tomorrow already has an open assigned (when avoidClopening)
+      if (PREFS.avoidClopening && ndk && isOpen(schedule[r][ndk])) return false;
       return true;
     });
 
@@ -2140,25 +4177,36 @@ function _generateScheduleInner() {
       let score = 0;
       const myCloses = closesPerWeek[r][w];
 
-      // SM: should close exactly 1/week — unless sole manager (covers all nights)
-      if (r === 'sm') {
+      // Role rules + SM/AM targets
+      const rule = getRoleRuleForPerson(r);
+      if (r === 'sm' || (rule && rule.closesPerWeek === 1 && rule.family === 'sm')) {
+        const smTarget = (rule && rule.closesPerWeek != null) ? rule.closesPerWeek : 1;
         if (closerCount === 0) {
-          // Only SM available — cover remaining nights freely
           score -= 5;
-        } else if (myCloses >= 1) {
-          score += 100; // already has their close — strongly avoid
+        } else if (myCloses >= smTarget) {
+          score += 100;
         } else {
-          score -= 5; // SM still needs a close — mild preference
+          score -= 5;
         }
-        if (isDkWeekend(dk)) score += 10; // SM prefers not closing weekends
+        if (isDkWeekend(dk)) score += 10;
       } else {
-        // AM / manager-KC: target closes per week
         const closerIdx = closerPool.indexOf(r);
-        const targetForThisCloser = baseClosesPerCloser + ((closerIdx + w) % closerCount < extraClosers ? 1 : 0);
-        if (myCloses >= targetForThisCloser + 1) score += 100; // well over target
-        else if (myCloses >= targetForThisCloser) score += 50; // at target
-        else if (myCloses === targetForThisCloser - 1) score -= 3; // needs more
-        else score -= 5; // well under target
+        let targetForThisCloser = baseClosesPerCloser + ((closerIdx + w) % Math.max(1, closerCount) < extraClosers ? 1 : 0);
+        if (rule && rule.closesPerWeek != null) targetForThisCloser = rule.closesPerWeek;
+        if (rule && rule.requireMoreCloses) targetForThisCloser = Math.max(targetForThisCloser, baseClosesPerCloser + 1);
+        if (rule && rule.preferCloses) score -= 4;
+        if (myCloses >= targetForThisCloser + 1) score += 100;
+        else if (myCloses >= targetForThisCloser) score += 50;
+        else if (myCloses === targetForThisCloser - 1) score -= 3;
+        else score -= 5;
+      }
+      // Preferred shift types for close
+      if (rule && rule.preferredShiftTypes && rule.preferredShiftTypes.some(t => t === 'close' || t === 'close-ext' || t === 'kc-close')) {
+        score -= 3;
+      }
+      // Coverage priority: higher priority roles slightly less preferred for close if SM-like prefers open
+      if (rule && rule.preferredShiftTypes && rule.preferredShiftTypes.some(t => t.startsWith('open'))) {
+        score += 2;
       }
 
       // Prefer close-before-off (offs already placed — strong signal)
@@ -2174,11 +4222,10 @@ function _generateScheduleInner() {
       const totalCloses = allDks.filter(d => isClose(schedule[r][d])).length;
       score += totalCloses;
 
-      // Weekend close fairness: if this is a weekend night, penalize managers
-      // who already have more weekend closes (spread them evenly)
-      if (isDkWeekend(dk) && r !== 'sm') {
+      // Weekend close fairness (when fairDistribution on)
+      if (PREFS.fairDistribution && isDkWeekend(dk) && r !== 'sm') {
         const myWeekendCloses = allDks.filter(d => isClose(schedule[r][d]) && isDkWeekend(d)).length;
-        score += myWeekendCloses * 5; // strong penalty for weekend close accumulation
+        score += myWeekendCloses * 5;
       }
 
       return { role: r, score };
@@ -2245,12 +4292,21 @@ function _generateScheduleInner() {
       const closedYesterday = pdk && isClose(schedule[r][pdk]);
       // SM always prefers open — no fairness balancing for SM
       // Others balance open/mid fairly
+      const ruleR = getRoleRuleForPerson(r);
       const isSM = (r === 'sm');
-      const preferMid = !isSM && managerOpens[r] > managerMids[r] + 1;
-      const preferOpen = isSM || (!isSM && managerMids[r] > managerOpens[r] + 1);
+      const rolePrefOpen = ruleR && ruleR.preferredShiftTypes && ruleR.preferredShiftTypes.some(t => t.startsWith('open'));
+      const rolePrefMid = ruleR && ruleR.preferredShiftTypes && ruleR.preferredShiftTypes.some(t => t.startsWith('mid'));
+      let preferMid = !isSM && managerOpens[r] > managerMids[r] + 1;
+      let preferOpen = isSM || rolePrefOpen || (!isSM && managerMids[r] > managerOpens[r] + 1);
+      if (rolePrefMid && !rolePrefOpen) { preferMid = true; preferOpen = false; }
+      if (!PREFS.fairDistribution && !rolePrefOpen && !rolePrefMid) {
+        // without fair dist, only role prefs and SM preference apply lightly
+        preferMid = rolePrefMid;
+        preferOpen = isSM || rolePrefOpen;
+      }
 
-      if (closedYesterday) {
-        // MUST be mid — NEVER open after a close
+      if (closedYesterday && PREFS.avoidClopening) {
+        // MUST be mid — NEVER open after a close (clopening ban)
         schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
         mids++;
         midVariety++;
@@ -2547,12 +4603,11 @@ function _generateScheduleInner() {
     if (isClose(schedule.sm[dk])) return;
     if (isInputLocked('sm', dk)) return;
     const prevDk = i > 0 ? allDks[i - 1] : null;
-    if (prevDk && isClose(schedule.sm[prevDk])) return; // can't open after close
+    if (prevDk && isClose(schedule.sm[prevDk]) && PREFS.avoidClopening) return;
     const swapWith = ROLES.find(r2 => {
       if (r2 === 'sm') return false;
       if (!isOpen(schedule[r2][dk])) return false;
       if (isInputLocked(r2, dk)) return false;
-      // r2 takes mid — no clopen issue for open→mid
       return true;
     });
     if (swapWith) {
@@ -2560,6 +4615,87 @@ function _generateScheduleInner() {
       schedule[swapWith][dk] = schedule.sm[dk];
       schedule.sm[dk] = tmp;
     }
+  });
+
+  // Soft pref 4: Max consecutive work days — try to break long streaks by swapping an off in
+  if (PREFS.maxConsecutiveWorkDays > 0) {
+    ROLES.forEach(r => {
+      let streak = 0;
+      for (let i = 0; i < allDks.length; i++) {
+        const dk = allDks[i];
+        if (isWork(schedule[r][dk])) {
+          streak++;
+          if (streak > PREFS.maxConsecutiveWorkDays) {
+            // Try to move an off from later in week onto this day, or convert this day if coverage allows
+            if (!isInputLocked(r, dk) && !isClose(schedule[r][dk]) && !isDkMonday(dk)) {
+              const others = ROLES.filter(rx => rx !== r && isWork(schedule[rx][dk])).length;
+              if (others >= 2) {
+                // Find a weekday off later we can convert to work (swap)
+                const offDay = allDks.find((d2, j) => j > i && schedule[r][d2] === 'off' && !isInputLocked(r, d2) && !isDkMonday(d2));
+                if (offDay) {
+                  schedule[r][offDay] = schedule[r][dk];
+                  schedule[r][dk] = 'off';
+                  streak = 0;
+                }
+              }
+            }
+          }
+        } else {
+          streak = 0;
+        }
+      }
+    });
+  }
+
+  // Soft pref 5: Min hours between shifts (close -> early open next day)
+  if (PREFS.minHoursBetweenShifts > 0) {
+    for (let i = 1; i < allDks.length; i++) {
+      const dk = allDks[i];
+      const prevDk = allDks[i - 1];
+      ROLES.forEach(r => {
+        const prev = schedule[r][prevDk];
+        const cur = schedule[r][dk];
+        if (!isWork(prev) || !isWork(cur)) return;
+        if (isInputLocked(r, dk)) return;
+        const gap = hoursBetweenShifts(prev, cur);
+        if (gap < PREFS.minHoursBetweenShifts) {
+          // Prefer mid over open after late close
+          if (isOpen(cur) && !(prevDk && isClose(prev) && !PREFS.avoidClopening)) {
+            schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+          }
+        }
+      });
+    }
+  }
+
+  // Soft pref 6: Role preferred shift types — swap opens onto people who prefer them
+  ROLES.forEach(r => {
+    const rule = getRoleRuleForPerson(r);
+    if (!rule || !rule.preferredShiftTypes || !rule.preferredShiftTypes.length) return;
+    const wantsOpen = rule.preferredShiftTypes.some(t => t.startsWith('open'));
+    if (!wantsOpen) return;
+    allDks.forEach((dk, i) => {
+      if (!isMid(schedule[r][dk])) return;
+      if (isInputLocked(r, dk)) return;
+      const prevDk = i > 0 ? allDks[i - 1] : null;
+      if (prevDk && isClose(schedule[r][prevDk]) && PREFS.avoidClopening) return;
+      const swapWith = ROLES.find(r2 => {
+        if (r2 === r) return false;
+        if (!isOpen(schedule[r2][dk])) return false;
+        if (isInputLocked(r2, dk)) return false;
+        const rule2 = getRoleRuleForPerson(r2);
+        // Don't steal open from someone who also prefers open with higher priority
+        if (rule2 && rule2.preferredShiftTypes && rule2.preferredShiftTypes.some(t => t.startsWith('open'))) {
+          if ((rule2.coveragePriority || 0) >= (rule.coveragePriority || 0)) return false;
+        }
+        return true;
+      });
+      if (swapWith) {
+        const tmp = schedule[swapWith][dk];
+        schedule[swapWith][dk] = schedule[r][dk];
+        schedule[r][dk] = tmp;
+      }
+    });
   });
 
   // Revert soft prefs if they increased hard errors
@@ -2595,11 +4731,87 @@ function _generateScheduleInner() {
     warnings.unshift({ type: 'warn', msg: `${finalViolations.filter(v=>v.severity==='error').length} hard constraint(s) remain after ${pass} repair passes.` });
   }
 
+  // Build generation quality report
+  lastGenReport = buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, finalViolations, isDkWeekend, dkToDate);
+  window._lastGenReport = lastGenReport;
+
   renderSchedule(warnings, ROLES, ALL_KC);
-  renderSummary(warnings, ROLES, ALL_KC);
-  document.getElementById('schedule-section').style.display = '';
-  document.getElementById('summary-section').style.display = '';
-  document.getElementById('schedule-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  renderSummary(warnings, ROLES, ALL_KC, lastGenReport);
+  setScheduleResultsVisible(true);
+  const ts = document.getElementById('gen-timestamp');
+  if (ts) ts.textContent = 'Generated ' + new Date().toLocaleString();
+  const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
+  showToast(`Schedule ready · Quality ${q.score}/100 (${q.grade})`, hasErrors ? 'warn' : 'success');
+  updateReadyChecklist();
+  switchTab('schedule');
+  setTimeout(() => {
+    document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, violations, isDkWeekend, dkToDate) {
+  const isDayOffish = (s) => s === 'off' || s === 'rto' || s === 'pto' || s === 'loa';
+  const weekendOffs = {};
+  const opens = {}, closes = {}, mids = {}, clopens = {};
+  const maxStreak = {};
+  const unmet = [];
+
+  ROLES.forEach(r => {
+    weekendOffs[r] = allDks.filter(dk => isDkWeekend(dk) && isDayOffish(schedule[r][dk])).length;
+    opens[r] = allDks.filter(dk => isOpen(schedule[r][dk])).length;
+    closes[r] = allDks.filter(dk => isClose(schedule[r][dk])).length;
+    mids[r] = allDks.filter(dk => isMid(schedule[r][dk])).length;
+    clopens[r] = 0;
+    let streak = 0, best = 0;
+    for (let i = 0; i < allDks.length; i++) {
+      if (isWork(schedule[r][allDks[i]])) {
+        streak++;
+        if (streak > best) best = streak;
+      } else streak = 0;
+      if (i > 0 && isClose(schedule[r][allDks[i-1]]) && isOpen(schedule[r][allDks[i]])) clopens[r]++;
+    }
+    maxStreak[r] = best;
+    const target = getWeekendTargetForPerson(r);
+    if (weekendOffs[r] < target) {
+      unmet.push(`${names[r] || r}: weekend days off ${weekendOffs[r]}/${target}`);
+    }
+    if (PREFS.maxConsecutiveWorkDays && best > PREFS.maxConsecutiveWorkDays) {
+      unmet.push(`${names[r] || r}: max work streak ${best} (limit ${PREFS.maxConsecutiveWorkDays})`);
+    }
+  });
+
+  const totalClopens = Object.values(clopens).reduce((a, b) => a + b, 0);
+  if (PREFS.avoidClopening && totalClopens > 0) {
+    unmet.push(`${totalClopens} clopen(s) remain (avoid clopening is ON)`);
+  }
+
+  // Fairness variance (among same-family roles; SM open preference is expected)
+  if (PREFS.fairDistribution && ROLES.length > 1) {
+    const spread = (arr) => arr.length ? Math.max(...arr) - Math.min(...arr) : 0;
+    const weVals = ROLES.map(r => weekendOffs[r]);
+    if (spread(weVals) > 2) unmet.push(`Weekend off spread is ${spread(weVals)} (fairness target ≤ 2)`);
+    // Open/close fairness among AMs only (SM/KC often have intentional bias)
+    const ams = ROLES.filter(r => r.startsWith('am'));
+    if (ams.length > 1) {
+      const openVals = ams.map(r => opens[r]);
+      const closeVals = ams.map(r => closes[r]);
+      if (spread(openVals) > 4) unmet.push(`AM open-shift spread is ${spread(openVals)} (fairness)`);
+      if (spread(closeVals) > 3) unmet.push(`AM close-shift spread is ${spread(closeVals)} (fairness)`);
+    }
+  }
+
+  const hardErrors = (violations || []).filter(v => v.severity === 'error');
+  hardErrors.forEach(e => {
+    if (e.detail && !unmet.includes(e.detail)) unmet.push(e.detail);
+  });
+
+  const report = {
+    weekendOffs, opens, closes, mids, clopens, maxStreak,
+    totalClopens, unmet, prefs: PREFS,
+    hardErrorCount: hardErrors.length
+  };
+  report.quality = computeQualityScore(report, ROLES);
+  return report;
 }
 
 
@@ -2708,17 +4920,38 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   // ── Rule 5: KC Monday close (informational only — always placed in step 1) ──
   // (validated implicitly, not a repair target)
 
-  // ── Rule 6: No clopens ──
+  // ── Rule 6: No clopens (when preference enabled; always hard if avoidClopening) ──
+  const avoidClopen = (typeof preferences !== 'undefined' && preferences.avoidClopening !== false);
   for (let i = 1; i < allDks.length; i++) {
     const dk = allDks[i];
     const prevDk = allDks[i - 1];
     ROLES.forEach(r => {
       if (isClose(schedule[r][prevDk]) && isOpen(schedule[r][dk])) {
-        v('error', 'no-clopen', r, null, dk,
+        v(avoidClopen ? 'error' : 'warning', 'no-clopen', r, null, dk,
           `${names[r]}: Clopen on ${formatDate(dkToDate(dk))} (closed ${formatDate(dkToDate(prevDk))})`);
       }
     });
   }
+
+  // ── Rule 6b: Max consecutive work days (warning if over) ──
+  const maxWork = (typeof preferences !== 'undefined' && preferences.maxConsecutiveWorkDays) ? preferences.maxConsecutiveWorkDays : 6;
+  ROLES.forEach(r => {
+    let streak = 0;
+    let streakStart = null;
+    allDks.forEach(dk => {
+      if (isWork(schedule[r][dk])) {
+        if (streak === 0) streakStart = dk;
+        streak++;
+        if (streak > maxWork) {
+          v('warning', 'max-consec-work', r, null, dk,
+            `${names[r]}: ${streak} consecutive work days (max ${maxWork}) ending ${formatDate(dkToDate(dk))}`);
+        }
+      } else {
+        streak = 0;
+        streakStart = null;
+      }
+    });
+  });
 
   // ── Rule 7: 1 consecutive weekend off per period (off/rto/pto/loa all count) ──
   ROLES.forEach(r => {
@@ -3192,7 +5425,10 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
 function renderSchedule(warnings, ROLES, ALL_KC) {
   const names = getManagerNames();
   const p = currentPeriod;
-  const periodLabel = `FY${fiscalYear} Period ${p.number} - ${p.approxMonth} (${formatDate(p.start)} - ${formatDate(p.end)})`;
+  const storeName = (document.getElementById('store-name') || {}).value || '';
+  const storeNum = (document.getElementById('store-number') || {}).value || '';
+  const storeBit = [storeName, storeNum ? '#' + storeNum : ''].filter(Boolean).join(' ');
+  const periodLabel = `${storeBit ? storeBit + ' · ' : ''}FY${fiscalYear} Period ${p.number} - ${p.approxMonth} (${formatDate(p.start)} - ${formatDate(p.end)})`;
   document.getElementById('schedule-title').textContent = periodLabel;
   document.getElementById('print-header').textContent = periodLabel;
 
@@ -3650,12 +5886,107 @@ function exportScheduleExcel() {
 }
 
 // ── Render Summary ──
-function renderSummary(warnings, ROLES, ALL_KC) {
+function renderSummary(warnings, ROLES, ALL_KC, genReport) {
   const names = getManagerNames();
   const numWeeks = currentPeriod.numWeeks;
   const allDks = periodDates.map(d => dateKey(d));
   const getWeekDks = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
   let html = '';
+  genReport = genReport || window._lastGenReport || null;
+
+  // ── Generation Quality Summary ──
+  if (genReport) {
+    const totalClopens = genReport.totalClopens || 0;
+    const avoidOn = genReport.prefs && genReport.prefs.avoidClopening;
+    const clopenOk = !avoidOn || totalClopens === 0;
+    const hardOk = (genReport.hardErrorCount || 0) === 0;
+    const unmet = genReport.unmet || [];
+    const bannerCls = !hardOk || (avoidOn && totalClopens > 0) ? 'bad' : (unmet.length ? 'warn' : 'ok');
+    const bannerText = bannerCls === 'ok'
+      ? 'Schedule meets hard constraints and scheduling preferences.'
+      : (bannerCls === 'bad'
+        ? 'Some hard constraints could not be fully satisfied — review below.'
+        : 'Hard constraints OK; some soft preferences not fully met.');
+
+    const q = genReport.quality || computeQualityScore(genReport, ROLES);
+    const labor = computeLaborStats(ROLES, ALL_KC);
+    const bar = (label, pts, max) => {
+      const pct = Math.round((pts / max) * 100);
+      const cls = pct >= 90 ? 'ok' : pct >= 60 ? 'warn' : 'bad';
+      return `<div class="score-bar-row"><span>${label}</span><div class="score-bar-track"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div><span>${pts}/${max}</span></div>`;
+    };
+    html += `<div class="score-hero">
+      <div class="score-ring-wrap">${scoreRingSVG(q.score)}<div class="score-num">${q.score}<span class="score-label">${esc(q.grade)}</span></div></div>
+      <div class="score-details">
+        <h3>Schedule Quality Score</h3>
+        <p>${bannerText}</p>
+        <div class="score-bars">
+          ${bar('Hard rules', q.parts.hard, 40)}
+          ${bar('No clopens', q.parts.clopen, 20)}
+          ${bar('Weekends', q.parts.weekend, 20)}
+          ${bar('Work streaks', q.parts.streak, 10)}
+          ${bar('Soft prefs', q.parts.soft, 10)}
+        </div>
+        <div class="score-actions no-print">
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON</button>
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
+        </div>
+      </div>
+    </div>`;
+
+    // Labor hours
+    html += '<div class="summary-panel"><h3>Labor Hours (estimated from shift times)</h3>';
+    html += '<div class="labor-grid">';
+    html += `<div class="labor-card"><div class="l-label">Total hours</div><div class="l-val">${labor.totalHours}</div><div class="l-sub">${labor.weeks}-week period</div></div>`;
+    html += `<div class="labor-card"><div class="l-label">Shifts</div><div class="l-val">${labor.totalShifts}</div><div class="l-sub">${labor.managers} managers</div></div>`;
+    html += `<div class="labor-card"><div class="l-label">Avg / week</div><div class="l-val">${labor.avgPerWeek}</div><div class="l-sub">team hours</div></div>`;
+    const perMgr = labor.managers ? Math.round((labor.totalHours / labor.managers) * 10) / 10 : 0;
+    html += `<div class="labor-card"><div class="l-label">Avg / manager</div><div class="l-val">${perMgr}</div><div class="l-sub">period hours</div></div>`;
+    html += '</div>';
+    html += '<table class="dist-table"><thead><tr><th>Person</th><th>Shifts</th><th>Hours</th></tr></thead><tbody>';
+    Object.keys(labor.byPerson).forEach(r => {
+      const p = labor.byPerson[r];
+      if (p.shifts === 0) return;
+      html += `<tr><td style="text-align:left;font-weight:600">${esc(p.name)}</td><td>${p.shifts}</td><td>${p.hours}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+
+    html += `<div class="quality-banner ${bannerCls}"><span>${bannerCls === 'ok' ? '✓' : (bannerCls === 'bad' ? '!!' : '!')}</span><div><div>${bannerText}</div>`;
+    if (unmet.length) {
+      html += '<ul class="unmet-list">' + unmet.slice(0, 12).map(u => `<li>${esc(u)}</li>`).join('') + '</ul>';
+      if (unmet.length > 12) html += `<div style="margin-top:0.35rem;font-size:0.8rem">+${unmet.length - 12} more…</div>`;
+    }
+    html += '</div></div>';
+
+    // Stat cards
+    const weTarget = (genReport.prefs && genReport.prefs.targetWeekendDaysOff) || 2;
+    const weVals = ROLES.map(r => genReport.weekendOffs[r] || 0);
+    const avgWe = weVals.length ? (weVals.reduce((a,b)=>a+b,0) / weVals.length) : 0;
+    const metWe = ROLES.filter(r => (genReport.weekendOffs[r] || 0) >= getWeekendTargetForPerson(r)).length;
+    html += '<div class="gen-summary">';
+    html += `<div class="gen-stat-card"><h4>Weekend days off</h4><div class="stat-value ${metWe === ROLES.length ? 'ok' : 'warn'}">${metWe}/${ROLES.length}</div><div class="stat-sub">met target (avg ${avgWe.toFixed(1)}, goal ${weTarget})</div></div>`;
+    html += `<div class="gen-stat-card"><h4>Clopens</h4><div class="stat-value ${clopenOk ? 'ok' : 'bad'}">${totalClopens}</div><div class="stat-sub">${avoidOn ? 'Avoid clopening ON' : 'Avoid clopening OFF'}</div></div>`;
+    const totalOpens = ROLES.reduce((s,r)=>s+(genReport.opens[r]||0),0);
+    const totalCloses = ROLES.reduce((s,r)=>s+(genReport.closes[r]||0),0);
+    const totalMids = ROLES.reduce((s,r)=>s+(genReport.mids[r]||0),0);
+    html += `<div class="gen-stat-card"><h4>Shift mix</h4><div class="stat-value" style="font-size:1.05rem">${totalOpens}O · ${totalMids}M · ${totalCloses}C</div><div class="stat-sub">Opens · Mids · Closes (period)</div></div>`;
+    const maxSt = Math.max(0, ...ROLES.map(r => genReport.maxStreak[r] || 0));
+    const maxLim = (genReport.prefs && genReport.prefs.maxConsecutiveWorkDays) || 6;
+    html += `<div class="gen-stat-card"><h4>Longest work streak</h4><div class="stat-value ${maxSt > maxLim ? 'warn' : 'ok'}">${maxSt}</div><div class="stat-sub">limit ${maxLim} consecutive days</div></div>`;
+    html += '</div>';
+
+    // Per-person weekend + shift distribution
+    html += '<div class="summary-panel"><h3>Preference Scorecard</h3><table class="dist-table"><thead><tr><th>Manager</th><th>Weekend off</th><th>Target</th><th>Opens</th><th>Mids</th><th>Closes</th><th>Clopens</th><th>Max streak</th></tr></thead><tbody>';
+    ROLES.forEach(r => {
+      const t = getWeekendTargetForPerson(r);
+      const we = genReport.weekendOffs[r] || 0;
+      const badge = we >= t ? '<span class="badge-pill badge-ok">OK</span>' : '<span class="badge-pill badge-miss">Low</span>';
+      const cp = genReport.clopens[r] || 0;
+      html += `<tr><td style="text-align:left;font-weight:600">${esc(names[r] || r)}</td><td>${we} ${badge}</td><td>${t}</td><td>${genReport.opens[r]||0}</td><td>${genReport.mids[r]||0}</td><td>${genReport.closes[r]||0}</td><td style="${cp ? 'color:#dc2626;font-weight:700' : ''}">${cp}</td><td>${genReport.maxStreak[r]||0}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+  }
 
   // Per-week breakdown
   html += '<div class="summary-panel"><h3>Weekly Breakdown</h3><table><thead><tr><th>Manager</th>';
@@ -3741,8 +6072,12 @@ function renderSummary(warnings, ROLES, ALL_KC) {
 // ── Clear Generated ──
 function clearSchedule() {
   schedule = {};
-  document.getElementById('schedule-section').style.display = 'none';
-  document.getElementById('summary-section').style.display = 'none';
+  window._lastGenReport = null;
+  setScheduleResultsVisible(false);
+  const ts = document.getElementById('gen-timestamp');
+  if (ts) ts.textContent = '';
+  updateReadyChecklist();
+  showToast('Generated schedule cleared.', 'info');
 }
 
 // ── Save / Load ──
@@ -3760,6 +6095,7 @@ function saveToStorage() {
     if (el) kc.name = el.value;
   });
 
+  readPreferencesFromUI();
   const data = {
     fiscalYear: fiscalYear,
     periodIndex: currentPeriodIndex,
@@ -3767,6 +6103,7 @@ function saveToStorage() {
     amCount: amCount,
     kcList: kcList,
     storeNumber: document.getElementById('store-number').value || '',
+    storeName: (document.getElementById('store-name') || {}).value || '',
     names: {
       sm: document.getElementById('name-sm').value,
       ...amNames
@@ -3774,12 +6111,14 @@ function saveToStorage() {
     inputs: inputs,
     schedule: schedule,
     holidayWeeks: holidayWeeks,
+    preferences: preferences,
+    roleRules: roleRules,
     _savedAt: new Date().toISOString()
   };
   const key = `schedule_FY${fiscalYear}-P${p.number}`;
   localStorage.setItem(key, JSON.stringify(data));
   localStorage.setItem('schedule_last', key);
-  alert(`Schedule saved: FY${fiscalYear} Period ${p.number} (${p.approxMonth})`);
+  showToast(`Saved FY${fiscalYear} Period ${p.number} (${p.approxMonth})`, 'success');
 }
 
 function loadFromStorage() {
@@ -3787,7 +6126,7 @@ function loadFromStorage() {
   const key = `schedule_FY${fiscalYear}-P${p.number}`;
   const raw = localStorage.getItem(key);
   if (!raw) {
-    alert(`No saved schedule for FY${fiscalYear} Period ${p.number}`);
+    showToast(`No saved schedule for FY${fiscalYear} Period ${p.number}`, 'warn');
     return;
   }
   const data = JSON.parse(raw);
@@ -3806,9 +6145,12 @@ function loadFromStorage() {
     kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
   }
 
-  // Restore store number
+  // Restore store number / name
   if (data.storeNumber !== undefined) {
     document.getElementById('store-number').value = data.storeNumber;
+  }
+  if (data.storeName !== undefined && document.getElementById('store-name')) {
+    document.getElementById('store-name').value = data.storeName;
   }
 
   // Rebuild UI rows
@@ -3828,6 +6170,16 @@ function loadFromStorage() {
 
   // Restore holiday weeks
   holidayWeeks = data.holidayWeeks || {};
+
+  // Restore preferences + role rules
+  if (data.preferences) {
+    preferences = Object.assign({}, DEFAULT_PREFERENCES, data.preferences);
+    renderPreferencesUI();
+  }
+  if (data.roleRules) {
+    roleRules = data.roleRules;
+    renderRoleRulesUI();
+  }
 
   // Restore inputs
   inputs = {};
@@ -3859,11 +6211,12 @@ function loadFromStorage() {
     const ALL_KC = getAllWithKC();
     renderSchedule([], ROLES, ALL_KC);
     renderSummary([], ROLES, ALL_KC);
-    document.getElementById('schedule-section').style.display = '';
-    document.getElementById('summary-section').style.display = '';
+    setScheduleResultsVisible(true);
+    switchTab('schedule');
   }
 
-  alert(`Schedule loaded: FY${fiscalYear} Period ${p.number} (${p.approxMonth})`);
+  showToast(`Loaded FY${fiscalYear} Period ${p.number} (${p.approxMonth})`, 'success');
+  updateReadyChecklist();
 }
 
 // ════════════════════════════════════════════════════
@@ -4180,6 +6533,9 @@ function loadSavedSchedule(key) {
   if (data.storeNumber !== undefined) {
     document.getElementById('store-number').value = data.storeNumber;
   }
+  if (data.storeName !== undefined && document.getElementById('store-name')) {
+    document.getElementById('store-name').value = data.storeName;
+  }
 
   renderAMRows();
   renderKCRows();
@@ -4214,6 +6570,16 @@ function loadSavedSchedule(key) {
     });
   }
 
+  if (data.holidayWeeks) holidayWeeks = data.holidayWeeks;
+  if (data.preferences) {
+    preferences = Object.assign({}, DEFAULT_PREFERENCES, data.preferences);
+    renderPreferencesUI();
+  }
+  if (data.roleRules) {
+    roleRules = data.roleRules;
+    renderRoleRulesUI();
+  }
+
   buildInputTabs();
   buildInputCalendar(activeTab);
 
@@ -4221,9 +6587,9 @@ function loadSavedSchedule(key) {
     const ROLES = getRoles();
     const ALL_KC = getAllWithKC();
     renderSchedule([], ROLES, ALL_KC);
-    renderSummary([], ROLES, ALL_KC);
-    document.getElementById('schedule-section').style.display = '';
-    document.getElementById('summary-section').style.display = '';
+    renderSummary([], ROLES, ALL_KC, window._lastGenReport || null);
+    setScheduleResultsVisible(true);
+    switchTab('schedule');
   }
 
   closeSavedSchedulesModal(); // close the modal
@@ -4378,10 +6744,144 @@ function resetShiftTimes() {
 // BOOT: Restore persisted manager names (Feature 2)
 // Must run after initial renderAMRows/renderKCRows
 // ════════════════════════════════════════════════════
+
+// ── PWA: service worker + install prompt ──
+let deferredInstallPrompt = null;
+
+function isStandalonePwa() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true
+    || document.referrer.includes('android-app://');
+}
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  // Only on http/https (not file://)
+  if (!/^https?:$/.test(location.protocol)) return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => {
+        console.log('[pwa] SW registered', reg.scope);
+        reg.addEventListener('updatefound', () => {
+          const worker = reg.installing;
+          if (!worker) return;
+          worker.addEventListener('statechange', () => {
+            if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+              showToast('Update available — reload for the latest version.', 'info');
+            }
+          });
+        });
+      })
+      .catch((err) => console.warn('[pwa] SW failed', err));
+  });
+}
+
+function setupInstallPrompt() {
+  if (isStandalonePwa()) {
+    document.documentElement.classList.add('pwa-standalone');
+    return;
+  }
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showInstallBanner();
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    hideInstallBanner();
+    showToast('Installed! Open Schedule Pro from your home screen.', 'success');
+    try { localStorage.setItem('msb_pwa_installed', '1'); } catch (e) {}
+  });
+  // iOS / browsers without beforeinstallprompt — show soft instructions once
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const dismissed = (() => { try { return localStorage.getItem('msb_install_dismissed') === '1'; } catch(e) { return false; } })();
+  if (!dismissed && (isIOS || !window.matchMedia('(display-mode: browser)').matches === false)) {
+    // soft show after delay on mobile
+    if (isIOS && window.innerWidth < 900) {
+      setTimeout(() => {
+        if (!deferredInstallPrompt && !isStandalonePwa()) showInstallBanner(true);
+      }, 4000);
+    }
+  }
+}
+
+function showInstallBanner(iosHint) {
+  const el = document.getElementById('install-banner');
+  if (!el || isStandalonePwa()) return;
+  try {
+    if (localStorage.getItem('msb_install_dismissed') === '1') return;
+  } catch(e) {}
+  el.classList.add('show');
+  if (iosHint) {
+    const span = el.querySelector('.ib-text span');
+    if (span) span.textContent = 'On iPhone: Share → Add to Home Screen. Then open like any app.';
+    const btn = document.getElementById('btn-install-pwa');
+    if (btn) { btn.textContent = 'How to install'; btn.onclick = () => showToast('Tap Share, then “Add to Home Screen”.', 'info'); }
+  }
+}
+
+function hideInstallBanner() {
+  document.getElementById('install-banner')?.classList.remove('show');
+}
+
+function dismissInstallBanner() {
+  hideInstallBanner();
+  try { localStorage.setItem('msb_install_dismissed', '1'); } catch(e) {}
+}
+
+async function promptPwaInstall() {
+  if (!deferredInstallPrompt) {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS) {
+      showToast('Tap Share → Add to Home Screen to install.', 'info');
+    } else {
+      showToast('Use your browser menu: Install app / Add to Home screen.', 'info');
+    }
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  const choice = await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  if (choice && choice.outcome === 'accepted') {
+    hideInstallBanner();
+  }
+}
+
+function handleLaunchQuery() {
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') && typeof switchTab === 'function') {
+      setTimeout(() => switchTab(params.get('tab')), 50);
+    }
+    if (params.get('demo') === '1' && typeof loadDemoStore === 'function') {
+      setTimeout(() => loadDemoStore(), 200);
+    }
+  } catch(e) {}
+}
+
+registerServiceWorker();
+setupInstallPrompt();
+// After DOM boot
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', handleLaunchQuery);
+} else {
+  setTimeout(handleLaunchQuery, 0);
+}
+
+
 restoreManagerNames();
+restoreStoreMeta();
+restoreWelcomeState();
+renderPreferencesUI();
+renderRoleRulesUI();
 // Rebuild tabs after name restore
 buildInputTabs();
 buildInputCalendar(activeTab);
+updateReadyChecklist();
+// Keep checklist fresh when period/names change
+const _pickPeriod = document.getElementById('pick-period');
+if (_pickPeriod) _pickPeriod.addEventListener('change', () => setTimeout(updateReadyChecklist, 50));
+document.getElementById('name-sm')?.addEventListener('change', updateReadyChecklist);
 
 
 </script>

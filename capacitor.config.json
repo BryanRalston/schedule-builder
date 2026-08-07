@@ -1,0 +1,7 @@
+{
+  "appId": "com.managerschedulebuilder.pro",
+  "appName": "Schedule Pro",
+  "webDir": ".",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false, "backgroundColor": "#1a1a2e" }
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play upload cheat sheet · Schedule Pro</title>
+  <link rel="icon" href="../icons/favicon-32.png">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 1.25rem; color: #1a1a2e; line-height: 1.55; }
+    h1 { font-size: 1.3rem; }
+    h2 { font-size: 1.05rem; margin-top: 1.4rem; border-top: 1px solid #e5e7eb; padding-top: 0.9rem; }
+    .box { background: #f8f9fb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.85rem 1rem; margin: 0.5rem 0; word-break: break-all; }
+    .path { font-family: ui-monospace, Menlo, monospace; font-size: 0.85rem; }
+    .ok { background: #ecfdf5; border-color: #a7f3d0; }
+    a { color: #2563eb; }
+    ol { padding-left: 1.2rem; }
+    button.copy { font-size: 0.75rem; font-weight: 700; border: 1px solid #d1d5db; background: #fff; border-radius: 6px; padding: 0.3rem 0.55rem; cursor: pointer; float: right; }
+  </style>
+</head>
+<body>
+  <p><a href="../install.html">← Publish setup</a> · <a href="listing.html">Listing pack</a> · <a href="../PLAY_CONSOLE_NOW.md">PLAY_CONSOLE_NOW.md</a></p>
+  <h1>Google Play — upload this AAB</h1>
+  <p>Works offline. Open while you have Play Console in another tab.</p>
+
+  <h2>1. File to upload</h2>
+  <div class="box ok">
+    <button class="copy" type="button" data-copy="C:\Users\bryma\schedule-builder\android-twa\app-release-bundle.aab">Copy path</button>
+    <div class="path">C:\Users\bryma\schedule-builder\android-twa\app-release-bundle.aab</div>
+  </div>
+  <p>Explorer should already be on this folder. Drag the <strong>.aab</strong> into Play → Internal testing release.</p>
+
+  <h2>2. Package name</h2>
+  <div class="box"><button class="copy" type="button" data-copy="com.managerschedulebuilder.pro">Copy</button>
+    <div class="path">com.managerschedulebuilder.pro</div>
+  </div>
+
+  <h2>3. Version</h2>
+  <div class="box">versionName <strong>2.1.0</strong> · versionCode <strong>210</strong></div>
+
+  <h2>4. Privacy policy URL</h2>
+  <div class="box">
+    <button class="copy" type="button" data-copy="https://bryanralston.github.io/schedule-builder/legal/privacy.html">Copy</button>
+    <div class="path">https://bryanralston.github.io/schedule-builder/legal/privacy.html</div>
+  </div>
+
+  <h2>5. Track order</h2>
+  <ol>
+    <li><strong>Internal testing</strong> first (you + testers, fastest)</li>
+    <li>Then <strong>Production</strong> when listing + data safety complete</li>
+  </ol>
+
+  <h2>6. After upload — paste this back to Cortex</h2>
+  <ol>
+    <li>Play Console → <strong>Setup → App integrity / App signing</strong></li>
+    <li>Copy <strong>App signing key certificate SHA-256</strong></li>
+    <li>Paste to Cortex so we can add it to <code>assetlinks.json</code></li>
+  </ol>
+
+  <h2>7. Data safety one-liners</h2>
+  <ul>
+    <li>No account · data stays on device · not shared with third parties</li>
+    <li>HTTPS when online · user can clear site data to delete</li>
+  </ul>
+
+  <h2>8. Listing copy</h2>
+  <p>Use <a href="listing.html">listing.html</a> for title, short &amp; full description.</p>
+
+  <p style="margin-top:2rem;color:#6b7280;font-size:0.88rem">Secrets/keystore stay in <code>C:\Users\bryma\schedule-builder-secrets\</code> — never upload those to git.</p>
+
+  <script>
+    document.querySelectorAll('button.copy').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(btn.dataset.copy || '');
+          btn.textContent = 'Copied';
+          setTimeout(() => btn.textContent = 'Copy path'.includes(btn.dataset.copy && btn.dataset.copy.includes(':\\') ? 'x' : '') ? 'Copy path' : 'Copy', 1000);
+          btn.textContent = 'Copied';
+          setTimeout(() => { btn.textContent = btn.dataset.copy.includes(':\\') ? 'Copy path' : 'Copy'; }, 1100);
+        } catch { alert('Copy manually'); }
+      });
+    });
+  </script>
+</body>
+</html>

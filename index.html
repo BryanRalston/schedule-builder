@@ -1198,6 +1198,7 @@ button:active { transform: scale(0.98); }
   gap: 0.25rem;
   background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #1a1a2e;
+  /* free state overrides via .pro-badge.is-free */
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -1206,6 +1207,41 @@ button:active { transform: scale(0.98); }
   border-radius: 999px;
   line-height: 1;
 }
+.pro-badge.is-free {
+  background: rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.04em;
+}
+.pro-badge.is-free a,
+.pro-badge a {
+  color: inherit;
+  text-decoration: none;
+}
+.pro-gate-modal {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(15,23,42,0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.pro-gate-modal[hidden] { display: none !important; }
+.pro-gate-card {
+  background: #fff;
+  color: #1a1a2e;
+  border-radius: 14px;
+  max-width: 400px;
+  width: 100%;
+  padding: 1.25rem 1.2rem 1.1rem;
+  box-shadow: 0 20px 50px rgba(15,23,42,0.28);
+}
+.pro-gate-card h3 { margin: 0 0 0.4rem; font-size: 1.1rem; }
+.pro-gate-card p { margin: 0.35rem 0; font-size: 0.92rem; color: #4b5563; }
+.pro-gate-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 1rem; }
+.pro-gate-actions a, .pro-gate-actions button {
+  font-size: 0.88rem; font-weight: 700; border-radius: 8px;
+  padding: 0.5rem 0.85rem; border: none; cursor: pointer; text-decoration: none;
+}
+.pro-gate-actions .pg-buy { background: #f59e0b; color: #1a1a2e; }
+.pro-gate-actions .pg-secondary { background: #f3f4f6; color: #1a1a2e; border: 1px solid #e5e7eb; }
 .offline-pill {
   display: inline-flex;
   align-items: center;
@@ -1959,7 +1995,7 @@ html.pwa-standalone .install-banner { display: none !important; }
   <div>
     <div class="brand-row">
       <h1>Manager Schedule Builder</h1>
-      <span class="pro-badge">Pro</span>
+      <span class="pro-badge is-free" id="license-badge" title="License status">Free</span>
       <span class="offline-pill"><span class="dot"></span> Works offline</span>
       <span class="pwa-mode-badge">App mode</span>
     </div>
@@ -1978,6 +2014,8 @@ html.pwa-standalone .install-banner { display: none !important; }
         <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON</button>
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()">How it works</button>
+        <button type="button" onclick="promptLicenseUnlock(); closeHeaderMenu()">Enter license / unlock</button>
+        <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()">Buy Pro — $29</button>
         <button type="button" onclick="location.href='install.html'; closeHeaderMenu()">Install / Play path</button>
       </div>
     </div>
@@ -2002,10 +2040,11 @@ html.pwa-standalone .install-banner { display: none !important; }
   <!-- WELCOME / ONBOARDING -->
   <div class="welcome-card no-print compact" id="welcome-card">
     <h2>Fair retail schedules in minutes</h2>
-    <p>Preference-driven engine for store managers — weekends, clopens, role rules, export. Fully offline.</p>
+    <p>Preference-driven engine for store managers — weekends, clopens, role rules, export. Fully offline. Free: try with up to 3 managers; Pro unlocks unlimited roster + Word/Excel.</p>
     <div class="welcome-actions">
       <button class="btn-demo" onclick="loadDemoStore()">Try Demo</button>
       <button class="btn-primary" onclick="switchTab('setup')">Get started</button>
+      <button class="btn-outline" style="border-color:#f59e0b;color:#92400e" onclick="location.href='buy.html'">Buy Pro $29</button>
       <button class="welcome-dismiss" onclick="dismissWelcome()">Dismiss</button>
     </div>
   </div>
@@ -2251,13 +2290,26 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · v2.1 PWA · Offline · Data stays in this browser</div>
+  <div><strong>Manager Schedule Builder Pro</strong> · v2.1.1 PWA · Offline · Data stays in this browser · <a href="buy.html" style="color:#2563eb;font-weight:700;text-decoration:none">Upgrade to Pro $29</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
+    <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
     <button type="button" onclick="location.href='install.html'">Publish setup</button>
     <button type="button" onclick="location.href='legal/privacy.html'">Privacy</button>
   </div>
 </footer>
+
+<div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title">
+  <div class="pro-gate-card">
+    <h3 id="pro-gate-title">Pro feature</h3>
+    <p id="pro-gate-body">Unlock Pro for unlimited managers and Word/Excel export. Free keeps full generate + JSON backup.</p>
+    <div class="pro-gate-actions">
+      <a class="pg-buy" href="buy.html">Buy Pro — $29</a>
+      <button type="button" class="pg-secondary" onclick="promptLicenseUnlock()">Enter license</button>
+      <button type="button" class="pg-secondary" onclick="closeProGate()">Not now</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast-host" id="toast-host" aria-live="polite"></div>
 
@@ -2362,8 +2414,147 @@ function restoreAppTab() {
 
 
 // ── Dynamic Configuration State ──
-let amCount = 3;
+// Free tier caps manager roster at freeManagerLimit (default 3 = SM + 2 AMs)
+let amCount = 2;
 let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
+
+// ── Monetization / Pro license (offline-first; soft gate) ──
+const MSB_LICENSE_KEY = 'msb_pro_license';
+let monetizationConfig = {
+  priceLabel: '$29',
+  priceNote: 'one-time · lifetime Pro unlock',
+  checkoutUrl: '',
+  freeManagerLimit: 3,
+  proFeatures: ['unlimited managers', 'Word export', 'Excel export', 'priority future updates']
+};
+
+function isProUnlocked() {
+  try {
+    const raw = localStorage.getItem(MSB_LICENSE_KEY);
+    if (!raw) return false;
+    const j = JSON.parse(raw);
+    return !!(j && j.unlocked);
+  } catch (e) { return false; }
+}
+
+function setProUnlocked(key) {
+  const payload = {
+    unlocked: true,
+    key: String(key || 'unlock').slice(0, 120),
+    at: new Date().toISOString()
+  };
+  try { localStorage.setItem(MSB_LICENSE_KEY, JSON.stringify(payload)); } catch (e) {}
+  updateLicenseBadge();
+  return payload;
+}
+
+function validLicenseKey(k) {
+  const s = String(k || '').trim();
+  if (s.length >= 6) return true;
+  if (/^MSB-PRO-/i.test(s)) return true;
+  return false;
+}
+
+function freeManagerLimit() {
+  const n = Number(monetizationConfig.freeManagerLimit);
+  return Number.isFinite(n) && n > 0 ? n : 3;
+}
+
+function rosterManagerCount() {
+  // SM + AMs + KCs marked as manager coverage
+  return getRoles().length;
+}
+
+function updateLicenseBadge() {
+  const el = document.getElementById('license-badge');
+  if (!el) return;
+  if (isProUnlocked()) {
+    el.textContent = 'Pro';
+    el.classList.remove('is-free');
+    el.title = 'Pro unlocked on this device';
+  } else {
+    el.textContent = 'Free';
+    el.classList.add('is-free');
+    el.title = 'Free tier · click Buy Pro for unlimited roster + exports';
+    el.style.cursor = 'pointer';
+    el.onclick = () => { location.href = 'buy.html'; };
+  }
+}
+
+function showProGate(message) {
+  const modal = document.getElementById('pro-gate-modal');
+  const body = document.getElementById('pro-gate-body');
+  if (body && message) body.textContent = message;
+  if (modal) modal.removeAttribute('hidden');
+}
+
+function closeProGate() {
+  const modal = document.getElementById('pro-gate-modal');
+  if (modal) modal.setAttribute('hidden', '');
+}
+
+function requirePro(featureLabel) {
+  if (isProUnlocked()) return true;
+  showProGate(
+    (featureLabel || 'This feature') +
+    ' is included with Pro (' + (monetizationConfig.priceLabel || '$29') +
+    ' one-time). Free still generates schedules and backs up JSON so you never lose data.'
+  );
+  return false;
+}
+
+function promptLicenseUnlock() {
+  closeProGate();
+  const key = window.prompt('Enter your license / unlock code (Gumroad key or MSB-PRO-…):', '');
+  if (key == null) return;
+  if (!validLicenseKey(key)) {
+    if (typeof showToast === 'function') showToast('Code too short — use 6+ characters.', 'warn');
+    else alert('Enter a code at least 6 characters (or MSB-PRO-…).');
+    return;
+  }
+  setProUnlocked(key.trim());
+  if (typeof showToast === 'function') showToast('Pro unlocked on this device.', 'success');
+  else alert('Pro unlocked on this device.');
+}
+
+async function loadMonetizationConfig() {
+  try {
+    const r = await fetch('monetization.json', { cache: 'no-store' });
+    if (!r.ok) return;
+    const j = await r.json();
+    monetizationConfig = { ...monetizationConfig, ...j };
+  } catch (e) { /* offline / missing — keep defaults */ }
+}
+
+function applyUrlProUnlock() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const pro = params.get('pro') === '1' || params.get('unlocked') === '1';
+    const lic = params.get('license') || params.get('key');
+    if (pro || (lic && validLicenseKey(lic))) {
+      setProUnlocked(lic || 'pro=1');
+      const u = new URL(location.href);
+      ['pro', 'license', 'unlocked', 'key'].forEach((p) => u.searchParams.delete(p));
+      history.replaceState({}, '', u.pathname + u.search + u.hash);
+      if (typeof showToast === 'function') showToast('Pro unlocked — thanks for your support.', 'success');
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+function canAddManagerSeat() {
+  if (isProUnlocked()) return true;
+  // After adding one seat, count must stay <= freeManagerLimit
+  if (rosterManagerCount() >= freeManagerLimit()) {
+    showProGate(
+      'Free includes up to ' + freeManagerLimit() +
+      ' managers on the roster (Store Manager + AMs / manager KCs). Unlock Pro for unlimited team size.'
+    );
+    return false;
+  }
+  return true;
+}
 
 // ── Computed Role Arrays ──
 function getRoles() {
@@ -3362,7 +3553,7 @@ function renderKCRows() {
         onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
       <label class="kc-toggle-label">
         <input type="checkbox" ${kc.asManager ? 'checked' : ''}
-          onchange="kcList[${idx}].asManager = this.checked; rebuildAfterConfigChange()">
+          onchange="toggleKcAsManager(${idx}, this)">
         Mgr coverage
       </label>
     </div>`;
@@ -3372,6 +3563,7 @@ function renderKCRows() {
 }
 
 function addAM() {
+  if (!canAddManagerSeat()) return;
   amCount++;
   renderAMRows();
   rebuildAfterConfigChange();
@@ -3387,9 +3579,27 @@ function removeAM() {
 }
 
 function addKC() {
+  // Non-manager KCs do not consume free manager seats
   const num = kcList.length + 1;
   kcList.push({ id: 'kc' + num, name: 'Key Carrier ' + num, asManager: false });
   renderKCRows();
+  rebuildAfterConfigChange();
+}
+
+function toggleKcAsManager(idx, checkbox) {
+  const want = !!(checkbox && checkbox.checked);
+  if (want && !isProUnlocked()) {
+    // Enabling manager mode consumes a roster seat
+    if (rosterManagerCount() >= freeManagerLimit()) {
+      if (checkbox) checkbox.checked = false;
+      showProGate(
+        'Free includes up to ' + freeManagerLimit() +
+        ' managers. Unlock Pro to mark more key carriers as manager coverage.'
+      );
+      return;
+    }
+  }
+  if (kcList[idx]) kcList[idx].asManager = want;
   rebuildAfterConfigChange();
 }
 
@@ -5647,6 +5857,7 @@ function renderPrintSchedule(ROLES, ALL_KC) {
 
 // ── Export formatted Word document (.doc via Word HTML) ──
 function exportSchedule() {
+  if (!requirePro('Word export')) return;
   if (!currentPeriod) {
     alert('Please load a period first.');
     return;
@@ -5807,6 +6018,7 @@ function exportSchedule() {
 
 // ── Export plain Excel (.xlsx via SheetJS) ──
 function exportScheduleExcel() {
+  if (!requirePro('Excel export')) return;
   if (!currentPeriod) {
     alert('Please load a period first.');
     return;
@@ -6849,6 +7061,7 @@ async function promptPwaInstall() {
 
 function handleLaunchQuery() {
   try {
+    applyUrlProUnlock();
     const params = new URLSearchParams(location.search);
     if (params.get('tab') && typeof switchTab === 'function') {
       setTimeout(() => switchTab(params.get('tab')), 50);
@@ -6861,6 +7074,8 @@ function handleLaunchQuery() {
 
 registerServiceWorker();
 setupInstallPrompt();
+updateLicenseBadge();
+loadMonetizationConfig().then(() => updateLicenseBadge());
 // After DOM boot
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', handleLaunchQuery);
@@ -6878,6 +7093,7 @@ renderRoleRulesUI();
 buildInputTabs();
 buildInputCalendar(activeTab);
 updateReadyChecklist();
+updateLicenseBadge();
 // Keep checklist fresh when period/names change
 const _pickPeriod = document.getElementById('pick-period');
 if (_pickPeriod) _pickPeriod.addEventListener('change', () => setTimeout(updateReadyChecklist, 50));

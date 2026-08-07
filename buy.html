@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Buy Pro · Manager Schedule Builder</title>
+  <link rel="icon" href="icons/favicon-32.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root {
+      --ink: #e8eaf0;
+      --muted: #9ca3af;
+      --line: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.04);
+      --brand: #3b82f6;
+      --amber: #f59e0b;
+      --bg0: #1a1a2e;
+      --bg1: #16213e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(165deg, var(--bg0) 0%, var(--bg1) 45%, #0f172a 100%);
+      min-height: 100vh;
+      line-height: 1.55;
+    }
+    a { color: #93c5fd; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 1.25rem 1.15rem 3rem; }
+    header {
+      padding: 1.75rem 0 1rem;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1.5rem;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 0.65rem;
+      font-size: 0.88rem; color: var(--muted); font-weight: 600;
+    }
+    .brand img { width: 36px; height: 36px; border-radius: 9px; }
+    h1 {
+      margin: 0.85rem 0 0.45rem;
+      font-size: clamp(1.55rem, 4vw, 2rem);
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+    .lede { color: var(--muted); font-size: 1.02rem; max-width: 36rem; margin: 0; }
+    .price-card {
+      margin: 1.5rem 0;
+      padding: 1.25rem 1.2rem;
+      border-radius: 16px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .price-main {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+    .price-main span { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin-left: 0.35rem; }
+    .price-note { color: var(--muted); font-size: 0.9rem; margin-top: 0.15rem; }
+    .alt-price { font-size: 0.82rem; color: var(--muted); margin-top: 0.35rem; }
+    .cta-col { display: flex; flex-direction: column; gap: 0.5rem; min-width: min(100%, 220px); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none; font-weight: 700; font-size: 0.95rem;
+      padding: 0.75rem 1.1rem; border-radius: 10px; border: none; cursor: pointer;
+      text-align: center;
+    }
+    .btn-buy {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #1a1a2e;
+      box-shadow: 0 8px 24px rgba(245,158,11,0.25);
+    }
+    .btn-buy:hover { filter: brightness(1.05); }
+    .btn-demo {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .btn-demo:hover { border-color: rgba(255,255,255,0.28); }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: 1px dashed var(--line); font-size: 0.85rem;
+    }
+    h2 { font-size: 1.05rem; margin: 1.75rem 0 0.65rem; color: #fff; }
+    ul.benefits {
+      list-style: none; padding: 0; margin: 0;
+      display: grid; gap: 0.55rem;
+    }
+    ul.benefits li {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.75rem 0.9rem;
+      font-size: 0.95rem;
+      display: flex; gap: 0.55rem; align-items: flex-start;
+    }
+    ul.benefits li::before {
+      content: "✓";
+      color: #34d399;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .setup-box {
+      margin-top: 1rem;
+      padding: 1rem 1.05rem;
+      border-radius: 12px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.28);
+      font-size: 0.9rem;
+      color: #fde68a;
+    }
+    .setup-box h3 { margin: 0 0 0.45rem; font-size: 0.95rem; color: #fbbf24; }
+    .setup-box ol { margin: 0.4rem 0; padding-left: 1.2rem; color: #fef3c7; }
+    .setup-box code, .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.84em;
+      background: rgba(0,0,0,0.25);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+    .copy-block {
+      margin-top: 0.75rem;
+      background: rgba(0,0,0,0.25);
+      border-radius: 10px;
+      padding: 0.75rem 0.85rem;
+      position: relative;
+      white-space: pre-wrap;
+      font-size: 0.82rem;
+      color: #e5e7eb;
+      line-height: 1.45;
+    }
+    .copy-btn {
+      position: absolute; top: 0.45rem; right: 0.45rem;
+      font-size: 0.72rem; font-weight: 700;
+      border: 1px solid var(--line); background: var(--bg0); color: var(--ink);
+      border-radius: 6px; padding: 0.25rem 0.5rem; cursor: pointer;
+    }
+    .pro-list { color: var(--muted); font-size: 0.9rem; margin: 0.35rem 0 0; padding-left: 1.1rem; }
+    .unlock {
+      margin-top: 1.75rem;
+      padding: 1rem 1.05rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--card);
+    }
+    .unlock label { display: block; font-size: 0.85rem; color: var(--muted); font-weight: 600; margin-bottom: 0.4rem; }
+    .unlock-row { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .unlock input {
+      flex: 1; min-width: 160px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--line);
+      color: #fff;
+      border-radius: 8px;
+      padding: 0.55rem 0.7rem;
+      font-size: 0.92rem;
+    }
+    .unlock .btn { padding: 0.55rem 0.9rem; background: var(--brand); color: #fff; }
+    .msg { font-size: 0.85rem; margin-top: 0.45rem; min-height: 1.2em; }
+    .msg.ok { color: #34d399; }
+    .msg.err { color: #f87171; }
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem;
+      justify-content: space-between;
+    }
+    footer a { color: #93c5fd; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <img src="icons/icon-192.png" alt="" width="36" height="36">
+        Schedule Pro
+      </div>
+      <h1>Fair manager schedules without the spreadsheet fight</h1>
+      <p class="lede">Built for retail store managers who need NRF periods, fair weekends, and clopen-free coverage — then export and post.</p>
+    </header>
+
+    <div class="price-card">
+      <div>
+        <div class="price-main" id="price-label">$29<span id="price-note-inline"> one-time</span></div>
+        <div class="price-note" id="price-note">one-time · lifetime Pro unlock</div>
+        <div class="alt-price">Optional later: $12/mo subscription (not required now)</div>
+      </div>
+      <div class="cta-col">
+        <a class="btn btn-buy" id="btn-buy" href="#setup">Buy &amp; unlock Pro</a>
+        <a class="btn btn-demo" href="index.html?demo=1">Open free demo</a>
+      </div>
+    </div>
+
+    <h2>Why store managers pay once</h2>
+    <ul class="benefits">
+      <li><strong>NRF 4-5-4 calendar</strong> — fiscal periods that match retail, not generic monthly grids</li>
+      <li><strong>Fair weekends</strong> — preference engine balances who works Fri–Sun</li>
+      <li><strong>No clopens</strong> — hard preference to stop close→open punishment shifts</li>
+      <li><strong>Works offline</strong> — data stays in this browser; no account required for core use</li>
+      <li><strong>Word &amp; Excel export</strong> (Pro) — post-ready docs for your team and payroll</li>
+      <li><strong>Unlimited managers</strong> (Pro) — free tier is capped so you can try the full flow first</li>
+    </ul>
+
+    <h2>Pro unlock includes</h2>
+    <ul class="pro-list" id="pro-features">
+      <li>unlimited managers</li>
+      <li>Word export</li>
+      <li>Excel export</li>
+      <li>priority future updates</li>
+    </ul>
+
+    <div class="setup-box" id="setup-box" hidden>
+      <h3>Checkout not linked yet — 5 minutes on Gumroad</h3>
+      <p>Create a product, set price <strong>$29</strong>, then paste the checkout URL into <code>monetization.json</code> (field <code>checkoutUrl</code>) and redeploy — or just open the product URL yourself while selling.</p>
+      <ol>
+        <li>Open <a href="https://gumroad.com/" target="_blank" rel="noopener">Gumroad</a> → New product</li>
+        <li>Title: <strong>Manager Schedule Builder Pro</strong></li>
+        <li>Price: <strong>$29</strong> (one-time)</li>
+        <li>After purchase redirect / content URL:<br>
+          <code>https://bryanralston.github.io/schedule-builder/?pro=1</code>
+        </li>
+        <li>Also share the app link: <code>https://bryanralston.github.io/schedule-builder/</code></li>
+        <li>Optional: email license key — buyers paste it under “Unlock code” below (any key ≥ 6 chars or starting with <code>MSB-PRO-</code>)</li>
+      </ol>
+      <p style="margin:0.65rem 0 0.25rem"><strong>Copy product description:</strong></p>
+      <div class="copy-block" id="gumroad-copy">Manager Schedule Builder Pro — preference-driven retail manager scheduling.
+
+NRF 4-5-4 fiscal calendar, fair weekends, clopen prevention, role rules, quality score, Word/Excel export. Works offline. Data stays on your device.
+
+After purchase, open:
+https://bryanralston.github.io/schedule-builder/?pro=1
+
+Or open the app and enter your license/unlock code from the receipt.
+
+Free demo: https://bryanralston.github.io/schedule-builder/?demo=1
+Price: $29 one-time lifetime unlock.</div>
+      <button type="button" class="copy-btn" id="btn-copy-desc">Copy</button>
+      <p style="margin-top:0.75rem;margin-bottom:0">Full paste pack: <a href="store/gumroad-product.md">store/gumroad-product.md</a></p>
+    </div>
+
+    <div class="unlock" id="unlock-panel">
+      <label for="license-input">Already purchased? Enter license / unlock code</label>
+      <div class="unlock-row">
+        <input id="license-input" type="text" placeholder="Paste Gumroad license or MSB-PRO-…" autocomplete="off">
+        <button type="button" class="btn" id="btn-unlock">Unlock Pro</button>
+      </div>
+      <div class="msg" id="unlock-msg"></div>
+      <p style="margin:0.55rem 0 0;font-size:0.82rem;color:var(--muted)">
+        After Gumroad redirect, this page also accepts <code>?pro=1</code> / <code>?license=…</code> automatically.
+      </p>
+    </div>
+
+    <footer>
+      <div>
+        <a href="./">App</a> ·
+        <a href="index.html?demo=1">Demo</a> ·
+        <a href="legal/privacy.html">Privacy</a> ·
+        <a href="legal/terms.html">Terms</a> ·
+        <a href="install.html">Install / Play</a>
+      </div>
+      <div>v2.1 · Offline-first · No account required</div>
+    </footer>
+  </div>
+  <script>
+    const DEFAULTS = {
+      priceLabel: '$29',
+      priceNote: 'one-time · lifetime Pro unlock',
+      checkoutUrl: '',
+      productName: 'Manager Schedule Builder Pro',
+      proFeatures: ['unlimited managers', 'Word export', 'Excel export', 'priority future updates']
+    };
+    const LICENSE_KEY = 'msb_pro_license';
+
+    function isProUnlocked() {
+      try {
+        const raw = localStorage.getItem(LICENSE_KEY);
+        if (!raw) return false;
+        const j = JSON.parse(raw);
+        return !!(j && j.unlocked);
+      } catch { return false; }
+    }
+
+    function unlockPro(key) {
+      const payload = {
+        unlocked: true,
+        key: String(key || 'url-unlock').slice(0, 120),
+        at: new Date().toISOString()
+      };
+      localStorage.setItem(LICENSE_KEY, JSON.stringify(payload));
+      return payload;
+    }
+
+    function validLicenseKey(k) {
+      const s = String(k || '').trim();
+      if (s.length >= 6) return true;
+      if (/^MSB-PRO-/i.test(s)) return true;
+      return false;
+    }
+
+    function cleanUnlockParams() {
+      try {
+        const u = new URL(location.href);
+        ['pro', 'license', 'unlocked', 'key'].forEach((p) => u.searchParams.delete(p));
+        history.replaceState({}, '', u.pathname + u.search + u.hash);
+      } catch {}
+    }
+
+    function applyUrlUnlock() {
+      const params = new URLSearchParams(location.search);
+      const pro = params.get('pro') === '1' || params.get('unlocked') === '1';
+      const lic = params.get('license') || params.get('key');
+      if (pro || (lic && validLicenseKey(lic))) {
+        unlockPro(lic || 'pro=1');
+        cleanUnlockParams();
+        return true;
+      }
+      return false;
+    }
+
+    async function loadMonetization() {
+      try {
+        const r = await fetch('monetization.json', { cache: 'no-store' });
+        if (!r.ok) return DEFAULTS;
+        return { ...DEFAULTS, ...(await r.json()) };
+      } catch {
+        return DEFAULTS;
+      }
+    }
+
+    (async function boot() {
+      const justUnlocked = applyUrlUnlock();
+      const m = await loadMonetization();
+
+      document.getElementById('price-label').innerHTML =
+        (m.priceLabel || '$29') + '<span id="price-note-inline"> one-time</span>';
+      document.getElementById('price-note').textContent = m.priceNote || DEFAULTS.priceNote;
+
+      const feats = document.getElementById('pro-features');
+      if (Array.isArray(m.proFeatures) && m.proFeatures.length) {
+        feats.innerHTML = m.proFeatures.map((f) => '<li>' + f + '</li>').join('');
+      }
+
+      const btn = document.getElementById('btn-buy');
+      const setup = document.getElementById('setup-box');
+      if (m.checkoutUrl && String(m.checkoutUrl).trim()) {
+        btn.href = m.checkoutUrl;
+        btn.target = '_blank';
+        btn.rel = 'noopener';
+        btn.textContent = 'Buy & unlock Pro — ' + (m.priceLabel || '$29');
+        setup.hidden = true;
+      } else {
+        btn.href = '#setup';
+        btn.textContent = 'Set up $29 checkout (Gumroad)';
+        setup.hidden = false;
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          setup.scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+
+      if (isProUnlocked()) {
+        const msg = document.getElementById('unlock-msg');
+        msg.className = 'msg ok';
+        msg.textContent = justUnlocked
+          ? 'Pro unlocked on this device. Opening the app…'
+          : 'Pro is already unlocked in this browser.';
+        if (justUnlocked) setTimeout(() => { location.href = './'; }, 900);
+      }
+
+      document.getElementById('btn-unlock').addEventListener('click', () => {
+        const val = document.getElementById('license-input').value;
+        const msg = document.getElementById('unlock-msg');
+        if (!validLicenseKey(val)) {
+          msg.className = 'msg err';
+          msg.textContent = 'Enter a code at least 6 characters (or MSB-PRO-…).';
+          return;
+        }
+        unlockPro(val.trim());
+        msg.className = 'msg ok';
+        msg.textContent = 'Pro unlocked. Redirecting to the app…';
+        setTimeout(() => { location.href = './'; }, 700);
+      });
+
+      document.getElementById('btn-copy-desc').addEventListener('click', async () => {
+        const text = document.getElementById('gumroad-copy').innerText;
+        try {
+          await navigator.clipboard.writeText(text);
+          document.getElementById('btn-copy-desc').textContent = 'Copied';
+          setTimeout(() => { document.getElementById('btn-copy-desc').textContent = 'Copy'; }, 1200);
+        } catch {
+          alert('Select the text and copy manually.');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

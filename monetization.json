@@ -1,0 +1,15 @@
+{
+  "priceLabel": "$29",
+  "priceNote": "one-time · lifetime Pro unlock",
+  "checkoutUrl": "",
+  "checkoutProvider": "gumroad",
+  "productName": "Manager Schedule Builder Pro",
+  "supportEmail": "",
+  "freeManagerLimit": 3,
+  "proFeatures": [
+    "unlimited managers",
+    "Word export",
+    "Excel export",
+    "priority future updates"
+  ]
+}

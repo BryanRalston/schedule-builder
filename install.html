@@ -59,8 +59,16 @@
     </div>
 
     <div class="note">
-      <strong>What I already finished for you:</strong> app icons, install banner, offline cache, privacy & terms pages, Play package id <span class="mono">com.managerschedulebuilder.pro</span>, and store listing copy.
-      <strong>What only you can do:</strong> create a Play developer account, host on a public HTTPS domain, and upload the signed app bundle.
+      <strong>Done for you:</strong> live HTTPS PWA, icons, offline cache, privacy/terms, sales page (<span class="mono">buy.html</span>), soft Pro gate, package id <span class="mono">com.managerschedulebuilder.pro</span>, upload-cert assetlinks, and signed <span class="mono">.aab</span>.
+      <strong>You click:</strong> create Gumroad product ($29), paste checkout URL, upload AAB in Play Console.
+    </div>
+
+    <h2>Live URLs</h2>
+    <div class="step">
+      <p><strong>App:</strong> <a href="https://bryanralston.github.io/schedule-builder/" target="_blank" rel="noopener">https://bryanralston.github.io/schedule-builder/</a></p>
+      <p><strong>Buy / Pro:</strong> <a href="https://bryanralston.github.io/schedule-builder/buy.html" target="_blank" rel="noopener">…/buy.html</a></p>
+      <p><strong>Privacy:</strong> <a href="https://bryanralston.github.io/schedule-builder/legal/privacy.html" target="_blank" rel="noopener">…/legal/privacy.html</a></p>
+      <p><strong>Manifest:</strong> <span class="mono">https://bryanralston.github.io/schedule-builder/manifest.webmanifest</span></p>
     </div>
 
     <h2>Path A — Use it as an app today (no store)</h2>
@@ -72,92 +80,84 @@
       <div class="actions">
         <button class="btn amber" type="button" id="btn-try-install">Try install prompt</button>
         <a class="btn secondary" href="./">Open app</a>
+        <a class="btn secondary" href="buy.html">Sales page</a>
       </div>
     </div>
 
     <h2>Path B — Sell on the web (fastest money)</h2>
     <div class="step">
-      <h3><span class="step-num">2</span> Host the app on HTTPS <span class="badge badge-you">You do this</span></h3>
-      <ol>
-        <li>Create a free site on <strong>GitHub Pages</strong>, <strong>Vercel</strong>, or <strong>Cloudflare Pages</strong></li>
-        <li>Upload the entire app folder (not just one file): <span class="mono">index.html</span>, <span class="mono">sw.js</span>, <span class="mono">manifest.webmanifest</span>, <span class="mono">icons/</span>, <span class="mono">legal/</span></li>
-        <li>Confirm <span class="mono">https://yourdomain.com/manifest.webmanifest</span> loads</li>
-        <li>Open the site on your phone and install it</li>
-      </ol>
-      <p>Point your checkout (Lemon Squeezy / Gumroad) at that URL after purchase, or keep the app free with a tip link.</p>
+      <h3><span class="step-num">2</span> Host the app on HTTPS <span class="badge badge-done">Done</span></h3>
+      <p>Live on GitHub Pages: <a href="https://bryanralston.github.io/schedule-builder/" target="_blank" rel="noopener">bryanralston.github.io/schedule-builder</a></p>
+      <p>Open on your phone and install from Chrome/Safari when ready.</p>
     </div>
     <div class="step">
-      <h3><span class="step-num">3</span> Create a checkout <span class="badge badge-you">You do this</span></h3>
+      <h3><span class="step-num">3</span> Create a Gumroad checkout <span class="badge badge-you">You do this — earn ASAP</span></h3>
       <ol>
-        <li>Sign up at <a href="https://www.lemonsqueezy.com/" target="_blank" rel="noopener">Lemon Squeezy</a> or <a href="https://gumroad.com/" target="_blank" rel="noopener">Gumroad</a></li>
-        <li>Product name: <strong>Manager Schedule Builder Pro</strong></li>
-        <li>Suggested price: <strong>$29 one-time</strong> or <strong>$12/month</strong></li>
-        <li>Delivery: link to your HTTPS app URL</li>
+        <li>Sign up / log in at <a href="https://gumroad.com/" target="_blank" rel="noopener">Gumroad</a> → New product</li>
+        <li>Title: <strong>Manager Schedule Builder Pro</strong> · Price: <strong>$29</strong> one-time</li>
+        <li>After-purchase URL: <span class="mono">https://bryanralston.github.io/schedule-builder/?pro=1</span></li>
+        <li>Paste pack: <a href="store/gumroad-product.md">store/gumroad-product.md</a> · Sales page: <a href="buy.html">buy.html</a></li>
+        <li>Copy your product checkout URL → put it in <span class="mono">monetization.json</span> as <span class="mono">checkoutUrl</span> (or send URL to Cortex)</li>
       </ol>
+      <div class="actions">
+        <a class="btn" href="buy.html">Open buy.html</a>
+        <a class="btn secondary" href="store/gumroad-product.md">Gumroad paste pack</a>
+      </div>
     </div>
 
     <h2>Path C — Google Play Store</h2>
     <div class="step">
       <h3><span class="step-num">4</span> Google Play developer account <span class="badge badge-you">You do this</span></h3>
       <ol>
-        <li>Go to <a href="https://play.google.com/console/signup" target="_blank" rel="noopener">Play Console signup</a></li>
-        <li>Pay the one-time registration fee (Google sets this; currently around $25)</li>
-        <li>Complete identity verification — can take hours to a few days</li>
+        <li>Go to <a href="https://play.google.com/console" target="_blank" rel="noopener">Play Console</a></li>
+        <li>Pay the one-time registration fee if new (~$25)</li>
+        <li>Complete identity verification if prompted</li>
       </ol>
     </div>
     <div class="step">
-      <h3><span class="step-num">5</span> Host on HTTPS first <span class="badge badge-you">Required</span></h3>
-      <p>Play’s web-app wrapper (Trusted Web Activity) must load your live HTTPS site. Finish Path B step 2 before packaging.</p>
+      <h3><span class="step-num">5</span> Host on HTTPS <span class="badge badge-done">Done</span></h3>
+      <p>TWA loads the live site above. No extra host step.</p>
     </div>
     <div class="step">
-      <h3><span class="step-num">6</span> Package for Play (TWA) <span class="badge badge-you">On your computer</span></h3>
-      <p>On a computer with Android Studio / JDK installed:</p>
-      <ol>
-        <li>Install Bubblewrap: <span class="mono">npm i -g @bubblewrap/cli</span></li>
-        <li>Run: <span class="mono">bubblewrap init --manifest https://YOUR_DOMAIN/manifest.webmanifest</span></li>
-        <li>When asked, package id: <span class="mono">com.managerschedulebuilder.pro</span></li>
-        <li>Build: <span class="mono">bubblewrap build</span> → produces an <span class="mono">.aab</span> file</li>
-        <li>Copy the signing certificate SHA-256 Bubblewrap prints</li>
-      </ol>
+      <h3><span class="step-num">6</span> Package for Play (TWA) <span class="badge badge-done">AAB ready</span></h3>
+      <p>Signed App Bundle already built on this machine:</p>
+      <p class="mono" style="word-break:break-all">C:\Users\bryma\schedule-builder\android-twa\app-release-bundle.aab</p>
+      <p>Package id: <span class="mono">com.managerschedulebuilder.pro</span> · version 2.1.0 (210)</p>
+      <div class="actions">
+        <a class="btn" href="store/play-upload.html">Play upload cheat sheet</a>
+        <a class="btn secondary" href="PLAY_CONSOLE_NOW.md">PLAY_CONSOLE_NOW.md</a>
+      </div>
     </div>
     <div class="step">
-      <h3><span class="step-num">7</span> Link domain to the Android app <span class="badge badge-you">You do this</span></h3>
-      <p>Edit <span class="mono">/.well-known/assetlinks.json</span> on your live site. Replace the placeholder fingerprint with your real SHA-256 (colons optional; Google accepts both formats).</p>
-      <pre class="mono" style="white-space:pre-wrap;background:#f3f4f6;padding:0.75rem;border-radius:8px;font-size:0.78rem;overflow:auto">[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.managerschedulebuilder.pro",
-      "sha256_cert_fingerprints": ["YOUR_SHA256_HERE"]
-    }
-  }
-]</pre>
-      <p>Test with Google’s statement list generator after deploy.</p>
+      <h3><span class="step-num">7</span> Link domain (assetlinks) <span class="badge badge-done">Upload cert live</span></h3>
+      <p>Upload-key SHA-256 is already on <span class="mono">.well-known/assetlinks.json</span>.</p>
+      <p><strong>After first Play upload:</strong> copy <em>App signing</em> SHA-256 from Play → App integrity and paste back to Cortex to add the second fingerprint.</p>
     </div>
     <div class="step">
       <h3><span class="step-num">8</span> Store listing <span class="badge badge-done">Copy ready</span></h3>
-      <p>Use our ready-made listing text and screenshots pack.</p>
+      <p>Use listing pack + screenshots. Prefer <strong>Internal testing</strong> track first, then Production.</p>
       <div class="actions">
         <a class="btn" href="store/listing.html">Open store listing pack</a>
         <a class="btn secondary" href="legal/privacy.html">Privacy policy URL</a>
       </div>
-      <p style="margin-top:0.6rem">In Play Console create an app → fill title, short/full description from the listing pack → set privacy policy URL to your hosted <span class="mono">/legal/privacy.html</span> → upload the <span class="mono">.aab</span> → complete content rating questionnaire → submit for review.</p>
+      <p style="margin-top:0.6rem">Privacy URL for Play Console:<br>
+        <span class="mono">https://bryanralston.github.io/schedule-builder/legal/privacy.html</span></p>
     </div>
 
     <h2>Your checklist</h2>
     <div class="step checklist" id="checklist">
       <label><input type="checkbox" data-k="c1"> App installs from browser (Path A)</label>
-      <label><input type="checkbox" data-k="c2"> Hosted on public HTTPS</label>
-      <label><input type="checkbox" data-k="c3"> Lemon Squeezy / Gumroad product created</label>
+      <label><input type="checkbox" data-k="c2" checked> Hosted on public HTTPS (GitHub Pages)</label>
+      <label><input type="checkbox" data-k="c3"> Gumroad $29 product created + checkout URL set</label>
       <label><input type="checkbox" data-k="c4"> Play developer account approved</label>
-      <label><input type="checkbox" data-k="c5"> Bubblewrap AAB built</label>
-      <label><input type="checkbox" data-k="c6"> assetlinks.json updated with real fingerprint</label>
-      <label><input type="checkbox" data-k="c7"> Play listing submitted for review</label>
+      <label><input type="checkbox" data-k="c5" checked> Bubblewrap AAB built</label>
+      <label><input type="checkbox" data-k="c6" checked> assetlinks upload cert live (add Play signing SHA later)</label>
+      <label><input type="checkbox" data-k="c7"> Play internal test / listing submitted</label>
     </div>
 
     <footer>
-      Package: <span class="mono">com.managerschedulebuilder.pro</span> · Version 2.1.0 PWA<br>
+      Package: <span class="mono">com.managerschedulebuilder.pro</span> · Version 2.1.1 PWA<br>
+      <a href="buy.html">Buy</a> ·
       <a href="legal/privacy.html">Privacy</a> ·
       <a href="legal/terms.html">Terms</a> ·
       <a href="store/listing.html">Store listing</a> ·

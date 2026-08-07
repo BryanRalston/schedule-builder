@@ -1,15 +1,16 @@
-{
-  "priceLabel": "$29",
-  "priceNote": "one-time · lifetime Pro unlock",
-  "checkoutUrl": "https://ralstonia5.gumroad.com/l/pwplbc",
-  "checkoutProvider": "gumroad",
-  "productName": "Manager Schedule Builder Pro",
-  "supportEmail": "",
-  "freeManagerLimit": 3,
-  "proFeatures": [
-    "unlimited managers",
-    "Word export",
-    "Excel export",
-    "priority future updates"
-  ]
+﻿{
+    "checkoutUrl":  "https://ralstonia5.gumroad.com/l/pwplbc?wanted=true",
+    "supportEmail":  "",
+    "priceNote":  "one-time · lifetime Pro unlock",
+    "checkoutProvider":  "gumroad",
+    "priceLabel":  "$29",
+    "freeManagerLimit":  3,
+    "productUrl":  "https://ralstonia5.gumroad.com/l/pwplbc",
+    "productName":  "Manager Schedule Builder Pro",
+    "proFeatures":  [
+                        "unlimited managers",
+                        "Word export",
+                        "Excel export",
+                        "priority future updates"
+                    ]
 }

@@ -1,11 +1,14 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "com.managerschedulebuilder.pro",
       "sha256_cert_fingerprints": [
-        "6C:FF:DC:CF:CC:F6:B8:27:8E:D4:EC:A5:63:98:4A:6E:16:87:2D:6F:59:65:D3:4F:E6:70:75:E5:F1:06:2F:58"
+        "6C:FF:DC:CF:CC:F6:B8:27:8E:D4:EC:A5:63:98:4A:6E:16:87:2D:6F:59:65:D3:4F:E6:70:75:E5:F1:06:2F:58",
+        "66:33:51:35:08:FE:03:23:BE:4E:2B:D1:E3:8A:A6:6A:FC:F1:92:67:87:5D:70:C0:11:B4:11:D9:CB:65:34:AE"
       ]
     }
   }

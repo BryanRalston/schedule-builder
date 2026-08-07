@@ -7,19 +7,28 @@ Desktop.ini
 .vscode/
 .idea/
 
-# Local tooling / secrets
+# Local tooling / secrets — NEVER commit
 *.keystore
 *.jks
 *.p12
+keystore.properties
 local.properties
 .env
 .env.*
 
-# Node / Bubblewrap (if run from this tree)
+# Node
 node_modules/
+package-lock.json
+
+# Bubblewrap / Android build outputs (keep sources under android-twa/)
 .twa-*/
 android/
-package-lock.json
+android-twa/.gradle/
+android-twa/build/
+android-twa/app/build/
+android-twa/*.apk
+android-twa/*.aab
+android-twa/*.idsig
 
 # Logs
 *.log

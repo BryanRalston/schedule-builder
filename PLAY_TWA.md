@@ -1,117 +1,117 @@
 # Google Play TWA (Bubblewrap) — Manager Schedule Builder Pro
 
 **Package id:** `com.managerschedulebuilder.pro`  
-**Version:** 2.1.0  
-**App name:** Schedule Pro / Manager Schedule Builder Pro
+**Version name:** `2.1.0` · **versionCode:** `210`  
+**App name:** Manager Schedule Builder Pro · **Launcher:** Schedule Pro
 
-This is a **Trusted Web Activity** shell around the live HTTPS PWA. The scheduler stays offline-first in the browser; Play ships a thin Android wrapper.
-
-## Live URL (GitHub Pages project site)
-
-Expected:
-
-```
-https://bryanralston.github.io/schedule-builder/
-```
-
-Manifest (for Bubblewrap):
-
-```
-https://bryanralston.github.io/schedule-builder/manifest.webmanifest
-```
-
-Privacy policy (Play Console):
-
-```
-https://bryanralston.github.io/schedule-builder/legal/privacy.html
-```
-
-Digital Asset Links (must be served at site root under `.well-known`):
-
-```
-https://bryanralston.github.io/schedule-builder/.well-known/assetlinks.json
-```
-
-> **Note:** Paths in the PWA use **relative** URLs so the app works under `/schedule-builder/`. If you later move to a custom domain at the site root, relative paths still work.
+Trusted Web Activity shell around the live HTTPS PWA. Scheduler stays offline-first in the browser.
 
 ---
 
-## Prerequisites (Windows)
+## Status (as of packaging session)
 
-Java is **not** currently available on this machine. Install before Bubblewrap:
+| Step | Status |
+|------|--------|
+| JDK 17 installed (Microsoft OpenJDK) | Done |
+| Bubblewrap CLI `@bubblewrap/cli` | Done (global npm) |
+| Android SDK + build-tools 36.1.0 | Done (existing SDK + install) |
+| TWA project generated | Done → `android-twa/` |
+| Upload keystore | Done (outside repo) |
+| SHA-256 in live `assetlinks.json` | Done (upload cert) |
+| Signed `.aab` + `.apk` | Done (local only, gitignored) |
+| Play Console upload | **Bryan** |
+| Play App Signing SHA added to assetlinks | **Bryan** (after first upload) |
 
-1. **JDK 17+** (Temurin recommended)  
-   - https://adoptium.net/  
-   - Confirm: `java -version`
-2. **Android command-line tools / SDK** (Bubblewrap can prompt to install)  
-   - Or Android Studio if you prefer a full IDE
-3. **Node.js + npm** (already available)
-4. Bubblewrap CLI:
+### Live URLs
 
-```powershell
-npm install -g @bubblewrap/cli
-bubblewrap --version
-```
+- App: https://bryanralston.github.io/schedule-builder/
+- Manifest: https://bryanralston.github.io/schedule-builder/manifest.webmanifest
+- Privacy: https://bryanralston.github.io/schedule-builder/legal/privacy.html
+- Asset links: https://bryanralston.github.io/schedule-builder/.well-known/assetlinks.json
 
----
+### Local artifacts (do not commit)
 
-## 1. Bubblewrap init (against LIVE HTTPS)
+| Item | Path |
+|------|------|
+| Signed App Bundle (Play upload) | `android-twa/app-release-bundle.aab` |
+| Signed APK (sideload test) | `android-twa/app-release-signed.apk` |
+| Keystore + passwords | `C:\Users\bryma\schedule-builder-secrets\` (OUTSIDE git) |
+| Bubblewrap config | `%USERPROFILE%\.bubblewrap\config.json` |
+| JDK no-space junction | `C:\Java\jdk17` → Microsoft JDK 17 (Bubblewrap breaks on spaces in JAVA path) |
 
-From a **new empty folder** (do not init inside the static web repo):
-
-```powershell
-mkdir C:\Users\bryma\projects\schedule-pro-twa
-cd C:\Users\bryma\projects\schedule-pro-twa
-
-bubblewrap init --manifest https://bryanralston.github.io/schedule-builder/manifest.webmanifest
-```
-
-When prompted, use:
-
-| Prompt | Value |
-|--------|--------|
-| Package ID | `com.managerschedulebuilder.pro` |
-| App name | `Schedule Pro` |
-| Launcher name | `Schedule Pro` |
-| Theme color | `#1a1a2e` |
-| Background color | `#1a1a2e` |
-| Start URL | leave as detected from manifest (under `/schedule-builder/`) |
-| Display mode | `standalone` |
-| Icon | accept generated from maskable 512 if offered |
-
-Bubblewrap creates an Android project + signing config.
+**Back up** `C:\Users\bryma\schedule-builder-secrets\` offline. Losing the keystore blocks updates signed with this upload key.
 
 ---
 
-## 2. Signing keystore
-
-If Bubblewrap does not create one for you:
+## Rebuild later
 
 ```powershell
-keytool -genkey -v -keystore schedule-pro-upload.keystore -alias schedule-pro -keyalg RSA -keysize 2048 -validity 10000
+$env:JAVA_HOME = "C:\Java\jdk17"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+$env:ANDROID_HOME = "C:\Users\bryma\AppData\Local\Android\Sdk"
+
+# Load passwords from secrets file (do not echo)
+$props = @{}
+Get-Content "C:\Users\bryma\schedule-builder-secrets\keystore.properties" | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') { $props[$Matches[1]] = $Matches[2] }
+}
+$env:BUBBLEWRAP_KEYSTORE_PASSWORD = $props['storePassword']
+$env:BUBBLEWRAP_KEY_PASSWORD = $props['keyPassword']
+
+cd C:\Users\bryma\schedule-builder\android-twa
+bubblewrap build --skipPwaValidation
 ```
 
-**Store the keystore + passwords offline.** Losing them blocks Play updates.
-
-Get the **SHA-256** fingerprint of the **upload** key (and later the Play App Signing cert if enrolled):
+Regenerate project from live manifest (non-interactive helper):
 
 ```powershell
-keytool -list -v -keystore schedule-pro-upload.keystore -alias schedule-pro
+cd C:\Users\bryma\schedule-builder
+node .\scripts\noninteractive-twa-init.js
 ```
 
-Copy the `SHA256:` line (colon-separated hex).
+Interactive equivalent:
+
+```powershell
+bubblewrap init --manifest=https://bryanralston.github.io/schedule-builder/manifest.webmanifest --directory=android-twa
+```
+
+Use package id `com.managerschedulebuilder.pro`.
 
 ---
 
-## 3. assetlinks.json
+## Play Console remaining steps (Bryan)
 
-Repo file (placeholder until you have a real cert):
+1. Open [Google Play Console](https://play.google.com/console) → Create app (or open existing).
+2. Package name must be **`com.managerschedulebuilder.pro`** (cannot change after create).
+3. **Production / Testing** → Create release → Upload  
+   `C:\Users\bryma\schedule-builder\android-twa\app-release-bundle.aab`
+4. After upload, open **Setup → App integrity / App signing**:
+   - Copy the **App signing key certificate** SHA-256 from Play.
+   - Add it as a **second** fingerprint in `.well-known/assetlinks.json` (keep the upload key fingerprint too).
+   - Commit + push so GitHub Pages serves the updated file.
+5. Store listing — use copy from `store/listing.html`  
+   - Feature graphic: `store/feature-graphic-1024x500.png`  
+   - Screenshots: `store/screenshots/`  
+   - High-res icon: `icons/icon-512.png`
+6. Privacy policy URL:  
+   `https://bryanralston.github.io/schedule-builder/legal/privacy.html`
+7. Complete Data safety (local-only / no account server), content rating, target audience.
+8. Verify Digital Asset Links (full-screen TWA, no Chrome custom-tab bar):  
+   https://developers.google.com/digital-asset-links/tools/generator  
+   Package: `com.managerschedulebuilder.pro`  
+   Domain: `bryanralston.github.io`
+9. Submit for review.
 
-```
-.well-known/assetlinks.json
-```
+### Note on host / project Pages
 
-Replace `REPLACE_WITH_YOUR_UPLOAD_KEY_SHA256` with your fingerprint **without** spaces, e.g.:
+TWA `host` is `bryanralston.github.io` with  
+`startUrl` `/schedule-builder/?source=pwa` and  
+`fullScopeUrl` `https://bryanralston.github.io/schedule-builder/`.  
+That is correct for a GitHub **project** site. A custom domain later would need a new Bubblewrap init/update + Play release.
+
+---
+
+## assetlinks.json shape
 
 ```json
 [
@@ -121,108 +121,20 @@ Replace `REPLACE_WITH_YOUR_UPLOAD_KEY_SHA256` with your fingerprint **without** 
       "namespace": "android_app",
       "package_name": "com.managerschedulebuilder.pro",
       "sha256_cert_fingerprints": [
-        "AB:CD:EF:..."
+        "<UPLOAD_KEY_SHA256>",
+        "<PLAY_APP_SIGNING_SHA256_WHEN_AVAILABLE>"
       ]
     }
   }
 ]
 ```
 
-If you use **Play App Signing**, also add the **App signing key certificate** SHA-256 from Play Console → Setup → App integrity (in addition to the upload key).
-
-Commit + push, then verify:
-
-```
-https://bryanralston.github.io/schedule-builder/.well-known/assetlinks.json
-```
-
-Google’s tester:
-
-```
-https://developers.google.com/digital-asset-links/tools/generator
-```
+Upload cert fingerprint is already live. Add Play’s app-signing cert after first AAB upload.
 
 ---
 
-## 4. Build the Android App Bundle
+## Secrets policy
 
-```powershell
-cd C:\Users\bryma\projects\schedule-pro-twa
-bubblewrap build
-```
-
-Output is typically an `.aab` (App Bundle) for Play Console upload.
-
-Update version for later releases:
-
-```powershell
-bubblewrap update
-# or edit twa-manifest.json versionCode / versionName
-```
-
----
-
-## 5. Play Console listing
-
-Use copy from:
-
-```
-store/listing.html
-```
-
-(once live: `https://bryanralston.github.io/schedule-builder/store/listing.html`)
-
-Assets already in repo:
-
-- Feature graphic: `store/feature-graphic-1024x500.png`
-- Phone screenshots: `store/screenshots/*.png`
-- High-res icon: use `icons/icon-512.png` / maskable 512
-
-Checklist:
-
-1. Create app with package `com.managerschedulebuilder.pro` (must match Bubblewrap)
-2. Default language, free or paid as you choose
-3. Store listing: title, short + full description from listing pack
-4. Privacy policy URL → hosted `legal/privacy.html`
-5. App category: Business / Productivity
-6. Content rating questionnaire
-7. Target audience, news app, data safety (local-only storage — declare accordingly)
-8. Upload signed `.aab`
-9. Confirm Digital Asset Links so the TWA opens full-screen without Chrome custom-tab bar
-10. Submit for review
-
----
-
-## 6. Optional: Capacitor path
-
-`capacitor.config.json` is present with the same package id for a fuller native shell if you abandon TWA later. Prefer Bubblewrap TWA for “wrap the live PWA” simplicity.
-
----
-
-## Quick command cheat sheet
-
-```powershell
-# After JDK installed
-npm install -g @bubblewrap/cli
-
-# Init + build
-mkdir C:\Users\bryma\projects\schedule-pro-twa
-cd C:\Users\bryma\projects\schedule-pro-twa
-bubblewrap init --manifest https://bryanralston.github.io/schedule-builder/manifest.webmanifest
-bubblewrap build
-
-# Fingerprint for assetlinks
-keytool -list -v -keystore schedule-pro-upload.keystore -alias schedule-pro
-```
-
----
-
-## What Bryan still needs to do
-
-1. Confirm GitHub Pages is live at the URL above (or enable Pages if push succeeded without `gh`).
-2. Install **JDK 17+**, then Bubblewrap.
-3. Run `bubblewrap init` / `build`, create keystore, fill real SHA-256 into `.well-known/assetlinks.json`, redeploy.
-4. Create/pay Google Play developer account if not already.
-5. Submit listing + AAB using `store/listing.html` copy.
-
-No app logic rewrite required for any of the above.
+- Keystore and passwords live only under `C:\Users\bryma\schedule-builder-secrets\`
+- Repo `.gitignore` blocks `*.keystore`, `keystore.properties`, `*.aab`, `*.apk`, Gradle build dirs
+- `twa-manifest.json` points signingKey.path at the secrets keystore (absolute path on this machine)

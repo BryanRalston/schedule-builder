@@ -193,7 +193,7 @@
 
     <div class="price-card">
       <div>
-        <div class="price-main" id="price-label">$29<span id="price-note-inline"> one-time</span></div>
+        <div class="price-main" id="price-label">$19.99<span id="price-note-inline"> one-time</span></div>
         <div class="price-note" id="price-note">one-time · lifetime Pro unlock</div>
         <div class="alt-price">Optional later: $12/mo subscription (not required now)</div>
       </div>
@@ -223,11 +223,11 @@
 
     <div class="setup-box" id="setup-box" hidden>
       <h3>Checkout not linked yet — 5 minutes on Gumroad</h3>
-      <p>Create a product, set price <strong>$29</strong>, then paste the checkout URL into <code>monetization.json</code> (field <code>checkoutUrl</code>) and redeploy — or just open the product URL yourself while selling.</p>
+      <p>Create a product, set price <strong>$19.99</strong>, then paste the checkout URL into <code>monetization.json</code> (field <code>checkoutUrl</code>) and redeploy — or just open the product URL yourself while selling.</p>
       <ol>
         <li>Open <a href="https://gumroad.com/" target="_blank" rel="noopener">Gumroad</a> → New product</li>
         <li>Title: <strong>Manager Schedule Builder Pro</strong></li>
-        <li>Price: <strong>$29</strong> (one-time)</li>
+        <li>Price: <strong>$19.99</strong> (one-time)</li>
         <li>After purchase redirect / content URL:<br>
           <code>https://bryanralston.github.io/schedule-builder/?pro=1</code>
         </li>
@@ -245,7 +245,7 @@ https://bryanralston.github.io/schedule-builder/?pro=1
 Or open the app and enter your license/unlock code from the receipt.
 
 Free demo: https://bryanralston.github.io/schedule-builder/?demo=1
-Price: $29 one-time lifetime unlock.</div>
+Price: $19.99 one-time lifetime unlock.</div>
       <button type="button" class="copy-btn" id="btn-copy-desc">Copy</button>
       <p style="margin-top:0.75rem;margin-bottom:0">Full paste pack: <a href="store/gumroad-product.md">store/gumroad-product.md</a></p>
     </div>
@@ -275,7 +275,7 @@ Price: $29 one-time lifetime unlock.</div>
   </div>
   <script>
     const DEFAULTS = {
-      priceLabel: '$29',
+      priceLabel: '$19.99',
       priceNote: 'one-time · lifetime Pro unlock',
       checkoutUrl: '',
       productName: 'Manager Schedule Builder Pro',
@@ -344,7 +344,7 @@ Price: $29 one-time lifetime unlock.</div>
       const m = await loadMonetization();
 
       document.getElementById('price-label').innerHTML =
-        (m.priceLabel || '$29') + '<span id="price-note-inline"> one-time</span>';
+        (m.priceLabel || '$19.99') + '<span id="price-note-inline"> one-time</span>';
       document.getElementById('price-note').textContent = m.priceNote || DEFAULTS.priceNote;
 
       const feats = document.getElementById('pro-features');
@@ -358,11 +358,11 @@ Price: $29 one-time lifetime unlock.</div>
         btn.href = m.checkoutUrl;
         btn.target = '_blank';
         btn.rel = 'noopener';
-        btn.textContent = 'Buy & unlock Pro — ' + (m.priceLabel || '$29');
+        btn.textContent = 'Buy & unlock Pro — ' + (m.priceLabel || '$19.99');
         setup.hidden = true;
       } else {
         btn.href = '#setup';
-        btn.textContent = 'Set up $29 checkout (Gumroad)';
+        btn.textContent = 'Set up $19.99 checkout (Gumroad)';
         setup.hidden = false;
         btn.addEventListener('click', (e) => {
           e.preventDefault();

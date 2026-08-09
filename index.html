@@ -581,56 +581,151 @@ input[type="radio"] { accent-color: var(--gold); }
   background: rgba(16, 26, 46, 0.98);
 }
 
-/* Mobile week cards */
-.mobile-week-cards { display: none; }
+/* Day view cards (any width when Day view is selected) */
+.mobile-week-cards { display: block; padding: 0.65rem 0.75rem 0.85rem; }
+.mw-day {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  margin-bottom: 0.55rem;
+  overflow: hidden;
+}
+.mw-day-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.55rem 0.75rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+.mw-day-head .mw-date { font-size: 0.75rem; font-weight: 500; color: var(--ink-3); }
+.mw-day-head.weekend { background: rgba(124,92,255,0.14); }
+.mw-person {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  min-height: 48px;
+}
+.mw-person:last-child { border-bottom: none; }
+.mw-person:active { background: var(--gold-soft); }
+.mw-person .mw-name { flex: 1; font-weight: 600; font-size: 0.86rem; min-width: 0; }
+.mw-person .mw-shift {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.mw-coverage {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding: 0.45rem 0.75rem;
+  background: var(--gold-soft);
+}
+.mw-coverage.coverage-bad { color: var(--bad); background: var(--bad-bg); }
+
+/* Month calendar view */
+.month-calendar {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.month-cal-head {
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border-bottom: 1px solid var(--line-strong);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.month-cal-head > div {
+  background: linear-gradient(180deg, #0e1628, #0a1220);
+  color: #c5e8ff;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.55rem 0.25rem;
+}
+.month-cal-head > div.weekend { background: #12102a; color: #d4c8ff; }
+.month-week-row {
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.month-week-label {
+  background: rgba(14, 22, 40, 0.98);
+  color: var(--ink-3);
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+.month-day-cell {
+  background: rgba(12, 18, 32, 0.92);
+  min-height: 92px;
+  padding: 0.35rem 0.3rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.month-day-cell.weekend { background: rgba(22, 18, 42, 0.92); }
+.month-day-cell .md-date {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  margin-bottom: 0.15rem;
+}
+.month-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 0.18rem 0.28rem;
+  border-radius: 5px;
+  cursor: pointer;
+  min-height: 22px;
+  line-height: 1.15;
+}
+.month-chip:hover { filter: brightness(1.15); box-shadow: 0 0 0 1px rgba(61,220,255,0.35); }
+.month-chip .mc-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+.month-chip .mc-shift { flex-shrink: 0; opacity: 0.95; }
 @media (max-width: 720px) {
-  .week-table-wrapper .week-table { display: none; }
-  .mobile-week-cards { display: block; padding: 0.65rem 0.75rem 0.85rem; }
-  .mw-day {
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--surface);
-    margin-bottom: 0.55rem;
-    overflow: hidden;
-  }
-  .mw-day-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 0.55rem 0.75rem;
-    background: var(--surface-2);
-    border-bottom: 1px solid var(--line);
-    font-weight: 600;
-    font-size: 0.88rem;
-  }
-  .mw-day-head .mw-date { font-size: 0.75rem; font-weight: 500; color: var(--ink-3); }
-  .mw-day-head.weekend { background: rgba(124,92,255,0.14); }
-  .mw-person {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.55rem 0.75rem;
-    border-bottom: 1px solid var(--line);
-    cursor: pointer;
-    min-height: 48px;
-  }
-  .mw-person:last-child { border-bottom: none; }
-  .mw-person:active { background: var(--gold-soft); }
-  .mw-person .mw-name { flex: 1; font-weight: 600; font-size: 0.86rem; min-width: 0; }
-  .mw-person .mw-shift {
-    font-size: 0.78rem;
-    font-weight: 600;
-    padding: 0.35rem 0.6rem;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
-  .mw-coverage {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--ink-3);
-    padding: 0.45rem 0.75rem;
-    background: var(--gold-soft);
-  }
+  .month-cal-head, .month-week-row { grid-template-columns: 36px repeat(7, minmax(72px, 1fr)); }
+  .month-calendar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .month-cal-head, .month-week-row { min-width: 560px; }
 }
 
 /* Clopen radar */
@@ -2244,6 +2339,65 @@ input[type="radio"] { accent-color: var(--gold); }
   color: var(--ink-4);
   margin-right: 0.25rem;
 }
+.view-mode-seg {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 2px;
+  background: rgba(8, 12, 22, 0.75);
+  gap: 2px;
+  box-shadow: inset 0 0 0 1px rgba(61,220,255,0.04);
+}
+.view-mode-seg .view-mode-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-4);
+  padding: 0 0.35rem 0 0.55rem;
+  letter-spacing: 0.02em;
+}
+.view-mode-seg button {
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.72rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.view-mode-seg button:hover {
+  color: var(--ink);
+  background: rgba(61,220,255,0.08);
+}
+.view-mode-seg button.active {
+  background: rgba(61,220,255,0.16);
+  color: #9aedff;
+  box-shadow: 0 0 14px rgba(61,220,255,0.35), inset 0 0 0 1px rgba(61,220,255,0.4);
+}
+.pref-day-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  margin-top: 0.15rem;
+}
+.pref-day-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+}
+.pref-day-checks input[type="checkbox"] {
+  accent-color: var(--gold);
+  width: 14px;
+  height: 14px;
+}
 .gen-timestamp {
   font-size: 0.75rem;
   color: var(--ink-4);
@@ -2919,6 +3073,12 @@ html.pwa-standalone .install-banner { display: none !important; }
     </div>
     <div class="section-body" id="schedule-body">
       <div class="schedule-toolbar no-print" id="schedule-toolbar">
+        <div class="view-mode-seg" id="schedule-view-toggle" role="group" aria-label="Schedule view mode">
+          <span class="view-mode-label">View</span>
+          <button type="button" data-view="month" onclick="setScheduleViewMode('month')">Month</button>
+          <button type="button" data-view="week" onclick="setScheduleViewMode('week')" class="active">Week</button>
+          <button type="button" data-view="day" onclick="setScheduleViewMode('day')">Day</button>
+        </div>
         <span class="toolbar-label">Actions</span>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="window.print()">Print posting sheet</button>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportSchedule()">Word</button>
@@ -2955,7 +3115,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.2.4</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.3.0</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3340,10 +3500,39 @@ const DEFAULT_PREFERENCES = {
   maxConsecutiveWorkDays: 6,
   avoidClopening: true,
   fairDistribution: true,
-  minHoursBetweenShifts: 0
+  minHoursBetweenShifts: 0,
+  kcCloseDays: [1] // 0=Sun … 6=Sat; default Monday
 };
 
 let preferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
+
+/** Normalize KC close DOWs (0=Sun…6=Sat). Empty array = no automatic KC close nights. */
+function normalizeKcCloseDays(arr) {
+  if (!Array.isArray(arr)) return [1];
+  const out = [];
+  const seen = new Set();
+  for (const raw of arr) {
+    const n = typeof raw === 'number' ? raw : parseInt(raw, 10);
+    if (!Number.isFinite(n) || n < 0 || n > 6 || seen.has(n)) continue;
+    seen.add(n);
+    out.push(n);
+  }
+  out.sort((a, b) => a - b);
+  return out;
+}
+
+function getKcCloseDows(prefs) {
+  return normalizeKcCloseDays((prefs || preferences || DEFAULT_PREFERENCES).kcCloseDays);
+}
+
+function getManagerNightsPerWeek(prefs) {
+  return 7 - getKcCloseDows(prefs).length;
+}
+
+function makeIsKcCloseNight(dkToDate, prefs) {
+  const dows = getKcCloseDows(prefs);
+  return (dk) => dows.includes(dkToDate(dk).getDay());
+}
 
 const DEFAULT_ROLE_RULES = {
   sm: {
@@ -3422,6 +3611,11 @@ function getWeekendTargetForPerson(personId) {
 function readPreferencesFromUI() {
   const g = (id) => document.getElementById(id);
   if (!g('pref-weekend-target')) return preferences;
+  const kcCloseDays = [];
+  for (let i = 0; i <= 6; i++) {
+    const cb = g('pref-kc-close-' + i);
+    if (cb && cb.checked) kcCloseDays.push(i);
+  }
   preferences = {
     targetWeekendDaysOff: Math.max(0, parseInt(g('pref-weekend-target').value, 10) || 0),
     preferConsecutiveDaysOff: !!g('pref-consec-off').checked,
@@ -3429,7 +3623,8 @@ function readPreferencesFromUI() {
     maxConsecutiveWorkDays: Math.max(1, parseInt(g('pref-max-work').value, 10) || 6),
     avoidClopening: !!g('pref-avoid-clopen').checked,
     fairDistribution: !!g('pref-fair-dist').checked,
-    minHoursBetweenShifts: Math.max(0, parseInt(g('pref-min-hours').value, 10) || 0)
+    minHoursBetweenShifts: Math.max(0, parseInt(g('pref-min-hours').value, 10) || 0),
+    kcCloseDays: normalizeKcCloseDays(kcCloseDays)
   };
   return preferences;
 }
@@ -3485,6 +3680,16 @@ function renderPreferencesUI() {
         <input type="number" id="pref-min-hours" min="0" max="24" value="${p.minHoursBetweenShifts}" onchange="readPreferencesFromUI()">
       </label>
       <div class="pref-desc">Optional rest gap. 0 = disabled. Uses shift end/start times when set (e.g. 10–12).</div>
+    </div>
+    <div class="pref-card">
+      <div class="pref-label">Key carrier close nights</div>
+      <div class="pref-day-checks">
+        ${DAY_NAMES.map((dn, i) => {
+          const checked = normalizeKcCloseDays(p.kcCloseDays).includes(i) ? 'checked' : '';
+          return `<label><input type="checkbox" id="pref-kc-close-${i}" ${checked} onchange="readPreferencesFromUI()"> ${dn}</label>`;
+        }).join('')}
+      </div>
+      <div class="pref-desc">Non-manager key carriers close these nights (rotated if multiple KCs). Managers still work those days and do not close. KCs marked 'manager coverage' are scheduled as managers, not forced to these KC closes. Leave all unchecked so managers cover all 7 closes.</div>
     </div>
   `;
 }
@@ -3616,7 +3821,38 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.2.4';
+const APP_VERSION = '2.3.0';
+
+// ── Schedule view mode: month | week | day ──
+let scheduleViewMode = 'week';
+try {
+  const storedView = localStorage.getItem('msb_schedule_view');
+  if (storedView === 'month' || storedView === 'week' || storedView === 'day') {
+    scheduleViewMode = storedView;
+  }
+} catch (e) {}
+let lastScheduleRenderArgs = null; // { warnings, ROLES, ALL_KC }
+
+function updateScheduleViewToggleUI() {
+  const host = document.getElementById('schedule-view-toggle');
+  if (!host) return;
+  host.querySelectorAll('button[data-view]').forEach((btn) => {
+    btn.classList.toggle('active', btn.getAttribute('data-view') === scheduleViewMode);
+  });
+}
+
+function setScheduleViewMode(mode) {
+  if (mode !== 'month' && mode !== 'week' && mode !== 'day') return;
+  scheduleViewMode = mode;
+  try { localStorage.setItem('msb_schedule_view', mode); } catch (e) {}
+  updateScheduleViewToggleUI();
+  if (schedule && Object.keys(schedule).length > 0 && currentPeriod) {
+    const ROLES = (lastScheduleRenderArgs && lastScheduleRenderArgs.ROLES) || getRoles();
+    const ALL_KC = (lastScheduleRenderArgs && lastScheduleRenderArgs.ALL_KC) || getAllWithKC();
+    const warnings = (lastScheduleRenderArgs && lastScheduleRenderArgs.warnings) || window._lastScheduleWarnings || [];
+    renderSchedule(warnings, ROLES, ALL_KC);
+  }
+}
 
 function applyPriceLabels() {
   const price = monetizationConfig.priceLabel || '$19.99';
@@ -5029,6 +5265,9 @@ function _generateScheduleInner() {
   const isDkSunday   = (dk) => dkToDate(dk).getDay() === 0;
   const isDkWeekend  = (dk) => { const dow = dkToDate(dk).getDay(); return dow === 0 || dow === 6; };
   const dkDow        = (dk) => dkToDate(dk).getDay();
+  const kcCloseDows = normalizeKcCloseDays(PREFS.kcCloseDays);
+  const isKcCloseNight = (dk) => kcCloseDows.includes(dkToDate(dk).getDay());
+  const managerNightsPerWeek = 7 - kcCloseDows.length;
 
   const getWeekDks = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
 
@@ -5066,7 +5305,7 @@ function _generateScheduleInner() {
 
   // ════════════════════════════════════════════════════
   // STEP 1: LOCK ALL REQUESTS
-  // Copy PTO, RTO, shift requests. Non-manager KCs close on Monday. Managers work Monday.
+  // Copy PTO, RTO, shift requests. Non-manager KCs close on kcCloseDays. Managers work those nights.
   // ════════════════════════════════════════════════════
 
   ALL_KC.forEach(r => {
@@ -5076,29 +5315,21 @@ function _generateScheduleInner() {
     }
   });
 
-  // Non-manager KCs close every Monday (rotation if multiple)
+  // Non-manager KCs close on configured nights (rotation if multiple); never overwrite inputs
   allDks.forEach(dk => {
-    if (isDkMonday(dk)) {
-      if (nonMgrKCs.length > 0) {
-        // Find which Monday this is (0-based index across the period)
-        const mondayIndex = allDks.filter((d, i) => i <= allDks.indexOf(dk) && isDkMonday(d)).length - 1;
-        const kcIdx = mondayIndex % nonMgrKCs.length;
-        const assignedKC = nonMgrKCs[kcIdx];
-        schedule[assignedKC.id][dk] = 'kc-close';
-        // Other non-manager KCs are off on Monday (unless they have input)
-        nonMgrKCs.forEach((kc, i) => {
-          if (i !== kcIdx && !schedule[kc.id][dk]) {
-            // leave unassigned — they don't need to be scheduled
-          }
-        });
-      }
+    if (!isKcCloseNight(dk) || nonMgrKCs.length === 0) return;
+    const nightIndex = allDks.filter((d, i) => i <= allDks.indexOf(dk) && isKcCloseNight(d)).length - 1;
+    const kcIdx = nightIndex % nonMgrKCs.length;
+    const assignedKC = nonMgrKCs[kcIdx];
+    if (!isInputLocked(assignedKC.id, dk)) {
+      schedule[assignedKC.id][dk] = 'kc-close';
     }
   });
 
-  // All managers (ROLES) work Monday — remove any Monday offs (unless PTO)
+  // All managers (ROLES) work on KC-close nights — remove offs/RTO (unless PTO/LOA kept)
   ROLES.forEach(r => {
     allDks.forEach(dk => {
-      if (isDkMonday(dk)) {
+      if (isKcCloseNight(dk)) {
         const s = schedule[r][dk];
         if (s === 'off' || s === 'rto') {
           delete schedule[r][dk];
@@ -5205,7 +5436,7 @@ function _generateScheduleInner() {
   // STEP 3: ASSIGN REMAINING DAYS OFF (to hit target days/week)
   // Runs BEFORE closes so close-before-off scoring can see offs.
   // PTO counts as a scheduled day. RTO does NOT. LOA reduces availability.
-  // Company holiday weeks target 4. Never Monday off. Don't override input work/closes.
+  // Company holiday weeks target 4. Never off on KC-close nights. Don't override input work/closes.
   // Prefer days with most other managers working (least coverage impact).
   // Don't stack too many managers off on the same day.
   // ════════════════════════════════════════════════════
@@ -5254,7 +5485,7 @@ function _generateScheduleInner() {
 
       // Pick days for off
       const candidates = weekDks.filter(dk => {
-        if (isDkMonday(dk)) return false;
+        if (isKcCloseNight(dk)) return false;
         const s = schedule[r][dk];
         if (isClose(s)) return false;  // don't remove a close (incl. close-ext)
         if (s === 'off' || s === 'rto' || s === 'pto' || s === 'loa') return false; // already accounted
@@ -5307,17 +5538,17 @@ function _generateScheduleInner() {
   // ════════════════════════════════════════════════════
   // STEP 4: ASSIGN CLOSING SHIFTS — night-first approach
   // Offs already placed so close-before-off scoring works.
-  // For each non-Monday night, assign exactly 1 closer.
-  // 6 non-Monday nights per week. SM gets 1 (or all if sole manager).
-  // Remaining 5 distributed among AMs (+ manager-mode KCs) as evenly as possible.
+  // For each manager-close night (not a KC-close night), assign exactly 1 closer.
+  // managerNightsPerWeek nights per week. SM gets min(1, mgrNights) (or all if sole manager).
+  // Remaining distributed among AMs (+ manager-mode KCs) as evenly as possible.
   // ════════════════════════════════════════════════════
 
   // The "closers pool" = AMs + manager-mode KCs (everyone in ROLES except SM)
   const closerPool = ROLES.filter(r => r !== 'sm');
   const closerCount = closerPool.length;
-  // SM gets 1 close. Remaining = 5. Distribute among closerPool.
-  // If closerPool is empty, SM covers all remaining nights (no divide-by-zero).
-  const remainingCloses = 5;
+  // SM target: all manager nights if sole manager, else min(1, mgrNights)
+  const smCloseTarget = closerCount === 0 ? managerNightsPerWeek : Math.min(1, managerNightsPerWeek);
+  const remainingCloses = Math.max(0, managerNightsPerWeek - (closerCount === 0 ? 0 : smCloseTarget));
   const baseClosesPerCloser = closerCount > 0 ? Math.floor(remainingCloses / closerCount) : 0;
   const extraClosers = closerCount > 0 ? remainingCloses % closerCount : 0;
   // So `extraClosers` closers get (baseClosesPerCloser + 1), the rest get baseClosesPerCloser
@@ -5337,9 +5568,9 @@ function _generateScheduleInner() {
     });
   });
 
-  // Get all non-Monday nights that need a closer
+  // Get all manager-close nights that need a closer (KC nights excluded)
   const nightsToFill = allDks.filter(dk => {
-    if (isDkMonday(dk)) return false; // KC handles Monday (or manager-mode KC handles via ROLES)
+    if (isKcCloseNight(dk)) return false; // non-manager KC handles (or empty if no KC nights)
     // Check if already has a closer from inputs (close / close-ext)
     const hasCloser = ROLES.some(r => isClose(schedule[r][dk]));
     return !hasCloser;
@@ -5371,7 +5602,9 @@ function _generateScheduleInner() {
       // Role rules + SM/AM targets
       const rule = getRoleRuleForPerson(r);
       if (r === 'sm' || (rule && rule.closesPerWeek === 1 && rule.family === 'sm')) {
-        const smTarget = (rule && rule.closesPerWeek != null) ? rule.closesPerWeek : 1;
+        let smTarget = (rule && rule.closesPerWeek != null) ? rule.closesPerWeek : Math.min(1, managerNightsPerWeek);
+        if (closerCount === 0) smTarget = managerNightsPerWeek;
+        else smTarget = Math.min(smTarget, managerNightsPerWeek);
         if (closerCount === 0) {
           score -= 5;
         } else if (myCloses >= smTarget) {
@@ -5450,8 +5683,8 @@ function _generateScheduleInner() {
       if (isMid(s)) mids++;
       if (isClose(s)) closes++;
     });
-    // Count non-manager KC closes on Monday
-    if (isDkMonday(dk)) {
+    // Count non-manager KC closes on configured KC-close nights
+    if (isKcCloseNight(dk)) {
       nonMgrKCs.forEach(kc => { if (schedule[kc.id][dk] === 'kc-close') closes++; });
     }
 
@@ -5551,9 +5784,9 @@ function _generateScheduleInner() {
     }
   });
 
-  // Non-manager KC mid for critically understaffed non-Monday days (< 2 managers working)
+  // Non-manager KC mid for critically understaffed non-KC-night days (< 2 managers working)
   allDks.forEach(dk => {
-    if (isDkMonday(dk)) return;
+    if (isKcCloseNight(dk)) return;
     if (dayWorkCount(dk) < 2) {
       // Find a non-manager KC that isn't already scheduled
       for (const kc of nonMgrKCs) {
@@ -5596,9 +5829,9 @@ function _generateScheduleInner() {
       const weWeek = Math.floor(allDks.indexOf(weDk) / 7);
       const weekDks = getWeekDks(weWeek);
 
-      // Find a weekday in the same week where this manager works (not close, not Monday)
+      // Find a weekday in the same week where this manager works (not close, not KC-close night)
       const wdCands = weekDks.filter(dk => {
-        if (isDkMonday(dk) || isDkWeekend(dk)) return false;
+        if (isKcCloseNight(dk) || isDkWeekend(dk)) return false;
         const s = schedule[over][dk];
         return isWork(s) && !isClose(s) && !isInputLocked(over, dk);
       });
@@ -5644,7 +5877,7 @@ function _generateScheduleInner() {
     if (!under) break;
 
     const myWeekdayOffs = allDks.filter(dk =>
-      !isDkWeekend(dk) && !isDkMonday(dk) && schedule[under][dk] === 'off' && !isInputLocked(under, dk)
+      !isDkWeekend(dk) && !isKcCloseNight(dk) && schedule[under][dk] === 'off' && !isInputLocked(under, dk)
     );
 
     let didSwap = false;
@@ -5762,7 +5995,7 @@ function _generateScheduleInner() {
   for (let i = 0; i < allDks.length - 1; i++) {
     const dk = allDks[i];
     const ndk = allDks[i + 1];
-    if (isDkMonday(dk)) continue; // managers never close Monday
+    if (isKcCloseNight(dk)) continue; // managers never close on KC nights
     ROLES.forEach(r => {
       // r has open/mid today and is off tomorrow — ideal closer
       if (!isDayOffish(schedule[r][ndk])) return;
@@ -5818,11 +6051,11 @@ function _generateScheduleInner() {
           streak++;
           if (streak > PREFS.maxConsecutiveWorkDays) {
             // Try to move an off from later in week onto this day, or convert this day if coverage allows
-            if (!isInputLocked(r, dk) && !isClose(schedule[r][dk]) && !isDkMonday(dk)) {
+            if (!isInputLocked(r, dk) && !isClose(schedule[r][dk]) && !isKcCloseNight(dk)) {
               const others = ROLES.filter(rx => rx !== r && isWork(schedule[rx][dk])).length;
               if (others >= 2) {
                 // Find a weekday off later we can convert to work (swap)
-                const offDay = allDks.find((d2, j) => j > i && schedule[r][d2] === 'off' && !isInputLocked(r, d2) && !isDkMonday(d2));
+                const offDay = allDks.find((d2, j) => j > i && schedule[r][d2] === 'off' && !isInputLocked(r, d2) && !isKcCloseNight(d2));
                 if (offDay) {
                   schedule[r][offDay] = schedule[r][dk];
                   schedule[r][dk] = 'off';
@@ -6028,6 +6261,12 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   const v = (severity, rule, manager, week, day, detail) =>
     violations.push({ severity, rule, manager, week, day, detail });
 
+  const kcCloseDows = getKcCloseDows(preferences);
+  const isKcCloseNight = (dk) => kcCloseDows.includes(dkToDate(dk).getDay());
+  const mgrNights = getManagerNightsPerWeek(preferences);
+  const smCloseTarget = closerPool.length === 0 ? mgrNights : Math.min(1, mgrNights);
+  const remainingCloses = Math.max(0, mgrNights - (closerPool.length === 0 ? 0 : smCloseTarget));
+
   // ── Rule 1: Target scheduled days/week (work+PTO; RTO/LOA reduce availability) ──
   // Matches generation Step 3: holiday weeks target 4; LOA excluded via availDays.
   for (let w = 0; w < numWeeks; w++) {
@@ -6051,37 +6290,37 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
     });
   }
 
-  // ── Rule 2: All managers on Monday (unless PTO/LOA) ──
+  // ── Rule 2: All managers work on KC-close nights (unless PTO/LOA) ──
   allDks.forEach(dk => {
-    if (!isDkMonday(dk)) return;
+    if (!isKcCloseNight(dk)) return;
+    const dayName = DAY_NAMES_FULL[dkToDate(dk).getDay()] || 'day';
     ROLES.forEach(r => {
       const s = schedule[r][dk];
       if (!isWork(s) && !isPto(s) && !isLoa(s)) {
-        v('error', 'monday-all', r, null, dk,
-          `${names[r]}: Not working on Monday ${formatDate(dkToDate(dk))}`);
+        v('error', 'kc-night-all', r, null, dk,
+          `${names[r]}: Not working on KC-close night ${dayName} ${formatDate(dkToDate(dk))}`);
       }
     });
   });
 
-  // ── Rule 3: SM closes exactly 1 per week (or all nights if sole manager) ──
+  // ── Rule 3: SM closes target per week (or all manager nights if sole manager) ──
   for (let w = 0; w < numWeeks; w++) {
     const weekDks = getWeekDks(w);
     const smCloses = weekDks.filter(dk => isClose(schedule.sm[dk])).length;
     if (closerPool.length === 0) {
-      // Sole manager — SM covers all non-Monday nights (expect 6, warn if short)
-      if (smCloses < 6) {
+      // Sole manager — SM covers all manager nights
+      if (smCloses < mgrNights) {
         v('warning', 'sm-close-1', 'sm', w, null,
-          `${names.sm}: Week ${w+1} has ${smCloses} closes (sole manager — need 6 for full coverage)`);
+          `${names.sm}: Week ${w+1} has ${smCloses} closes (sole manager — need ${mgrNights} for full coverage)`);
       }
-    } else if (smCloses !== 1) {
+    } else if (smCloses !== smCloseTarget) {
       v('error', 'sm-close-1', 'sm', w, null,
-        `${names.sm}: Week ${w+1} has ${smCloses} closes (need exactly 1)`);
+        `${names.sm}: Week ${w+1} has ${smCloses} closes (need exactly ${smCloseTarget})`);
     }
   }
 
   // ── Rule 4: Closer distribution ──
-  // 6 non-Monday nights per week. SM gets 1. Remaining 5 distributed among closerPool.
-  const remainingCloses = 5;
+  // mgrNights manager-close nights/week. SM gets smCloseTarget. Remaining among closerPool.
   const closerCount = closerPool.length;
   const baseTarget = closerCount > 0 ? Math.floor(remainingCloses / closerCount) : 0;
   const extraCount = closerCount > 0 ? remainingCloses % closerCount : 0;
@@ -6100,27 +6339,27 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
 
     closerPool.forEach(r => {
       const closes = closeCounts[r];
-      if (closes === 0) {
+      if (closes < minTarget) {
         v('error', 'am-close-2', r, w, null,
-          `${names[r]}: Week ${w+1} has 0 closes (need at least ${minTarget})`);
+          `${names[r]}: Week ${w+1} has ${closes} closes (need at least ${minTarget})`);
       } else if (closes > maxTarget + 1) {
         v('error', 'am-close-2', r, w, null,
           `${names[r]}: Week ${w+1} has ${closes} closes (max ${maxTarget + 1})`);
-      } else if (closes === maxTarget + 1) {
+      } else if (closes === maxTarget + 1 && maxTarget >= 0 && remainingCloses > 0) {
         v('warning', 'am-close-2', r, w, null,
           `${names[r]}: Week ${w+1} has ${closes} closes (target is ${minTarget}-${maxTarget}, but may be needed for coverage)`);
       }
     });
 
-    // Total closes should cover all 6 non-Monday nights
-    if (totalCloses < 6) {
+    // Total manager closes should cover manager nights
+    if (mgrNights > 0 && totalCloses < mgrNights) {
       v('warning', 'close-coverage', null, w, null,
-        `Week ${w+1}: Only ${totalCloses} of 6 non-Monday nights have closers`);
+        `Week ${w+1}: Only ${totalCloses} of ${mgrNights} manager close nights have closers`);
     }
   }
 
-  // ── Rule 5: KC Monday close (informational only — always placed in step 1) ──
-  // (validated implicitly, not a repair target)
+  // ── Rule 5: KC close nights (informational — placed in step 1 when non-manager KCs exist) ──
+  // (validated implicitly via coverage-close, not a repair target)
 
   // ── Rule 6: No clopens (when preference enabled; always hard if avoidClopening) ──
   const avoidClopen = (typeof preferences !== 'undefined' && preferences.avoidClopening !== false);
@@ -6188,13 +6427,14 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
     }
   });
 
-  // ── Rule 9: No manager close on Monday ──
+  // ── Rule 9: No manager close on KC-close nights ──
   allDks.forEach(dk => {
-    if (!isDkMonday(dk)) return;
+    if (!isKcCloseNight(dk)) return;
+    const dayName = DAY_NAMES_FULL[dkToDate(dk).getDay()] || 'day';
     ROLES.forEach(r => {
       if (isClose(schedule[r][dk])) {
-        v('error', 'no-monday-close', r, null, dk,
-          `${names[r]}: Closing on Monday ${formatDate(dkToDate(dk))} (KC handles Monday close)`);
+        v('error', 'no-kc-night-close', r, null, dk,
+          `${names[r]}: Closing on ${dayName} ${formatDate(dkToDate(dk))} (KC handles this close night)`);
       }
     });
   });
@@ -6227,6 +6467,11 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
     if (!byRule[v.rule]) byRule[v.rule] = [];
     byRule[v.rule].push(v);
   });
+
+  const isKcCloseNight = makeIsKcCloseNight(dkToDate, preferences);
+  const mgrNights = getManagerNightsPerWeek(preferences);
+  const smCloseTarget = closerPool.length === 0 ? mgrNights : Math.min(1, mgrNights);
+  const remainingCloses = Math.max(0, mgrNights - (closerPool.length === 0 ? 0 : smCloseTarget));
 
   // Helper: count work+PTO days for role in week (matches Rule 1 / gen Step 3)
   const weekWorkPto = (role, wIdx) => {
@@ -6262,17 +6507,17 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
 
   const isDayOffish = (s) => s === 'off' || s === 'rto' || s === 'pto' || s === 'loa';
 
-  // ── Repair: No Monday close for managers (Rule 9) ──
+  // ── Repair: No manager close on KC nights (Rule 9) ──
   // Must run before close-count repairs
-  if (byRule['no-monday-close']) {
-    byRule['no-monday-close'].forEach(v => {
+  if (byRule['no-kc-night-close']) {
+    byRule['no-kc-night-close'].forEach(v => {
       const r = v.manager;
       const dk = v.day;
       const w = weekOf(dk);
       const weekDks = getWeekDks(w);
-      // Move this close to a different non-Monday day in the week (not input-locked)
+      // Move this close to a different non-KC-night day in the week (not input-locked)
       const candidates = weekDks.filter(cdk =>
-        !isDkMonday(cdk) && schedule[r][cdk] && isWork(schedule[r][cdk]) &&
+        !isKcCloseNight(cdk) && schedule[r][cdk] && isWork(schedule[r][cdk]) &&
         !isClose(schedule[r][cdk]) && !isInputLocked(r, cdk) &&
         // Prefer days without another closer already
         !ROLES.some(rx => rx !== r && isClose(schedule[rx][cdk]))
@@ -6281,43 +6526,43 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
         const target = candidates[0];
         const oldShift = schedule[r][target];
         schedule[r][target] = 'close';
-        // Only rewrite Monday if not input-locked
+        // Only rewrite KC night if not input-locked
         if (!isInputLocked(r, dk)) schedule[r][dk] = oldShift;
       } else if (!isInputLocked(r, dk)) {
-        // Just remove the close, give them mid on Monday
+        // Just remove the close, give them mid on that night
         schedule[r][dk] = 'mid-early';
       }
     });
   }
 
-  // ── Repair: Manager not on Monday (Rule 2) ──
-  if (byRule['monday-all']) {
-    byRule['monday-all'].forEach(v => {
+  // ── Repair: Manager not on KC-close night (Rule 2) ──
+  if (byRule['kc-night-all']) {
+    byRule['kc-night-all'].forEach(v => {
       const r = v.manager;
-      const dk = v.day; // the Monday
+      const dk = v.day; // the KC-close night
       const w = weekOf(dk);
       const weekDks = getWeekDks(w);
 
       // Never override input-locked PTO/LOA
       if (isInputLocked(r, dk) && (isPto(inputs[r][dk]) || isLoa(inputs[r][dk]))) return;
 
-      // Remove this Monday off/rto (unless input-locked)
+      // Remove this night's off/rto (unless input-locked)
       if (!isInputLocked(r, dk) && (schedule[r][dk] === 'off' || schedule[r][dk] === 'rto')) {
         delete schedule[r][dk];
       }
 
-      // Now they need a work shift on Monday — assign open or mid
+      // Now they need a work shift — assign open or mid
       if (!isInputLocked(r, dk) && (!schedule[r][dk] || !isWork(schedule[r][dk]))) {
         const prevDk = allDks.indexOf(dk) > 0 ? allDks[allDks.indexOf(dk) - 1] : null;
         const closedYesterday = prevDk && isClose(schedule[r][prevDk]);
         schedule[r][dk] = closedYesterday ? 'mid-early' : 'open-early';
       }
 
-      // They may now be over target this week — find a non-Monday to give off
+      // They may now be over target this week — find a non-KC-night to give off
       const target = weekTarget(r, w);
       if (weekWorkPto(r, w) > target) {
         const offCandidates = weekDks.filter(cdk =>
-          !isDkMonday(cdk) && isWork(schedule[r][cdk]) && !isInputLocked(r, cdk) && !isClose(schedule[r][cdk])
+          !isKcCloseNight(cdk) && isWork(schedule[r][cdk]) && !isInputLocked(r, cdk) && !isClose(schedule[r][cdk])
         ).sort((a, b) => {
           // Prefer days with most other managers working (least coverage impact)
           const aCount = ROLES.filter(rx => rx !== r && isWork(schedule[rx][a])).length;
@@ -6341,10 +6586,10 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       let sched = weekWorkPto(r, w);
 
       if (sched > target) {
-        // Too many scheduled days — convert work days to off (not Monday, not input-locked)
+        // Too many scheduled days — convert work days to off (not KC night, not input-locked)
         // Prefer non-close days so we don't strip night coverage
         const excess = weekDks.filter(dk =>
-          isWork(schedule[r][dk]) && !isDkMonday(dk) && !isInputLocked(r, dk)
+          isWork(schedule[r][dk]) && !isKcCloseNight(dk) && !isInputLocked(r, dk)
         ).sort((a, b) => {
           // Prefer removing non-closes first
           const aClose = isClose(schedule[r][a]) ? 1 : 0;
@@ -6398,12 +6643,12 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       const w = v.week;
       const weekDks = getWeekDks(w);
       const current = weekCloses('sm', w);
-      const smTarget = closerPool.length === 0 ? 6 : 1;
+      const smTarget = smCloseTarget;
 
       if (current < smTarget) {
-        // Need to add close(s) — non-Monday work days, not input-locked, no dual closer
+        // Need to add close(s) — non-KC-night work days, not input-locked, no dual closer
         const candidates = weekDks.filter(dk =>
-          !isDkMonday(dk) && isWork(schedule.sm[dk]) && !isClose(schedule.sm[dk]) &&
+          !isKcCloseNight(dk) && isWork(schedule.sm[dk]) && !isClose(schedule.sm[dk]) &&
           !isInputLocked('sm', dk) &&
           !ROLES.some(rx => rx !== 'sm' && isClose(schedule[rx][dk]))
         );
@@ -6413,10 +6658,10 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
           schedule.sm[dk] = 'close';
           needed--;
         }
-      } else if (closerPool.length > 0 && current > 1) {
+      } else if (closerPool.length > 0 && current > smTarget) {
         // Too many closes — convert excess to mid (never touch input-locked)
         const closes = weekDks.filter(dk => isClose(schedule.sm[dk]) && !isInputLocked('sm', dk));
-        for (let i = 1; i < closes.length; i++) {
+        for (let i = smTarget; i < closes.length; i++) {
           schedule.sm[closes[i]] = 'mid-early';
         }
       }
@@ -6430,24 +6675,23 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       const w = v.week;
       const weekDks = getWeekDks(w);
       const current = weekCloses(closer, w);
-      const nonMonWork = weekDks.filter(dk =>
-        !isDkMonday(dk) && isWork(schedule[closer][dk])
+      const mgrNightWork = weekDks.filter(dk =>
+        !isKcCloseNight(dk) && isWork(schedule[closer][dk])
       ).length;
 
       // Compute this closer's target (guard empty closerPool)
-      const remainingCloses = 5;
       const closerCountLocal = closerPool.length;
       if (closerCountLocal === 0) return;
       const baseT = Math.floor(remainingCloses / closerCountLocal);
       const extraT = remainingCloses % closerCountLocal;
       const closerIdx = closerPool.indexOf(closer);
       const target = baseT + ((closerIdx + w) % closerCountLocal < extraT ? 1 : 0);
-      const effectiveTarget = Math.min(target, nonMonWork <= 3 ? 1 : target);
+      const effectiveTarget = Math.min(target, mgrNightWork <= 3 ? Math.min(1, target) : target);
 
       if (current < effectiveTarget) {
         // Add closes: convert non-close work days to close (not input-locked)
         const candidates = weekDks.filter(dk =>
-          !isDkMonday(dk) && isWork(schedule[closer][dk]) && !isClose(schedule[closer][dk]) &&
+          !isKcCloseNight(dk) && isWork(schedule[closer][dk]) && !isClose(schedule[closer][dk]) &&
           !isInputLocked(closer, dk)
         ).sort((a, b) => {
           // Prefer days where no other manager is closing
@@ -6591,7 +6835,7 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
   if (byRule['coverage-close']) {
     byRule['coverage-close'].forEach(v => {
       const dk = v.day;
-      if (isDkMonday(dk)) return; // KC should handle
+      if (isKcCloseNight(dk)) return; // non-manager KC should handle
       // Already has a closer? (close-ext etc.) — nothing to do
       if (ROLES.some(r => isClose(schedule[r][dk]))) return;
       // No closer — find someone to close this night
@@ -6623,10 +6867,153 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
   }
 }
 
-// ── Render Schedule — Weekly Tables ──
+// ── Render Schedule — Week tables / Day cards / Month grid ──
+function getWeekDatesForIndex(week, wIdx) {
+  const weekDates = [];
+  const d = new Date(week.start);
+  for (let i = 0; i < 7; i++) {
+    weekDates.push(new Date(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return weekDates;
+}
+
+function renderDayCardsHtml(weekDates, wIdx, names, ALL_KC) {
+  let html = '<div class="mobile-week-cards">';
+  weekDates.forEach((wd) => {
+    const dk = dateKey(wd);
+    const dow = wd.getDay();
+    const isWe = dow === 0 || dow === 6;
+    let opens = 0, mids = 0, closes = 0;
+    html += `<div class="mw-day">`;
+    html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${DAY_NAMES_FULL[dow]}</span><span class="mw-date">${formatDate(wd)}</span></div>`;
+    ALL_KC.forEach((r) => {
+      const isKC = r.startsWith('kc');
+      const s = schedule[r] && schedule[r][dk];
+      if (isOpen(s)) opens++;
+      if (isMid(s)) mids++;
+      if (isClose(s) || s === 'kc-close') closes++;
+      const label = s ? getShiftShortLabel(s) : (isKC ? '—' : 'Off');
+      const cls = s ? getShiftCssClass(s) : 'shift-off';
+      html += `<div class="mw-person" data-role="${r}" data-dk="${dk}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})">`;
+      html += `<span class="mw-name">${esc(names[r] || r)}</span>`;
+      html += `<span class="mw-shift ${cls}">${esc(label)}</span>`;
+      html += `</div>`;
+    });
+    const covCls = opens === 0 || closes === 0 ? 'coverage-bad' : '';
+    html += `<div class="mw-coverage ${covCls}">Coverage · ${opens} open · ${mids} mid · ${closes} close</div>`;
+    html += `</div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderWeekTableHtml(weekDates, wIdx, names, ALL_KC) {
+  let html = '<table class="week-table">';
+  html += '<thead><tr><th class="name-col"></th>';
+  weekDates.forEach(wd => {
+    const dow = wd.getDay();
+    let cls = '';
+    if (dow === 0 || dow === 6) cls = 'weekend-col';
+    else if (dow === 1) cls = 'monday-col';
+    html += `<th class="${cls}">${DAY_NAMES[dow]}</th>`;
+  });
+  html += '</tr>';
+  html += '<tr><th class="name-col"></th>';
+  weekDates.forEach(wd => {
+    const dow = wd.getDay();
+    let cls = '';
+    if (dow === 0 || dow === 6) cls = 'weekend-col';
+    else if (dow === 1) cls = 'monday-col';
+    html += `<th class="${cls}">${formatDate(wd)}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+  ALL_KC.forEach(r => {
+    html += '<tr data-role="' + r + '">';
+    const isKC = r.startsWith('kc');
+    const roleBadge = r === 'sm' ? 'role-sm' : (isKC ? 'role-kc' : 'role-am');
+    const roleLabel = r.toUpperCase();
+    html += `<td class="name-col"><span class="role-badge ${roleBadge}" style="font-size:0.6rem;padding:1px 4px;margin-right:4px">${roleLabel}</span>${names[r] || r.toUpperCase()}</td>`;
+    weekDates.forEach(wd => {
+      const dk = dateKey(wd);
+      const s = schedule[r] && schedule[r][dk];
+      let cellCls = '';
+      let content = '';
+      if (s) {
+        cellCls = getShiftCssClass(s);
+        content = getShiftShortLabel(s);
+      } else if (isKC) {
+        cellCls = 'shift-off';
+        content = '';
+      }
+      if (isWeekend(wd) && !s) cellCls += ' weekend-stripe';
+      cellCls += ' shift-editable';
+      html += `<td class="${cellCls}" data-role="${r}" data-dk="${dk}" data-week="${wIdx}" data-is-kc="${isKC}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})">${content}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '<tr class="coverage-row"><td class="name-col">Coverage</td>';
+  weekDates.forEach(wd => {
+    const dk = dateKey(wd);
+    let opens = 0, mids = 0, closes = 0, total = 0;
+    ALL_KC.forEach(r => {
+      const s = schedule[r] && schedule[r][dk];
+      if (isOpen(s)) { opens++; total++; }
+      if (isMid(s)) { mids++; total++; }
+      if (isClose(s) || s === 'kc-close') { closes++; total++; }
+    });
+    let coverageCls = 'coverage-ok';
+    if (opens === 0 || closes === 0) coverageCls = 'coverage-bad';
+    else if (mids === 0 && total < 3) coverageCls = 'coverage-warn';
+    html += `<td class="${coverageCls}">${opens}O ${mids}M ${closes}C</td>`;
+  });
+  html += '</tr></tbody></table>';
+  return html;
+}
+
+function renderMonthViewHtml(p, names, ALL_KC) {
+  let html = '<div class="month-calendar" id="month-calendar">';
+  html += '<div class="month-cal-head"><div></div>';
+  for (let dow = 0; dow < 7; dow++) {
+    const isWe = dow === 0 || dow === 6;
+    html += `<div class="${isWe ? 'weekend' : ''}">${DAY_NAMES[dow]}</div>`;
+  }
+  html += '</div>';
+  p.weeks.forEach((week, wIdx) => {
+    const weekDates = getWeekDatesForIndex(week, wIdx);
+    html += '<div class="month-week-row">';
+    html += `<div class="month-week-label">W${wIdx + 1}</div>`;
+    weekDates.forEach((wd) => {
+      const dk = dateKey(wd);
+      const dow = wd.getDay();
+      const isWe = dow === 0 || dow === 6;
+      html += `<div class="month-day-cell${isWe ? ' weekend' : ''}">`;
+      html += `<div class="md-date">${DAY_NAMES[dow]} ${formatDate(wd)}</div>`;
+      ALL_KC.forEach((r) => {
+        const isKC = r.startsWith('kc');
+        const s = schedule[r] && schedule[r][dk];
+        if (!s && isKC) return; // skip empty non-manager KC slots in month chips
+        const shiftVal = s || 'off';
+        const shortName = (names[r] || r).split(/\s+/)[0];
+        const label = getShiftShortLabel(shiftVal);
+        const cls = getShiftCssClass(shiftVal);
+        html += `<div class="month-chip ${cls}" data-role="${r}" data-dk="${dk}" title="${esc(names[r] || r)} · ${esc(label)}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})">`;
+        html += `<span class="mc-name">${esc(shortName)}</span>`;
+        html += `<span class="mc-shift">${esc(label)}</span>`;
+        html += `</div>`;
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 function renderSchedule(warnings, ROLES, ALL_KC) {
   const names = getManagerNames();
   const p = currentPeriod;
+  if (!p) return;
   const storeName = (document.getElementById('store-name') || {}).value || '';
   const storeNum = (document.getElementById('store-number') || {}).value || '';
   const storeBit = [storeName, storeNum ? '#' + storeNum : ''].filter(Boolean).join(' ');
@@ -6634,132 +7021,35 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
   document.getElementById('schedule-title').textContent = periodLabel;
   document.getElementById('print-header').textContent = periodLabel;
 
+  lastScheduleRenderArgs = { warnings: warnings || [], ROLES, ALL_KC };
+  window._lastScheduleWarnings = warnings || [];
+  updateScheduleViewToggleUI();
+
+  const mode = scheduleViewMode || 'week';
   let html = '';
 
-  p.weeks.forEach((week, wIdx) => {
-    const weekDates = [];
-    const d = new Date(week.start);
-    for (let i = 0; i < 7; i++) {
-      weekDates.push(new Date(d));
-      d.setDate(d.getDate() + 1);
-    }
-
-    html += '<div class="week-table-wrapper" id="week-wrap-' + wIdx + '">';
-    html += `<div class="week-header">`;
-    html += `<span>Week ${wIdx + 1}</span>`;
-    html += `<span class="week-dates">${DAY_NAMES_FULL[weekDates[0].getDay()]} ${formatDate(weekDates[0])} – ${DAY_NAMES_FULL[weekDates[6].getDay()]} ${formatDate(weekDates[6])}</span>`;
-    html += `</div>`;
-
-    // Mobile week cards (visible ≤720px)
-    html += '<div class="mobile-week-cards">';
-    weekDates.forEach((wd) => {
-      const dk = dateKey(wd);
-      const dow = wd.getDay();
-      const isWe = dow === 0 || dow === 6;
-      let opens = 0, mids = 0, closes = 0;
-      html += `<div class="mw-day">`;
-      html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${DAY_NAMES_FULL[dow]}</span><span class="mw-date">${formatDate(wd)}</span></div>`;
-      ALL_KC.forEach((r) => {
-        const isKC = r.startsWith('kc');
-        const s = schedule[r] && schedule[r][dk];
-        if (isOpen(s)) opens++;
-        if (isMid(s)) mids++;
-        if (isClose(s) || s === 'kc-close') closes++;
-        const label = s ? getShiftShortLabel(s) : (isKC ? '—' : 'Off');
-        const cls = s ? getShiftCssClass(s) : 'shift-off';
-        html += `<div class="mw-person" data-role="${r}" data-dk="${dk}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})">`;
-        html += `<span class="mw-name">${esc(names[r] || r)}</span>`;
-        html += `<span class="mw-shift ${cls}">${esc(label)}</span>`;
-        html += `</div>`;
-      });
-      const covCls = opens === 0 || closes === 0 ? 'coverage-bad' : '';
-      html += `<div class="mw-coverage ${covCls}">Coverage · ${opens} open · ${mids} mid · ${closes} close</div>`;
+  if (mode === 'month') {
+    html = renderMonthViewHtml(p, names, ALL_KC);
+  } else {
+    p.weeks.forEach((week, wIdx) => {
+      const weekDates = getWeekDatesForIndex(week, wIdx);
+      html += '<div class="week-table-wrapper" id="week-wrap-' + wIdx + '">';
+      html += `<div class="week-header">`;
+      html += `<span>Week ${wIdx + 1}</span>`;
+      html += `<span class="week-dates">${DAY_NAMES_FULL[weekDates[0].getDay()]} ${formatDate(weekDates[0])} – ${DAY_NAMES_FULL[weekDates[6].getDay()]} ${formatDate(weekDates[6])}</span>`;
       html += `</div>`;
+      if (mode === 'day') {
+        html += renderDayCardsHtml(weekDates, wIdx, names, ALL_KC);
+      } else {
+        html += renderWeekTableHtml(weekDates, wIdx, names, ALL_KC);
+      }
+      html += '</div>';
     });
-    html += '</div>';
-
-    html += '<table class="week-table">';
-
-    // Header row 1: Day names
-    html += '<thead><tr><th class="name-col"></th>';
-    weekDates.forEach(wd => {
-      const dow = wd.getDay();
-      let cls = '';
-      if (dow === 0 || dow === 6) cls = 'weekend-col';
-      else if (dow === 1) cls = 'monday-col';
-      html += `<th class="${cls}">${DAY_NAMES[dow]}</th>`;
-    });
-    html += '</tr>';
-
-    // Header row 2: Dates
-    html += '<tr><th class="name-col"></th>';
-    weekDates.forEach(wd => {
-      const dow = wd.getDay();
-      let cls = '';
-      if (dow === 0 || dow === 6) cls = 'weekend-col';
-      else if (dow === 1) cls = 'monday-col';
-      html += `<th class="${cls}">${formatDate(wd)}</th>`;
-    });
-    html += '</tr></thead>';
-
-    // Body rows
-    html += '<tbody>';
-    ALL_KC.forEach(r => {
-      html += '<tr data-role="' + r + '">';
-      const isKC = r.startsWith('kc');
-      const isAM = r.startsWith('am');
-      const roleBadge = r === 'sm' ? 'role-sm' : (isKC ? 'role-kc' : 'role-am');
-      const roleLabel = r.toUpperCase();
-      html += `<td class="name-col"><span class="role-badge ${roleBadge}" style="font-size:0.6rem;padding:1px 4px;margin-right:4px">${roleLabel}</span>${names[r] || r.toUpperCase()}</td>`;
-
-      weekDates.forEach(wd => {
-        const dk = dateKey(wd);
-        const s = schedule[r] && schedule[r][dk];
-        let cellCls = '';
-        let content = '';
-
-        if (s) {
-          cellCls = getShiftCssClass(s);
-          content = getShiftShortLabel(s);
-        } else if (isKC) {
-          cellCls = 'shift-off';
-          content = '';
-        }
-
-        if (isWeekend(wd) && !s) cellCls += ' weekend-stripe';
-
-        cellCls += ' shift-editable';
-        html += `<td class="${cellCls}" data-role="${r}" data-dk="${dk}" data-week="${wIdx}" data-is-kc="${isKC}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})">${content}</td>`;
-      });
-      html += '</tr>';
-    });
-
-    // Coverage row
-    html += '<tr class="coverage-row"><td class="name-col">Coverage</td>';
-    weekDates.forEach(wd => {
-      const dk = dateKey(wd);
-      let opens = 0, mids = 0, closes = 0, total = 0;
-      ALL_KC.forEach(r => {
-        const s = schedule[r] && schedule[r][dk];
-        if (isOpen(s)) { opens++; total++; }
-        if (isMid(s)) { mids++; total++; }
-        if (isClose(s) || s === 'kc-close') { closes++; total++; }
-      });
-
-      let coverageCls = 'coverage-ok';
-      if (opens === 0 || closes === 0) coverageCls = 'coverage-bad';
-      else if (mids === 0 && total < 3) coverageCls = 'coverage-warn';
-
-      html += `<td class="${coverageCls}">${opens}O ${mids}M ${closes}C</td>`;
-    });
-    html += '</tr>';
-
-    html += '</tbody></table></div>';
-  });
+  }
 
   document.getElementById('schedule-grid').innerHTML = html;
 
-  // Also render the print-optimized version
+  // Also render the print-optimized version (unchanged)
   renderPrintSchedule(ROLES, ALL_KC);
 
   // Insight panels above summary
@@ -7770,6 +8060,7 @@ function loadFromStorage() {
   // Restore preferences + role rules
   if (data.preferences) {
     preferences = Object.assign({}, DEFAULT_PREFERENCES, data.preferences);
+    preferences.kcCloseDays = normalizeKcCloseDays(preferences.kcCloseDays);
     renderPreferencesUI();
   }
   if (data.roleRules) {
@@ -8259,6 +8550,7 @@ function loadSavedSchedule(key) {
   if (data.holidayWeeks) holidayWeeks = data.holidayWeeks;
   if (data.preferences) {
     preferences = Object.assign({}, DEFAULT_PREFERENCES, data.preferences);
+    preferences.kcCloseDays = normalizeKcCloseDays(preferences.kcCloseDays);
     renderPreferencesUI();
   }
   if (data.roleRules) {
@@ -8567,6 +8859,7 @@ restoreStoreMeta();
 restoreWelcomeState();
 renderPreferencesUI();
 renderRoleRulesUI();
+updateScheduleViewToggleUI();
 // Rebuild tabs after name restore
 buildInputTabs();
 buildInputCalendar(activeTab);

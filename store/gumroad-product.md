@@ -1,6 +1,6 @@
 # Gumroad product paste pack — Manager Schedule Builder Pro
 
-Use this when creating the product. **Price: $29 one-time.**
+Use this when creating the product. **Price: $19.99 one-time.**
 
 ## Title
 ```
@@ -27,7 +27,7 @@ WHAT YOU GET
 
 FREE vs PRO
 • Free: try the full generator with a 3-manager roster cap; JSON backup always free
-• Pro ($29 one-time): unlimited managers + Word/Excel export + lifetime unlock on your devices (paste license or open the unlock link)
+• Pro ($19.99 one-time): unlimited managers + Word/Excel export + lifetime unlock on your devices (paste license or open the unlock link)
 
 AFTER PURCHASE
 Open this unlock link (sets Pro on your browser):
@@ -46,7 +46,7 @@ If unlock link doesn’t fire, open the app → More → Enter license / unlock 
 ```
 
 ## Price
-- **$29** USD one-time  
+- **$19.99** USD one-time  
 - Optional later: $12/mo as a second product (not required)
 
 ## Delivery / content URL

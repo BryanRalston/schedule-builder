@@ -470,8 +470,116 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   font-weight: 600;
   background: var(--surface-2);
   color: var(--ink-2);
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  box-shadow: 4px 0 10px rgba(12,15,20,0.06);
 }
-.week-table thead .name-col { text-align: center; }
+.week-table thead .name-col {
+  text-align: center;
+  z-index: 4;
+  background: var(--navy);
+  color: #f3efe8;
+}
+.week-table thead tr:nth-child(2) .name-col {
+  background: #1e2a40;
+  color: rgba(243,239,232,0.75);
+}
+.week-table tbody tr:nth-child(even) td.name-col {
+  background: var(--paper-2);
+}
+
+/* Mobile week cards */
+.mobile-week-cards { display: none; }
+@media (max-width: 720px) {
+  .week-table-wrapper .week-table { display: none; }
+  .mobile-week-cards { display: block; padding: 0.65rem 0.75rem 0.85rem; }
+  .mw-day {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    margin-bottom: 0.55rem;
+    overflow: hidden;
+  }
+  .mw-day-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.55rem 0.75rem;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+    font-size: 0.88rem;
+  }
+  .mw-day-head .mw-date { font-size: 0.75rem; font-weight: 500; color: var(--ink-3); }
+  .mw-day-head.weekend { background: rgba(26,22,40,0.06); }
+  .mw-person {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    min-height: 48px;
+  }
+  .mw-person:last-child { border-bottom: none; }
+  .mw-person:active { background: var(--gold-soft); }
+  .mw-person .mw-name { flex: 1; font-weight: 600; font-size: 0.86rem; min-width: 0; }
+  .mw-person .mw-shift {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .mw-coverage {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ink-3);
+    padding: 0.45rem 0.75rem;
+    background: var(--gold-soft);
+  }
+}
+
+/* Clopen radar */
+.clopen-radar {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.15rem;
+  box-shadow: var(--shadow-sm);
+}
+.clopen-radar h3 {
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+.clopen-radar .cr-sub { font-size: 0.84rem; color: var(--ink-3); margin-bottom: 0.75rem; }
+.clopen-radar.empty-ok {
+  border-color: rgba(47,111,78,0.22);
+  background: linear-gradient(180deg, var(--ok-bg), var(--surface));
+}
+.cr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.cr-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  cursor: pointer;
+  color: inherit;
+}
+.cr-item:hover { border-color: rgba(176,141,87,0.45); background: var(--surface); }
+.cr-item .cr-who { font-weight: 600; flex: 1; min-width: 0; }
+.cr-item .cr-when { font-size: 0.78rem; color: var(--ink-3); }
+.cr-item .cr-go { font-size: 0.72rem; font-weight: 600; color: var(--gold-deep); }
 
 .week-table tbody tr:nth-child(even) td { background: rgba(243,239,232,0.35); }
 .week-table tbody tr:nth-child(even) td.name-col { background: var(--paper-2); }
@@ -2539,7 +2647,7 @@ html.pwa-standalone .install-banner { display: none !important; }
     <div class="section-body" id="schedule-body">
       <div class="schedule-toolbar no-print" id="schedule-toolbar">
         <span class="toolbar-label">Actions</span>
-        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="window.print()">Print</button>
+        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="window.print()">Print posting sheet</button>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportSchedule()">Word</button>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
@@ -2555,9 +2663,10 @@ html.pwa-standalone .install-banner { display: none !important; }
 <!-- SUMMARY -->
   <div class="section" id="summary-section">
     <div class="section-header">
-      <h2>Coverage & Quality Summary</h2>
+      <h2>Posting &amp; quality</h2>
     </div>
     <div class="section-body" id="summary-body">
+      <div id="clopen-radar-host"></div>
       <div class="summary-grid" id="summary-grid"></div>
     </div>
   </div>
@@ -2573,7 +2682,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.2.0</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.2.1</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3176,7 +3285,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.2.1';
 
 function applyPriceLabels() {
   const price = monetizationConfig.priceLabel || '$19.99';
@@ -6183,11 +6292,39 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
       d.setDate(d.getDate() + 1);
     }
 
-    html += '<div class="week-table-wrapper">';
+    html += '<div class="week-table-wrapper" id="week-wrap-' + wIdx + '">';
     html += `<div class="week-header">`;
     html += `<span>Week ${wIdx + 1}</span>`;
-    html += `<span class="week-dates">${DAY_NAMES_FULL[weekDates[0].getDay()]} ${formatDate(weekDates[0])} - ${DAY_NAMES_FULL[weekDates[6].getDay()]} ${formatDate(weekDates[6])}</span>`;
+    html += `<span class="week-dates">${DAY_NAMES_FULL[weekDates[0].getDay()]} ${formatDate(weekDates[0])} – ${DAY_NAMES_FULL[weekDates[6].getDay()]} ${formatDate(weekDates[6])}</span>`;
     html += `</div>`;
+
+    // Mobile week cards (visible ≤720px)
+    html += '<div class="mobile-week-cards">';
+    weekDates.forEach((wd) => {
+      const dk = dateKey(wd);
+      const dow = wd.getDay();
+      const isWe = dow === 0 || dow === 6;
+      let opens = 0, mids = 0, closes = 0;
+      html += `<div class="mw-day">`;
+      html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${DAY_NAMES_FULL[dow]}</span><span class="mw-date">${formatDate(wd)}</span></div>`;
+      ALL_KC.forEach((r) => {
+        const isKC = r.startsWith('kc');
+        const s = schedule[r] && schedule[r][dk];
+        if (isOpen(s)) opens++;
+        if (isMid(s)) mids++;
+        if (isClose(s) || s === 'kc-close') closes++;
+        const label = s ? getShiftShortLabel(s) : (isKC ? '—' : 'Off');
+        const cls = s ? getShiftCssClass(s) : 'shift-off';
+        html += `<div class="mw-person" data-role="${r}" data-dk="${dk}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})">`;
+        html += `<span class="mw-name">${esc(names[r] || r)}</span>`;
+        html += `<span class="mw-shift ${cls}">${esc(label)}</span>`;
+        html += `</div>`;
+      });
+      const covCls = opens === 0 || closes === 0 ? 'coverage-bad' : '';
+      html += `<div class="mw-coverage ${covCls}">Coverage · ${opens} open · ${mids} mid · ${closes} close</div>`;
+      html += `</div>`;
+    });
+    html += '</div>';
 
     html += '<table class="week-table">';
 
@@ -6272,6 +6409,107 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
 
   // Also render the print-optimized version
   renderPrintSchedule(ROLES, ALL_KC);
+
+  // Clopen radar lives above summary — inject if host exists
+  const radarHost = document.getElementById('clopen-radar-host');
+  if (radarHost) {
+    radarHost.innerHTML = renderClopenRadar(ROLES);
+  }
+}
+
+/** List every close → next-day open (clopen) for managers. */
+function findClopens(ROLES) {
+  if (!schedule || !periodDates || !periodDates.length) return [];
+  const names = getManagerNames();
+  const allDks = periodDates.map((d) => dateKey(d)).filter((dk) => typeof dk === 'string' && dk.includes('-'));
+  const list = [];
+  ROLES.forEach((r) => {
+    for (let i = 0; i < allDks.length - 1; i++) {
+      const dk = allDks[i];
+      const ndk = allDks[i + 1];
+      if (isClose(schedule[r][dk]) && isOpen(schedule[r][ndk])) {
+        const d0 = periodDates[i];
+        const d1 = periodDates[i + 1];
+        list.push({
+          role: r,
+          name: names[r] || r,
+          closeDk: dk,
+          openDk: ndk,
+          label:
+            (names[r] || r) +
+            ': close ' +
+            formatDate(d0) +
+            ' → open ' +
+            formatDate(d1),
+          weekIdx: Math.floor(i / 7),
+        });
+      }
+    }
+  });
+  return list;
+}
+
+function renderClopenRadar(ROLES) {
+  const list = findClopens(ROLES);
+  if (!list.length) {
+    return (
+      '<div class="clopen-radar empty-ok no-print">' +
+      '<h3>Clopen radar</h3>' +
+      '<div class="cr-sub">No close→open pairs found. Nice for rest and fairness.</div>' +
+      '</div>'
+    );
+  }
+  let html = '<div class="clopen-radar no-print">';
+  html += '<h3>Clopen radar</h3>';
+  html +=
+    '<div class="cr-sub">' +
+    list.length +
+    ' close→open pair' +
+    (list.length === 1 ? '' : 's') +
+    ' — tap to jump and edit.</div>';
+  html += '<div class="cr-list">';
+  list.forEach((c, idx) => {
+    html +=
+      '<button type="button" class="cr-item" onclick="jumpToClopen(' +
+      idx +
+      ')">' +
+      '<span class="cr-who">' +
+      esc(c.name) +
+      '</span>' +
+      '<span class="cr-when">' +
+      esc(c.label.replace(c.name + ': ', '')) +
+      '</span>' +
+      '<span class="cr-go">Edit →</span></button>';
+  });
+  html += '</div></div>';
+  window._clopenList = list;
+  return html;
+}
+
+function jumpToClopen(idx) {
+  const c = (window._clopenList && window._clopenList[idx]) || null;
+  if (!c) return;
+  switchTab('schedule');
+  setTimeout(() => {
+    const el =
+      document.querySelector(
+        '#schedule-grid td.shift-editable[data-role="' + c.role + '"][data-dk="' + c.openDk + '"]'
+      ) ||
+      document.querySelector(
+        '#schedule-grid tr[data-role="' + c.role + '"] td.shift-editable[data-dk="' + c.openDk + '"]'
+      ) ||
+      document.querySelector(
+        '#schedule-grid .mw-person[data-role="' + c.role + '"][data-dk="' + c.openDk + '"]'
+      );
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('cell-flash');
+      setTimeout(() => el.classList.remove('cell-flash'), 1500);
+    } else {
+      const wrap = document.getElementById('week-wrap-' + (c.weekIdx || 0));
+      if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 50);
 }
 
 // ── Render Print Schedule (posting sheet) ──

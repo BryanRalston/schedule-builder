@@ -33,6 +33,7 @@ body {
   color: #1a1a2e;
   line-height: 1.5;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ========== LAYOUT ========== */
@@ -40,6 +41,9 @@ body {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: #fff;
   padding: 1rem 2rem;
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-left: max(2rem, env(safe-area-inset-left));
+  padding-right: max(2rem, env(safe-area-inset-right));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -635,6 +639,26 @@ button:active { transform: scale(0.98); }
   .week-table { font-size: 0.7rem; min-width: 500px; }
   .week-table th, .week-table td { padding: 0.25rem 0.15rem; }
   .week-table .name-col { width: 100px; min-width: 100px; padding-left: 0.25rem; font-size: 0.7rem; }
+  /* Horizontal scroll for wide schedule tables */
+  #schedule-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.25rem;
+    padding-bottom: 0.35rem;
+  }
+  #schedule-grid::after {
+    content: 'Swipe sideways to see full week →';
+    display: block;
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin-top: 0.35rem;
+    font-weight: 600;
+  }
+  .btn-success.btn-large[disabled],
+  #btn-generate[disabled] {
+    opacity: 0.7;
+    cursor: wait;
+  }
   .week-header { font-size: 0.85rem; padding: 0.4rem 0.5rem; flex-wrap: wrap; gap: 0.25rem; }
   .week-header .week-dates { font-size: 0.7rem; }
   .summary-grid {
@@ -1493,6 +1517,38 @@ button:active { transform: scale(0.98); }
   gap: 0.4rem;
   margin-top: 0.75rem;
 }
+.score-why {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #334155;
+}
+.score-why-title {
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+.score-why ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.score-why li { margin: 0.25rem 0; line-height: 1.4; }
+.ready-checklist button.ready-item {
+  font: inherit;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.ready-checklist button.ready-item.miss:hover {
+  text-decoration: underline;
+}
 
 .labor-grid {
   display: grid;
@@ -2015,7 +2071,7 @@ html.pwa-standalone .install-banner { display: none !important; }
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()">How it works</button>
         <button type="button" onclick="promptLicenseUnlock(); closeHeaderMenu()">Enter license / unlock</button>
-        <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()">Buy Pro — $29</button>
+        <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label>Buy Pro — $19.99</button>
         <button type="button" onclick="location.href='install.html'; closeHeaderMenu()">Install / Play path</button>
       </div>
     </div>
@@ -2044,7 +2100,7 @@ html.pwa-standalone .install-banner { display: none !important; }
     <div class="welcome-actions">
       <button class="btn-demo" onclick="loadDemoStore()">Try Demo</button>
       <button class="btn-primary" onclick="switchTab('setup')">Get started</button>
-      <button class="btn-outline" style="border-color:#f59e0b;color:#92400e" onclick="location.href='buy.html'">Buy Pro $29</button>
+      <button class="btn-outline" style="border-color:#f59e0b;color:#92400e" onclick="location.href='buy.html'" data-price-label>Buy Pro $19.99</button>
       <button class="welcome-dismiss" onclick="dismissWelcome()">Dismiss</button>
     </div>
   </div>
@@ -2262,6 +2318,7 @@ html.pwa-standalone .install-banner { display: none !important; }
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON</button>
+        <button type="button" class="btn-secondary" id="btn-undo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="undoSchedEdit()" disabled title="Undo last cell edit">Undo</button>
         <span class="gen-timestamp" id="gen-timestamp"></span>
       </div>
       <div class="period-print-header" id="print-header"></div>
@@ -2290,7 +2347,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · v2.1.1 PWA · Offline · Data stays in this browser · <a href="buy.html" style="color:#2563eb;font-weight:700;text-decoration:none">Upgrade to Pro $29</a></div>
+  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.1.2</span> PWA · Offline · Data stays in this browser · <a href="buy.html" style="color:#2563eb;font-weight:700;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -2304,7 +2361,7 @@ html.pwa-standalone .install-banner { display: none !important; }
     <h3 id="pro-gate-title">Pro feature</h3>
     <p id="pro-gate-body">Unlock Pro for unlimited managers and Word/Excel export. Free keeps full generate + JSON backup.</p>
     <div class="pro-gate-actions">
-      <a class="pg-buy" href="buy.html">Buy Pro — $29</a>
+      <a class="pg-buy" href="buy.html" data-price-label>Buy Pro — $19.99</a>
       <button type="button" class="pg-secondary" onclick="promptLicenseUnlock()">Enter license</button>
       <button type="button" class="pg-secondary" onclick="closeProGate()">Not now</button>
     </div>
@@ -2421,7 +2478,7 @@ let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
 // ── Monetization / Pro license (offline-first; soft gate) ──
 const MSB_LICENSE_KEY = 'msb_pro_license';
 let monetizationConfig = {
-  priceLabel: '$29',
+  priceLabel: '$19.99',
   priceNote: 'one-time · lifetime Pro unlock',
   checkoutUrl: '',
   freeManagerLimit: 3,
@@ -2493,11 +2550,21 @@ function closeProGate() {
   if (modal) modal.setAttribute('hidden', '');
 }
 
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  closeProGate();
+  closeHeaderMenu();
+  const saved = document.getElementById('saved-modal-overlay');
+  if (saved && saved.style.display !== 'none') {
+    if (typeof closeSavedSchedulesModal === 'function') closeSavedSchedulesModal();
+  }
+});
+
 function requirePro(featureLabel) {
   if (isProUnlocked()) return true;
   showProGate(
     (featureLabel || 'This feature') +
-    ' is included with Pro (' + (monetizationConfig.priceLabel || '$29') +
+    ' is included with Pro (' + (monetizationConfig.priceLabel || '$19.99') +
     ' one-time). Free still generates schedules and backs up JSON so you never lose data.'
   );
   return false;
@@ -2524,6 +2591,7 @@ async function loadMonetizationConfig() {
     const j = await r.json();
     monetizationConfig = { ...monetizationConfig, ...j };
   } catch (e) { /* offline / missing — keep defaults */ }
+  if (typeof applyPriceLabels === 'function') applyPriceLabels();
 }
 
 function applyUrlProUnlock() {
@@ -2882,7 +2950,20 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.1.2';
+
+function applyPriceLabels() {
+  const price = monetizationConfig.priceLabel || '$19.99';
+  document.querySelectorAll('[data-price-label]').forEach((el) => {
+    const t = el.textContent || '';
+    el.textContent = t
+      .replace(/\$\d+(?:\.\d+)?/g, price)
+      .replace(/Buy Pro(?!\s*[—–$-])/i, 'Buy Pro — ' + price);
+    if (/^Buy Pro\s*$/i.test(t.trim())) el.textContent = 'Buy Pro — ' + price;
+  });
+  const ver = document.getElementById('app-version-label');
+  if (ver) ver.textContent = 'v' + APP_VERSION;
+}
 
 function showToast(message, type) {
   type = type || 'info';
@@ -3024,7 +3105,58 @@ function computeQualityScore(genReport, ROLES) {
   else if (score >= 85) grade = 'Strong';
   else if (score >= 70) grade = 'Good';
   else if (score >= 55) grade = 'Fair';
-  return { score, parts, grade };
+  return { score, parts, grade, hard, cl, met, over, softOnly, avoidOn, maxLim };
+}
+
+function explainQualityScore(q, genReport, ROLES) {
+  if (!q) return [];
+  const tips = [];
+  const n = (ROLES && ROLES.length) || 0;
+  if ((q.parts.hard || 0) < 40) {
+    const hard = q.hard != null ? q.hard : (genReport && genReport.hardErrorCount) || 0;
+    tips.push(
+      hard === 1
+        ? '1 hard rule is still broken (coverage, hours, or role rules). Fix those first — they cost the most points.'
+        : hard + ' hard rules are still broken (coverage, hours, or role rules). Fix those first — they cost the most points.'
+    );
+  } else {
+    tips.push('All hard rules look satisfied — openers/closers and role constraints are clean.');
+  }
+  if ((q.parts.clopen || 0) < 20) {
+    const cl = q.cl != null ? q.cl : (genReport && genReport.totalClopens) || 0;
+    tips.push(
+      cl
+        ? cl + ' clopen(s) remain (close then open next day). Swap those shifts to recover clopen points.'
+        : 'Clopen preference is costing points — check close→open pairs.'
+    );
+  } else if (q.avoidOn !== false) {
+    tips.push('No clopens under current preferences — good for rest and fairness.');
+  }
+  if ((q.parts.weekend || 0) < 20 && n) {
+    const met = q.met != null ? q.met : 0;
+    tips.push(
+      'Weekend targets: ' +
+        met +
+        '/' +
+        n +
+        ' managers hit their weekend-off goal. Give more Sat/Sun off where coverage allows.'
+    );
+  }
+  if ((q.parts.streak || 0) < 10) {
+    tips.push(
+      'Someone is over the max consecutive work days. Break long streaks with an off day.'
+    );
+  }
+  if ((q.parts.soft || 0) < 10) {
+    tips.push(
+      'Some soft preferences (favorite shifts, request styles) were not fully met. Not required for a valid schedule.'
+    );
+  }
+  if (q.score >= 95) tips.unshift('Excellent score — ready to publish to your team.');
+  else if (q.score >= 85) tips.unshift('Strong schedule — only small preference polish left.');
+  else if (q.score >= 70) tips.unshift('Good baseline — prioritize hard rules and clopens if anything still looks off.');
+  else tips.unshift('Score is fair/needs work — start with hard constraint fixes, then weekends.');
+  return tips.slice(0, 6);
 }
 
 function scoreRingSVG(score) {
@@ -3048,26 +3180,31 @@ function updateReadyChecklist() {
   // Consider ready if period loaded; names optional but recommended
   const named = Object.values(names).filter(n => n && String(n).trim()).length >= 2;
   const hasPrefs = typeof preferences !== 'undefined';
+  const storeName = ((document.getElementById('store-name') || {}).value || '').trim();
   const items = [
-    { ok: hasPeriod, label: hasPeriod ? 'Period loaded' : 'Load a fiscal period' },
-    { ok: named, label: named ? 'Team named' : 'Add team names' },
-    { ok: hasPrefs, label: 'Preferences ready' },
-    { ok: true, label: 'PTO optional' }
+    { ok: hasPeriod, label: hasPeriod ? 'Period loaded' : 'Load a fiscal period', go: 'setup' },
+    { ok: named, label: named ? 'Team named' : 'Name your managers', go: 'setup' },
+    { ok: !!storeName, label: storeName ? 'Store named' : 'Optional: store name', go: 'setup' },
+    { ok: true, label: 'PTO/RTO optional (set on Requests)', go: 'requests' }
   ];
   el.innerHTML = items.map(i =>
-    `<span class="ready-item ${i.ok ? 'ok' : 'miss'}"><span class="ready-dot"></span>${i.label}</span>`
+    `<button type="button" class="ready-item ${i.ok ? 'ok' : 'miss'}" ${i.ok ? '' : `onclick="switchTab('${i.go}')"`} title="${i.ok ? 'Ready' : 'Jump to fix'}">` +
+    `<span class="ready-dot"></span>${i.label}</button>`
   ).join('');
   const btn = document.getElementById('btn-generate');
-  if (btn) {
+  if (btn && !_generateBusy) {
     btn.disabled = !hasPeriod;
     btn.style.opacity = hasPeriod ? '1' : '0.55';
     btn.title = hasPeriod ? 'Generate optimized schedule' : 'Load a fiscal period first';
   }
   const meta = document.getElementById('gen-meta');
   if (meta && hasPeriod && currentPeriod) {
-    meta.textContent = `Ready · FY${fiscalYear} Period ${currentPeriod.number} · ${currentPeriod.numWeeks} weeks · ${getRoles().length} managers on roster`;
+    const miss = items.filter(i => !i.ok).map(i => i.label);
+    meta.textContent =
+      `Ready · FY${fiscalYear} Period ${currentPeriod.number} · ${currentPeriod.numWeeks} weeks · ${getRoles().length} managers` +
+      (miss.length ? ' · Next: ' + miss[0] : '');
   } else if (meta) {
-    meta.textContent = 'Tip: set PTO/RTO first — the engine treats them as hard locks.';
+    meta.textContent = 'Tip: Load a period first, then set PTO/RTO — the engine treats them as hard locks.';
   }
 }
 
@@ -4012,9 +4149,33 @@ function prevDateKey(dk) {
 }
 
 // ── GENERATE SCHEDULE ──
+let _generateBusy = false;
 function generateSchedule() {
-  try { _generateScheduleInner(); }
-  catch(e) { alert('Generate error: ' + e.message + '\n' + e.stack); console.error(e); }
+  if (_generateBusy) return;
+  const btn = document.getElementById('btn-generate');
+  const prevLabel = btn ? btn.textContent : '';
+  _generateBusy = true;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    btn.setAttribute('aria-busy', 'true');
+  }
+  // Yield so the button state paints before heavy work
+  setTimeout(() => {
+    try {
+      _generateScheduleInner();
+    } catch (e) {
+      console.error(e);
+      showToast('Generate error: ' + (e.message || e), 'error');
+    } finally {
+      _generateBusy = false;
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = prevLabel || 'Generate Schedule';
+        btn.removeAttribute('aria-busy');
+      }
+    }
+  }, 30);
 }
 function _generateScheduleInner() {
   schedule = {};
@@ -4030,7 +4191,8 @@ function _generateScheduleInner() {
   const nonMgrKCs = getNonManagerKCs(); // KCs not in manager mode
 
   if (!periodDates || periodDates.length === 0) {
-    alert('Please load a fiscal period first.');
+    showToast('Load a fiscal period first (Setup → Load Period).', 'warn');
+    switchTab('setup');
     return;
   }
 
@@ -4952,6 +5114,7 @@ function _generateScheduleInner() {
   if (ts) ts.textContent = 'Generated ' + new Date().toLocaleString();
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
   showToast(`Schedule ready · Quality ${q.score}/100 (${q.grade})`, hasErrors ? 'warn' : 'success');
+  clearSchedUndo();
   updateReadyChecklist();
   switchTab('schedule');
   setTimeout(() => {
@@ -6139,6 +6302,10 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
           ${bar('Work streaks', q.parts.streak, 10)}
           ${bar('Soft prefs', q.parts.soft, 10)}
         </div>
+        <div class="score-why no-print">
+          <div class="score-why-title">Why this score</div>
+          <ul>${explainQualityScore(q, genReport, ROLES).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+        </div>
         <div class="score-actions no-print">
           <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
           <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON</button>
@@ -6542,9 +6709,99 @@ function closeSchedEditMenu() {
   schedEditOpen = false;
 }
 
+// ── Undo stack for manual cell edits ──
+const SCHED_UNDO_MAX = 40;
+let schedUndoStack = [];
+
+function pushSchedUndo(role, dk, prevValue) {
+  schedUndoStack.push({
+    role,
+    dk,
+    prev: prevValue === undefined ? null : prevValue,
+    at: Date.now(),
+  });
+  if (schedUndoStack.length > SCHED_UNDO_MAX) schedUndoStack.shift();
+  updateUndoButton();
+}
+
+function updateUndoButton() {
+  const btn = document.getElementById('btn-undo-edit');
+  if (!btn) return;
+  const n = schedUndoStack.length;
+  btn.disabled = n === 0;
+  btn.textContent = n ? `Undo (${n})` : 'Undo';
+  btn.title = n ? 'Undo last cell edit' : 'No edits to undo';
+}
+
+function clearSchedUndo() {
+  schedUndoStack = [];
+  updateUndoButton();
+}
+
+function undoSchedEdit() {
+  if (!schedUndoStack.length || !schedule) {
+    showToast('Nothing to undo.', 'info');
+    return;
+  }
+  const step = schedUndoStack.pop();
+  if (!schedule[step.role]) schedule[step.role] = {};
+  if (step.prev === null || step.prev === undefined) {
+    delete schedule[step.role][step.dk];
+  } else {
+    schedule[step.role][step.dk] = step.prev;
+  }
+  updateUndoButton();
+  // Re-render like applySchedEdit
+  const ROLES = getRoles();
+  const ALL_KC = getAllWithKC();
+  if (!periodDates || !periodDates.length) {
+    showToast('Undid edit.', 'success');
+    return;
+  }
+  const allDks = periodDates.map(d => dateKey(d)).filter(dk => typeof dk === 'string' && dk.includes('-'));
+  const numWeeks = currentPeriod.numWeeks;
+  const names = getManagerNames();
+  const AMS = getAMs();
+  const closerPool = ROLES.filter(r => r !== 'sm');
+  const dkToDate = (dk) => {
+    if (!dk || typeof dk !== 'string') return new Date(NaN);
+    const parts = dk.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  };
+  const isDkMondayL = (dk) => dkToDate(dk).getDay() === 1;
+  const isDkSaturdayL = (dk) => dkToDate(dk).getDay() === 6;
+  const isDkSundayL = (dk) => dkToDate(dk).getDay() === 0;
+  const isDkWeekendL = (dk) => { const dow = dkToDate(dk).getDay(); return dow === 0 || dow === 6; };
+  const dkDowL = (dk) => dkToDate(dk).getDay();
+  const getWeekDksL = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
+  const allWeekendPairsL = [];
+  for (let i = 0; i < allDks.length; i++) {
+    if (isDkSaturdayL(allDks[i]) && i + 1 < allDks.length && isDkSundayL(allDks[i + 1])) {
+      allWeekendPairsL.push({ sat: allDks[i], sun: allDks[i + 1] });
+    }
+  }
+  const finalViolations = validateSchedule(schedule, allDks, numWeeks, getWeekDksL, dkToDate, isDkMondayL, isDkSaturdayL, isDkSundayL, isDkWeekendL, dkDowL, allWeekendPairsL, names, ROLES, ALL_KC, AMS, closerPool);
+  const warnings = finalViolations.map(v => ({
+    type: v.severity === 'error' ? 'error' : (v.severity === 'warning' ? 'warn' : 'info'),
+    msg: v.detail
+  }));
+  renderSchedule(warnings, ROLES, ALL_KC);
+  renderPrintSchedule(ROLES, ALL_KC);
+  if (window._lastGenReport) {
+    window._lastGenReport = buildGenerationReport(
+      schedule, allDks, ROLES, ALL_KC, names,
+      preferences || {}, finalViolations, isDkWeekendL, dkToDate
+    );
+    renderSummary(warnings, ROLES, ALL_KC, window._lastGenReport);
+  }
+  showToast('Undid last cell edit.', 'success');
+}
+
 function applySchedEdit(role, dk, weekIdx, value) {
   // Update the schedule data
   if (!schedule[role]) schedule[role] = {};
+  const prev = schedule[role].hasOwnProperty(dk) ? schedule[role][dk] : null;
+  pushSchedUndo(role, dk, prev);
   if (value === null) {
     delete schedule[role][dk];
   } else {
@@ -7075,7 +7332,11 @@ function handleLaunchQuery() {
 registerServiceWorker();
 setupInstallPrompt();
 updateLicenseBadge();
-loadMonetizationConfig().then(() => updateLicenseBadge());
+loadMonetizationConfig().then(() => {
+  updateLicenseBadge();
+  applyPriceLabels();
+});
+applyPriceLabels();
 // After DOM boot
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', handleLaunchQuery);

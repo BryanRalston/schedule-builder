@@ -580,6 +580,103 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .cr-item .cr-who { font-weight: 600; flex: 1; min-width: 0; }
 .cr-item .cr-when { font-size: 0.78rem; color: var(--ink-3); }
 .cr-item .cr-go { font-size: 0.72rem; font-weight: 600; color: var(--gold-deep); }
+.cr-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+.cr-row .cr-item { flex: 1; min-width: 200px; }
+.cr-fix {
+  font-size: 0.78rem !important;
+  padding: 0.55rem 0.85rem !important;
+  white-space: nowrap;
+  align-self: center;
+}
+.cr-nofix {
+  font-size: 0.75rem;
+  color: var(--ink-4);
+  align-self: center;
+  padding: 0 0.35rem;
+}
+
+/* Weekend fairness board */
+.weekend-board {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.15rem;
+  box-shadow: var(--shadow-sm);
+}
+.weekend-board.empty-ok {
+  border-color: rgba(47,111,78,0.22);
+  background: linear-gradient(180deg, var(--ok-bg), var(--surface));
+}
+.weekend-board h3 {
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+.wf-table { display: flex; flex-direction: column; gap: 0.3rem; }
+.wf-row {
+  display: grid;
+  grid-template-columns: 1fr 48px 48px 88px;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+.wf-row.wf-head {
+  border: none;
+  background: transparent;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  cursor: default;
+  padding-bottom: 0.15rem;
+}
+.wf-row.met { opacity: 0.85; }
+.wf-row.short {
+  border-color: rgba(154,107,31,0.28);
+  background: var(--warn-bg);
+}
+.wf-row:not(.wf-head):hover {
+  border-color: rgba(176,141,87,0.45);
+  box-shadow: var(--shadow-sm);
+}
+.wf-name { font-weight: 600; font-size: 0.88rem; }
+.wf-got, .wf-goal { font-weight: 600; font-size: 0.88rem; text-align: center; }
+.wf-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-align: right;
+  color: var(--ink-3);
+}
+.wf-row.short .wf-status { color: var(--warn); }
+.wf-row.met .wf-status { color: var(--ok); }
+
+@media (max-width: 720px) {
+  .mw-day-head {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    backdrop-filter: blur(6px);
+  }
+  .cr-row { flex-direction: column; }
+  .cr-fix { width: 100%; }
+}
 
 .week-table tbody tr:nth-child(even) td { background: rgba(243,239,232,0.35); }
 .week-table tbody tr:nth-child(even) td.name-col { background: var(--paper-2); }
@@ -2682,7 +2779,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.2.2</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.2.3</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3343,7 +3440,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.2.2';
+const APP_VERSION = '2.2.3';
 
 function applyPriceLabels() {
   const price = monetizationConfig.priceLabel || '$19.99';
@@ -6489,14 +6586,18 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
   // Also render the print-optimized version
   renderPrintSchedule(ROLES, ALL_KC);
 
-  // Clopen radar lives above summary — inject if host exists
+  // Insight panels above summary
   const radarHost = document.getElementById('clopen-radar-host');
   if (radarHost) {
-    radarHost.innerHTML = renderClopenRadar(ROLES);
+    radarHost.innerHTML = renderClopenRadar(ROLES) + renderWeekendFairnessBoard(ROLES);
   }
 }
 
-/** List every close → next-day open (clopen) for managers. */
+function isCellLocked(role, dk) {
+  return !!(inputs[role] && inputs[role][dk] !== undefined);
+}
+
+/** List every close → next-day open (clopen) for managers, with fix options. */
 function findClopens(ROLES) {
   if (!schedule || !periodDates || !periodDates.length) return [];
   const names = getManagerNames();
@@ -6509,11 +6610,14 @@ function findClopens(ROLES) {
       if (isClose(schedule[r][dk]) && isOpen(schedule[r][ndk])) {
         const d0 = periodDates[i];
         const d1 = periodDates[i + 1];
+        const fix = suggestClopenFix(r, dk, ndk, ROLES, allDks, i);
         list.push({
           role: r,
           name: names[r] || r,
           closeDk: dk,
           openDk: ndk,
+          closeIdx: i,
+          openIdx: i + 1,
           label:
             (names[r] || r) +
             ': close ' +
@@ -6521,6 +6625,7 @@ function findClopens(ROLES) {
             ' → open ' +
             formatDate(d1),
           weekIdx: Math.floor(i / 7),
+          fix: fix,
         });
       }
     }
@@ -6528,13 +6633,59 @@ function findClopens(ROLES) {
   return list;
 }
 
+/**
+ * Suggest a safe fix for a clopen:
+ * 1) Swap open day with someone who has mid/open and didn't close prev day
+ * 2) Change this person's open → mid if another opener exists
+ */
+function suggestClopenFix(role, closeDk, openDk, ROLES, allDks, closeIdx) {
+  const names = getManagerNames();
+  // Prefer swap of the OPEN day with a mid/open person who is safe
+  const swapWith = ROLES.find((r2) => {
+    if (r2 === role) return false;
+    if (isCellLocked(r2, openDk) || isCellLocked(role, openDk)) return false;
+    const s2 = schedule[r2][openDk];
+    if (!isMid(s2) && !isOpen(s2)) return false;
+    if (isClose(schedule[r2][closeDk])) return false; // would create clopen for them
+    return true;
+  });
+  if (swapWith) {
+    return {
+      type: 'swap-open',
+      label: 'Swap open with ' + (names[swapWith] || swapWith),
+      withRole: swapWith,
+      dk: openDk,
+    };
+  }
+  // Change open to mid if coverage still has an opener
+  const otherOpens = ROLES.filter((r2) => r2 !== role && isOpen(schedule[r2][openDk])).length;
+  if (!isCellLocked(role, openDk) && otherOpens > 0) {
+    return {
+      type: 'to-mid',
+      label: 'Change open → mid (keep coverage)',
+      dk: openDk,
+    };
+  }
+  // Change previous close to mid if another closer exists that day
+  const otherCloses = ROLES.filter((r2) => r2 !== role && isClose(schedule[r2][closeDk])).length;
+  if (!isCellLocked(role, closeDk) && otherCloses > 0) {
+    return {
+      type: 'close-to-mid',
+      label: 'Change close → mid (other closer stays)',
+      dk: closeDk,
+    };
+  }
+  return null;
+}
+
 function renderClopenRadar(ROLES) {
   const list = findClopens(ROLES);
+  window._clopenList = list;
   if (!list.length) {
     return (
       '<div class="clopen-radar empty-ok no-print">' +
       '<h3>Clopen radar</h3>' +
-      '<div class="cr-sub">No close→open pairs found. Nice for rest and fairness.</div>' +
+      '<div class="cr-sub">No close→open pairs. Team gets real rest between nights and mornings.</div>' +
       '</div>'
     );
   }
@@ -6545,9 +6696,10 @@ function renderClopenRadar(ROLES) {
     list.length +
     ' close→open pair' +
     (list.length === 1 ? '' : 's') +
-    ' — tap to jump and edit.</div>';
+    ' — jump to edit or apply a suggested fix.</div>';
   html += '<div class="cr-list">';
   list.forEach((c, idx) => {
+    html += '<div class="cr-row">';
     html +=
       '<button type="button" class="cr-item" onclick="jumpToClopen(' +
       idx +
@@ -6558,11 +6710,124 @@ function renderClopenRadar(ROLES) {
       '<span class="cr-when">' +
       esc(c.label.replace(c.name + ': ', '')) +
       '</span>' +
-      '<span class="cr-go">Edit →</span></button>';
+      '<span class="cr-go">Find →</span></button>';
+    if (c.fix) {
+      html +=
+        '<button type="button" class="cr-fix btn-secondary" onclick="applyClopenFix(' +
+        idx +
+        ')">' +
+        esc(c.fix.label) +
+        '</button>';
+    } else {
+      html += '<span class="cr-nofix">No auto-fix — edit manually</span>';
+    }
+    html += '</div>';
   });
   html += '</div></div>';
-  window._clopenList = list;
   return html;
+}
+
+function applyClopenFix(idx) {
+  const c = (window._clopenList && window._clopenList[idx]) || null;
+  if (!c || !c.fix || !schedule) {
+    showToast('No automatic fix for that clopen.', 'warn');
+    return;
+  }
+  const fix = c.fix;
+  if (fix.type === 'swap-open') {
+    const r2 = fix.withRole;
+    const dk = fix.dk;
+    const prevA = schedule[c.role][dk];
+    const prevB = schedule[r2][dk];
+    pushSchedUndo(c.role, dk, prevA);
+    pushSchedUndo(r2, dk, prevB);
+    schedule[c.role][dk] = prevB;
+    schedule[r2][dk] = prevA;
+    showToast('Swapped open with ' + (getManagerNames()[r2] || r2) + '.', 'success');
+  } else if (fix.type === 'to-mid') {
+    const dk = fix.dk;
+    pushSchedUndo(c.role, dk, schedule[c.role][dk]);
+    schedule[c.role][dk] = 'mid-late';
+    showToast(c.name + ': open → mid.', 'success');
+  } else if (fix.type === 'close-to-mid') {
+    const dk = fix.dk;
+    pushSchedUndo(c.role, dk, schedule[c.role][dk]);
+    schedule[c.role][dk] = 'mid-early';
+    showToast(c.name + ': close → mid.', 'success');
+  } else {
+    showToast('Unknown fix type.', 'warn');
+    return;
+  }
+  // Re-render schedule + panels (does not count as a free generate)
+  const ROLES = getRoles();
+  const ALL_KC = getAllWithKC();
+  revalidateAfterManualEdit(ROLES, ALL_KC);
+}
+
+function revalidateAfterManualEdit(ROLES, ALL_KC) {
+  if (!periodDates || !periodDates.length || !schedule) return;
+  const allDks = periodDates.map((d) => dateKey(d)).filter((dk) => typeof dk === 'string' && dk.includes('-'));
+  const numWeeks = currentPeriod.numWeeks;
+  const names = getManagerNames();
+  const AMS = getAMs();
+  const closerPool = ROLES.filter((r) => r !== 'sm');
+  const dkToDate = (dk) => {
+    if (!dk || typeof dk !== 'string') return new Date(NaN);
+    const parts = dk.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  };
+  const isDkMondayL = (dk) => dkToDate(dk).getDay() === 1;
+  const isDkSaturdayL = (dk) => dkToDate(dk).getDay() === 6;
+  const isDkSundayL = (dk) => dkToDate(dk).getDay() === 0;
+  const isDkWeekendL = (dk) => {
+    const dow = dkToDate(dk).getDay();
+    return dow === 0 || dow === 6;
+  };
+  const dkDowL = (dk) => dkToDate(dk).getDay();
+  const getWeekDksL = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
+  const allWeekendPairsL = [];
+  for (let i = 0; i < allDks.length; i++) {
+    if (isDkSaturdayL(allDks[i]) && i + 1 < allDks.length && isDkSundayL(allDks[i + 1])) {
+      allWeekendPairsL.push({ sat: allDks[i], sun: allDks[i + 1] });
+    }
+  }
+  const finalViolations = validateSchedule(
+    schedule,
+    allDks,
+    numWeeks,
+    getWeekDksL,
+    dkToDate,
+    isDkMondayL,
+    isDkSaturdayL,
+    isDkSundayL,
+    isDkWeekendL,
+    dkDowL,
+    allWeekendPairsL,
+    names,
+    ROLES,
+    ALL_KC,
+    AMS,
+    closerPool
+  );
+  const warnings = finalViolations.map((v) => ({
+    type: v.severity === 'error' ? 'error' : v.severity === 'warning' ? 'warn' : 'info',
+    msg: v.detail,
+  }));
+  if (window._lastGenReport) {
+    window._lastGenReport = buildGenerationReport(
+      schedule,
+      allDks,
+      ROLES,
+      ALL_KC,
+      names,
+      preferences || {},
+      finalViolations,
+      isDkWeekendL,
+      dkToDate
+    );
+  }
+  renderSchedule(warnings, ROLES, ALL_KC);
+  renderSummary(warnings, ROLES, ALL_KC, window._lastGenReport || null);
 }
 
 function jumpToClopen(idx) {
@@ -6587,6 +6852,93 @@ function jumpToClopen(idx) {
     } else {
       const wrap = document.getElementById('week-wrap-' + (c.weekIdx || 0));
       if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 50);
+}
+
+/** Who is short on weekend days off this period. */
+function buildWeekendFairness(ROLES) {
+  if (!schedule || !periodDates || !periodDates.length) return [];
+  const names = getManagerNames();
+  const allDks = periodDates.map((d) => dateKey(d)).filter((dk) => typeof dk === 'string' && dk.includes('-'));
+  const isDayOffish = (s) => s === 'off' || s === 'rto' || s === 'pto' || s === 'loa';
+  return ROLES.map((r) => {
+    const target = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(r) : 2;
+    let got = 0;
+    allDks.forEach((dk, i) => {
+      const d = periodDates[i];
+      if (!d) return;
+      const dow = d.getDay();
+      if ((dow === 0 || dow === 6) && isDayOffish(schedule[r] && schedule[r][dk])) got++;
+    });
+    return {
+      role: r,
+      name: names[r] || r,
+      got,
+      target,
+      short: Math.max(0, target - got),
+      met: got >= target,
+    };
+  }).sort((a, b) => b.short - a.short || a.name.localeCompare(b.name));
+}
+
+function renderWeekendFairnessBoard(ROLES) {
+  const rows = buildWeekendFairness(ROLES);
+  if (!rows.length) return '';
+  const shortN = rows.filter((r) => r.short > 0).length;
+  const allMet = shortN === 0;
+  let html =
+    '<div class="weekend-board no-print' +
+    (allMet ? ' empty-ok' : '') +
+    '">';
+  html += '<h3>Weekend fairness</h3>';
+  html +=
+    '<div class="cr-sub">' +
+    (allMet
+      ? 'Everyone met their weekend-off target for this period.'
+      : shortN +
+        ' manager' +
+        (shortN === 1 ? '' : 's') +
+        ' still short on weekend days off.') +
+    '</div>';
+  html += '<div class="wf-table">';
+  html +=
+    '<div class="wf-row wf-head"><span>Manager</span><span>Off</span><span>Goal</span><span></span></div>';
+  rows.forEach((r) => {
+    html +=
+      '<button type="button" class="wf-row' +
+      (r.met ? ' met' : ' short') +
+      '" onclick="jumpToRoleOnGrid(\'' +
+      r.role +
+      '\')">' +
+      '<span class="wf-name">' +
+      esc(r.name) +
+      '</span>' +
+      '<span class="wf-got">' +
+      r.got +
+      '</span>' +
+      '<span class="wf-goal">' +
+      r.target +
+      '</span>' +
+      '<span class="wf-status">' +
+      (r.met ? 'Met' : 'Short ' + r.short) +
+      '</span></button>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function jumpToRoleOnGrid(role) {
+  switchTab('schedule');
+  setTimeout(() => {
+    const el =
+      document.querySelector('#schedule-grid tr[data-role="' + role + '"] td.shift-editable') ||
+      document.querySelector('#schedule-grid .mw-person[data-role="' + role + '"]') ||
+      document.querySelector('#schedule-grid tr[data-role="' + role + '"] .name-col');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('cell-flash');
+      setTimeout(() => el.classList.remove('cell-flash'), 1500);
     }
   }, 50);
 }

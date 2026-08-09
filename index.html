@@ -2430,7 +2430,7 @@ html.pwa-standalone .install-banner { display: none !important; }
   <!-- WELCOME / ONBOARDING -->
   <div class="welcome-card no-print compact" id="welcome-card">
     <h2>Build the period. Post with confidence.</h2>
-    <p>Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen control, Word/Excel export. Fully offline. Free for up to 3 managers; Pro unlocks unlimited roster and export.</p>
+    <p>Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen control. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel.</p>
     <div class="welcome-actions">
       <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
       <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
@@ -2682,7 +2682,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.2.1</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.2.2</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -2694,7 +2694,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 <div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title">
   <div class="pro-gate-card">
     <h3 id="pro-gate-title">Pro feature</h3>
-    <p id="pro-gate-body">Unlock Pro for unlimited managers and Word/Excel export. Free keeps full generate + JSON backup.</p>
+    <p id="pro-gate-body">Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.</p>
     <div class="pro-gate-actions">
       <a class="pg-buy" href="buy.html" data-price-label>Buy Pro — $19.99</a>
       <button type="button" class="pg-secondary" onclick="promptLicenseUnlock()">Enter license</button>
@@ -2806,18 +2806,20 @@ function restoreAppTab() {
 
 
 // ── Dynamic Configuration State ──
-// Free tier caps manager roster at freeManagerLimit (default 3 = SM + 2 AMs)
+// Free: unlimited managers; limited free schedule builds (see freeGenerateLimit)
 let amCount = 2;
 let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
 
 // ── Monetization / Pro license (offline-first; soft gate) ──
 const MSB_LICENSE_KEY = 'msb_pro_license';
+const MSB_GEN_COUNT_KEY = 'msb_free_generate_count';
 let monetizationConfig = {
   priceLabel: '$19.99',
   priceNote: 'one-time · lifetime Pro unlock',
   checkoutUrl: '',
-  freeManagerLimit: 3,
-  proFeatures: ['unlimited managers', 'Word export', 'Excel export', 'priority future updates']
+  freeManagerLimit: 0,
+  freeGenerateLimit: 2,
+  proFeatures: ['unlimited schedule builds', 'Word export', 'Excel export', 'priority future updates']
 };
 
 function isProUnlocked() {
@@ -2848,8 +2850,46 @@ function validLicenseKey(k) {
 }
 
 function freeManagerLimit() {
+  // 0 / missing = unlimited managers on Free
   const n = Number(monetizationConfig.freeManagerLimit);
-  return Number.isFinite(n) && n > 0 ? n : 3;
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+function freeGenerateLimit() {
+  const n = Number(monetizationConfig.freeGenerateLimit);
+  return Number.isFinite(n) && n >= 0 ? n : 2;
+}
+
+function getFreeGenerateCount() {
+  try {
+    const n = parseInt(localStorage.getItem(MSB_GEN_COUNT_KEY) || '0', 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function setFreeGenerateCount(n) {
+  try {
+    localStorage.setItem(MSB_GEN_COUNT_KEY, String(Math.max(0, n | 0)));
+  } catch (e) {}
+}
+
+function remainingFreeGenerates() {
+  if (isProUnlocked()) return Infinity;
+  return Math.max(0, freeGenerateLimit() - getFreeGenerateCount());
+}
+
+function canGenerateSchedule() {
+  if (isProUnlocked()) return true;
+  return getFreeGenerateCount() < freeGenerateLimit();
+}
+
+function recordFreeGenerate() {
+  if (isProUnlocked()) return;
+  setFreeGenerateCount(getFreeGenerateCount() + 1);
+  updateLicenseBadge();
+  updateReadyChecklist();
 }
 
 function rosterManagerCount() {
@@ -2863,13 +2903,24 @@ function updateLicenseBadge() {
   if (isProUnlocked()) {
     el.textContent = 'Pro';
     el.classList.remove('is-free');
-    el.title = 'Pro unlocked on this device';
+    el.title = 'Pro unlocked — unlimited builds + Word/Excel';
+    el.style.cursor = 'default';
+    el.onclick = null;
   } else {
-    el.textContent = 'Free';
+    const left = remainingFreeGenerates();
+    el.textContent = left === 0 ? 'Free · 0 builds' : 'Free · ' + left + ' left';
     el.classList.add('is-free');
-    el.title = 'Free tier · click Buy Pro for unlimited roster + exports';
+    el.title =
+      left === 0
+        ? 'Free builds used — unlock Pro for unlimited builds + Word/Excel'
+        : left +
+          ' free schedule build' +
+          (left === 1 ? '' : 's') +
+          ' left · unlimited managers · edits always free';
     el.style.cursor = 'pointer';
-    el.onclick = () => { location.href = 'buy.html'; };
+    el.onclick = () => {
+      location.href = 'buy.html';
+    };
   }
 }
 
@@ -2899,8 +2950,23 @@ function requirePro(featureLabel) {
   if (isProUnlocked()) return true;
   showProGate(
     (featureLabel || 'This feature') +
-    ' is included with Pro (' + (monetizationConfig.priceLabel || '$19.99') +
-    ' one-time). Free still generates schedules and backs up JSON so you never lose data.'
+      ' is included with Pro (' +
+      (monetizationConfig.priceLabel || '$19.99') +
+      ' one-time). Free includes unlimited managers, full editing, and ' +
+      freeGenerateLimit() +
+      ' schedule builds — then unlock for unlimited builds plus Word/Excel.'
+  );
+  return false;
+}
+
+function requireGenerateAllowance() {
+  if (canGenerateSchedule()) return true;
+  showProGate(
+    'You’ve used your ' +
+      freeGenerateLimit() +
+      ' free schedule builds on this device. Edits to an existing schedule stay free. Unlock Pro (' +
+      (monetizationConfig.priceLabel || '$19.99') +
+      ' one-time) for unlimited builds plus Word/Excel export.'
   );
   return false;
 }
@@ -2947,15 +3013,7 @@ function applyUrlProUnlock() {
 }
 
 function canAddManagerSeat() {
-  if (isProUnlocked()) return true;
-  // After adding one seat, count must stay <= freeManagerLimit
-  if (rosterManagerCount() >= freeManagerLimit()) {
-    showProGate(
-      'Free includes up to ' + freeManagerLimit() +
-      ' managers on the roster (Store Manager + AMs / manager KCs). Unlock Pro for unlimited team size.'
-    );
-    return false;
-  }
+  // Free: unlimited managers — monetization is on schedule builds + export
   return true;
 }
 
@@ -3285,7 +3343,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.2.1';
+const APP_VERSION = '2.2.2';
 
 function applyPriceLabels() {
   const price = monetizationConfig.priceLabel || '$19.99';
@@ -3658,11 +3716,21 @@ function updateReadyChecklist() {
   const named = Object.values(names).filter(n => n && String(n).trim()).length >= 2;
   const hasPrefs = typeof preferences !== 'undefined';
   const storeName = ((document.getElementById('store-name') || {}).value || '').trim();
+  const canGen = canGenerateSchedule();
+  const left = remainingFreeGenerates();
   const items = [
     { ok: hasPeriod, label: hasPeriod ? 'Period loaded' : 'Load a fiscal period', go: 'setup' },
     { ok: named, label: named ? 'Team named' : 'Name your managers', go: 'setup' },
     { ok: !!storeName, label: storeName ? 'Store named' : 'Optional: store name', go: 'setup' },
-    { ok: true, label: 'PTO/RTO optional (set on Requests)', go: 'requests' }
+    {
+      ok: canGen,
+      label: isProUnlocked()
+        ? 'Unlimited builds (Pro)'
+        : canGen
+          ? left + ' free build' + (left === 1 ? '' : 's') + ' left'
+          : 'Free builds used — unlock Pro',
+      go: 'schedule',
+    },
   ];
   el.innerHTML = items.map(i =>
     `<button type="button" class="ready-item ${i.ok ? 'ok' : 'miss'}" ${i.ok ? '' : `onclick="switchTab('${i.go}')"`} title="${i.ok ? 'Ready' : 'Jump to fix'}">` +
@@ -3670,18 +3738,27 @@ function updateReadyChecklist() {
   ).join('');
   const btn = document.getElementById('btn-generate');
   if (btn && !_generateBusy) {
-    btn.disabled = !hasPeriod;
-    btn.style.opacity = hasPeriod ? '1' : '0.55';
-    btn.title = hasPeriod ? 'Generate optimized schedule' : 'Load a fiscal period first';
+    const ready = hasPeriod && canGen;
+    btn.disabled = !ready;
+    btn.style.opacity = ready ? '1' : '0.55';
+    if (!hasPeriod) btn.title = 'Load a fiscal period first';
+    else if (!canGen) btn.title = 'Free builds used — unlock Pro for more';
+    else btn.title = 'Build optimized schedule for this period';
   }
   const meta = document.getElementById('gen-meta');
   if (meta && hasPeriod && currentPeriod) {
-    const miss = items.filter(i => !i.ok).map(i => i.label);
-    meta.textContent =
-      `Ready · FY${fiscalYear} Period ${currentPeriod.number} · ${currentPeriod.numWeeks} weeks · ${getRoles().length} managers` +
-      (miss.length ? ' · Next: ' + miss[0] : '');
+    let line =
+      `Ready · FY${fiscalYear} Period ${currentPeriod.number} · ${currentPeriod.numWeeks} weeks · ${getRoles().length} managers`;
+    if (!isProUnlocked()) {
+      line +=
+        left === 0
+          ? ' · Free builds used (edits still free)'
+          : ' · ' + left + ' free build' + (left === 1 ? '' : 's') + ' left';
+    }
+    meta.textContent = line;
   } else if (meta) {
-    meta.textContent = 'Tip: Load a period first, then set PTO/RTO — the engine treats them as hard locks.';
+    meta.textContent =
+      'Tip: Load a period first, then set PTO/RTO — the engine treats them as hard locks. Unlimited managers on Free.';
   }
 }
 
@@ -4202,17 +4279,6 @@ function addKC() {
 
 function toggleKcAsManager(idx, checkbox) {
   const want = !!(checkbox && checkbox.checked);
-  if (want && !isProUnlocked()) {
-    // Enabling manager mode consumes a roster seat
-    if (rosterManagerCount() >= freeManagerLimit()) {
-      if (checkbox) checkbox.checked = false;
-      showProGate(
-        'Free includes up to ' + freeManagerLimit() +
-        ' managers. Unlock Pro to mark more key carriers as manager coverage.'
-      );
-      return;
-    }
-  }
   if (kcList[idx]) kcList[idx].asManager = want;
   rebuildAfterConfigChange();
 }
@@ -4629,12 +4695,13 @@ function prevDateKey(dk) {
 let _generateBusy = false;
 function generateSchedule() {
   if (_generateBusy) return;
+  if (!requireGenerateAllowance()) return;
   const btn = document.getElementById('btn-generate');
   const prevLabel = btn ? btn.textContent : '';
   _generateBusy = true;
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Generating…';
+    btn.textContent = 'Building…';
     btn.setAttribute('aria-busy', 'true');
   }
   // Yield so the button state paints before heavy work
@@ -4648,9 +4715,11 @@ function generateSchedule() {
       _generateBusy = false;
       if (btn) {
         btn.disabled = false;
-        btn.textContent = prevLabel || 'Generate Schedule';
+        btn.textContent = prevLabel || 'Build this period';
         btn.removeAttribute('aria-busy');
       }
+      updateReadyChecklist();
+      updateLicenseBadge();
     }
   }, 30);
 }
@@ -5590,7 +5659,17 @@ function _generateScheduleInner() {
   const ts = document.getElementById('gen-timestamp');
   if (ts) ts.textContent = 'Generated ' + new Date().toLocaleString();
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
-  showToast(`Schedule ready · Quality ${q.score}/100 (${q.grade})`, hasErrors ? 'warn' : 'success');
+  // Successful build only — free allowance decrements after a real schedule lands
+  recordFreeGenerate();
+  const left = remainingFreeGenerates();
+  let toastMsg = `Schedule ready · Quality ${q.score}/100 (${q.grade})`;
+  if (!isProUnlocked()) {
+    toastMsg +=
+      left === 0
+        ? ' · Free builds used (edits still free)'
+        : ' · ' + left + ' free build' + (left === 1 ? '' : 's') + ' left';
+  }
+  showToast(toastMsg, hasErrors ? 'warn' : 'success');
   clearSchedUndo();
   updateReadyChecklist();
   switchTab('schedule');

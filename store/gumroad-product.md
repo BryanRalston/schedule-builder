@@ -27,7 +27,8 @@ WHAT YOU GET
 
 FREE vs PRO
 • Free: try the full generator with a 3-manager roster cap; JSON backup always free
-• Pro ($19.99 one-time): unlimited managers + Word/Excel export + lifetime unlock on your devices (paste license or open the unlock link)
+• Free: unlimited managers, full cell edits, 2 schedule builds
+• Pro ($19.99 one-time): unlimited builds + Word/Excel export + lifetime unlock on your devices
 
 AFTER PURCHASE
 Open this unlock link (sets Pro on your browser):

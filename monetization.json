@@ -8,9 +8,10 @@
   "checkoutProvider": "gumroad",
   "productName": "Manager Schedule Builder Pro",
   "supportEmail": "b.ralston62989@gmail.com",
-  "freeManagerLimit": 3,
+  "freeManagerLimit": 0,
+  "freeGenerateLimit": 2,
   "proFeatures": [
-    "unlimited managers",
+    "unlimited schedule builds",
     "Word export",
     "Excel export",
     "priority future updates"

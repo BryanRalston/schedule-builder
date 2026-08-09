@@ -3115,7 +3115,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.3.0</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.3.1</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3501,10 +3501,62 @@ const DEFAULT_PREFERENCES = {
   avoidClopening: true,
   fairDistribution: true,
   minHoursBetweenShifts: 0,
-  kcCloseDays: [1] // 0=Sun … 6=Sat; default Monday
+  kcCloseDays: [1], // 0=Sun … 6=Sat; default Monday
+  smClosesPerWeek: 1, // Store Manager target closes per week (manager-close nights only)
+  amClosesPerWeek: null // null = auto fair-share of remaining; number = each AM targets this many
 };
 
 let preferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
+
+/** SM closes/week target. Sole manager covers all manager nights. */
+function getSmClosesPerWeekTarget(prefs, managerNights, soleManager) {
+  const nights = Math.max(0, managerNights | 0);
+  if (soleManager) return nights;
+  const p = prefs || preferences || DEFAULT_PREFERENCES;
+  let n = p.smClosesPerWeek;
+  if (n == null || n === '') {
+    const rule = (typeof roleRules !== 'undefined' && roleRules.sm) ? roleRules.sm : null;
+    n = (rule && rule.closesPerWeek != null) ? rule.closesPerWeek : 1;
+  }
+  n = Math.max(0, parseInt(n, 10));
+  if (!Number.isFinite(n)) n = 1;
+  return Math.min(n, nights);
+}
+
+/**
+ * AM (or manager-mode closer) closes/week target.
+ * Fixed when prefs.amClosesPerWeek is set; otherwise fair share of remaining after SM.
+ */
+function getAmClosesPerWeekTarget(prefs, remainingCloses, closerCount, closerIdx, weekIdx) {
+  const p = prefs || preferences || DEFAULT_PREFERENCES;
+  if (p.amClosesPerWeek != null && p.amClosesPerWeek !== '') {
+    const fixed = Math.max(0, parseInt(p.amClosesPerWeek, 10));
+    return Number.isFinite(fixed) ? fixed : 0;
+  }
+  const rule = (typeof roleRules !== 'undefined' && roleRules.am) ? roleRules.am : null;
+  if (rule && rule.closesPerWeek != null && rule.closesPerWeek !== '') {
+    const fixed = Math.max(0, parseInt(rule.closesPerWeek, 10));
+    if (Number.isFinite(fixed)) return fixed;
+  }
+  if (!closerCount || closerCount <= 0) return 0;
+  const rem = Math.max(0, remainingCloses | 0);
+  const base = Math.floor(rem / closerCount);
+  const extra = rem % closerCount;
+  const idx = Math.max(0, closerIdx | 0);
+  const w = Math.max(0, weekIdx | 0);
+  return base + ((idx + w) % closerCount < extra ? 1 : 0);
+}
+
+function syncCloseTargetsToRoleRules() {
+  if (typeof roleRules === 'undefined') return;
+  if (roleRules.sm) {
+    roleRules.sm.closesPerWeek = getSmClosesPerWeekTarget(preferences, 7, false);
+  }
+  if (roleRules.am) {
+    const am = preferences.amClosesPerWeek;
+    roleRules.am.closesPerWeek = (am == null || am === '') ? null : Math.max(0, parseInt(am, 10) || 0);
+  }
+}
 
 /** Normalize KC close DOWs (0=Sun…6=Sat). Empty array = no automatic KC close nights. */
 function normalizeKcCloseDays(arr) {
@@ -3616,6 +3668,10 @@ function readPreferencesFromUI() {
     const cb = g('pref-kc-close-' + i);
     if (cb && cb.checked) kcCloseDays.push(i);
   }
+  const smClRaw = g('pref-sm-closes') ? g('pref-sm-closes').value : '1';
+  const amClRaw = g('pref-am-closes') ? g('pref-am-closes').value : '';
+  const smCl = Math.max(0, Math.min(7, parseInt(smClRaw, 10)));
+  const amCl = (amClRaw === '' || amClRaw == null) ? null : Math.max(0, Math.min(7, parseInt(amClRaw, 10)));
   preferences = {
     targetWeekendDaysOff: Math.max(0, parseInt(g('pref-weekend-target').value, 10) || 0),
     preferConsecutiveDaysOff: !!g('pref-consec-off').checked,
@@ -3624,8 +3680,11 @@ function readPreferencesFromUI() {
     avoidClopening: !!g('pref-avoid-clopen').checked,
     fairDistribution: !!g('pref-fair-dist').checked,
     minHoursBetweenShifts: Math.max(0, parseInt(g('pref-min-hours').value, 10) || 0),
-    kcCloseDays: normalizeKcCloseDays(kcCloseDays)
+    kcCloseDays: normalizeKcCloseDays(kcCloseDays),
+    smClosesPerWeek: Number.isFinite(smCl) ? smCl : 1,
+    amClosesPerWeek: (amCl == null || !Number.isFinite(amCl)) ? null : amCl
   };
+  syncCloseTargetsToRoleRules();
   return preferences;
 }
 
@@ -3690,6 +3749,18 @@ function renderPreferencesUI() {
         }).join('')}
       </div>
       <div class="pref-desc">Non-manager key carriers close these nights (rotated if multiple KCs). Managers still work those days and do not close. KCs marked 'manager coverage' are scheduled as managers, not forced to these KC closes. Leave all unchecked so managers cover all 7 closes.</div>
+    </div>
+    <div class="pref-card">
+      <label class="pref-label">Store Manager closes / week
+        <input type="number" id="pref-sm-closes" min="0" max="7" value="${p.smClosesPerWeek != null ? p.smClosesPerWeek : 1}" onchange="readPreferencesFromUI()">
+      </label>
+      <div class="pref-desc">How many manager-close nights the SM takes each week (default 1). Raise to 2 if you close twice. Capped by nights that aren’t KC-close nights. Sole manager always covers all manager nights.</div>
+    </div>
+    <div class="pref-card">
+      <label class="pref-label">Assistant Manager closes / week
+        <input type="number" id="pref-am-closes" min="0" max="7" placeholder="auto" value="${p.amClosesPerWeek == null || p.amClosesPerWeek === '' ? '' : p.amClosesPerWeek}" onchange="readPreferencesFromUI()">
+      </label>
+      <div class="pref-desc">Per AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — remaining closes after the SM are split evenly. Set 2 for smaller teams where each AM closes twice. Coverage still wins if totals don’t match nights available.</div>
     </div>
   `;
 }
@@ -3821,7 +3892,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.3.0';
+const APP_VERSION = '2.3.1';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -5546,13 +5617,12 @@ function _generateScheduleInner() {
   // The "closers pool" = AMs + manager-mode KCs (everyone in ROLES except SM)
   const closerPool = ROLES.filter(r => r !== 'sm');
   const closerCount = closerPool.length;
-  // SM target: all manager nights if sole manager, else min(1, mgrNights)
-  const smCloseTarget = closerCount === 0 ? managerNightsPerWeek : Math.min(1, managerNightsPerWeek);
+  // SM / AM targets from preferences (defaults: SM 1, AMs auto fair-share of remainder)
+  const smCloseTarget = getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, closerCount === 0);
   const remainingCloses = Math.max(0, managerNightsPerWeek - (closerCount === 0 ? 0 : smCloseTarget));
   const baseClosesPerCloser = closerCount > 0 ? Math.floor(remainingCloses / closerCount) : 0;
   const extraClosers = closerCount > 0 ? remainingCloses % closerCount : 0;
-  // So `extraClosers` closers get (baseClosesPerCloser + 1), the rest get baseClosesPerCloser
-  // Target per closer rotates which ones get the extra across weeks
+  // Auto mode: extraClosers get base+1; fixed amClosesPerWeek overrides per-AM target
 
   // Track closes per manager per week
   const closesPerWeek = {};
@@ -5599,12 +5669,10 @@ function _generateScheduleInner() {
       let score = 0;
       const myCloses = closesPerWeek[r][w];
 
-      // Role rules + SM/AM targets
+      // Role rules + SM/AM targets from preferences
       const rule = getRoleRuleForPerson(r);
-      if (r === 'sm' || (rule && rule.closesPerWeek === 1 && rule.family === 'sm')) {
-        let smTarget = (rule && rule.closesPerWeek != null) ? rule.closesPerWeek : Math.min(1, managerNightsPerWeek);
-        if (closerCount === 0) smTarget = managerNightsPerWeek;
-        else smTarget = Math.min(smTarget, managerNightsPerWeek);
+      if (r === 'sm') {
+        const smTarget = smCloseTarget;
         if (closerCount === 0) {
           score -= 5;
         } else if (myCloses >= smTarget) {
@@ -5612,11 +5680,17 @@ function _generateScheduleInner() {
         } else {
           score -= 5;
         }
-        if (isDkWeekend(dk)) score += 10;
+        // Prefer SM not taking weekend closes when they only take 1
+        if (isDkWeekend(dk) && smTarget <= 1) score += 10;
       } else {
         const closerIdx = closerPool.indexOf(r);
-        let targetForThisCloser = baseClosesPerCloser + ((closerIdx + w) % Math.max(1, closerCount) < extraClosers ? 1 : 0);
-        if (rule && rule.closesPerWeek != null) targetForThisCloser = rule.closesPerWeek;
+        let targetForThisCloser = getAmClosesPerWeekTarget(PREFS, remainingCloses, closerCount, closerIdx, w);
+        // Per-person role override still wins when set on a custom rule (not global AM auto)
+        if (rule && rule.family !== 'am' && rule.closesPerWeek != null) {
+          targetForThisCloser = Math.max(0, parseInt(rule.closesPerWeek, 10) || 0);
+        } else if (rule && rule.family === 'am' && PREFS.amClosesPerWeek == null && rule.closesPerWeek != null) {
+          targetForThisCloser = Math.max(0, parseInt(rule.closesPerWeek, 10) || 0);
+        }
         if (rule && rule.requireMoreCloses) targetForThisCloser = Math.max(targetForThisCloser, baseClosesPerCloser + 1);
         if (rule && rule.preferCloses) score -= 4;
         if (myCloses >= targetForThisCloser + 1) score += 100;
@@ -6264,8 +6338,9 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   const kcCloseDows = getKcCloseDows(preferences);
   const isKcCloseNight = (dk) => kcCloseDows.includes(dkToDate(dk).getDay());
   const mgrNights = getManagerNightsPerWeek(preferences);
-  const smCloseTarget = closerPool.length === 0 ? mgrNights : Math.min(1, mgrNights);
+  const smCloseTarget = getSmClosesPerWeekTarget(preferences, mgrNights, closerPool.length === 0);
   const remainingCloses = Math.max(0, mgrNights - (closerPool.length === 0 ? 0 : smCloseTarget));
+  const amFixed = preferences.amClosesPerWeek != null && preferences.amClosesPerWeek !== '';
 
   // ── Rule 1: Target scheduled days/week (work+PTO; RTO/LOA reduce availability) ──
   // Matches generation Step 3: holiday weeks target 4; LOA excluded via availDays.
@@ -6320,13 +6395,8 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   }
 
   // ── Rule 4: Closer distribution ──
-  // mgrNights manager-close nights/week. SM gets smCloseTarget. Remaining among closerPool.
+  // mgrNights manager-close nights/week. SM gets smCloseTarget. AMs: fixed or auto share of remainder.
   const closerCount = closerPool.length;
-  const baseTarget = closerCount > 0 ? Math.floor(remainingCloses / closerCount) : 0;
-  const extraCount = closerCount > 0 ? remainingCloses % closerCount : 0;
-  // Each closer should have between baseTarget and baseTarget+1 closes per week
-  const minTarget = baseTarget;
-  const maxTarget = baseTarget + (extraCount > 0 ? 1 : 0);
 
   for (let w = 0; w < numWeeks; w++) {
     const weekDks = getWeekDks(w);
@@ -6339,15 +6409,20 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
 
     closerPool.forEach(r => {
       const closes = closeCounts[r];
+      const closerIdx = closerPool.indexOf(r);
+      const target = getAmClosesPerWeekTarget(preferences, remainingCloses, closerCount, closerIdx, w);
+      const minTarget = amFixed ? target : Math.max(0, target - (closerCount > 1 ? 0 : 0));
+      const maxTarget = amFixed ? target : target;
+      // Auto mode allows +1 slack for coverage; fixed mode is exact with +1 soft slack
       if (closes < minTarget) {
         v('error', 'am-close-2', r, w, null,
-          `${names[r]}: Week ${w+1} has ${closes} closes (need at least ${minTarget})`);
+          `${names[r]}: Week ${w+1} has ${closes} closes (need at least ${minTarget}${amFixed ? '' : ' — auto share'})`);
       } else if (closes > maxTarget + 1) {
         v('error', 'am-close-2', r, w, null,
-          `${names[r]}: Week ${w+1} has ${closes} closes (max ${maxTarget + 1})`);
-      } else if (closes === maxTarget + 1 && maxTarget >= 0 && remainingCloses > 0) {
+          `${names[r]}: Week ${w+1} has ${closes} closes (target ${maxTarget})`);
+      } else if (closes === maxTarget + 1 && maxTarget >= 0) {
         v('warning', 'am-close-2', r, w, null,
-          `${names[r]}: Week ${w+1} has ${closes} closes (target is ${minTarget}-${maxTarget}, but may be needed for coverage)`);
+          `${names[r]}: Week ${w+1} has ${closes} closes (target ${maxTarget}; extra may be needed for coverage)`);
       }
     });
 
@@ -6470,7 +6545,7 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
 
   const isKcCloseNight = makeIsKcCloseNight(dkToDate, preferences);
   const mgrNights = getManagerNightsPerWeek(preferences);
-  const smCloseTarget = closerPool.length === 0 ? mgrNights : Math.min(1, mgrNights);
+  const smCloseTarget = getSmClosesPerWeekTarget(preferences, mgrNights, closerPool.length === 0);
   const remainingCloses = Math.max(0, mgrNights - (closerPool.length === 0 ? 0 : smCloseTarget));
 
   // Helper: count work+PTO days for role in week (matches Rule 1 / gen Step 3)
@@ -6682,11 +6757,9 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       // Compute this closer's target (guard empty closerPool)
       const closerCountLocal = closerPool.length;
       if (closerCountLocal === 0) return;
-      const baseT = Math.floor(remainingCloses / closerCountLocal);
-      const extraT = remainingCloses % closerCountLocal;
       const closerIdx = closerPool.indexOf(closer);
-      const target = baseT + ((closerIdx + w) % closerCountLocal < extraT ? 1 : 0);
-      const effectiveTarget = Math.min(target, mgrNightWork <= 3 ? Math.min(1, target) : target);
+      const target = getAmClosesPerWeekTarget(preferences, remainingCloses, closerCountLocal, closerIdx, w);
+      const effectiveTarget = Math.min(target, mgrNightWork <= 3 ? Math.min(Math.max(1, target), target) : target);
 
       if (current < effectiveTarget) {
         // Add closes: convert non-close work days to close (not input-locked)

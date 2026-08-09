@@ -18,91 +18,174 @@
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <meta property="og:title" content="Manager Schedule Builder Pro">
 <meta property="og:description" content="Fair retail schedules in minutes. NRF 4-5-4, no clopens, role rules, offline.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icons/icon-512.png">
-<title>Manager Schedule Builder Pro · Retail Scheduling Engine</title>
+<title>Schedule Pro · Manager Shifts</title>
 <style>
+/* ========== DESIGN TOKENS (atelier) ========== */
+:root {
+  --ink: #0c0f14;
+  --ink-2: #2a303c;
+  --ink-3: #5c6573;
+  --ink-4: #8b93a0;
+  --paper: #f3efe8;
+  --paper-2: #ebe5db;
+  --surface: #fffcf7;
+  --surface-2: #f7f2ea;
+  --line: rgba(12, 15, 20, 0.09);
+  --line-strong: rgba(12, 15, 20, 0.14);
+  --gold: #b08d57;
+  --gold-deep: #8c6a3a;
+  --gold-soft: rgba(176, 141, 87, 0.14);
+  --navy: #141c2b;
+  --navy-2: #1c2740;
+  --ok: #2f6f4e;
+  --ok-bg: #e8f3ec;
+  --warn: #9a6b1f;
+  --warn-bg: #f8f0e0;
+  --bad: #9b2c2c;
+  --bad-bg: #f8eaea;
+  --shadow-sm: 0 1px 2px rgba(12,15,20,0.04), 0 1px 3px rgba(12,15,20,0.06);
+  --shadow-md: 0 4px 16px rgba(12,15,20,0.06), 0 1px 3px rgba(12,15,20,0.04);
+  --shadow-lg: 0 18px 50px rgba(12,15,20,0.12), 0 4px 12px rgba(12,15,20,0.05);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font: 'Outfit', system-ui, -apple-system, sans-serif;
+  --display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+}
+
 /* ========== RESET & BASE ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; }
+html { font-size: 15px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: #f0f2f5;
-  color: #1a1a2e;
-  line-height: 1.5;
+  font-family: var(--font);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(176,141,87,0.09), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(28,39,64,0.06), transparent 50%),
+    var(--paper);
+  color: var(--ink);
+  line-height: 1.55;
   min-height: 100vh;
   min-height: 100dvh;
+  letter-spacing: -0.01em;
 }
+::selection { background: var(--gold-soft); color: var(--ink); }
 
 /* ========== LAYOUT ========== */
 .app-header {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: #fff;
-  padding: 1rem 2rem;
-  padding-top: max(1rem, env(safe-area-inset-top));
+  background: linear-gradient(145deg, var(--navy) 0%, var(--navy-2) 55%, #243352 100%);
+  color: #f7f2ea;
+  padding: 1.1rem 2rem;
+  padding-top: max(1.1rem, env(safe-area-inset-top));
   padding-left: max(2rem, env(safe-area-inset-left));
   padding-right: max(2rem, env(safe-area-inset-right));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border-bottom: 1px solid rgba(176,141,87,0.22);
+  box-shadow: 0 8px 32px rgba(12,15,20,0.18);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
 }
-.app-header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
-.app-header .subtitle { font-size: 0.85rem; opacity: 0.7; margin-top: 2px; }
-.header-actions { display: flex; gap: 0.5rem; }
+.app-header h1 {
+  font-family: var(--display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+}
+.app-header .subtitle {
+  font-size: 0.78rem;
+  font-weight: 400;
+  opacity: 0.62;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.header-actions { display: flex; gap: 0.45rem; align-items: center; }
 
-.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+.container { max-width: 1120px; margin: 0 auto; padding: 1.75rem 1.5rem 2.5rem; }
 
 .section {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  margin-bottom: 1.5rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.35rem;
   overflow: hidden;
 }
 .section-header {
-  background: #f8f9fb;
-  border-bottom: 1px solid #e8eaed;
-  padding: 0.75rem 1.25rem;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  border-bottom: 1px solid var(--line);
+  padding: 0.85rem 1.35rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
 }
-.section-header h2 { font-size: 1.1rem; font-weight: 600; color: #1a1a2e; }
-.section-header .toggle { font-size: 1.2rem; color: #666; transition: transform 0.2s; }
+.section-header h2 {
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+.section-header .toggle { font-size: 1rem; color: var(--ink-4); transition: transform 0.2s; }
 .section-header.collapsed .toggle { transform: rotate(-90deg); }
-.section-body { padding: 1.25rem; }
+.section-body { padding: 1.35rem 1.4rem; }
 .section-body.collapsed { display: none; }
 
 /* ========== BUTTONS ========== */
 button {
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
   border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  padding: 0.52rem 1.05rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s;
+  letter-spacing: 0.01em;
 }
-button:hover { filter: brightness(0.95); }
-button:active { transform: scale(0.98); }
+button:hover { filter: none; }
+button:active { transform: scale(0.985); }
+button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-.btn-primary { background: #2563eb; color: #fff; }
-.btn-primary:hover { background: #1d4ed8; }
-.btn-success { background: #059669; color: #fff; }
-.btn-success:hover { background: #047857; }
-.btn-danger { background: #dc2626; color: #fff; }
-.btn-danger:hover { background: #b91c1c; }
-.btn-secondary { background: #e5e7eb; color: #374151; }
-.btn-secondary:hover { background: #d1d5db; }
-.btn-outline { background: transparent; border: 1px solid #d1d5db; color: #374151; }
-.btn-outline:hover { background: #f3f4f6; }
-.btn-large { padding: 0.75rem 2rem; font-size: 1rem; }
+.btn-primary {
+  background: var(--navy);
+  color: #f7f2ea;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 12px rgba(20,28,43,0.2);
+}
+.btn-primary:hover { background: #1a2438; }
+.btn-success {
+  background: linear-gradient(180deg, #3d8b62, var(--ok));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(47,111,78,0.25);
+}
+.btn-success:hover { filter: brightness(1.05); }
+.btn-danger { background: var(--bad); color: #fff; }
+.btn-danger:hover { background: #7f2222; }
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--ink-2);
+  border: 1px solid var(--line-strong);
+}
+.btn-secondary:hover { background: var(--paper-2); }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-2);
+}
+.btn-outline:hover { background: rgba(12,15,20,0.04); border-color: var(--ink-3); }
+.btn-large { padding: 0.85rem 1.75rem; font-size: 0.95rem; letter-spacing: 0.02em; }
 
 /* Small round +/- buttons */
 .btn-round {
@@ -318,91 +401,98 @@ button:active { transform: scale(0.98); }
 
 /* ========== WEEKLY SCHEDULE OUTPUT ========== */
 .week-table-wrapper {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  background: var(--surface);
 }
 .week-header {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1a1a2e;
-  padding: 0.5rem 0.75rem;
-  background: linear-gradient(135deg, #f0f7ff 0%, #f8f9fb 100%);
-  border: 1px solid #d1d5db;
-  border-bottom: none;
-  border-radius: 8px 8px 0 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 0.7rem 1rem;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  letter-spacing: 0.01em;
 }
 .week-header .week-dates {
-  font-size: 0.85rem;
-  font-weight: 400;
-  color: #6b7280;
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
 }
 
 .week-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   table-layout: fixed;
-  border: 1px solid #d1d5db;
-  border-radius: 0 0 8px 8px;
-  overflow: hidden;
   min-width: 600px;
 }
 .week-table th, .week-table td {
-  border: 1px solid #d1d5db;
-  padding: 0.4rem 0.3rem;
+  border: 1px solid var(--line);
+  padding: 0.45rem 0.3rem;
   text-align: center;
   vertical-align: middle;
 }
 .week-table thead tr:first-child th {
-  background: #1a1a2e;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.8rem;
+  background: var(--navy);
+  color: #f3efe8;
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .week-table thead tr:nth-child(2) th {
-  background: #2d3748;
-  color: #e2e8f0;
+  background: #1e2a40;
+  color: rgba(243,239,232,0.75);
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
-.week-table thead th.weekend-col { background: #2d1a4e; }
-.week-table thead tr:nth-child(2) th.weekend-col { background: #3d2a5e; }
-.week-table thead th.monday-col { background: #1a2e4e; }
-.week-table thead tr:nth-child(2) th.monday-col { background: #2a3e5e; }
+.week-table thead th.weekend-col { background: #1a1628; }
+.week-table thead tr:nth-child(2) th.weekend-col { background: #252038; }
+.week-table thead th.monday-col { background: #152033; }
+.week-table thead tr:nth-child(2) th.monday-col { background: #1c2a42; }
 
 .week-table .name-col {
   width: 140px;
   min-width: 140px;
   text-align: left;
-  padding-left: 0.5rem;
+  padding-left: 0.65rem;
   font-weight: 600;
-  background: #f8f9fb;
+  background: var(--surface-2);
+  color: var(--ink-2);
 }
 .week-table thead .name-col { text-align: center; }
 
-.week-table tbody tr:nth-child(even) td { background: #fafbfc; }
-.week-table tbody tr:nth-child(even) td.name-col { background: #f0f1f3; }
+.week-table tbody tr:nth-child(even) td { background: rgba(243,239,232,0.35); }
+.week-table tbody tr:nth-child(even) td.name-col { background: var(--paper-2); }
 
 .week-table .coverage-row td {
-  background: #f0f7ff !important;
+  background: var(--gold-soft) !important;
   font-weight: 700;
-  font-size: 0.75rem;
-  border-top: 2px solid #1a1a2e;
+  font-size: 0.72rem;
+  border-top: 2px solid var(--navy);
+  color: var(--ink-2);
 }
-.week-table .coverage-row .name-col { background: #e0ecff !important; }
+.week-table .coverage-row .name-col { background: rgba(176,141,87,0.2) !important; }
 
-/* Shift cell colors */
-.shift-open { background: #d1fae5 !important; color: #065f46; font-weight: 600; }
-.shift-mid { background: #e0e7ff !important; color: #3730a3; font-weight: 600; }
-.shift-close { background: #fce7f3 !important; color: #9d174d; font-weight: 600; }
-.shift-pto { background: #dbeafe !important; color: #1e40af; font-weight: 600; }
-.shift-rto { background: #ffedd5 !important; color: #9a3412; font-weight: 600; }
-.shift-off { background: #f3f4f6 !important; color: #9ca3af; }
-.shift-kc-close { background: #fef3c7 !important; color: #92400e; font-weight: 600; }
+/* Shift cell colors — muted atelier palette */
+.shift-open { background: #e4f0e8 !important; color: #1f4d35; font-weight: 600; }
+.shift-mid { background: #e8ebf4 !important; color: #2a3558; font-weight: 600; }
+.shift-close { background: #f3e6ec !important; color: #6b2a45; font-weight: 600; }
+.shift-pto { background: #e5eef8 !important; color: #1e3a5f; font-weight: 600; }
+.shift-rto { background: #f5ebe0 !important; color: #6b3f1a; font-weight: 600; }
+.shift-off { background: #f0ece6 !important; color: #8b93a0; }
+.shift-kc-close { background: #f3ecd9 !important; color: #6b5420; font-weight: 600; }
 
 .coverage-ok { color: #059669; }
 .coverage-warn { color: #d97706; }
@@ -449,23 +539,120 @@ button:active { transform: scale(0.98); }
 .warning-info { background: #eff6ff; color: #1e40af; }
 .warning-icon { font-weight: 700; min-width: 20px; }
 
+/* ========== READY TO POST ========== */
+.posting-board {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 1rem 1.15rem 1.1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.posting-board-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.posting-board-head h3 {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+  color: var(--ink);
+}
+.posting-board-head p { margin: 0; font-size: 0.84rem; color: var(--ink-3); }
+.posting-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.posting-badge.ok { background: var(--ok-bg); color: var(--ok); border: 1px solid rgba(47,111,78,0.2); }
+.posting-badge.warn { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(154,107,31,0.25); }
+.posting-badge.bad { background: var(--bad-bg); color: var(--bad); border: 1px solid rgba(155,44,44,0.2); }
+.posting-issues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.posting-issue {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  border-radius: 10px;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.posting-issue:hover {
+  border-color: rgba(176,141,87,0.45);
+  box-shadow: var(--shadow-sm);
+  background: var(--surface);
+}
+.posting-issue .sev {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.45rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 0.12rem;
+}
+.posting-issue .sev.must { background: var(--bad-bg); color: var(--bad); }
+.posting-issue .sev.review { background: var(--warn-bg); color: var(--warn); }
+.posting-issue .sev.note { background: var(--paper-2); color: var(--ink-3); }
+.posting-issue .issue-body { flex: 1; min-width: 0; }
+.posting-issue .issue-title { font-weight: 600; font-size: 0.88rem; color: var(--ink); }
+.posting-issue .issue-meta { font-size: 0.76rem; color: var(--ink-4); margin-top: 0.15rem; }
+.posting-issue .issue-go { font-size: 0.72rem; font-weight: 600; color: var(--gold-deep); flex-shrink: 0; align-self: center; }
+.cell-flash {
+  animation: cellFlash 1.4s ease;
+  outline: 2px solid var(--gold) !important;
+  outline-offset: -2px;
+}
+@keyframes cellFlash {
+  0%, 100% { box-shadow: none; }
+  25%, 55% { box-shadow: 0 0 0 3px rgba(176,141,87,0.4); }
+}
+
 /* ========== PRINT SCHEDULE (hidden on screen, shown in print) ========== */
 .print-schedule { display: none; }
 
 .print-schedule .print-title {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.65rem;
+  border-bottom: 2px solid #000;
+  padding-bottom: 0.45rem;
 }
 .print-schedule .print-title .print-main-title {
-  font-size: 16pt;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15pt;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
 }
 .print-schedule .print-title .print-sub-title {
-  font-size: 12pt;
-  font-weight: 400;
-  margin-top: 2px;
+  font-size: 10pt;
+  font-weight: 500;
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+.print-schedule .print-store-line {
+  font-size: 11pt;
+  font-weight: 700;
+  margin-bottom: 2px;
 }
 
 .print-schedule .print-week {
@@ -1292,43 +1479,49 @@ button:active { transform: scale(0.98); }
   padding: 0.4rem 0.75rem;
 }
 .btn-demo {
-  background: #f59e0b !important;
-  color: #1a1a2e !important;
+  background: linear-gradient(180deg, #c9a66b, var(--gold-deep)) !important;
+  color: #1a140c !important;
   border: none !important;
   font-weight: 700;
+  box-shadow: 0 4px 14px rgba(140,106,58,0.28);
 }
-.btn-demo:hover { filter: brightness(1.05); }
+.btn-demo:hover { filter: brightness(1.04); }
 
 .welcome-card {
-  background: linear-gradient(135deg, #1a1a2e 0%, #1e3a5f 55%, #1d4ed8 100%);
-  color: #fff;
-  border-radius: 12px;
-  padding: 1.25rem 1.4rem;
+  background:
+    linear-gradient(135deg, rgba(176,141,87,0.12), transparent 40%),
+    linear-gradient(160deg, var(--navy) 0%, #182338 50%, #243044 100%);
+  color: #f7f2ea;
+  border-radius: 16px;
+  padding: 1.5rem 1.6rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 16px rgba(26,26,46,0.18);
+  box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
+  border: 1px solid rgba(176,141,87,0.28);
 }
 .welcome-card::after {
   content: '';
   position: absolute;
-  right: -40px; top: -40px;
-  width: 160px; height: 160px;
-  background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%);
+  right: -30px; top: -50px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(176,141,87,0.22), transparent 68%);
   pointer-events: none;
 }
 .welcome-card h2 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  margin-bottom: 0.35rem;
-  letter-spacing: -0.02em;
+  font-family: var(--display);
+  font-size: 1.55rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.01em;
 }
 .welcome-card p {
-  font-size: 0.88rem;
-  opacity: 0.88;
-  max-width: 640px;
-  line-height: 1.5;
-  margin-bottom: 0.9rem;
+  font-size: 0.9rem;
+  opacity: 0.78;
+  max-width: 620px;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+  font-weight: 400;
 }
 .welcome-steps {
   display: grid;
@@ -1625,34 +1818,36 @@ button:active { transform: scale(0.98); }
 }
 
 .app-footer {
-  max-width: 1200px;
-  margin: 0 auto 2rem;
-  padding: 0 1.5rem;
-  color: #9ca3af;
-  font-size: 0.78rem;
+  max-width: 1120px;
+  margin: 0 auto 2.5rem;
+  padding: 1.25rem 1.5rem 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink-4);
+  font-size: 0.76rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1rem;
   justify-content: space-between;
   align-items: center;
 }
-.app-footer strong { color: #6b7280; }
+.app-footer strong { color: var(--ink-3); font-weight: 600; }
 .app-footer .footer-links {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.9rem;
   flex-wrap: wrap;
 }
 .app-footer button {
   background: none;
   border: none;
-  color: #6b7280;
-  font-size: 0.78rem;
-  font-weight: 600;
+  color: var(--ink-3);
+  font-size: 0.76rem;
+  font-weight: 500;
   padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
+  letter-spacing: 0.02em;
 }
-.app-footer button:hover { color: #2563eb; }
+.app-footer button:hover { color: var(--gold-deep); }
+.app-footer a { color: var(--gold-deep) !important; }
 
 .store-name-row {
   display: flex;
@@ -1779,18 +1974,43 @@ button:active { transform: scale(0.98); }
 }
 
 .workspace {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
   overflow: hidden;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  border: 1px solid var(--line);
+}
+.brand-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.55rem;
+}
+.pro-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(176,141,87,0.4);
+}
+.pro-badge.is-free {
+  background: rgba(255,252,247,0.08);
+  color: rgba(247,242,234,0.85);
+}
+.pro-badge.is-pro {
+  background: linear-gradient(180deg, rgba(201,166,107,0.35), rgba(140,106,58,0.45));
+  color: #f7e7c8;
+  border-color: rgba(201,166,107,0.55);
 }
 .app-tabs {
   display: flex;
-  gap: 0;
-  background: #f8f9fb;
-  border-bottom: 1px solid #e8eaed;
-  padding: 0 0.5rem;
+  gap: 0.15rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  padding: 0.35rem 0.55rem 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -1801,12 +2021,12 @@ button:active { transform: scale(0.98); }
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  border-radius: 0;
-  color: #6b7280;
+  border-radius: 10px 10px 0 0;
+  color: var(--ink-3);
   font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 0.9rem 1.1rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+  padding: 0.85rem 1.15rem;
   cursor: pointer;
   white-space: nowrap;
   display: inline-flex;
@@ -1814,70 +2034,76 @@ button:active { transform: scale(0.98); }
   gap: 0.4rem;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
   margin-bottom: -1px;
+  letter-spacing: 0.02em;
 }
 .app-tab:hover {
-  color: #1a1a2e;
-  background: rgba(255,255,255,0.6);
+  color: var(--ink);
+  background: rgba(255,252,247,0.7);
   filter: none;
 }
 .app-tab:active { transform: none; }
 .app-tab.active {
-  color: #1d4ed8;
-  border-bottom-color: #2563eb;
-  background: #fff;
+  color: var(--ink);
+  border-bottom-color: var(--gold);
+  background: var(--surface);
+  font-weight: 600;
 }
 .app-tab .tab-count {
   font-size: 0.68rem;
   font-weight: 700;
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--paper-2);
+  color: var(--ink-3);
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
   min-width: 1.1rem;
   text-align: center;
 }
 .app-tab.active .tab-count {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--gold-soft);
+  color: var(--gold-deep);
 }
 .app-tab .tab-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #059669;
+  background: var(--gold);
   display: none;
 }
 .app-tab.has-result .tab-dot { display: inline-block; }
 
 .tab-panel {
   display: none;
-  padding: 1.25rem 1.4rem 1.5rem;
-  animation: tabFade 0.18s ease;
+  padding: 1.4rem 1.5rem 1.6rem;
+  animation: tabFade 0.2s ease;
+  background: var(--surface);
 }
 .tab-panel.active { display: block; }
 @keyframes tabFade {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .tab-panel-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin-bottom: 0.25rem;
-  letter-spacing: -0.02em;
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin-bottom: 0.3rem;
 }
 .tab-panel-desc {
-  font-size: 0.85rem;
-  color: #6b7280;
-  margin-bottom: 1.15rem;
-  line-height: 1.45;
+  font-size: 0.88rem;
+  color: var(--ink-3);
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+  font-weight: 400;
+  max-width: 36rem;
 }
 
 /* Nested content inside tabs — drop heavy section chrome */
 .tab-panel .section {
   box-shadow: none;
-  border: 1px solid #e8eaed;
+  border: 1px solid var(--line);
   margin-bottom: 1rem;
   border-radius: 10px;
 }
@@ -2050,12 +2276,12 @@ html.pwa-standalone .install-banner { display: none !important; }
 <header class="app-header">
   <div>
     <div class="brand-row">
-      <h1>Manager Schedule Builder</h1>
+      <h1>Schedule Pro</h1>
       <span class="pro-badge is-free" id="license-badge" title="License status">Free</span>
-      <span class="offline-pill"><span class="dot"></span> Works offline</span>
-      <span class="pwa-mode-badge">App mode</span>
+      <span class="offline-pill"><span class="dot"></span> Offline</span>
+      <span class="pwa-mode-badge">App</span>
     </div>
-    <div class="subtitle">Retail scheduling engine · NRF 4-5-4 · Fair weekends · No clopens</div>
+    <div class="subtitle">Manager shifts · NRF periods · Fair weekends · No clopens</div>
   </div>
   <div class="header-actions no-print">
     <button class="btn-demo" onclick="loadDemoStore()" title="Load sample store & generate">Demo</button>
@@ -2095,12 +2321,12 @@ html.pwa-standalone .install-banner { display: none !important; }
 
   <!-- WELCOME / ONBOARDING -->
   <div class="welcome-card no-print compact" id="welcome-card">
-    <h2>Fair retail schedules in minutes</h2>
-    <p>Preference-driven engine for store managers — weekends, clopens, role rules, export. Fully offline. Free: try with up to 3 managers; Pro unlocks unlimited roster + Word/Excel.</p>
+    <h2>Build the period. Post with confidence.</h2>
+    <p>Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen control, Word/Excel export. Fully offline. Free for up to 3 managers; Pro unlocks unlimited roster and export.</p>
     <div class="welcome-actions">
-      <button class="btn-demo" onclick="loadDemoStore()">Try Demo</button>
-      <button class="btn-primary" onclick="switchTab('setup')">Get started</button>
-      <button class="btn-outline" style="border-color:#f59e0b;color:#92400e" onclick="location.href='buy.html'" data-price-label>Buy Pro $19.99</button>
+      <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
+      <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
+      <button class="btn-outline" style="border-color:rgba(176,141,87,0.55);color:#e8d5b0" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
       <button class="welcome-dismiss" onclick="dismissWelcome()">Dismiss</button>
     </div>
   </div>
@@ -2282,16 +2508,16 @@ html.pwa-standalone .install-banner { display: none !important; }
 
     <!-- TAB: SCHEDULE -->
     <div class="tab-panel" id="tab-schedule" role="tabpanel" aria-labelledby="tabbtn-schedule">
-      <div class="tab-panel-title">Generate & review</div>
-      <div class="tab-panel-desc">Build the period schedule, check quality score, then print or export.</div>
+      <div class="tab-panel-title">Build &amp; post</div>
+      <div class="tab-panel-desc">Create the period schedule, clear must-fix issues, then print a clean posting sheet.</div>
 <!-- GENERATE -->
   <div class="section no-print" id="generate-section" style="border:none;background:transparent">
     <div class="section-body generate-panel">
       <div class="ready-checklist" id="ready-checklist"></div>
       <div class="generate-actions">
-        <button class="btn-success btn-large" id="btn-generate" onclick="generateSchedule()">Generate Schedule</button>
-        <button class="btn-secondary" onclick="clearSchedule()">Clear Generated</button>
-        <button class="btn-outline" onclick="loadDemoStore()">Load Demo</button>
+        <button class="btn-success btn-large" id="btn-generate" onclick="generateSchedule()">Build this period</button>
+        <button class="btn-secondary" onclick="clearSchedule()">Clear board</button>
+        <button class="btn-outline" onclick="loadDemoStore()">Sample store</button>
       </div>
       <div class="gen-meta" id="gen-meta">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
     </div>
@@ -2347,7 +2573,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.1.2</span> PWA · Offline · Data stays in this browser · <a href="buy.html" style="color:#2563eb;font-weight:700;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.2.0</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -2950,7 +3176,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.1.2';
+const APP_VERSION = '2.2.0';
 
 function applyPriceLabels() {
   const price = monetizationConfig.priceLabel || '$19.99';
@@ -3116,47 +3342,189 @@ function explainQualityScore(q, genReport, ROLES) {
     const hard = q.hard != null ? q.hard : (genReport && genReport.hardErrorCount) || 0;
     tips.push(
       hard === 1
-        ? '1 hard rule is still broken (coverage, hours, or role rules). Fix those first — they cost the most points.'
-        : hard + ' hard rules are still broken (coverage, hours, or role rules). Fix those first — they cost the most points.'
+        ? '1 must-fix issue remains (coverage, hours, or role rules). Fix those first.'
+        : hard + ' must-fix issues remain (coverage, hours, or role rules). Fix those first.'
     );
   } else {
-    tips.push('All hard rules look satisfied — openers/closers and role constraints are clean.');
+    tips.push('Must-fix rules look clean — openers, closers, and role constraints hold.');
   }
   if ((q.parts.clopen || 0) < 20) {
     const cl = q.cl != null ? q.cl : (genReport && genReport.totalClopens) || 0;
     tips.push(
       cl
-        ? cl + ' clopen(s) remain (close then open next day). Swap those shifts to recover clopen points.'
+        ? cl + ' clopen(s) remain (close then open the next day). Swap those before posting.'
         : 'Clopen preference is costing points — check close→open pairs.'
     );
   } else if (q.avoidOn !== false) {
-    tips.push('No clopens under current preferences — good for rest and fairness.');
+    tips.push('No clopens under current preferences.');
   }
   if ((q.parts.weekend || 0) < 20 && n) {
     const met = q.met != null ? q.met : 0;
     tips.push(
-      'Weekend targets: ' +
-        met +
-        '/' +
-        n +
-        ' managers hit their weekend-off goal. Give more Sat/Sun off where coverage allows.'
+      'Weekend fairness: ' + met + '/' + n + ' managers hit their weekend-off goal.'
     );
   }
   if ((q.parts.streak || 0) < 10) {
-    tips.push(
-      'Someone is over the max consecutive work days. Break long streaks with an off day.'
-    );
+    tips.push('Someone is over max consecutive work days — break long streaks with an off day.');
   }
   if ((q.parts.soft || 0) < 10) {
-    tips.push(
-      'Some soft preferences (favorite shifts, request styles) were not fully met. Not required for a valid schedule.'
-    );
+    tips.push('Some shift preferences could not be fully honored (optional polish).');
   }
-  if (q.score >= 95) tips.unshift('Excellent score — ready to publish to your team.');
-  else if (q.score >= 85) tips.unshift('Strong schedule — only small preference polish left.');
-  else if (q.score >= 70) tips.unshift('Good baseline — prioritize hard rules and clopens if anything still looks off.');
-  else tips.unshift('Score is fair/needs work — start with hard constraint fixes, then weekends.');
+  if (q.score >= 95) tips.unshift('Ready to post — strong enough for the breakroom.');
+  else if (q.score >= 85) tips.unshift('Nearly ready — only small preference polish left.');
+  else if (q.score >= 70) tips.unshift('Usable baseline — clear must-fix issues before posting.');
+  else tips.unshift('Not ready to post yet — start with must-fix issues, then weekends.');
   return tips.slice(0, 6);
+}
+
+/** Build actionable posting issues from the last generation report + violations. */
+function buildPostingIssues(genReport, ROLES, warnings) {
+  const issues = [];
+  const names = getManagerNames ? getManagerNames() : {};
+  const nameOf = (r) => names[r] || r;
+
+  if (genReport) {
+    const hard = genReport.hardErrorCount || 0;
+    if (hard > 0) {
+      issues.push({
+        sev: 'must',
+        title: hard + ' must-fix rule' + (hard === 1 ? '' : 's') + ' still open',
+        meta: 'Coverage, hours, or role constraints — fix before you post.',
+        target: 'summary',
+      });
+    }
+    const cl = genReport.totalClopens || 0;
+    if (cl > 0 && genReport.prefs && genReport.prefs.avoidClopening) {
+      issues.push({
+        sev: 'must',
+        title: cl + ' clopen' + (cl === 1 ? '' : 's') + ' on the board',
+        meta: 'Close followed by open the next morning. Tap a person to edit their week.',
+        target: 'grid',
+        role: null,
+      });
+    }
+    ROLES.forEach((r) => {
+      const target = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(r) : 2;
+      const got = (genReport.weekendOffs && genReport.weekendOffs[r]) || 0;
+      if (got < target) {
+        issues.push({
+          sev: 'review',
+          title: nameOf(r) + ' is short on weekend offs',
+          meta: got + ' of ' + target + ' weekend days off this period.',
+          target: 'grid',
+          role: r,
+        });
+      }
+    });
+    (genReport.unmet || []).slice(0, 6).forEach((u) => {
+      issues.push({
+        sev: 'note',
+        title: String(u).slice(0, 120),
+        meta: 'Preference note — optional to fix.',
+        target: 'summary',
+      });
+    });
+  }
+
+  (warnings || [])
+    .filter((w) => w.type === 'error' || w.type === 'warn')
+    .slice(0, 8)
+    .forEach((w) => {
+      const msg = w.msg || w.detail || '';
+      if (!msg) return;
+      // Avoid exact duplicates of hard count banner
+      if (/hard constraint/i.test(msg) && issues.some((i) => /must-fix/i.test(i.title))) return;
+      issues.push({
+        sev: w.type === 'error' ? 'must' : 'review',
+        title: String(msg).slice(0, 140),
+        meta: w.type === 'error' ? 'Must-fix' : 'Review before posting',
+        target: 'grid',
+      });
+    });
+
+  // Deduplicate by title
+  const seen = new Set();
+  const unique = [];
+  issues.forEach((i) => {
+    const k = i.title.toLowerCase();
+    if (seen.has(k)) return;
+    seen.add(k);
+    unique.push(i);
+  });
+  return unique.slice(0, 10);
+}
+
+function renderPostingBoard(issues, q) {
+  const must = issues.filter((i) => i.sev === 'must').length;
+  const review = issues.filter((i) => i.sev === 'review').length;
+  let badgeCls = 'ok';
+  let badgeText = 'Ready to post';
+  let blurb = 'No blocking issues. Print or export when you’re happy with the week.';
+  if (must > 0) {
+    badgeCls = 'bad';
+    badgeText = 'Not ready';
+    blurb = 'Fix must-fix items before you hang this on the board.';
+  } else if (review > 0 || (q && q.score < 85)) {
+    badgeCls = 'warn';
+    badgeText = 'Review first';
+    blurb = 'Schedule is usable — glance at the notes below, then post.';
+  }
+  if (!issues.length && q && q.score >= 85) {
+    blurb = 'Looks solid. Score ' + q.score + '/100 · ' + (q.grade || '') + '.';
+  }
+
+  let html = '<div class="posting-board no-print" id="posting-board">';
+  html += '<div class="posting-board-head">';
+  html += '<div><h3>Posting check</h3><p>' + esc(blurb) + '</p></div>';
+  html += '<span class="posting-badge ' + badgeCls + '">' + esc(badgeText) + '</span>';
+  html += '</div>';
+
+  window._postingIssues = issues;
+  if (issues.length) {
+    html += '<div class="posting-issues">';
+    issues.forEach((iss, idx) => {
+      html +=
+        '<button type="button" class="posting-issue" onclick="jumpToPostingIssue(' + idx + ')">';
+      html += '<span class="sev ' + iss.sev + '">' + (iss.sev === 'must' ? 'Must' : iss.sev === 'review' ? 'Review' : 'Note') + '</span>';
+      html += '<span class="issue-body"><span class="issue-title">' + esc(iss.title) + '</span>';
+      if (iss.meta) html += '<div class="issue-meta">' + esc(iss.meta) + '</div>';
+      html += '</span>';
+      html += '<span class="issue-go">' + (iss.role ? 'Find →' : 'View →') + '</span>';
+      html += '</button>';
+    });
+    html += '</div>';
+  } else {
+    html += '<p style="margin:0;font-size:0.88rem;color:var(--ok);font-weight:600">No issues flagged — safe to print for the team.</p>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function jumpToPostingIssue(idx) {
+  const data = (window._postingIssues && window._postingIssues[idx]) || {};
+  switchTab('schedule');
+  if (data.target === 'summary' || !data.role) {
+    setTimeout(() => {
+      document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('posting-board')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 40);
+    return;
+  }
+  setTimeout(() => {
+    let el = document.querySelector(
+      '#schedule-grid tr[data-role="' + data.role + '"] td.shift-editable'
+    );
+    if (!el) {
+      el = document.querySelector('#schedule-grid td.shift-editable[data-role="' + data.role + '"]');
+    }
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('cell-flash');
+      setTimeout(() => el.classList.remove('cell-flash'), 1500);
+    } else {
+      document.getElementById('schedule-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 50);
 }
 
 function scoreRingSVG(score) {
@@ -5848,7 +6216,7 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
     // Body rows
     html += '<tbody>';
     ALL_KC.forEach(r => {
-      html += '<tr>';
+      html += '<tr data-role="' + r + '">';
       const isKC = r.startsWith('kc');
       const isAM = r.startsWith('am');
       const roleBadge = r === 'sm' ? 'role-sm' : (isKC ? 'role-kc' : 'role-am');
@@ -5906,11 +6274,12 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
   renderPrintSchedule(ROLES, ALL_KC);
 }
 
-// ── Render Print Schedule (Bryan's format) ──
+// ── Render Print Schedule (posting sheet) ──
 function renderPrintSchedule(ROLES, ALL_KC) {
   const names = getManagerNames();
   const p = currentPeriod;
-  const storeNum = document.getElementById('store-number').value || '';
+  const storeNum = (document.getElementById('store-number') || {}).value || '';
+  const storeName = (document.getElementById('store-name') || {}).value || '';
 
   const PRINT_DAY_NAMES = ['SUN','MON','TUES','WED','THURS','FRI','SAT'];
 
@@ -5919,26 +6288,27 @@ function renderPrintSchedule(ROLES, ALL_KC) {
 
   let html = '';
 
-  // Title block
+  // Title block — breakroom posting style
   html += '<div class="print-title">';
-  html += '<div class="print-main-title">MANAGEMENT SCHEDULE</div>';
+  html += '<div class="print-main-title">Management Schedule</div>';
+  if (storeName || storeNum) {
+    html += '<div class="print-store-line">' + esc([storeName, storeNum ? '#' + storeNum : ''].filter(Boolean).join(' · ')) + '</div>';
+  }
   html += '<div class="print-sub-title">';
-  if (storeNum) html += 'Store: ' + esc(storeNum) + '&nbsp;&nbsp;';
-  html += 'Period ' + p.number + ' &nbsp; FY' + fiscalYear + ' &nbsp; ';
-  html += 'Month: ' + esc(p.approxMonth);
-  html += ' &nbsp; (' + formatDate(p.start) + ' – ' + formatDate(p.end) + ')';
+  html += 'Period ' + p.number + ' · FY' + fiscalYear + ' · ' + esc(p.approxMonth);
+  html += ' · ' + formatDate(p.start) + ' – ' + formatDate(p.end);
   html += '</div>';
   html += '</div>';
 
   // Color legend
   html += '<div class="print-legend">';
-  html += '<span><i style="background:#d1fae5"></i> Open</span>';
-  html += '<span><i style="background:#e0e7ff"></i> Mid</span>';
-  html += '<span><i style="background:#fce7f3"></i> Close</span>';
-  html += '<span><i style="background:#f3f4f6"></i> OFF</span>';
-  html += '<span><i style="background:#ffedd5"></i> RTO</span>';
-  html += '<span><i style="background:#dbeafe"></i> VAC/PTO</span>';
-  html += '<span><i style="background:#ccfbf1"></i> LOA</span>';
+  html += '<span><i style="background:#e4f0e8"></i> Open</span>';
+  html += '<span><i style="background:#e8ebf4"></i> Mid</span>';
+  html += '<span><i style="background:#f3e6ec"></i> Close</span>';
+  html += '<span><i style="background:#f0ece6"></i> Off</span>';
+  html += '<span><i style="background:#f5ebe0"></i> RTO</span>';
+  html += '<span><i style="background:#e5eef8"></i> PTO</span>';
+  html += '<span><i style="background:#e0f2f0"></i> LOA</span>';
   html += '</div>';
 
   // One table per week
@@ -5978,9 +6348,9 @@ function renderPrintSchedule(ROLES, ALL_KC) {
     // Body rows — managers first (ROLES), then non-manager KCs
     html += '<tbody>';
 
-    // Manager rows (SM + AMs + manager-mode KCs) — use actual names, no role badges
+    // Manager rows (SM + AMs + manager-mode KCs) — names only for posting sheet
     ROLES.forEach(r => {
-      html += '<tr>';
+      html += '<tr data-role="' + esc(r) + '">';
       html += '<td class="name-col">' + esc(names[r] || r.toUpperCase()) + '</td>';
       weekDates.forEach(wd => {
         const dk = dateKey(wd);
@@ -6278,12 +6648,14 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     const unmet = genReport.unmet || [];
     const bannerCls = !hardOk || (avoidOn && totalClopens > 0) ? 'bad' : (unmet.length ? 'warn' : 'ok');
     const bannerText = bannerCls === 'ok'
-      ? 'Schedule meets hard constraints and scheduling preferences.'
+      ? 'Must-fix rules look good — check the posting board before you hang this.'
       : (bannerCls === 'bad'
-        ? 'Some hard constraints could not be fully satisfied — review below.'
-        : 'Hard constraints OK; some soft preferences not fully met.');
+        ? 'Must-fix issues remain — review before you post to the team.'
+        : 'Must-fix rules OK; some preferences not fully met.');
 
     const q = genReport.quality || computeQualityScore(genReport, ROLES);
+    const postingIssues = buildPostingIssues(genReport, ROLES, warnings);
+    html += renderPostingBoard(postingIssues, q);
     const labor = computeLaborStats(ROLES, ALL_KC);
     const bar = (label, pts, max) => {
       const pct = Math.round((pts / max) * 100);

@@ -2802,17 +2802,515 @@ html.pwa-standalone .install-banner { display: none !important; }
   .install-banner { display: none !important; }
 }
 
+/* ========== AUTH / ACCOUNT LAYER ========== */
+#auth-shell {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  align-items: center;
+  justify-content: center;
+  padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(1.25rem, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(900px 500px at 15% -5%, rgba(124, 92, 255, 0.22), transparent 55%),
+    radial-gradient(800px 480px at 95% 5%, rgba(61, 220, 255, 0.14), transparent 50%),
+    radial-gradient(600px 400px at 50% 100%, rgba(61, 222, 140, 0.06), transparent 45%),
+    linear-gradient(180deg, #050810 0%, #070b14 40%, #0a101c 100%);
+  overflow-y: auto;
+}
+#auth-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image:
+    linear-gradient(rgba(61,220,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,220,255,0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 20%, transparent 75%);
+}
+html.auth-locked #auth-shell { display: flex; }
+html.auth-locked #app-root { display: none !important; }
+html.auth-locked .toast-host { z-index: 20050; }
+
+.auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+  padding: 1.75rem 1.5rem 1.35rem;
+  background: rgba(12, 18, 32, 0.88);
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg), 0 0 60px rgba(124, 92, 255, 0.12);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+}
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+}
+.auth-logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, rgba(124,92,255,0.95), rgba(61,220,255,0.8));
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #050810;
+  box-shadow: 0 0 24px rgba(124,92,255,0.4);
+  flex-shrink: 0;
+}
+.auth-logo h1 {
+  font-family: var(--display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(120deg, #fff 0%, #b8e9ff 45%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.15;
+}
+.auth-subtitle {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 1.35rem;
+  line-height: 1.5;
+}
+.auth-actions { display: flex; flex-direction: column; gap: 0.55rem; }
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.72rem 1rem;
+  border-radius: 10px;
+  font-family: var(--font);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--line-strong);
+  background: rgba(22, 32, 52, 0.9);
+  color: var(--ink);
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.auth-btn:hover { background: rgba(30, 42, 68, 0.95); border-color: rgba(61,220,255,0.35); }
+.auth-btn:active { transform: scale(0.99); }
+.auth-btn .auth-provider-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+.auth-btn .auth-provider-icon svg { width: 18px; height: 18px; display: block; }
+.auth-btn-email {
+  background: linear-gradient(135deg, rgba(124,92,255,0.25), rgba(61,220,255,0.12));
+  border-color: rgba(124,92,255,0.4);
+}
+.auth-btn-email:hover { border-color: rgba(167,139,250,0.55); }
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.85rem 0 0.55rem;
+  color: var(--ink-4);
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.auth-email-panel {
+  display: none;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.15rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(8, 12, 24, 0.55);
+}
+.auth-email-panel.open { display: flex; }
+.auth-email-panel label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.auth-email-panel input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: rgba(5, 8, 16, 0.7);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.9rem;
+}
+.auth-email-panel input:focus {
+  outline: none;
+  border-color: rgba(61,220,255,0.55);
+  box-shadow: 0 0 0 3px rgba(61,220,255,0.12);
+}
+.auth-email-row { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+.auth-email-row .auth-btn { flex: 1; min-width: 120px; }
+.auth-btn-primary {
+  background: linear-gradient(135deg, rgba(124,92,255,0.95), rgba(61,220,255,0.8));
+  color: #050810;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-weight: 700;
+}
+.auth-btn-primary:hover { filter: brightness(1.05); border-color: rgba(255,255,255,0.3); }
+.auth-offline-link {
+  display: block;
+  text-align: center;
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  color: var(--ink-3);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family: var(--font);
+  padding: 0.35rem;
+}
+.auth-offline-link:hover { color: var(--gold); }
+.auth-error {
+  display: none;
+  margin-top: 0.55rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: var(--bad-bg);
+  border: 1px solid rgba(255,92,122,0.35);
+  color: #ff8fa3;
+  font-size: 0.82rem;
+}
+.auth-error.show { display: block; }
+.auth-footer {
+  margin-top: 1.25rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--ink-4);
+  line-height: 1.55;
+}
+.auth-footer a {
+  color: var(--ink-3);
+  text-decoration: none;
+  font-weight: 500;
+}
+.auth-footer a:hover { color: var(--gold); }
+.auth-footer .auth-sso {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.7rem;
+  color: var(--ink-4);
+}
+
+/* Account chip */
+.account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.22rem 0.55rem 0.22rem 0.28rem;
+  border-radius: 999px;
+  border: 1px solid rgba(61,220,255,0.28);
+  background: rgba(16, 24, 40, 0.75);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--font);
+  max-width: 200px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.account-chip:hover {
+  border-color: rgba(61,220,255,0.5);
+  background: rgba(22, 32, 52, 0.9);
+}
+.account-chip-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(124,92,255,0.85), rgba(61,220,255,0.7));
+  color: #050810;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.account-chip-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  line-height: 1.15;
+}
+.account-chip-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+.account-chip-plan {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  color: #9ae8ff;
+}
+.account-chip-plan.is-pro {
+  color: #c4b5fd;
+}
+.pro-badge { cursor: pointer; }
+
+/* Account panel + license / provider modals */
+.account-modal,
+.license-modal,
+.provider-modal {
+  position: fixed; inset: 0; z-index: 10050;
+  background: rgba(5, 8, 16, 0.75);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+}
+.account-modal[hidden],
+.license-modal[hidden],
+.provider-modal[hidden] { display: none !important; }
+.account-panel-card,
+.license-modal-card,
+.provider-modal-card {
+  background: rgba(12, 18, 32, 0.97);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  max-width: 420px;
+  width: 100%;
+  padding: 1.25rem 1.2rem 1.1rem;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(20px);
+}
+.account-panel-card h3,
+.license-modal-card h3,
+.provider-modal-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+.account-panel-card .ap-sub,
+.license-modal-card p,
+.provider-modal-card p {
+  margin: 0.25rem 0 0.85rem;
+  font-size: 0.88rem;
+  color: var(--ink-3);
+}
+.ap-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+.ap-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  background: rgba(8, 12, 24, 0.55);
+  border: 1px solid var(--line);
+}
+.ap-row span:first-child { color: var(--ink-4); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-family: var(--mono); }
+.ap-row span:last-child { color: var(--ink); font-weight: 500; text-align: right; word-break: break-word; }
+.ap-actions, .license-modal-actions, .provider-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+.ap-actions button, .license-modal-actions button, .provider-modal-actions button,
+.ap-actions a {
+  font-size: 0.86rem;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.5rem 0.85rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font);
+}
+.ap-btn-primary, .lic-btn-primary, .prov-btn-primary {
+  background: linear-gradient(135deg, rgba(124,92,255,0.9), rgba(61,220,255,0.75));
+  color: #050810;
+}
+.ap-btn-secondary, .lic-btn-secondary, .prov-btn-secondary {
+  background: rgba(61,220,255,0.08);
+  color: var(--ink);
+  border: 1px solid var(--line-strong) !important;
+}
+.ap-btn-danger {
+  background: rgba(255,92,122,0.12);
+  color: #ff8fa3;
+  border: 1px solid rgba(255,92,122,0.35) !important;
+}
+.ap-signout-opts {
+  margin: 0.65rem 0 0.25rem;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+.ap-signout-opts input { margin-top: 0.15rem; }
+.license-modal-card label,
+.provider-modal-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-bottom: 0.55rem;
+}
+.license-modal-card input,
+.provider-modal-card input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: rgba(5, 8, 16, 0.7);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.9rem;
+}
+.license-modal-card input:focus,
+.provider-modal-card input:focus {
+  outline: none;
+  border-color: rgba(61,220,255,0.55);
+  box-shadow: 0 0 0 3px rgba(61,220,255,0.12);
+}
+.license-error, .provider-error {
+  display: none;
+  margin-bottom: 0.55rem;
+  font-size: 0.82rem;
+  color: #ff8fa3;
+}
+.license-error.show, .provider-error.show { display: block; }
+
+@media (max-width: 520px) {
+  .account-chip-name { max-width: 72px; }
+  .account-chip-meta { display: none; }
+  .account-chip { padding: 0.2rem; }
+}
+
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+/* Early auth gate — hide app before paint if no session */
+(function () {
+  try {
+    var raw = localStorage.getItem('msb_session');
+    var s = raw ? JSON.parse(raw) : null;
+    if (!s || !s.id || !s.method) document.documentElement.classList.add('auth-locked');
+  } catch (e) {
+    document.documentElement.classList.add('auth-locked');
+  }
+})();
+</script>
 </head>
 <body>
+
+<!-- AUTH SHELL (first launch / signed out) -->
+<div id="auth-shell" class="no-print" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-mark" aria-hidden="true">SP</div>
+      <h1 id="auth-title">Schedule Pro</h1>
+    </div>
+    <p class="auth-subtitle">Workforce scheduling for retail operations</p>
+    <div class="auth-actions">
+      <button type="button" class="auth-btn" id="auth-google-btn" onclick="startProviderSignIn('google')">
+        <span class="auth-provider-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.9-.1-1.2H12z"/><path fill="#4285F4" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-2.4 0-4.4-1.6-5.1-3.8l-3.4 2.6C5.1 19.1 8.3 20.7 12 20.7c3.5 0 6.4-1.2 8.1-3.2 2-2.2 2.5-5.3 2.5-7.3 0-.5 0-.9-.1-1.2H12z" opacity=".01"/><path fill="#FBBC05" d="M6.9 14.1c-.2-.7-.4-1.4-.4-2.1s.1-1.4.4-2.1L3.5 7.3C2.7 8.6 2.3 10 2.3 11.5s.4 2.9 1.2 4.2l3.4-1.6z"/><path fill="#34A853" d="M12 20.7c3.2 0 5.9-1.1 7.9-2.9l-3.4-2.6c-.9.6-2.1 1.1-3.5 1.1-2.7 0-5-1.8-5.8-4.3L3.8 14c1.4 2.8 4.3 4.7 8.2 4.7z"/><path fill="#4285F4" d="M21.5 11.2c0-.5 0-.9-.1-1.2H12v3.9h5.5c-.3 1.3-1.1 2.3-2.1 3l3.4 2.6c2-1.8 3.2-4.5 3.2-8.3z"/></svg>
+        </span>
+        Continue with Google
+      </button>
+      <button type="button" class="auth-btn" id="auth-microsoft-btn" onclick="startProviderSignIn('microsoft')">
+        <span class="auth-provider-icon" aria-hidden="true">
+          <svg viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg"><path fill="#f35325" d="M1 1h10v10H1z"/><path fill="#81bc06" d="M12 1h10v10H12z"/><path fill="#05a6f0" d="M1 12h10v10H1z"/><path fill="#ffba08" d="M12 12h10v10H12z"/></svg>
+        </span>
+        Continue with Microsoft
+      </button>
+      <button type="button" class="auth-btn auth-btn-email" id="auth-email-toggle" onclick="toggleAuthEmailPanel()" aria-expanded="false">
+        Work email
+      </button>
+      <div class="auth-email-panel" id="auth-email-panel">
+        <label>Work email
+          <input type="email" id="auth-email" autocomplete="username" placeholder="you@company.com" />
+        </label>
+        <label>Password
+          <input type="password" id="auth-password" autocomplete="current-password" placeholder="Min. 8 characters" />
+        </label>
+        <label id="auth-name-wrap" style="display:none">Display name
+          <input type="text" id="auth-name" autocomplete="name" placeholder="Your name" />
+        </label>
+        <label id="auth-org-wrap" style="display:none">Organization
+          <input type="text" id="auth-org" autocomplete="organization" placeholder="Store / company name" />
+        </label>
+        <div class="auth-email-row">
+          <button type="button" class="auth-btn auth-btn-primary" onclick="signInWithEmail()">Sign in</button>
+          <button type="button" class="auth-btn" onclick="createWorkspaceWithEmail()">Create workspace</button>
+        </div>
+      </div>
+    </div>
+    <div class="auth-error" id="auth-error" role="alert"></div>
+    <button type="button" class="auth-offline-link" onclick="continueOffline()">Continue offline on this device</button>
+    <div class="auth-footer">
+      <a href="legal/privacy.html">Privacy</a> · <a href="legal/terms.html">Terms</a>
+      <span class="auth-sso" id="auth-sso-note">SSO for enterprise: contact support</span>
+    </div>
+  </div>
+</div>
+
+<div id="app-root">
 
 <!-- HEADER -->
 <header class="app-header">
   <div>
     <div class="brand-row">
       <h1>Schedule Pro</h1>
-      <span class="pro-badge is-free" id="license-badge" title="License status">Free</span>
+      <button type="button" class="account-chip" id="account-chip" onclick="openAccountPanel()" title="Account">
+        <span class="account-chip-avatar" id="account-chip-avatar">?</span>
+        <span class="account-chip-meta">
+          <span class="account-chip-name" id="account-chip-name">Account</span>
+          <span class="account-chip-plan is-free" id="account-chip-plan">Free</span>
+        </span>
+      </button>
+      <span class="pro-badge is-free" id="license-badge" title="License status" hidden>Free</span>
       <span class="offline-pill"><span class="dot"></span> Offline</span>
       <span class="pwa-mode-badge">App</span>
     </div>
@@ -2831,7 +3329,7 @@ html.pwa-standalone .install-banner { display: none !important; }
         <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON</button>
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()">How it works</button>
-        <button type="button" onclick="promptLicenseUnlock(); closeHeaderMenu()">Enter license / unlock</button>
+        <button type="button" onclick="openAccountPanel(); closeHeaderMenu()">Account &amp; license</button>
         <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label>Buy Pro — $19.99</button>
         <button type="button" onclick="location.href='install.html'; closeHeaderMenu()">Install / Play path</button>
       </div>
@@ -2856,8 +3354,8 @@ html.pwa-standalone .install-banner { display: none !important; }
 
   <!-- WELCOME / ONBOARDING -->
   <div class="welcome-card no-print compact" id="welcome-card">
-    <h2>Build the period. Post with confidence.</h2>
-    <p>Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen control. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel.</p>
+    <h2 id="welcome-title">Build the period. Post with confidence.</h2>
+    <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen control. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel.</p>
     <div class="welcome-actions">
       <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
       <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
@@ -3115,7 +3613,7 @@ html.pwa-standalone .install-banner { display: none !important; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.3.1</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.4.0</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3123,6 +3621,8 @@ html.pwa-standalone .install-banner { display: none !important; }
     <button type="button" onclick="location.href='legal/privacy.html'">Privacy</button>
   </div>
 </footer>
+
+</div><!-- /#app-root -->
 
 <div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title">
   <div class="pro-gate-card">
@@ -3132,6 +3632,71 @@ html.pwa-standalone .install-banner { display: none !important; }
       <a class="pg-buy" href="buy.html" data-price-label>Buy Pro — $19.99</a>
       <button type="button" class="pg-secondary" onclick="promptLicenseUnlock()">Enter license</button>
       <button type="button" class="pg-secondary" onclick="closeProGate()">Not now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Account panel -->
+<div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title">
+  <div class="account-panel-card">
+    <h3 id="account-panel-title">Account</h3>
+    <p class="ap-sub">Workspace session on this device</p>
+    <div class="ap-rows">
+      <div class="ap-row"><span>Organization</span><span id="ap-org">—</span></div>
+      <div class="ap-row"><span>Name</span><span id="ap-name">—</span></div>
+      <div class="ap-row"><span>Email</span><span id="ap-email">—</span></div>
+      <div class="ap-row"><span>Sign-in</span><span id="ap-method">—</span></div>
+      <div class="ap-row"><span>Plan</span><span id="ap-plan">Free</span></div>
+    </div>
+    <div class="ap-actions">
+      <button type="button" class="ap-btn-primary" onclick="openLicenseModal()">Activate team license</button>
+      <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center">Manage billing</a>
+      <button type="button" class="ap-btn-secondary" onclick="closeAccountPanel()">Close</button>
+    </div>
+    <label class="ap-signout-opts">
+      <input type="checkbox" id="ap-wipe-schedules" />
+      <span>Also clear schedules &amp; roster data on this device when signing out</span>
+    </label>
+    <div class="ap-actions">
+      <button type="button" class="ap-btn-danger" onclick="signOutSession()">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- License unlock modal (replaces window.prompt) -->
+<div class="license-modal no-print" id="license-modal" hidden role="dialog" aria-modal="true" aria-labelledby="license-modal-title">
+  <div class="license-modal-card">
+    <h3 id="license-modal-title">Activate team license</h3>
+    <p>Enter your Gumroad license or unlock code (MSB-PRO-… or any key 6+ characters).</p>
+    <label>License / unlock code
+      <input type="text" id="license-input" autocomplete="off" placeholder="Paste license key" />
+    </label>
+    <div class="license-error" id="license-error" role="alert"></div>
+    <div class="license-modal-actions">
+      <button type="button" class="lic-btn-primary" onclick="submitLicenseUnlock()">Unlock Pro</button>
+      <button type="button" class="lic-btn-secondary" onclick="closeLicenseModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Provider sign-in modal (Google / Microsoft work account details) -->
+<div class="provider-modal no-print" id="provider-modal" hidden role="dialog" aria-modal="true" aria-labelledby="provider-modal-title">
+  <div class="provider-modal-card">
+    <h3 id="provider-modal-title">Sign in with Google</h3>
+    <p id="provider-modal-desc">Sign in with Google for your work account. Your session stays on this device.</p>
+    <label>Work email
+      <input type="email" id="provider-email" autocomplete="email" placeholder="you@company.com" />
+    </label>
+    <label>Display name
+      <input type="text" id="provider-name" autocomplete="name" placeholder="Your name" />
+    </label>
+    <label>Organization name
+      <input type="text" id="provider-org" autocomplete="organization" placeholder="Store / company" />
+    </label>
+    <div class="provider-error" id="provider-error" role="alert"></div>
+    <div class="provider-modal-actions">
+      <button type="button" class="prov-btn-primary" id="provider-confirm-btn" onclick="confirmProviderSignIn()">Continue</button>
+      <button type="button" class="prov-btn-secondary" onclick="closeProviderModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -3246,14 +3811,19 @@ let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
 // ── Monetization / Pro license (offline-first; soft gate) ──
 const MSB_LICENSE_KEY = 'msb_pro_license';
 const MSB_GEN_COUNT_KEY = 'msb_free_generate_count';
+const MSB_SESSION_KEY = 'msb_session';
+const MSB_WORKSPACE_KEY = 'msb_workspace';
+const MSB_LOCAL_ACCOUNTS_KEY = 'msb_local_accounts';
 let monetizationConfig = {
   priceLabel: '$19.99',
   priceNote: 'one-time · lifetime Pro unlock',
   checkoutUrl: '',
   freeManagerLimit: 0,
   freeGenerateLimit: 2,
+  supportEmail: 'b.ralston62989@gmail.com',
   proFeatures: ['unlimited schedule builds', 'Word export', 'Excel export', 'priority future updates']
 };
+let pendingProviderMethod = null; // 'google' | 'microsoft'
 
 function isProUnlocked() {
   try {
@@ -3271,8 +3841,521 @@ function setProUnlocked(key) {
     at: new Date().toISOString()
   };
   try { localStorage.setItem(MSB_LICENSE_KEY, JSON.stringify(payload)); } catch (e) {}
+  // Keep session.plan in sync
+  try {
+    const s = getSession();
+    if (s) {
+      s.plan = 'pro';
+      saveSession(s);
+    }
+  } catch (e) {}
   updateLicenseBadge();
+  updateAccountChip();
   return payload;
+}
+
+// ── Session / workspace / local accounts ──
+function getSession() {
+  try {
+    const raw = localStorage.getItem(MSB_SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || !s.id || !s.method) return null;
+    s.plan = isProUnlocked() ? 'pro' : 'free';
+    return s;
+  } catch (e) { return null; }
+}
+
+function saveSession(session) {
+  if (!session) return;
+  session.plan = isProUnlocked() ? 'pro' : (session.plan || 'free');
+  try { localStorage.setItem(MSB_SESSION_KEY, JSON.stringify(session)); } catch (e) {}
+}
+
+function clearSession() {
+  try { localStorage.removeItem(MSB_SESSION_KEY); } catch (e) {}
+}
+
+function getWorkspace() {
+  try {
+    const raw = localStorage.getItem(MSB_WORKSPACE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+function saveWorkspace(ws) {
+  try { localStorage.setItem(MSB_WORKSPACE_KEY, JSON.stringify(ws)); } catch (e) {}
+}
+
+function getLocalAccounts() {
+  try {
+    const raw = localStorage.getItem(MSB_LOCAL_ACCOUNTS_KEY);
+    const m = raw ? JSON.parse(raw) : {};
+    return m && typeof m === 'object' ? m : {};
+  } catch (e) { return {}; }
+}
+
+function saveLocalAccounts(map) {
+  try { localStorage.setItem(MSB_LOCAL_ACCOUNTS_KEY, JSON.stringify(map || {})); } catch (e) {}
+}
+
+function newId(prefix) {
+  return (prefix || 'id') + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
+}
+
+function randomSalt() {
+  const arr = new Uint8Array(16);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(arr);
+  else for (let i = 0; i < arr.length; i++) arr[i] = (Math.random() * 256) | 0;
+  return Array.from(arr).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashPassword(password, salt) {
+  const enc = new TextEncoder();
+  const data = enc.encode(String(salt || '') + String(password || ''));
+  if (window.crypto && crypto.subtle) {
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  // Fallback (rare: old browsers without subtle) — still not plain text
+  let h = 2166136261;
+  const s = String(salt || '') + String(password || '');
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return ('00000000' + (h >>> 0).toString(16)).slice(-8) + '_fb';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  if (!el) return;
+  if (!msg) {
+    el.textContent = '';
+    el.classList.remove('show');
+    return;
+  }
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function showAuthShell() {
+  document.documentElement.classList.add('auth-locked');
+  showAuthError('');
+  updateAuthSupportNote();
+}
+
+function hideAuthShell() {
+  document.documentElement.classList.remove('auth-locked');
+}
+
+function enterAppAfterAuth() {
+  hideAuthShell();
+  updateAccountChip();
+  updateLicenseBadge();
+  personalizeWelcome();
+  if (typeof showToast === 'function') {
+    const s = getSession();
+    if (s && s.method !== 'offline') {
+      showToast('Signed in as ' + (s.name || s.email || 'user'), 'success');
+    } else {
+      showToast('Continuing offline on this device', 'info');
+    }
+  }
+}
+
+function createSessionFromFields(opts) {
+  const method = opts.method || 'offline';
+  const name = (opts.name || '').trim() || (method === 'offline' ? 'Device user' : 'User');
+  const email = (opts.email || '').trim().toLowerCase();
+  const orgName = (opts.orgName || '').trim() || 'This device';
+  const session = {
+    id: newId('sess'),
+    method: method,
+    email: email,
+    name: name,
+    orgName: orgName,
+    role: opts.role || 'admin',
+    signedInAt: new Date().toISOString(),
+    plan: isProUnlocked() ? 'pro' : 'free'
+  };
+  if (opts.picture) session.picture = opts.picture;
+  saveSession(session);
+  saveWorkspace({
+    orgName: orgName,
+    orgId: newId('org'),
+    industry: 'retail',
+    seats: 1
+  });
+  // Seed store name if empty
+  try {
+    const sn = document.getElementById('store-name');
+    if (sn && !sn.value.trim() && orgName && orgName !== 'This device') {
+      sn.value = orgName;
+      if (typeof persistStoreMeta === 'function') persistStoreMeta();
+    }
+  } catch (e) {}
+  return session;
+}
+
+function toggleAuthEmailPanel() {
+  const panel = document.getElementById('auth-email-panel');
+  const btn = document.getElementById('auth-email-toggle');
+  if (!panel) return;
+  const open = !panel.classList.contains('open');
+  panel.classList.toggle('open', open);
+  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) {
+    const emailEl = document.getElementById('auth-email');
+    if (emailEl) emailEl.focus();
+  }
+  showAuthError('');
+}
+
+function setAuthCreateFieldsVisible(visible) {
+  const nw = document.getElementById('auth-name-wrap');
+  const ow = document.getElementById('auth-org-wrap');
+  if (nw) nw.style.display = visible ? '' : 'none';
+  if (ow) ow.style.display = visible ? '' : 'none';
+}
+
+async function createWorkspaceWithEmail() {
+  const wasHidden = (document.getElementById('auth-name-wrap') || {}).style?.display === 'none';
+  setAuthCreateFieldsVisible(true);
+  const email = ((document.getElementById('auth-email') || {}).value || '').trim().toLowerCase();
+  const password = ((document.getElementById('auth-password') || {}).value || '');
+  const name = ((document.getElementById('auth-name') || {}).value || '').trim();
+  const orgName = ((document.getElementById('auth-org') || {}).value || '').trim();
+  showAuthError('');
+  // First click expands create fields when they were collapsed
+  if (wasHidden && (!name || !orgName)) {
+    showAuthError('Add your name and organization, then create the workspace.');
+    document.getElementById('auth-name')?.focus();
+    return;
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showAuthError('Enter a valid work email.');
+    return;
+  }
+  if (password.length < 8) {
+    showAuthError('Password must be at least 8 characters.');
+    return;
+  }
+  if (!name) {
+    showAuthError('Enter a display name for your workspace.');
+    document.getElementById('auth-name')?.focus();
+    return;
+  }
+  if (!orgName) {
+    showAuthError('Enter an organization or store name.');
+    document.getElementById('auth-org')?.focus();
+    return;
+  }
+  const accounts = getLocalAccounts();
+  if (accounts[email]) {
+    showAuthError('An account with this email already exists. Sign in instead.');
+    return;
+  }
+  const salt = randomSalt();
+  const passHash = await hashPassword(password, salt);
+  accounts[email] = {
+    salt: salt,
+    passHash: passHash,
+    name: name,
+    orgName: orgName,
+    createdAt: new Date().toISOString()
+  };
+  saveLocalAccounts(accounts);
+  createSessionFromFields({ method: 'email', email: email, name: name, orgName: orgName });
+  enterAppAfterAuth();
+}
+
+async function signInWithEmail() {
+  setAuthCreateFieldsVisible(false);
+  const email = ((document.getElementById('auth-email') || {}).value || '').trim().toLowerCase();
+  const password = ((document.getElementById('auth-password') || {}).value || '');
+  showAuthError('');
+  if (!email || !password) {
+    showAuthError('Enter email and password.');
+    return;
+  }
+  const accounts = getLocalAccounts();
+  const acc = accounts[email];
+  if (!acc) {
+    showAuthError('No workspace for this email. Use Create workspace.');
+    setAuthCreateFieldsVisible(true);
+    return;
+  }
+  const passHash = await hashPassword(password, acc.salt);
+  if (passHash !== acc.passHash) {
+    showAuthError('Incorrect password.');
+    return;
+  }
+  createSessionFromFields({
+    method: 'email',
+    email: email,
+    name: acc.name || email.split('@')[0],
+    orgName: acc.orgName || 'Workspace'
+  });
+  enterAppAfterAuth();
+}
+
+function continueOffline() {
+  showAuthError('');
+  let org = 'This device';
+  try {
+    const sn = document.getElementById('store-name');
+    if (sn && sn.value.trim()) org = sn.value.trim();
+    else {
+      const meta = localStorage.getItem('msb_store_meta');
+      if (meta) {
+        const d = JSON.parse(meta);
+        if (d && d.storeName) org = d.storeName;
+      }
+    }
+  } catch (e) {}
+  createSessionFromFields({
+    method: 'offline',
+    email: '',
+    name: 'Device user',
+    orgName: org
+  });
+  enterAppAfterAuth();
+}
+
+function startProviderSignIn(method) {
+  pendingProviderMethod = method === 'microsoft' ? 'microsoft' : 'google';
+  // Optional real GIS if client id configured — otherwise professional provider modal
+  if (pendingProviderMethod === 'google' && monetizationConfig.googleClientId) {
+    tryLoadGoogleIdentity(monetizationConfig.googleClientId);
+  }
+  openProviderModal(pendingProviderMethod);
+}
+
+function openProviderModal(method) {
+  const modal = document.getElementById('provider-modal');
+  const title = document.getElementById('provider-modal-title');
+  const desc = document.getElementById('provider-modal-desc');
+  const err = document.getElementById('provider-error');
+  if (err) { err.textContent = ''; err.classList.remove('show'); }
+  const label = method === 'microsoft' ? 'Microsoft' : 'Google';
+  if (title) title.textContent = 'Sign in with ' + label;
+  if (desc) {
+    desc.textContent =
+      'Sign in with ' + label + ' for your work account. Enter your work details to create a device session. Full OAuth can be enabled later via monetization.json.';
+  }
+  pendingProviderMethod = method;
+  if (modal) modal.removeAttribute('hidden');
+  setTimeout(() => document.getElementById('provider-email')?.focus(), 50);
+}
+
+function closeProviderModal() {
+  const modal = document.getElementById('provider-modal');
+  if (modal) modal.setAttribute('hidden', '');
+  pendingProviderMethod = null;
+}
+
+function confirmProviderSignIn() {
+  const method = pendingProviderMethod || 'google';
+  const email = ((document.getElementById('provider-email') || {}).value || '').trim().toLowerCase();
+  const name = ((document.getElementById('provider-name') || {}).value || '').trim();
+  const orgName = ((document.getElementById('provider-org') || {}).value || '').trim();
+  const err = document.getElementById('provider-error');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (err) { err.textContent = 'Enter a valid work email.'; err.classList.add('show'); }
+    return;
+  }
+  if (!name) {
+    if (err) { err.textContent = 'Enter a display name.'; err.classList.add('show'); }
+    return;
+  }
+  if (!orgName) {
+    if (err) { err.textContent = 'Enter an organization name.'; err.classList.add('show'); }
+    return;
+  }
+  createSessionFromFields({ method: method, email: email, name: name, orgName: orgName });
+  closeProviderModal();
+  enterAppAfterAuth();
+}
+
+function tryLoadGoogleIdentity(clientId) {
+  // Optional hook — full GIS button only if straightforward; modal remains primary for v2.4.0
+  if (!clientId || document.getElementById('gis-client-script')) return;
+  try {
+    const s = document.createElement('script');
+    s.id = 'gis-client-script';
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    document.head.appendChild(s);
+  } catch (e) {}
+}
+
+function updateAuthSupportNote() {
+  const el = document.getElementById('auth-sso-note');
+  if (!el) return;
+  const email = monetizationConfig.supportEmail || 'support';
+  el.textContent = 'SSO for enterprise: contact ' + email;
+}
+
+function methodLabel(method) {
+  if (method === 'google') return 'Google';
+  if (method === 'microsoft') return 'Microsoft';
+  if (method === 'email') return 'Work email';
+  if (method === 'offline') return 'Device only';
+  return method || '—';
+}
+
+function updateAccountChip() {
+  const s = getSession();
+  const avatar = document.getElementById('account-chip-avatar');
+  const nameEl = document.getElementById('account-chip-name');
+  const planEl = document.getElementById('account-chip-plan');
+  const pro = isProUnlocked();
+  const planText = pro
+    ? 'Pro'
+    : (function () {
+        const left = remainingFreeGenerates();
+        return left === 0 ? 'Free · 0' : 'Free · ' + left;
+      })();
+  if (!s) {
+    if (avatar) avatar.textContent = '?';
+    if (nameEl) nameEl.textContent = 'Sign in';
+    if (planEl) {
+      planEl.textContent = planText;
+      planEl.classList.toggle('is-pro', pro);
+    }
+    return;
+  }
+  const initial = (s.name || s.email || 'U').trim().charAt(0).toUpperCase() || 'U';
+  if (avatar) avatar.textContent = initial;
+  if (nameEl) nameEl.textContent = s.name || s.email || 'Account';
+  if (planEl) {
+    planEl.textContent = planText;
+    planEl.classList.toggle('is-pro', pro);
+  }
+}
+
+function openAccountPanel() {
+  closeHeaderMenu();
+  const s = getSession();
+  const set = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = v || '—';
+  };
+  if (s) {
+    set('ap-org', s.orgName || (getWorkspace() || {}).orgName || '—');
+    set('ap-name', s.name);
+    set('ap-email', s.email || (s.method === 'offline' ? 'Device session' : '—'));
+    set('ap-method', methodLabel(s.method));
+  } else {
+    set('ap-org', '—');
+    set('ap-name', '—');
+    set('ap-email', '—');
+    set('ap-method', '—');
+  }
+  set('ap-plan', isProUnlocked() ? 'Pro' : 'Free');
+  const wipe = document.getElementById('ap-wipe-schedules');
+  if (wipe) wipe.checked = false;
+  const modal = document.getElementById('account-modal');
+  if (modal) modal.removeAttribute('hidden');
+}
+
+function closeAccountPanel() {
+  const modal = document.getElementById('account-modal');
+  if (modal) modal.setAttribute('hidden', '');
+}
+
+function openLicenseModal() {
+  closeProGate();
+  const err = document.getElementById('license-error');
+  if (err) { err.textContent = ''; err.classList.remove('show'); }
+  const input = document.getElementById('license-input');
+  if (input) input.value = '';
+  const modal = document.getElementById('license-modal');
+  if (modal) modal.removeAttribute('hidden');
+  setTimeout(() => input?.focus(), 50);
+}
+
+function closeLicenseModal() {
+  const modal = document.getElementById('license-modal');
+  if (modal) modal.setAttribute('hidden', '');
+}
+
+function submitLicenseUnlock() {
+  const input = document.getElementById('license-input');
+  const err = document.getElementById('license-error');
+  const key = (input && input.value) || '';
+  if (!validLicenseKey(key)) {
+    if (err) {
+      err.textContent = 'Code too short — use 6+ characters or MSB-PRO-…';
+      err.classList.add('show');
+    }
+    return;
+  }
+  setProUnlocked(key.trim());
+  closeLicenseModal();
+  closeAccountPanel();
+  if (typeof showToast === 'function') showToast('Pro unlocked on this device.', 'success');
+  else alert('Pro unlocked on this device.');
+}
+
+function signOutSession() {
+  const wipe = document.getElementById('ap-wipe-schedules');
+  const shouldWipe = wipe && wipe.checked;
+  if (shouldWipe) {
+    if (!confirm('Sign out and clear schedules & roster data on this device? This cannot be undone.')) return;
+    try {
+      const keep = new Set([
+        MSB_LOCAL_ACCOUNTS_KEY,
+        MSB_LICENSE_KEY,
+        MSB_GEN_COUNT_KEY,
+        'msb_install_dismissed',
+        'msb_pwa_installed'
+      ]);
+      const toRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.indexOf('msb_') === 0 && !keep.has(k)) toRemove.push(k);
+      }
+      toRemove.forEach((k) => localStorage.removeItem(k));
+    } catch (e) {}
+  }
+  clearSession();
+  try { localStorage.removeItem(MSB_WORKSPACE_KEY); } catch (e) {}
+  closeAccountPanel();
+  closeLicenseModal();
+  closeProviderModal();
+  showAuthShell();
+  updateAccountChip();
+  if (typeof showToast === 'function') showToast('Signed out.', 'info');
+}
+
+function personalizeWelcome() {
+  const s = getSession();
+  const title = document.getElementById('welcome-title');
+  if (!title) return;
+  if (s && s.name && s.method !== 'offline') {
+    const org = s.orgName ? ' · ' + s.orgName : '';
+    title.textContent = 'Welcome back, ' + s.name + org;
+  } else if (s && s.method === 'offline' && s.orgName && s.orgName !== 'This device') {
+    title.textContent = 'Welcome · ' + s.orgName;
+  } else {
+    title.textContent = 'Build the period. Post with confidence.';
+  }
+}
+
+function ensureAuthOnBoot() {
+  updateAuthSupportNote();
+  const s = getSession();
+  if (!s) {
+    showAuthShell();
+  } else {
+    // Refresh plan flag
+    saveSession(s);
+    hideAuthShell();
+    personalizeWelcome();
+  }
+  updateAccountChip();
 }
 
 function validLicenseKey(k) {
@@ -3332,29 +4415,31 @@ function rosterManagerCount() {
 
 function updateLicenseBadge() {
   const el = document.getElementById('license-badge');
-  if (!el) return;
-  if (isProUnlocked()) {
-    el.textContent = 'Pro';
-    el.classList.remove('is-free');
-    el.title = 'Pro unlocked — unlimited builds + Word/Excel';
-    el.style.cursor = 'default';
-    el.onclick = null;
-  } else {
-    const left = remainingFreeGenerates();
-    el.textContent = left === 0 ? 'Free · 0 builds' : 'Free · ' + left + ' left';
-    el.classList.add('is-free');
-    el.title =
-      left === 0
-        ? 'Free builds used — unlock Pro for unlimited builds + Word/Excel'
-        : left +
-          ' free schedule build' +
-          (left === 1 ? '' : 's') +
-          ' left · unlimited managers · edits always free';
-    el.style.cursor = 'pointer';
-    el.onclick = () => {
-      location.href = 'buy.html';
-    };
+  if (el) {
+    if (isProUnlocked()) {
+      el.textContent = 'Pro';
+      el.classList.remove('is-free');
+      el.classList.add('is-pro');
+      el.title = 'Pro unlocked — unlimited builds + Word/Excel';
+      el.style.cursor = 'pointer';
+      el.onclick = () => openAccountPanel();
+    } else {
+      const left = remainingFreeGenerates();
+      el.textContent = left === 0 ? 'Free · 0 builds' : 'Free · ' + left + ' left';
+      el.classList.add('is-free');
+      el.classList.remove('is-pro');
+      el.title =
+        left === 0
+          ? 'Free builds used — unlock Pro for unlimited builds + Word/Excel'
+          : left +
+            ' free schedule build' +
+            (left === 1 ? '' : 's') +
+            ' left · unlimited managers · edits always free';
+      el.style.cursor = 'pointer';
+      el.onclick = () => openAccountPanel();
+    }
   }
+  if (typeof updateAccountChip === 'function') updateAccountChip();
 }
 
 function showProGate(message) {
@@ -3373,6 +4458,9 @@ document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   closeProGate();
   closeHeaderMenu();
+  if (typeof closeLicenseModal === 'function') closeLicenseModal();
+  if (typeof closeProviderModal === 'function') closeProviderModal();
+  if (typeof closeAccountPanel === 'function') closeAccountPanel();
   const saved = document.getElementById('saved-modal-overlay');
   if (saved && saved.style.display !== 'none') {
     if (typeof closeSavedSchedulesModal === 'function') closeSavedSchedulesModal();
@@ -3405,17 +4493,7 @@ function requireGenerateAllowance() {
 }
 
 function promptLicenseUnlock() {
-  closeProGate();
-  const key = window.prompt('Enter your license / unlock code (Gumroad key or MSB-PRO-…):', '');
-  if (key == null) return;
-  if (!validLicenseKey(key)) {
-    if (typeof showToast === 'function') showToast('Code too short — use 6+ characters.', 'warn');
-    else alert('Enter a code at least 6 characters (or MSB-PRO-…).');
-    return;
-  }
-  setProUnlocked(key.trim());
-  if (typeof showToast === 'function') showToast('Pro unlocked on this device.', 'success');
-  else alert('Pro unlocked on this device.');
+  openLicenseModal();
 }
 
 async function loadMonetizationConfig() {
@@ -3426,6 +4504,7 @@ async function loadMonetizationConfig() {
     monetizationConfig = { ...monetizationConfig, ...j };
   } catch (e) { /* offline / missing — keep defaults */ }
   if (typeof applyPriceLabels === 'function') applyPriceLabels();
+  if (typeof updateAuthSupportNote === 'function') updateAuthSupportNote();
 }
 
 function applyUrlProUnlock() {
@@ -3892,7 +4971,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.3.1';
+const APP_VERSION = '2.4.0';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -3964,6 +5043,7 @@ function restoreWelcomeState() {
       if (c) c.style.display = 'none';
     }
   } catch(e) {}
+  if (typeof personalizeWelcome === 'function') personalizeWelcome();
 }
 
 function showHowItWorks() {
@@ -8913,19 +9993,38 @@ function handleLaunchQuery() {
 
 registerServiceWorker();
 setupInstallPrompt();
+ensureAuthOnBoot();
 updateLicenseBadge();
 loadMonetizationConfig().then(() => {
   updateLicenseBadge();
   applyPriceLabels();
+  updateAuthSupportNote();
 });
 applyPriceLabels();
 // After DOM boot
+function bootUi() {
+  handleLaunchQuery();
+  ensureAuthOnBoot();
+  updateAccountChip();
+  personalizeWelcome();
+}
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', handleLaunchQuery);
+  document.addEventListener('DOMContentLoaded', bootUi);
 } else {
-  setTimeout(handleLaunchQuery, 0);
+  setTimeout(bootUi, 0);
 }
 
+// Backdrop click to close account / license / provider modals
+document.addEventListener('click', (e) => {
+  ['account-modal', 'license-modal', 'provider-modal'].forEach((id) => {
+    const m = document.getElementById(id);
+    if (m && !m.hasAttribute('hidden') && e.target === m) {
+      if (id === 'account-modal') closeAccountPanel();
+      else if (id === 'license-modal') closeLicenseModal();
+      else closeProviderModal();
+    }
+  });
+});
 
 restoreManagerNames();
 restoreStoreMeta();
@@ -8938,6 +10037,7 @@ buildInputTabs();
 buildInputCalendar(activeTab);
 updateReadyChecklist();
 updateLicenseBadge();
+updateAccountChip();
 // Keep checklist fresh when period/names change
 const _pickPeriod = document.getElementById('pick-period');
 if (_pickPeriod) _pickPeriod.addEventListener('change', () => setTimeout(updateReadyChecklist, 50));

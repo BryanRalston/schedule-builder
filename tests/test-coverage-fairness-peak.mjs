@@ -438,10 +438,12 @@ async function main() {
   });
 
   // Evaluate assertions
-  if (!/^2\.5\.(6|7)/.test(String(report.version || ''))) {
-    fail('version', `expected 2.5.6+ got ${report.version}`);
-  } else {
-    pass('version', report.version);
+  {
+    const ver = String(report.version || '');
+    const m = ver.match(/^2\.5\.(\d+)/);
+    const patch = m ? parseInt(m[1], 10) : -1;
+    if (patch < 6) fail('version', `expected 2.5.6+ got ${ver}`);
+    else pass('version', ver);
   }
   if (report.defaultPeak === false) {
     pass('default-peakSeasonHours-false', 'DEFAULT_PREFERENCES.peakSeasonHours === false');

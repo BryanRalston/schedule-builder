@@ -3835,14 +3835,13 @@ html[data-density="board"] .week-table thead th .day-hours { font-size: 0.68rem;
 }
 @media (max-width: 720px) {
   .mobile-analytics-toggle { display: block; }
-  #summary-section.analytics-collapsed .section-body {
+  /* Default collapsed on mobile: only expand when .analytics-expanded is set */
+  #summary-section:not(.analytics-expanded) .section-body,
+  #summary-section:not(.analytics-expanded) .section-header {
     display: none !important;
   }
-  #summary-section.analytics-collapsed .section-header h2::after {
-    content: " (collapsed)";
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--ink-4);
+  #summary-section.analytics-expanded .section-body {
+    display: block !important;
   }
   /* Fairness stays visible; strip is primary review */
   #fairness-under-schedule {
@@ -14918,18 +14917,25 @@ function toggleMobileAnalytics() {
   const sec = document.getElementById('summary-section');
   const hint = document.getElementById('mobile-analytics-hint');
   if (!sec) return;
-  const collapsed = sec.classList.toggle('analytics-collapsed');
+  const expanded = sec.classList.toggle('analytics-expanded');
+  sec.classList.toggle('analytics-collapsed', !expanded);
   if (hint) {
-    hint.textContent = collapsed
-      ? 'Tap to expand labor, weekly breakdown, and score details'
-      : 'Tap to collapse analytics';
+    hint.textContent = expanded
+      ? 'Tap to collapse analytics'
+      : 'Tap to expand labor, weekly breakdown, and score details';
   }
 }
 function initMobileAnalyticsDefault() {
   const sec = document.getElementById('summary-section');
   if (!sec) return;
-  if (window.innerWidth <= 720) sec.classList.add('analytics-collapsed');
-  else sec.classList.remove('analytics-collapsed');
+  // Mobile: keep collapsed (no analytics-expanded). Desktop: always expanded.
+  if (window.innerWidth <= 720) {
+    sec.classList.remove('analytics-expanded');
+    sec.classList.add('analytics-collapsed');
+  } else {
+    sec.classList.add('analytics-expanded');
+    sec.classList.remove('analytics-collapsed');
+  }
 }
 (function wrapPostGenStripCta() {
   const orig = window.updatePostGenStrip;

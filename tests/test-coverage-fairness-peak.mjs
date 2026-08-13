@@ -1,5 +1,5 @@
 /**
- * Peak season hours + hard coverage + fairness suite (v2.5.6+)
+ * Peak season hours + hard coverage + fairness suite (v2.5.6+/2.5.7+)
  * Playwright + local static server of repo root.
  *
  * A. Hard coverage always
@@ -66,7 +66,7 @@ function warn(name, detail) {
 }
 
 async function main() {
-  console.log('\n=== Peak / coverage / fairness suite (v2.5.6) ===\n');
+  console.log('\n=== Peak / coverage / fairness suite (v2.5.7) ===\n');
   const startedAt = new Date().toISOString();
   const { server, base } = await startStaticServer();
   const browser = await chromium.launch({ headless: true });
@@ -438,8 +438,8 @@ async function main() {
   });
 
   // Evaluate assertions
-  if (report.version !== '2.5.6') {
-    fail('version', `expected 2.5.6 got ${report.version}`);
+  if (!/^2\.5\.(6|7)/.test(String(report.version || ''))) {
+    fail('version', `expected 2.5.6+ got ${report.version}`);
   } else {
     pass('version', report.version);
   }

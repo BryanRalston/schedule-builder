@@ -878,6 +878,238 @@ input[type="radio"] { accent-color: var(--gold); }
 .wf-row.short .wf-status { color: var(--warn); }
 .wf-row.met .wf-status { color: var(--ok); }
 
+/* Fairness under schedule (compact neon card) */
+.fairness-under {
+  margin: 0.85rem 0 0.35rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(61,220,255,0.28);
+  background: linear-gradient(145deg, rgba(16,28,48,0.95), rgba(12,20,36,0.92));
+  box-shadow: 0 0 20px rgba(61,220,255,0.1), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.fairness-under .fu-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.55rem;
+}
+.fairness-under .fu-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+  color: var(--gold);
+}
+.fairness-under .fu-meta {
+  font-size: 0.72rem;
+  color: var(--ink-3);
+  font-family: var(--mono);
+}
+.fairness-under .fu-cover {
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-left: auto;
+}
+.fairness-under .fu-cover.ok { color: var(--ok); }
+.fairness-under .fu-cover.warn { color: var(--warn); }
+.fairness-under table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+.fairness-under th {
+  text-align: left;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-4);
+  padding: 0.25rem 0.35rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.fairness-under td {
+  padding: 0.32rem 0.35rem;
+  border-bottom: 1px solid rgba(120,180,255,0.06);
+  font-variant-numeric: tabular-nums;
+}
+.fairness-under tr.fu-flag td { background: var(--warn-bg); }
+.fairness-under td.fu-name { font-weight: 600; color: var(--ink); }
+.fairness-under td.fu-note { color: var(--warn); font-size: 0.68rem; max-width: 8rem; }
+@media (max-width: 560px) {
+  .fairness-under { overflow-x: auto; }
+  .fairness-under table { min-width: 420px; }
+}
+
+/* Team templates bar */
+.team-templates-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.65rem 0 0.85rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.team-templates-bar label {
+  font-weight: 600;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+.team-templates-bar select {
+  flex: 1 1 140px;
+  min-width: 120px;
+  max-width: 220px;
+  padding: 0.3rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  color: var(--ink);
+  font-size: 0.8rem;
+}
+.team-templates-bar button {
+  font-size: 0.72rem !important;
+  padding: 0.3rem 0.55rem !important;
+  min-height: auto !important;
+}
+
+/* Store hours compact */
+.store-hours-block { margin-bottom: 0.85rem; }
+.store-hours-chip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.65rem;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+.store-hours-chip .sh-sum { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-2); }
+.store-hours-panel {
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.store-hours-panel .sh-row {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr 1fr;
+  gap: 0.35rem;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+.store-hours-panel .sh-row label { font-size: 0.75rem; font-weight: 600; color: var(--ink-3); }
+.store-hours-panel input[type="text"] {
+  width: 100%;
+  padding: 0.25rem 0.4rem;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-family: var(--mono);
+}
+.store-hours-panel .sh-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.45rem 0 0.55rem;
+}
+.store-hours-panel .sh-note {
+  font-size: 0.7rem;
+  color: var(--ink-4);
+  margin-top: 0.35rem;
+}
+.store-hours-panel .sh-ov-list {
+  margin-top: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.store-hours-panel .sh-ov-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  color: var(--ink-2);
+}
+.schedule-hours-line {
+  font-size: 0.72rem;
+  color: var(--ink-4);
+  margin: 0.25rem 0 0.15rem;
+  font-family: var(--mono);
+}
+.print-hours-line {
+  font-size: 0.85rem;
+  color: #374151;
+  margin-top: 0.25rem;
+}
+
+/* Onboarding tour */
+#onboarding-tour {
+  position: fixed;
+  inset: 0;
+  z-index: 25000;
+  pointer-events: none;
+}
+#onboarding-tour:not([hidden]) { pointer-events: auto; }
+.tour-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 6, 14, 0.72);
+  backdrop-filter: blur(2px);
+}
+.tour-card {
+  position: absolute;
+  left: 50%;
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(380px, calc(100vw - 1.5rem));
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(61,220,255,0.35);
+  background: linear-gradient(165deg, rgba(18,28,48,0.98), rgba(10,16,28,0.98));
+  box-shadow: var(--glow), var(--shadow-lg);
+  z-index: 2;
+}
+.tour-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  color: var(--gold);
+}
+.tour-card p {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  margin: 0 0 0.85rem;
+  line-height: 1.45;
+}
+.tour-card .tour-step-num {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin-bottom: 0.25rem;
+}
+.tour-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+.tour-actions button { font-size: 0.78rem !important; padding: 0.4rem 0.75rem !important; }
+[data-tour-highlight="1"] {
+  position: relative;
+  z-index: 25001 !important;
+  box-shadow: 0 0 0 3px rgba(61,220,255,0.55), 0 0 28px rgba(61,220,255,0.35) !important;
+  border-radius: 10px;
+  outline: 1px solid rgba(61,220,255,0.4);
+}
+
 @media (max-width: 720px) {
   .mw-day-head {
     position: sticky;
@@ -3370,6 +3602,7 @@ html.auth-locked .toast-host { z-index: 20050; }
         <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON</button>
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()">How it works</button>
+        <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()">Take tour</button>
         <button type="button" onclick="openAccountPanel(); closeHeaderMenu()">Account &amp; license</button>
         <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label>Buy Pro — $19.99</button>
         <button type="button" onclick="location.href='install.html'; closeHeaderMenu()">Install / Play path</button>
@@ -3400,6 +3633,7 @@ html.auth-locked .toast-host { z-index: 20050; }
     <div class="welcome-actions">
       <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
       <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
+      <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="startOnboardingTour(true)">Take tour</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
       <button class="welcome-dismiss" onclick="dismissWelcome()">Dismiss</button>
     </div>
@@ -3407,10 +3641,10 @@ html.auth-locked .toast-host { z-index: 20050; }
 
   <div class="workspace no-print-workspace">
     <nav class="app-tabs no-print" role="tablist" aria-label="Main">
-      <button type="button" class="app-tab active" role="tab" id="tabbtn-setup" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')">Setup</button>
-      <button type="button" class="app-tab" role="tab" id="tabbtn-requests" aria-selected="false" aria-controls="tab-requests" onclick="switchTab('requests')">Requests</button>
-      <button type="button" class="app-tab" role="tab" id="tabbtn-rules" aria-selected="false" aria-controls="tab-rules" onclick="switchTab('rules')">Rules</button>
-      <button type="button" class="app-tab" role="tab" id="tabbtn-schedule" aria-selected="false" aria-controls="tab-schedule" onclick="switchTab('schedule')">
+      <button type="button" class="app-tab active" role="tab" id="tabbtn-setup" data-tour="tab-setup" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')">Setup</button>
+      <button type="button" class="app-tab" role="tab" id="tabbtn-requests" data-tour="tab-requests" aria-selected="false" aria-controls="tab-requests" onclick="switchTab('requests')">Requests</button>
+      <button type="button" class="app-tab" role="tab" id="tabbtn-rules" data-tour="tab-rules" aria-selected="false" aria-controls="tab-rules" onclick="switchTab('rules')">Rules</button>
+      <button type="button" class="app-tab" role="tab" id="tabbtn-schedule" data-tour="tab-schedule" aria-selected="false" aria-controls="tab-schedule" onclick="switchTab('schedule')">
         Schedule <span class="tab-dot" title="Schedule ready"></span>
       </button>
     </nav>
@@ -3421,7 +3655,14 @@ html.auth-locked .toast-host { z-index: 20050; }
       <div class="tab-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating.</div>
 <!-- SETUP SECTION -->
   <div class="section no-print" style="border:none">
-    <div class="section-body" id="setup-body" style="padding:0">
+    <div class="section-body" id="setup-body" style="padding:0" data-tour="setup-team">
+      <div class="team-templates-bar no-print" id="team-templates-bar" data-tour="team-templates">
+        <label for="team-template-select">Team templates</label>
+        <select id="team-template-select" aria-label="Saved team templates"></select>
+        <button type="button" class="btn-secondary" onclick="saveTeamTemplate()">Save team</button>
+        <button type="button" class="btn-primary" onclick="loadSelectedTeamTemplate()">Load</button>
+        <button type="button" class="btn-outline" onclick="deleteSelectedTeamTemplate()">Delete</button>
+      </div>
       <div class="setup-grid">
         <div class="setup-left">
           <!-- SM (always 1) -->
@@ -3462,9 +3703,17 @@ html.auth-locked .toast-host { z-index: 20050; }
               <label style="font-weight:600;font-size:0.9rem;white-space:nowrap">Name:</label>
               <input type="text" id="store-name" value="" placeholder="e.g. Harbor East #851" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
-            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.65rem">
               <label style="font-weight:600;font-size:0.9rem">Store #:</label>
               <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+            </div>
+            <div class="store-hours-block no-print" id="store-hours-block" data-tour="store-hours">
+              <div class="store-hours-chip">
+                <span style="font-weight:600;color:var(--ink-2)">Hours:</span>
+                <span class="sh-sum" id="store-hours-summary"></span>
+                <button type="button" class="btn-secondary" style="font-size:0.72rem;padding:0.25rem 0.5rem;min-height:auto" onclick="toggleStoreHoursPanel()">Edit</button>
+              </div>
+              <div class="store-hours-panel" id="store-hours-panel" style="display:none"></div>
             </div>
           </div>
           <div>
@@ -3589,7 +3838,7 @@ html.auth-locked .toast-host { z-index: 20050; }
     <div class="section-body generate-panel">
       <div class="ready-checklist" id="ready-checklist"></div>
       <div class="generate-actions">
-        <button class="btn-success btn-large" id="btn-generate" onclick="generateSchedule()">Build this period</button>
+        <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()">Build this period</button>
         <button class="btn-secondary" onclick="clearSchedule()">Clear board</button>
         <button class="btn-outline" onclick="loadDemoStore()">Sample store</button>
       </div>
@@ -3628,7 +3877,9 @@ html.auth-locked .toast-host { z-index: 20050; }
         <span class="gen-timestamp" id="gen-timestamp"></span>
       </div>
       <div class="period-print-header" id="print-header"></div>
+      <div class="schedule-hours-line no-print" id="schedule-hours-line"></div>
       <div id="schedule-grid"></div>
+      <div id="fairness-under-schedule" class="fairness-under no-print" data-tour="fairness" hidden></div>
       <div class="print-schedule" id="print-schedule"></div>
     </div>
   </div>
@@ -3654,7 +3905,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.6</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.7</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3744,6 +3995,21 @@ html.auth-locked .toast-host { z-index: 20050; }
 </div>
 
 <div class="toast-host" id="toast-host" aria-live="polite"></div>
+
+<!-- Onboarding tour overlay -->
+<div id="onboarding-tour" class="no-print" hidden role="dialog" aria-modal="true" aria-labelledby="tour-title">
+  <div class="tour-backdrop" onclick="skipOnboardingTour()"></div>
+  <div class="tour-card" id="tour-card">
+    <div class="tour-step-num" id="tour-step-num">Step 1 of 5</div>
+    <h3 id="tour-title">Welcome</h3>
+    <p id="tour-body">Build fair manager schedules offline.</p>
+    <div class="tour-actions">
+      <button type="button" class="btn-outline" onclick="skipOnboardingTour()">Skip</button>
+      <button type="button" class="btn-secondary" id="tour-back-btn" onclick="tourBack()" style="display:none">Back</button>
+      <button type="button" class="btn-primary" id="tour-next-btn" onclick="tourNext()">Next</button>
+    </div>
+  </div>
+</div>
 
 <!-- Cell menu (portal) -->
 <div id="cell-menu-portal"></div>
@@ -3835,6 +4101,19 @@ function setScheduleResultsVisible(visible) {
   const sum = document.getElementById('summary-section');
   if (ss) ss.style.display = visible ? '' : 'none';
   if (sum) sum.style.display = visible ? '' : 'none';
+  if (visible && typeof renderFairnessUnderSchedule === 'function' && schedule && Object.keys(schedule).length) {
+    try {
+      const ROLES = (lastScheduleRenderArgs && lastScheduleRenderArgs.ROLES) || getRoles();
+      const ALL_KC = (lastScheduleRenderArgs && lastScheduleRenderArgs.ALL_KC) || getAllWithKC();
+      renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
+    } catch (e) {}
+  } else if (!visible) {
+    const fu = document.getElementById('fairness-under-schedule');
+    if (fu) {
+      fu.hidden = true;
+      fu.innerHTML = '';
+    }
+  }
 }
 
 function restoreAppTab() {
@@ -3849,6 +4128,22 @@ function restoreAppTab() {
 // Free: unlimited managers; limited free schedule builds (see freeGenerateLimit)
 let amCount = 2;
 let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
+
+// Store open/close hours (display/planning metadata — not required by coverage engine)
+const DEFAULT_STORE_HOURS = {
+  byDow: {
+    0: { open: '11a', close: '7p' },
+    1: { open: '10a', close: '9p' },
+    2: { open: '10a', close: '9p' },
+    3: { open: '10a', close: '9p' },
+    4: { open: '10a', close: '9p' },
+    5: { open: '10a', close: '10p' },
+    6: { open: '10a', close: '10p' }
+  },
+  overrides: {}
+};
+let storeHours = JSON.parse(JSON.stringify(DEFAULT_STORE_HOURS));
+let storeHoursPanelOpen = false;
 
 // ── Monetization / Pro license (offline-first; soft gate) ──
 const MSB_LICENSE_KEY = 'msb_pro_license';
@@ -5699,7 +5994,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.6';
+const APP_VERSION = '2.5.7';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -5789,10 +6084,12 @@ function persistStoreMeta() {
   try {
     localStorage.setItem('msb_store_meta', JSON.stringify({
       storeName: (document.getElementById('store-name') || {}).value || '',
-      storeNumber: (document.getElementById('store-number') || {}).value || ''
+      storeNumber: (document.getElementById('store-number') || {}).value || '',
+      storeHours: storeHours
     }));
   } catch(e) {}
   updateReadyChecklist();
+  if (typeof updateStoreHoursSummary === 'function') updateStoreHoursSummary();
 }
 
 function restoreStoreMeta() {
@@ -5804,7 +6101,206 @@ function restoreStoreMeta() {
     const num = document.getElementById('store-number');
     if (sn && d.storeName) sn.value = d.storeName;
     if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
+    if (d.storeHours) applyStoreHoursObject(d.storeHours);
   } catch(e) {}
+  if (typeof updateStoreHoursSummary === 'function') updateStoreHoursSummary();
+}
+
+function resetStoreHoursDefaults() {
+  storeHours = JSON.parse(JSON.stringify(DEFAULT_STORE_HOURS));
+  persistStoreMeta();
+  if (storeHoursPanelOpen) renderStoreHoursPanel();
+  updateStoreHoursSummary();
+  showToast('Store hours reset to defaults.', 'info');
+}
+
+function applyStoreHoursObject(obj) {
+  if (!obj || typeof obj !== 'object') return;
+  const next = JSON.parse(JSON.stringify(DEFAULT_STORE_HOURS));
+  if (obj.byDow && typeof obj.byDow === 'object') {
+    for (let d = 0; d <= 6; d++) {
+      const src = obj.byDow[d] || obj.byDow[String(d)];
+      if (src && src.open && src.close) next.byDow[d] = { open: String(src.open), close: String(src.close) };
+    }
+  }
+  next.overrides = {};
+  if (obj.overrides && typeof obj.overrides === 'object') {
+    Object.keys(obj.overrides).forEach((k) => {
+      const o = obj.overrides[k];
+      if (o && o.open && o.close) next.overrides[k] = { open: String(o.open), close: String(o.close) };
+    });
+  }
+  storeHours = next;
+}
+
+function getStoreHoursForDate(dateOrDk) {
+  let dk = null;
+  let dow = null;
+  if (typeof dateOrDk === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateOrDk)) {
+    dk = dateOrDk;
+    const parts = dk.split('-');
+    dow = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getDay();
+  } else if (dateOrDk instanceof Date && !isNaN(dateOrDk.getTime())) {
+    dk = dateKey(dateOrDk);
+    dow = dateOrDk.getDay();
+  } else {
+    const t = new Date();
+    dk = dateKey(t);
+    dow = t.getDay();
+  }
+  if (dk && storeHours.overrides && storeHours.overrides[dk]) {
+    const o = storeHours.overrides[dk];
+    return { open: o.open, close: o.close, isOverride: true, dateKey: dk };
+  }
+  const row = (storeHours.byDow && storeHours.byDow[dow]) || DEFAULT_STORE_HOURS.byDow[dow];
+  return { open: row.open, close: row.close, isOverride: false, dateKey: dk };
+}
+
+function summarizeStoreHours() {
+  const by = storeHours.byDow || DEFAULT_STORE_HOURS.byDow;
+  const fmt = (d) => (by[d].open + '–' + by[d].close);
+  const mon = fmt(1);
+  const monThuSame = [2, 3, 4].every((d) => fmt(d) === mon);
+  const fri = fmt(5);
+  const sat = fmt(6);
+  const sun = fmt(0);
+  const parts = [];
+  if (monThuSame) parts.push('Mon–Thu ' + mon);
+  else parts.push('Mon ' + mon + ' · Tue ' + fmt(2) + ' · Wed ' + fmt(3) + ' · Thu ' + fmt(4));
+  if (fri === sat) parts.push('Fri–Sat ' + fri);
+  else parts.push('Fri ' + fri + ' · Sat ' + sat);
+  parts.push('Sun ' + sun);
+  const ovN = Object.keys(storeHours.overrides || {}).length;
+  if (ovN) parts.push(ovN + ' holiday override' + (ovN === 1 ? '' : 's'));
+  return parts.join(' · ');
+}
+
+function updateStoreHoursSummary() {
+  const el = document.getElementById('store-hours-summary');
+  if (el) el.textContent = summarizeStoreHours();
+  updateScheduleHoursLine();
+}
+
+function updateScheduleHoursLine() {
+  const line = document.getElementById('schedule-hours-line');
+  if (!line) return;
+  if (!currentPeriod || !periodDates || !periodDates.length) {
+    line.textContent = '';
+    return;
+  }
+  // Compact one-liner for first week of loaded period (overrides noted)
+  const week0 = periodDates.slice(0, 7);
+  const bits = week0.map((d) => {
+    const h = getStoreHoursForDate(d);
+    const dn = DAY_NAMES[d.getDay()];
+    return dn + ' ' + h.open + '–' + h.close + (h.isOverride ? '*' : '');
+  });
+  line.textContent = 'Store hours · Wk1: ' + bits.join(' · ') + (bits.some((_, i) => getStoreHoursForDate(week0[i]).isOverride) ? ' (* override)' : '');
+}
+
+function toggleStoreHoursPanel() {
+  storeHoursPanelOpen = !storeHoursPanelOpen;
+  const panel = document.getElementById('store-hours-panel');
+  if (!panel) return;
+  panel.style.display = storeHoursPanelOpen ? 'block' : 'none';
+  if (storeHoursPanelOpen) renderStoreHoursPanel();
+}
+
+function renderStoreHoursPanel() {
+  const panel = document.getElementById('store-hours-panel');
+  if (!panel) return;
+  const by = storeHours.byDow;
+  let html = '';
+  for (let d = 0; d <= 6; d++) {
+    html += '<div class="sh-row">';
+    html += '<label>' + DAY_NAMES[d] + '</label>';
+    html += '<input type="text" id="sh-open-' + d + '" value="' + esc(by[d].open) + '" placeholder="open" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
+    html += '<input type="text" id="sh-close-' + d + '" value="' + esc(by[d].close) + '" placeholder="close" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
+    html += '</div>';
+  }
+  html += '<div class="sh-actions">';
+  html += '<button type="button" class="btn-secondary" style="font-size:0.72rem;padding:0.3rem 0.55rem;min-height:auto" onclick="applyStoreHoursMonFri()">Apply Mon–Fri</button>';
+  html += '<button type="button" class="btn-outline" style="font-size:0.72rem;padding:0.3rem 0.55rem;min-height:auto" onclick="resetStoreHoursDefaults()">Reset defaults</button>';
+  html += '</div>';
+  html += '<div style="font-weight:600;font-size:0.78rem;margin-top:0.25rem">Holiday day override</div>';
+  html += '<div class="sh-row" style="grid-template-columns:1.4fr 1fr 1fr auto;margin-top:0.35rem">';
+  let dateOpts = '';
+  if (periodDates && periodDates.length) {
+    periodDates.forEach((d) => {
+      const dk = dateKey(d);
+      dateOpts += '<option value="' + dk + '">' + dk + ' (' + DAY_NAMES[d.getDay()] + ')</option>';
+    });
+  }
+  if (dateOpts) {
+    html += '<select id="sh-ov-date" style="padding:0.25rem;border-radius:5px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);font-size:0.75rem">' + dateOpts + '</select>';
+  } else {
+    html += '<input type="text" id="sh-ov-date" placeholder="YYYY-MM-DD">';
+  }
+  html += '<input type="text" id="sh-ov-open" placeholder="open" value="9a">';
+  html += '<input type="text" id="sh-ov-close" placeholder="close" value="6p">';
+  html += '<button type="button" class="btn-primary" style="font-size:0.7rem;padding:0.25rem 0.45rem;min-height:auto" onclick="addStoreHoursOverride()">Add</button>';
+  html += '</div>';
+  html += '<div class="sh-ov-list">';
+  const ovs = Object.keys(storeHours.overrides || {}).sort();
+  if (!ovs.length) html += '<div style="font-size:0.72rem;color:var(--ink-4)">No overrides yet.</div>';
+  ovs.forEach((dk) => {
+    const o = storeHours.overrides[dk];
+    html += '<div class="sh-ov-item"><span>' + esc(dk) + ' · ' + esc(o.open) + '–' + esc(o.close) + '</span>';
+    html += '<button type="button" class="btn-outline" style="font-size:0.65rem;padding:0.15rem 0.4rem;min-height:auto" onclick="removeStoreHoursOverride(\'' + dk + '\')">Remove</button></div>';
+  });
+  html += '</div>';
+  html += '<div class="sh-note">Overrides win for that calendar day (holiday mid-week).</div>';
+  panel.innerHTML = html;
+}
+
+function updateStoreHoursDow(d) {
+  const o = document.getElementById('sh-open-' + d);
+  const c = document.getElementById('sh-close-' + d);
+  if (!o || !c) return;
+  const open = (o.value || '').trim();
+  const close = (c.value || '').trim();
+  if (!open || !close) return;
+  if (!storeHours.byDow) storeHours.byDow = {};
+  storeHours.byDow[d] = { open, close };
+  persistStoreMeta();
+}
+
+function applyStoreHoursMonFri() {
+  const mon = storeHours.byDow[1];
+  if (!mon) return;
+  for (let d = 2; d <= 5; d++) storeHours.byDow[d] = { open: mon.open, close: mon.close };
+  persistStoreMeta();
+  renderStoreHoursPanel();
+  showToast('Applied Monday hours to Tue–Fri.', 'success');
+}
+
+function addStoreHoursOverride() {
+  const dateEl = document.getElementById('sh-ov-date');
+  const openEl = document.getElementById('sh-ov-open');
+  const closeEl = document.getElementById('sh-ov-close');
+  if (!dateEl || !openEl || !closeEl) return;
+  let dk = (dateEl.value || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dk)) {
+    showToast('Use a date like 2026-12-24.', 'warn');
+    return;
+  }
+  const open = (openEl.value || '').trim();
+  const close = (closeEl.value || '').trim();
+  if (!open || !close) {
+    showToast('Enter open and close times.', 'warn');
+    return;
+  }
+  if (!storeHours.overrides) storeHours.overrides = {};
+  storeHours.overrides[dk] = { open, close };
+  persistStoreMeta();
+  renderStoreHoursPanel();
+  showToast('Holiday override saved for ' + dk, 'success');
+}
+
+function removeStoreHoursOverride(dk) {
+  if (storeHours.overrides) delete storeHours.overrides[dk];
+  persistStoreMeta();
+  renderStoreHoursPanel();
 }
 
 function estimateShiftHours(shift) {
@@ -6142,6 +6638,9 @@ function updateReadyChecklist() {
         left === 0
           ? ' · Free builds used (edits still free)'
           : ' · ' + left + ' free build' + (left === 1 ? '' : 's') + ' left';
+    }
+    if (preferences && preferences.peakSeasonHours) {
+      line += ' · Peak hours: early open + ext close shifts';
     }
     meta.textContent = line;
   } else if (meta) {
@@ -9225,9 +9724,10 @@ function _generateScheduleInner() {
   lastGenReport = buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, finalViolations, isDkWeekend, dkToDate);
   window._lastGenReport = lastGenReport;
 
+  setScheduleResultsVisible(true);
   renderSchedule(warnings, ROLES, ALL_KC);
   renderSummary(warnings, ROLES, ALL_KC, lastGenReport);
-  setScheduleResultsVisible(true);
+  renderFairnessUnderSchedule(ROLES, ALL_KC, lastGenReport);
   const ts = document.getElementById('gen-timestamp');
   if (ts) ts.textContent = 'Generated ' + new Date().toLocaleString();
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
@@ -9246,7 +9746,9 @@ function _generateScheduleInner() {
   updateReadyChecklist();
   switchTab('schedule');
   setTimeout(() => {
-    document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const fu = document.getElementById('fairness-under-schedule');
+    if (fu && !fu.hidden) fu.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    else document.getElementById('schedule-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 50);
 }
 
@@ -10162,12 +10664,157 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
 
   // Also render the print-optimized version (unchanged)
   renderPrintSchedule(ROLES, ALL_KC);
+  updateScheduleHoursLine();
+  renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
 
   // Insight panels above summary
   const radarHost = document.getElementById('clopen-radar-host');
   if (radarHost) {
     radarHost.innerHTML = renderClopenRadar(ROLES) + renderWeekendFairnessBoard(ROLES);
   }
+}
+
+/** Compact fairness card directly under the schedule grid. */
+function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
+  const host = document.getElementById('fairness-under-schedule');
+  if (!host) return;
+  const results = document.getElementById('schedule-results');
+  const show =
+    results &&
+    results.style.display !== 'none' &&
+    schedule &&
+    Object.keys(schedule).length > 0 &&
+    currentPeriod &&
+    periodDates &&
+    periodDates.length &&
+    ROLES &&
+    ROLES.length;
+  if (!show) {
+    host.hidden = true;
+    host.innerHTML = '';
+    return;
+  }
+
+  const names = getManagerNames();
+  const allDks = periodDates.map((d) => dateKey(d));
+  const report = genReport || window._lastGenReport || null;
+  const isDayOffish = (s) => s === 'off' || s === 'rto' || isRto(s);
+  const isWeekendDk = (dk) => {
+    const parts = dk.split('-');
+    const dow = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getDay();
+    return dow === 0 || dow === 6;
+  };
+
+  const rows = ROLES.map((r) => {
+    let we = 0, opens = 0, mids = 0, closes = 0, clopens = 0;
+    if (report) {
+      we = report.weekendOffs[r] || 0;
+      opens = report.opens[r] || 0;
+      mids = report.mids[r] || 0;
+      closes = report.closes[r] || 0;
+      clopens = report.clopens[r] || 0;
+    } else {
+      allDks.forEach((dk, i) => {
+        const s = schedule[r] && schedule[r][dk];
+        if (isWeekendDk(dk) && isDayOffish(s)) we++;
+        if (isOpen(s)) opens++;
+        if (isMid(s)) mids++;
+        if (isClose(s)) closes++;
+        if (i > 0 && isClose(schedule[r][allDks[i - 1]]) && isOpen(s)) clopens++;
+      });
+    }
+    return { role: r, name: names[r] || r, we, opens, mids, closes, clopens };
+  });
+
+  // Peer spread among AMs (and manager-coverage KCs); SM excluded from peer min/max
+  const peers = rows.filter((row) => row.role !== 'sm');
+  const peerPool = peers.length ? peers : rows;
+  const weVals = peerPool.map((r) => r.we);
+  const closeVals = peerPool.map((r) => r.closes);
+  const weMin = Math.min(...weVals);
+  const weMax = Math.max(...weVals);
+  const cMin = Math.min(...closeVals);
+  const cMax = Math.max(...closeVals);
+  const weSpread = weMax - weMin;
+  const cSpread = cMax - cMin;
+
+  // Coverage: every day has ≥1 open and ≥1 close (managers + non-mgr KC closes)
+  let coverOk = true;
+  let missDays = 0;
+  allDks.forEach((dk) => {
+    let opens = 0, closes = 0;
+    ROLES.forEach((r) => {
+      const s = schedule[r] && schedule[r][dk];
+      if (isOpen(s)) opens++;
+      if (isClose(s)) closes++;
+    });
+    (ALL_KC || []).forEach((kc) => {
+      if (ROLES.includes(kc.id)) return;
+      const s = schedule[kc.id] && schedule[kc.id][dk];
+      if (s === 'kc-close' || isClose(s)) closes++;
+      if (isOpen(s)) opens++;
+    });
+    if (opens < 1 || closes < 1) {
+      coverOk = false;
+      missDays++;
+    }
+  });
+
+  rows.forEach((row) => {
+    const notes = [];
+    const inPeer = peerPool.some((p) => p.role === row.role);
+    if (inPeer && weSpread >= 2 && (row.we === weMin || row.we === weMax) && weMin !== weMax) {
+      notes.push(row.we === weMin ? 'low WE offs' : 'high WE offs');
+    }
+    if (inPeer && cSpread >= 3 && (row.closes === cMin || row.closes === cMax) && cMin !== cMax) {
+      notes.push(row.closes === cMax ? 'more closes' : 'fewer closes');
+    }
+    if (row.clopens > 0) notes.push(row.clopens + ' clopen' + (row.clopens === 1 ? '' : 's'));
+    row.flag = notes.length > 0;
+    row.note = notes.join(' · ');
+  });
+
+  let html = '<div class="fu-head">';
+  html += '<span class="fu-title">Fairness at a glance</span>';
+  html +=
+    '<span class="fu-meta">AM peers · WE offs ' +
+    weMin +
+    '–' +
+    weMax +
+    ' · Closes ' +
+    cMin +
+    '–' +
+    cMax +
+    '</span>';
+  html += coverOk
+    ? '<span class="fu-cover ok">All days open+close ✓</span>'
+    : '<span class="fu-cover warn">' + missDays + ' day(s) missing open/close</span>';
+  html += '</div>';
+  html +=
+    '<table><thead><tr><th>Name</th><th>WE offs</th><th>Closes</th><th>Opens</th><th>Mids</th><th>Clopens</th><th></th></tr></thead><tbody>';
+  rows.forEach((row) => {
+    html +=
+      '<tr class="' +
+      (row.flag ? 'fu-flag' : '') +
+      '"><td class="fu-name">' +
+      esc(row.name) +
+      '</td><td>' +
+      row.we +
+      '</td><td>' +
+      row.closes +
+      '</td><td>' +
+      row.opens +
+      '</td><td>' +
+      row.mids +
+      '</td><td>' +
+      row.clopens +
+      '</td><td class="fu-note">' +
+      esc(row.note) +
+      '</td></tr>';
+  });
+  html += '</tbody></table>';
+  host.innerHTML = html;
+  host.hidden = false;
 }
 
 function isCellLocked(role, dk) {
@@ -10544,6 +11191,10 @@ function renderPrintSchedule(ROLES, ALL_KC) {
   html += 'Period ' + p.number + ' · FY' + fiscalYear + ' · ' + esc(p.approxMonth);
   html += ' · ' + formatDate(p.start) + ' – ' + formatDate(p.end);
   html += '</div>';
+  try {
+    const sum = typeof summarizeStoreHours === 'function' ? summarizeStoreHours() : '';
+    if (sum) html += '<div class="print-hours-line">Store hours · ' + esc(sum) + '</div>';
+  } catch (e) {}
   html += '</div>';
 
   // Color legend
@@ -11071,6 +11722,13 @@ function clearSchedule() {
   schedule = {};
   window._lastGenReport = null;
   setScheduleResultsVisible(false);
+  const fu = document.getElementById('fairness-under-schedule');
+  if (fu) {
+    fu.hidden = true;
+    fu.innerHTML = '';
+  }
+  const hoursLine = document.getElementById('schedule-hours-line');
+  if (hoursLine) hoursLine.textContent = '';
   const ts = document.getElementById('gen-timestamp');
   if (ts) ts.textContent = '';
   updateReadyChecklist();
@@ -11101,6 +11759,7 @@ function saveToStorage() {
     kcList: kcList,
     storeNumber: document.getElementById('store-number').value || '',
     storeName: (document.getElementById('store-name') || {}).value || '',
+    storeHours: storeHours,
     names: {
       sm: document.getElementById('name-sm').value,
       ...amNames
@@ -11153,6 +11812,11 @@ function loadFromStorage() {
   }
   if (data.storeName !== undefined && document.getElementById('store-name')) {
     document.getElementById('store-name').value = data.storeName;
+  }
+  if (data.storeHours) {
+    applyStoreHoursObject(data.storeHours);
+    updateStoreHoursSummary();
+    if (storeHoursPanelOpen) renderStoreHoursPanel();
   }
 
   // Rebuild UI rows
@@ -11212,9 +11876,10 @@ function loadFromStorage() {
   if (Object.keys(schedule).length > 0 && Object.keys(schedule.sm || {}).length > 0) {
     const ROLES = getRoles();
     const ALL_KC = getAllWithKC();
+    setScheduleResultsVisible(true);
     renderSchedule([], ROLES, ALL_KC);
     renderSummary([], ROLES, ALL_KC);
-    setScheduleResultsVisible(true);
+    renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
     switchTab('schedule');
   }
 
@@ -11687,9 +12352,10 @@ function loadSavedSchedule(key) {
   if (Object.keys(schedule).length > 0 && Object.keys(schedule.sm || {}).length > 0) {
     const ROLES = getRoles();
     const ALL_KC = getAllWithKC();
+    setScheduleResultsVisible(true);
     renderSchedule([], ROLES, ALL_KC);
     renderSummary([], ROLES, ALL_KC, window._lastGenReport || null);
-    setScheduleResultsVisible(true);
+    renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
     switchTab('schedule');
   }
 
@@ -11741,7 +12407,7 @@ function persistManagerNames() {
 function restoreManagerNames() {
   try {
     const stored = localStorage.getItem('schedule_manager_names');
-    if (!stored) return;
+    if (!stored) return false;
     const names = JSON.parse(stored);
 
     if (names.sm) {
@@ -11775,10 +12441,345 @@ function restoreManagerNames() {
       const el = document.getElementById('name-' + kc.id);
       if (el) el.value = kc.name;
     });
-
+    return true;
   } catch(e) {
     console.warn('Could not restore manager names:', e);
+    return false;
   }
+}
+
+// ════════════════════════════════════════════════════
+// TEAM TEMPLATES — reuse the same roster next period
+// ════════════════════════════════════════════════════
+const MSB_TEAM_TEMPLATES_KEY = 'msb_team_templates';
+const MSB_TEAM_TEMPLATE_LAST = 'msb_team_template_last';
+
+function listTeamTemplates() {
+  try {
+    const raw = localStorage.getItem(MSB_TEAM_TEMPLATES_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeTeamTemplates(list) {
+  try {
+    localStorage.setItem(MSB_TEAM_TEMPLATES_KEY, JSON.stringify(list));
+  } catch (e) {
+    showToast('Could not save team templates (storage full?).', 'error');
+  }
+}
+
+function snapshotCurrentTeamTemplate(name) {
+  const amNames = {};
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    amNames['am' + i] = el ? el.value : 'AM' + i;
+  }
+  kcList.forEach((kc) => {
+    const el = document.getElementById('name-' + kc.id);
+    if (el) kc.name = el.value;
+  });
+  try {
+    if (typeof readPreferencesFromUI === 'function') readPreferencesFromUI();
+  } catch (e) {}
+  return {
+    id: 'tt_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7),
+    name: name,
+    savedAt: new Date().toISOString(),
+    storeName: (document.getElementById('store-name') || {}).value || '',
+    storeNumber: (document.getElementById('store-number') || {}).value || '',
+    amCount: amCount,
+    names: {
+      sm: (document.getElementById('name-sm') || {}).value || 'Store Manager',
+      ...amNames
+    },
+    kcList: kcList.map((kc) => ({
+      id: kc.id,
+      name: kc.name,
+      asManager: !!kc.asManager,
+      midDows: normalizeKcMidDows(kc.midDows)
+    })),
+    preferences: JSON.parse(JSON.stringify(preferences || DEFAULT_PREFERENCES)),
+    storeHours: JSON.parse(JSON.stringify(storeHours))
+  };
+}
+
+function saveTeamTemplate() {
+  const storeDefault = ((document.getElementById('store-name') || {}).value || '').trim();
+  const name = (prompt('Name this team template:', storeDefault || 'My team') || '').trim();
+  if (!name) return;
+  const tpl = snapshotCurrentTeamTemplate(name);
+  const list = listTeamTemplates();
+  list.unshift(tpl);
+  // Cap at 20 templates
+  while (list.length > 20) list.pop();
+  writeTeamTemplates(list);
+  try {
+    localStorage.setItem(MSB_TEAM_TEMPLATE_LAST, tpl.id);
+  } catch (e) {}
+  persistManagerNames();
+  persistStoreMeta();
+  renderTeamTemplateUI();
+  showToast('Team template saved: ' + name, 'success');
+}
+
+function loadTeamTemplate(id) {
+  const list = listTeamTemplates();
+  const tpl = list.find((t) => t.id === id);
+  if (!tpl) {
+    showToast('Template not found.', 'warn');
+    return false;
+  }
+  amCount = Math.max(1, parseInt(tpl.amCount, 10) || 2);
+  kcList = (tpl.kcList || []).map((kc) => ({
+    id: kc.id,
+    name: kc.name,
+    asManager: !!kc.asManager,
+    midDows: normalizeKcMidDows(kc.midDows)
+  }));
+  if (!kcList.length) kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
+  renderAMRows();
+  renderKCRows();
+  const sn = document.getElementById('store-name');
+  const num = document.getElementById('store-number');
+  if (sn && tpl.storeName != null) sn.value = tpl.storeName;
+  if (num && tpl.storeNumber != null) num.value = tpl.storeNumber;
+  if (tpl.names) {
+    const sm = document.getElementById('name-sm');
+    if (sm && tpl.names.sm) sm.value = tpl.names.sm;
+    for (let i = 1; i <= amCount; i++) {
+      const el = document.getElementById('name-am' + i);
+      if (el && tpl.names['am' + i]) el.value = tpl.names['am' + i];
+    }
+  }
+  kcList.forEach((kc) => {
+    const el = document.getElementById('name-' + kc.id);
+    if (el) el.value = kc.name;
+  });
+  if (tpl.storeHours) {
+    applyStoreHoursObject(tpl.storeHours);
+    updateStoreHoursSummary();
+    if (storeHoursPanelOpen) renderStoreHoursPanel();
+  }
+  if (tpl.preferences) {
+    preferences = Object.assign({}, DEFAULT_PREFERENCES, tpl.preferences);
+    preferences.kcCloseDays = normalizeKcCloseDays(preferences.kcCloseDays);
+    try {
+      renderPreferencesUI();
+    } catch (e) {}
+  }
+  persistManagerNames();
+  persistStoreMeta();
+  try {
+    localStorage.setItem(MSB_TEAM_TEMPLATE_LAST, tpl.id);
+  } catch (e) {}
+  renderTeamTemplateUI();
+  buildInputTabs();
+  buildInputCalendar(activeTab);
+  updateReadyChecklist();
+  showToast('Loaded team: ' + (tpl.name || 'template'), 'success');
+  return true;
+}
+
+function deleteTeamTemplate(id) {
+  if (!id) return;
+  const list = listTeamTemplates();
+  const tpl = list.find((t) => t.id === id);
+  if (!tpl) return;
+  if (!confirm('Delete team template "' + (tpl.name || id) + '"?')) return;
+  const next = list.filter((t) => t.id !== id);
+  writeTeamTemplates(next);
+  try {
+    if (localStorage.getItem(MSB_TEAM_TEMPLATE_LAST) === id) localStorage.removeItem(MSB_TEAM_TEMPLATE_LAST);
+  } catch (e) {}
+  renderTeamTemplateUI();
+  showToast('Team template deleted.', 'info');
+}
+
+function loadSelectedTeamTemplate() {
+  const sel = document.getElementById('team-template-select');
+  if (!sel || !sel.value) {
+    showToast('Pick a team template first.', 'warn');
+    return;
+  }
+  loadTeamTemplate(sel.value);
+}
+
+function deleteSelectedTeamTemplate() {
+  const sel = document.getElementById('team-template-select');
+  if (!sel || !sel.value) {
+    showToast('Pick a team template first.', 'warn');
+    return;
+  }
+  deleteTeamTemplate(sel.value);
+}
+
+function renderTeamTemplateUI() {
+  const sel = document.getElementById('team-template-select');
+  if (!sel) return;
+  const list = listTeamTemplates();
+  let last = '';
+  try {
+    last = localStorage.getItem(MSB_TEAM_TEMPLATE_LAST) || '';
+  } catch (e) {}
+  const cur = sel.value || last;
+  sel.innerHTML = '';
+  if (!list.length) {
+    const o = document.createElement('option');
+    o.value = '';
+    o.textContent = 'No saved teams yet';
+    sel.appendChild(o);
+    return;
+  }
+  list.forEach((t) => {
+    const o = document.createElement('option');
+    o.value = t.id;
+    const when = t.savedAt ? new Date(t.savedAt).toLocaleDateString() : '';
+    o.textContent = (t.name || 'Team') + (when ? ' · ' + when : '');
+    sel.appendChild(o);
+  });
+  if (cur && list.some((t) => t.id === cur)) sel.value = cur;
+}
+
+function restoreLastTeamTemplateIfNeeded(hadNames) {
+  if (hadNames) return;
+  try {
+    const last = localStorage.getItem(MSB_TEAM_TEMPLATE_LAST);
+    if (!last) return;
+    const list = listTeamTemplates();
+    if (list.some((t) => t.id === last)) loadTeamTemplate(last);
+  } catch (e) {}
+}
+
+// ════════════════════════════════════════════════════
+// ONBOARDING TOUR (lightweight, no deps)
+// ════════════════════════════════════════════════════
+const MSB_TOUR_DONE = 'msb_tour_done';
+let tourStepIndex = 0;
+const TOUR_STEPS = [
+  {
+    tab: 'setup',
+    highlight: 'tab-setup',
+    title: 'Welcome to Schedule Pro',
+    body: 'Build fair manager schedules fully offline. Use the tabs to set up your team, lock requests, tune rules, then generate. Continue offline is already available on the sign-in screen.'
+  },
+  {
+    tab: 'setup',
+    highlight: 'setup-team',
+    title: 'Setup — team & store',
+    body: 'Enter SM / AM / KC names, store name & number, and store hours. Save a Team template so next period you load the roster in one tap. Load a fiscal period before generating.'
+  },
+  {
+    tab: 'requests',
+    highlight: 'tab-requests',
+    title: 'Requests — RTO / PTO / LOA',
+    body: 'Lock time off and preferred shifts here. The generator treats these as hard constraints and builds around them.'
+  },
+  {
+    tab: 'rules',
+    highlight: 'tab-rules',
+    title: 'Rules — preferences',
+    body: 'Tune weekend fairness, clopen avoidance, peak season, and KC close nights. Soft goals yield to hard coverage.'
+  },
+  {
+    tab: 'schedule',
+    highlight: 'btn-generate',
+    title: 'Schedule — build & fairness',
+    body: 'Hit Build this period. A Fairness at a glance card appears under the grid so you can spot uneven WE offs or closes before posting.'
+  }
+];
+
+function isTourDone() {
+  try {
+    return localStorage.getItem(MSB_TOUR_DONE) === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
+function setTourDone() {
+  try {
+    localStorage.setItem(MSB_TOUR_DONE, '1');
+  } catch (e) {}
+}
+
+function clearTourHighlights() {
+  document.querySelectorAll('[data-tour-highlight="1"]').forEach((el) => {
+    el.removeAttribute('data-tour-highlight');
+  });
+}
+
+function applyTourStep(idx) {
+  const step = TOUR_STEPS[idx];
+  if (!step) return;
+  tourStepIndex = idx;
+  if (step.tab) switchTab(step.tab);
+  clearTourHighlights();
+  if (step.highlight) {
+    const el = document.querySelector('[data-tour="' + step.highlight + '"]');
+    if (el) {
+      el.setAttribute('data-tour-highlight', '1');
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (e) {}
+    }
+  }
+  const root = document.getElementById('onboarding-tour');
+  const title = document.getElementById('tour-title');
+  const body = document.getElementById('tour-body');
+  const num = document.getElementById('tour-step-num');
+  const back = document.getElementById('tour-back-btn');
+  const next = document.getElementById('tour-next-btn');
+  if (title) title.textContent = step.title;
+  if (body) body.textContent = step.body;
+  if (num) num.textContent = 'Step ' + (idx + 1) + ' of ' + TOUR_STEPS.length;
+  if (back) back.style.display = idx === 0 ? 'none' : '';
+  if (next) next.textContent = idx >= TOUR_STEPS.length - 1 ? 'Done' : 'Next';
+  if (root) root.removeAttribute('hidden');
+}
+
+function startOnboardingTour(force) {
+  if (!force && isTourDone()) return;
+  // Don't start while auth shell is locked
+  if (document.documentElement.classList.contains('auth-locked')) return;
+  applyTourStep(0);
+}
+
+function tourNext() {
+  if (tourStepIndex >= TOUR_STEPS.length - 1) {
+    endOnboardingTour(true);
+    return;
+  }
+  applyTourStep(tourStepIndex + 1);
+}
+
+function tourBack() {
+  if (tourStepIndex <= 0) return;
+  applyTourStep(tourStepIndex - 1);
+}
+
+function skipOnboardingTour() {
+  endOnboardingTour(true);
+}
+
+function endOnboardingTour(markDone) {
+  const root = document.getElementById('onboarding-tour');
+  if (root) root.setAttribute('hidden', '');
+  clearTourHighlights();
+  if (markDone) setTourDone();
+}
+
+function maybeAutoStartTour() {
+  if (isTourDone()) return;
+  if (document.documentElement.classList.contains('auth-locked')) return;
+  setTimeout(() => {
+    if (isTourDone()) return;
+    if (document.documentElement.classList.contains('auth-locked')) return;
+    startOnboardingTour(false);
+  }, 900);
 }
 
 
@@ -12002,9 +13003,12 @@ document.addEventListener('click', (e) => {
   });
 });
 
-restoreManagerNames();
+const _hadRestoredNames = !!restoreManagerNames();
+restoreLastTeamTemplateIfNeeded(_hadRestoredNames);
 restoreStoreMeta();
 restoreWelcomeState();
+renderTeamTemplateUI();
+updateStoreHoursSummary();
 renderPreferencesUI();
 renderRoleRulesUI();
 updateScheduleViewToggleUI();
@@ -12014,6 +13018,7 @@ buildInputCalendar(activeTab);
 updateReadyChecklist();
 updateLicenseBadge();
 updateAccountChip();
+maybeAutoStartTour();
 // Keep checklist fresh when period/names change
 const _pickPeriod = document.getElementById('pick-period');
 if (_pickPeriod) _pickPeriod.addEventListener('change', () => setTimeout(updateReadyChecklist, 50));

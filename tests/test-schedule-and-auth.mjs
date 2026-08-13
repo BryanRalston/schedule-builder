@@ -65,10 +65,19 @@ async function setupPage(browser, base) {
     try {
       localStorage.clear();
       sessionStorage.clear();
+      // Don't auto-open onboarding tour during automated UI tests
+      localStorage.setItem('msb_tour_done', '1');
     } catch (e) {}
   });
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(800);
+  // Ensure tour overlay is closed if it still appeared
+  await page.evaluate(() => {
+    try {
+      if (typeof endOnboardingTour === 'function') endOnboardingTour(true);
+      localStorage.setItem('msb_tour_done', '1');
+    } catch (e) {}
+  });
   return page;
 }
 

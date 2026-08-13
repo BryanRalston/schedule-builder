@@ -13,7 +13,7 @@ powershell -File scripts/publish-staging.ps1
 
 ## Isolation
 - localStorage keys use `msb_stg_*` (production uses `msb_*`)
-- Service worker cache: `msb-pro-staging-v2.5.6`
+- Service worker cache: `msb-pro-staging-v2.5.7`
 - Separate PWA identity / branding: Schedule Pro (Staging)
 - `noindex,nofollow` - not for public discovery
 
@@ -23,4 +23,4 @@ powershell -File scripts/serve-staging.ps1
 ```
 Then open http://localhost:5174/
 
-Generated from app version **2.5.6** on 2026-08-13 11:28:22.
+Generated from app version **2.5.7** on 2026-08-13 12:03:29.

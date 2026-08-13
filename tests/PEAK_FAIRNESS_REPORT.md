@@ -1,7 +1,7 @@
 # Peak / Coverage / Fairness Report
 
-**Version:** 2.5.6
-**Generated:** 2026-08-13T15:28:13.997Z
+**Version:** 2.5.7
+**Generated:** 2026-08-13T16:03:38.918Z
 
 ## Summary
 

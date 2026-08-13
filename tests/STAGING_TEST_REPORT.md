@@ -1,7 +1,7 @@
 # Staging Full Test Report
 
-Generated: 2026-08-13T11:43:41.920Z
-Base: `http://127.0.0.1:56086` (local-staging-static)
+Generated: 2026-08-13T13:49:54.716Z
+Base: `http://127.0.0.1:60096` (local-staging-static)
 Staging path: `C:\Users\bryma\schedule-builder\staging`
 
 ## Summary

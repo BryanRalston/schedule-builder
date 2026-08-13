@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-13T11:43:41.920Z",
-  "base": "http://127.0.0.1:56086",
+  "generatedAt": "2026-08-13T13:49:54.716Z",
+  "base": "http://127.0.0.1:60096",
   "mode": "local-staging-static",
   "stagingPath": "C:\\Users\\bryma\\schedule-builder\\staging",
   "summary": {
@@ -112,7 +112,7 @@
       "section": "0. Isolation / staging identity",
       "name": "version-shows-staging",
       "ok": true,
-      "detail": "v2.5.2-staging",
+      "detail": "v2.5.3-staging",
       "severity": null
     },
     {
@@ -126,7 +126,7 @@
       "section": "0. Isolation / staging identity",
       "name": "sw-cache-staging-name",
       "ok": true,
-      "detail": "msb-pro-staging-v2.5.2",
+      "detail": "msb-pro-staging-v2.5.3",
       "severity": null
     },
     {
@@ -168,21 +168,21 @@
       "section": "1. Engine (in-page generate)",
       "name": "dual-am-pto-midweek",
       "ok": true,
-      "detail": "days=35 clopens=1 clopens=1 (allowed under dual PTO)",
+      "detail": "days=35 clopens=0 clopens=0 (allowed under dual PTO)",
       "severity": null
     },
     {
       "section": "1. Engine (in-page generate)",
       "name": "aggressive-weekend-target-short-staff",
       "ok": true,
-      "detail": "days=35 clopens=6 clopens=6",
+      "detail": "days=35 clopens=0 clopens=0",
       "severity": null
     },
     {
       "section": "1. Engine (in-page generate)",
       "name": "kc-close-monday-coverage",
       "ok": true,
-      "detail": "days=35 clopens=1 clopens=1",
+      "detail": "days=35 clopens=0 clopens=0",
       "severity": null
     },
     {
@@ -196,7 +196,7 @@
       "section": "1. Engine (in-page generate)",
       "name": "kc-mid-gap-fill",
       "ok": true,
-      "detail": "generate ok days=35 kcMids=30 clopens=1",
+      "detail": "generate ok days=35 kcMids=30 clopens=0",
       "severity": null
     },
     {
@@ -469,21 +469,21 @@
       "section": "6. Schedule generate UI",
       "name": "view-mode-month",
       "ok": true,
-      "detail": "len=1929 mode=month",
+      "detail": "len=2235 mode=month",
       "severity": null
     },
     {
       "section": "6. Schedule generate UI",
       "name": "view-mode-week",
       "ok": true,
-      "detail": "len=1932 mode=week",
+      "detail": "len=2100 mode=week",
       "severity": null
     },
     {
       "section": "6. Schedule generate UI",
       "name": "view-mode-day",
       "ok": true,
-      "detail": "len=4459 mode=day",
+      "detail": "len=4603 mode=day",
       "severity": null
     },
     {
@@ -560,7 +560,7 @@
       "section": "8. Auth full path (staging keys)",
       "name": "work-email-create-workspace",
       "ok": true,
-      "detail": "bryan.stg+1786621390246@ralston.local",
+      "detail": "bryan.stg+1786628963042@ralston.local",
       "severity": null
     },
     {

@@ -358,6 +358,30 @@ input[type="radio"] { accent-color: var(--gold); }
   height: 16px;
   cursor: pointer;
 }
+.kc-mid-days {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.45rem;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding-left: 0.15rem;
+  font-size: 0.68rem;
+  color: var(--ink-4);
+}
+.kc-mid-days .kc-mid-label { font-weight: 600; margin-right: 0.15rem; color: var(--ink-3); }
+.kc-mid-days label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.kc-mid-days input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+}
 
 .period-picker { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
 .period-picker select, .period-picker input[type="number"] {
@@ -3645,7 +3669,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.2-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.3-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3839,7 +3863,7 @@ function restoreAppTab() {
 // ── Dynamic Configuration State ──
 // Free: unlimited managers; limited free schedule builds (see freeGenerateLimit)
 let amCount = 2;
-let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
+let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
 
 // ── Monetization / Pro license (offline-first; soft gate) ──
 const MSB_LICENSE_KEY = 'msb_stg_pro_license';
@@ -5259,7 +5283,11 @@ const DEFAULT_PREFERENCES = {
   smClosesPerWeek: 1, // Store Manager target closes per week (manager-close nights only)
   amClosesPerWeek: null, // null = auto fair-share of remaining; number = each AM targets this many
   /** Non-manager KCs can take Mid only when no manager mid that day (gap fill). */
-  kcMidWhenNoMid: true
+  kcMidWhenNoMid: true,
+  /** Favor full Sun+Sat off package for one person when coverage allows. */
+  preferWeekendPackages: true,
+  /** SM not forced equal weekend offs with AMs (SM can sacrifice weekends). */
+  smFewerWeekendOffs: true
 };
 
 let preferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
@@ -5439,7 +5467,9 @@ function readPreferencesFromUI() {
     kcCloseDays: normalizeKcCloseDays(kcCloseDays),
     smClosesPerWeek: Number.isFinite(smCl) ? smCl : 1,
     amClosesPerWeek: (amCl == null || !Number.isFinite(amCl)) ? null : amCl,
-    kcMidWhenNoMid: g('pref-kc-mid') ? !!g('pref-kc-mid').checked : true
+    kcMidWhenNoMid: g('pref-kc-mid') ? !!g('pref-kc-mid').checked : true,
+    preferWeekendPackages: g('pref-we-packages') ? !!g('pref-we-packages').checked : true,
+    smFewerWeekendOffs: g('pref-sm-fewer-we') ? !!g('pref-sm-fewer-we').checked : true
   };
   syncCloseTargetsToRoleRules();
   return preferences;
@@ -5513,7 +5543,23 @@ function renderPreferencesUI() {
         <span class="toggle-track"></span>
         KC mid coverage when needed
       </label>
-      <div class="pref-desc">If a day has managers working but <strong>no Mid</strong>, schedule a non-manager key carrier as Mid to fill the gap only. Does not run on KC-close nights. Off by unchecking — KCs still handle close nights as configured above. Manager-coverage KCs are full managers, not used here.</div>
+      <div class="pref-desc">If a day has managers working but <strong>no Mid</strong>, schedule a non-manager key carrier as Mid to fill the gap only. Does not run on KC-close nights. Off by unchecking — KCs still handle close nights as configured above. Manager-coverage KCs are full managers, not used here. Per-KC preferred mid days (setup) still apply when set.</div>
+    </div>
+    <div class="pref-card">
+      <label class="toggle-switch">
+        <input type="checkbox" id="pref-we-packages" ${p.preferWeekendPackages !== false ? 'checked' : ''} onchange="readPreferencesFromUI()">
+        <span class="toggle-track"></span>
+        Prefer weekend packages
+      </label>
+      <div class="pref-desc">Favor full Sun+Sat off for one person when coverage allows (not just equal weekend-day counts).</div>
+    </div>
+    <div class="pref-card">
+      <label class="toggle-switch">
+        <input type="checkbox" id="pref-sm-fewer-we" ${p.smFewerWeekendOffs !== false ? 'checked' : ''} onchange="readPreferencesFromUI()">
+        <span class="toggle-track"></span>
+        SM fewer weekend offs
+      </label>
+      <div class="pref-desc">Do not force the Store Manager up to the same weekend-off count as AMs. SM can sacrifice weekends when staffing is tight.</div>
     </div>
     <div class="pref-card">
       <label class="pref-label">Store Manager closes / week
@@ -5657,7 +5703,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.2-staging';
+const APP_VERSION = '2.5.3-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -6113,8 +6159,8 @@ function loadDemoStore() {
     // Team
     amCount = 3;
     kcList = [
-      { id: 'kc1', name: 'Jordan Lee', asManager: false },
-      { id: 'kc2', name: 'Sam Rivera', asManager: false }
+      { id: 'kc1', name: 'Jordan Lee', asManager: false, midDows: [0, 2, 4, 5] },
+      { id: 'kc2', name: 'Sam Rivera', asManager: false, midDows: [3, 6] }
     ];
     renderAMRows();
     renderKCRows();
@@ -6580,11 +6626,32 @@ function renderAMRows() {
   document.getElementById('am-count-badge').textContent = amCount;
 }
 
+function normalizeKcMidDows(arr) {
+  if (!Array.isArray(arr)) return [];
+  return [...new Set(arr.map((n) => parseInt(n, 10)).filter((n) => n >= 0 && n <= 6))].sort((a, b) => a - b);
+}
+
+function toggleKcMidDow(idx, dow, checked) {
+  if (!kcList[idx]) return;
+  const set = new Set(normalizeKcMidDows(kcList[idx].midDows));
+  if (checked) set.add(dow);
+  else set.delete(dow);
+  kcList[idx].midDows = [...set].sort((a, b) => a - b);
+  persistManagerNames();
+}
+
 function renderKCRows() {
   const container = document.getElementById('kc-rows');
   let html = '';
   kcList.forEach((kc, idx) => {
-    html += `<div class="manager-row">
+    if (!Array.isArray(kc.midDows)) kc.midDows = [];
+    const midSet = new Set(normalizeKcMidDows(kc.midDows));
+    const midChecks = !kc.asManager
+      ? `<div class="kc-mid-days"><span class="kc-mid-label">Mid days</span>${DAY_NAMES.map((dn, d) =>
+          `<label><input type="checkbox" ${midSet.has(d) ? 'checked' : ''} onchange="toggleKcMidDow(${idx}, ${d}, this.checked)"> ${dn}</label>`
+        ).join('')}</div>`
+      : '';
+    html += `<div class="manager-row" style="flex-wrap:wrap">
       <span class="role-badge role-kc">KC${idx + 1}</span>
       <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="Key Carrier ${idx + 1}"
         onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
@@ -6593,6 +6660,7 @@ function renderKCRows() {
           onchange="toggleKcAsManager(${idx}, this)">
         Mgr coverage
       </label>
+      ${midChecks}
     </div>`;
   });
   container.innerHTML = html;
@@ -6618,7 +6686,7 @@ function removeAM() {
 function addKC() {
   // Non-manager KCs do not consume free manager seats
   const num = kcList.length + 1;
-  kcList.push({ id: 'kc' + num, name: 'Key Carrier ' + num, asManager: false });
+  kcList.push({ id: 'kc' + num, name: 'Key Carrier ' + num, asManager: false, midDows: [] });
   renderKCRows();
   rebuildAfterConfigChange();
 }
@@ -7679,9 +7747,24 @@ function _generateScheduleInner() {
     }
   });
 
-  // Non-manager KC mid fill (optional, gap-only)
-  // 1) Always: critically understaffed days (< 2 managers working)
-  // 2) If PREFS.kcMidWhenNoMid: days with managers but zero mids (fill mid gap only)
+  // Non-manager KC mid fill
+  // A) Template pass first: preferred midDows per KC (intentional recurring mids)
+  // B) Gap-fill: critically understaffed + kcMidWhenNoMid zero mids
+  for (const kc of nonMgrKCs) {
+    if (!schedule[kc.id]) schedule[kc.id] = {};
+    const preferred = normalizeKcMidDows(kc.midDows);
+    if (!preferred.length) continue;
+    allDks.forEach(dk => {
+      const dow = dkToDate(dk).getDay();
+      if (!preferred.includes(dow)) return;
+      const cur = schedule[kc.id][dk];
+      if (cur && cur !== 'off') return; // already has shift (incl. kc-close)
+      if (isInputLocked(kc.id, dk)) return;
+      // On KC close nights this KC may already hold kc-close; skip any existing work above
+      schedule[kc.id][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+      midVariety++;
+    });
+  }
   allDks.forEach(dk => {
     if (isKcCloseNight(dk)) return; // KC already handling close nights separately
     const mgrWorking = dayWorkCount(dk);
@@ -7705,23 +7788,34 @@ function _generateScheduleInner() {
   });
 
   // ════════════════════════════════════════════════════
-  // STEP 5b: BALANCE WEEKEND OFFS across all managers
-  // For managers with too many weekend offs, swap a weekend off for a weekday off.
-  // For managers with too few, swap a weekday off for a weekend off.
-  // Repeat until all managers are within 1 of each other.
+  // STEP 5b: BALANCE WEEKEND OFFS across managers
+  // When smFewerWeekendOffs: equalize among non-SM only (SM may keep fewer offs).
+  // SM can still be "over" and give weekend offs away.
   // ════════════════════════════════════════════════════
+
+  const weFairPool = (PREFS.smFewerWeekendOffs !== false && ROLES.filter(r => r !== 'sm').length >= 2)
+    ? ROLES.filter(r => r !== 'sm')
+    : ROLES.slice();
+
+  const countWeOffSoft = (r) => allDks.filter(dk =>
+    isDkWeekend(dk) && (schedule[r][dk] === 'off' || schedule[r][dk] === 'rto')
+  ).length;
 
   for (let balancePass = 0; balancePass < 20; balancePass++) {
     const weOffs = {};
-    ROLES.forEach(r => {
-      weOffs[r] = allDks.filter(dk => schedule[r][dk] === 'off' && isDkWeekend(dk)).length;
-    });
-    const maxWe = Math.max(...Object.values(weOffs));
-    const minWe = Math.min(...Object.values(weOffs));
-    if (maxWe - minWe <= 1) break;
+    ROLES.forEach(r => { weOffs[r] = countWeOffSoft(r); });
+    const fairVals = weFairPool.map(r => weOffs[r]);
+    const maxWe = Math.max(...fairVals);
+    const minWe = Math.min(...fairVals);
+    // Also consider SM as over if they have more than AMs (can sacrifice downward)
+    const smWe = weOffs.sm != null ? weOffs.sm : 0;
+    if (maxWe - minWe <= 1 && !(PREFS.smFewerWeekendOffs !== false && smWe > maxWe)) break;
 
-    // Pick the manager with the most weekend offs
-    const over = ROLES.find(r => weOffs[r] === maxWe);
+    // Prefer non-SM over first; allow SM if they exceed fair max
+    let over = weFairPool.find(r => weOffs[r] === maxWe && weOffs[r] > minWe);
+    if (!over && PREFS.smFewerWeekendOffs !== false && ROLES.includes('sm') && smWe > maxWe) {
+      over = 'sm';
+    }
     if (!over) break;
 
     // Find a weekend off day we can move to a weekday
@@ -7769,17 +7863,17 @@ function _generateScheduleInner() {
     if (!didSwap) break;
   }
 
-  // STEP 5c: Give under-managers MORE weekend offs
+  // STEP 5c: Give under-managers MORE weekend offs (prefer non-SM when smFewerWeekendOffs)
   for (let balancePass = 0; balancePass < 20; balancePass++) {
     const weOffs = {};
-    ROLES.forEach(r => {
-      weOffs[r] = allDks.filter(dk => schedule[r][dk] === 'off' && isDkWeekend(dk)).length;
-    });
-    const maxWe = Math.max(...Object.values(weOffs));
-    const minWe = Math.min(...Object.values(weOffs));
+    weFairPool.forEach(r => { weOffs[r] = countWeOffSoft(r); });
+    const vals = Object.values(weOffs);
+    if (!vals.length) break;
+    const maxWe = Math.max(...vals);
+    const minWe = Math.min(...vals);
     if (maxWe - minWe <= 1) break;
 
-    const under = ROLES.find(r => weOffs[r] === minWe);
+    const under = weFairPool.find(r => weOffs[r] === minWe);
     if (!under) break;
 
     const myWeekdayOffs = allDks.filter(dk =>
@@ -7819,6 +7913,130 @@ function _generateScheduleInner() {
       }
     }
     if (!didSwap) break;
+  }
+
+  // STEP 5c2: Weekend packages — prefer one manager has BOTH Sun+Sat off
+  if (PREFS.preferWeekendPackages !== false) {
+    const isSoftOff = (s) => s === 'off' || s === 'rto';
+    const dayHasOpenClose = (dk) => {
+      let opens = 0, closes = 0;
+      ROLES.forEach((r) => {
+        const s = schedule[r][dk];
+        if (isOpen(s)) opens++;
+        if (isClose(s)) closes++;
+      });
+      if (isKcCloseNight(dk)) {
+        nonMgrKCs.forEach((kc) => {
+          if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
+        });
+      }
+      return opens >= 1 && closes >= 1;
+    };
+    const wouldClopen = (r, dk, newShift) => {
+      if (!PREFS.avoidClopening) return false;
+      const idx = allDks.indexOf(dk);
+      const prev = idx > 0 ? allDks[idx - 1] : null;
+      const next = idx < allDks.length - 1 ? allDks[idx + 1] : null;
+      if (prev && isClose(schedule[r][prev]) && isOpen(newShift)) return true;
+      if (next && isClose(newShift) && isOpen(schedule[r][next])) return true;
+      return false;
+    };
+    for (let pkgPass = 0; pkgPass < 15; pkgPass++) {
+      let didPkg = false;
+      for (let w = 0; w < numWeeks; w++) {
+        const weekDks = getWeekDks(w);
+        const sunDk = weekDks.find((dk) => dkToDate(dk).getDay() === 0);
+        const satDk = weekDks.find((dk) => dkToDate(dk).getDay() === 6);
+        if (!sunDk || !satDk) continue;
+        // Already have a full package (prefer non-SM)?
+        const hasPackage = ROLES.some((r) => isSoftOff(schedule[r][sunDk]) && isSoftOff(schedule[r][satDk]));
+        if (hasPackage) continue;
+
+        // Find A: sun off, sat work (open/mid not close); B: sat off, sun work
+        const candidatesA = ROLES.filter((r) => {
+          if (!isSoftOff(schedule[r][sunDk])) return false;
+          if (isInputLocked(r, sunDk)) return false; // sun is already off lock ok; need sat free
+          const satS = schedule[r][satDk];
+          if (!isWork(satS) || isClose(satS)) return false;
+          if (isInputLocked(r, satDk)) return false;
+          return true;
+        });
+        // Prefer non-SM first for the package recipient
+        candidatesA.sort((a, b) => (a === 'sm' ? 1 : 0) - (b === 'sm' ? 1 : 0));
+
+        for (const personA of candidatesA) {
+          const candidatesB = ROLES.filter((r) => {
+            if (r === personA) return false;
+            if (!isSoftOff(schedule[r][satDk])) return false;
+            const sunS = schedule[r][sunDk];
+            if (!isWork(sunS) || isClose(sunS)) return false;
+            if (isInputLocked(r, sunDk) || isInputLocked(r, satDk)) return false;
+            return true;
+          });
+          for (const personB of candidatesB) {
+            // Swap work days: A takes B's sun work onto sat? Wait:
+            // A has sun off, sat work. B has sat off, sun work.
+            // Want A: sun off + sat off → A gives sat work to B, B gives sun work to A? That would make A work sun and off sat — wrong.
+            // Correct: swap so A gets B's sat off and B gets A's sat work... 
+            // A: sun=off, sat=workSA. B: sun=workSB, sat=off.
+            // After package for A: A sun=off, A sat=off; B sun=workSA?, B sat=workSB?
+            // So: move A's sat shift to B's sat, move B's sun shift to... B needs to work one of them.
+            // Simplest swap of the two work shifts onto the two people for the opposite days:
+            // A.sat <-> B.sun is wrong orientation.
+            // Want: A.sat = off (from B.sat), B.sat = A.sat work, and B.sun stays work or we move B.sun to... 
+            // Actually: swap A and B on sat only? Then A: sun off, sat off (from B); B: sun work, sat work (from A). B works full weekend.
+            // Or swap on sun only: A: sun work (from B), sat work; B: sun off, sat off — package for B.
+            // Task: "swap the work days so A gets full package"
+            // A already has sun off. Need A sat off and B to take A's sat work.
+            // B has sat off and sun work. After: B takes sat work from A; B keeps or moves sun work.
+            // If only swap sat: A gets off on sat (package), B works both sun and sat — may be ok if coverage allows.
+            const aSatShift = schedule[personA][satDk];
+            // personA sat -> off; personB sat -> aSatShift (A keeps sun off → full package)
+            if (wouldClopen(personB, satDk, aSatShift)) continue;
+            // Apply swap on sat
+            schedule[personA][satDk] = 'off';
+            schedule[personB][satDk] = aSatShift;
+            // If dual-close risk or missing coverage, ensureHard will fix later; check soft
+            if (!dayHasOpenClose(satDk) || !dayHasOpenClose(sunDk)) {
+              // try promote mid on the broken day before revert
+              const fixDay = (dk) => {
+                let opens = 0, closes = 0;
+                ROLES.forEach((r) => {
+                  if (isOpen(schedule[r][dk])) opens++;
+                  if (isClose(schedule[r][dk])) closes++;
+                });
+                if (isKcCloseNight(dk)) {
+                  nonMgrKCs.forEach((kc) => {
+                    if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
+                  });
+                }
+                if (opens === 0) {
+                  const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+                  if (mid) schedule[mid][dk] = 'open-early';
+                }
+                if (closes === 0 && !isKcCloseNight(dk)) {
+                  const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+                  if (mid) schedule[mid][dk] = 'close';
+                }
+              };
+              fixDay(satDk);
+              fixDay(sunDk);
+            }
+            if (!dayHasOpenClose(satDk) || !dayHasOpenClose(sunDk)) {
+              // revert
+              schedule[personA][satDk] = aSatShift;
+              schedule[personB][satDk] = 'off';
+              continue;
+            }
+            didPkg = true;
+            break;
+          }
+          if (didPkg) break;
+        }
+        if (didPkg) break;
+      }
+      if (!didPkg) break;
+    }
   }
 
   // ════════════════════════════════════════════════════
@@ -8214,6 +8432,249 @@ function _generateScheduleInner() {
       }
       ensureHardDailyCoverage();
     }
+  }
+
+  // ════════════════════════════════════════════════════
+  // STEP 7b: Period-level close rebalance among AMs (not SM equality)
+  // Equalize period + weekly close counts after coverage is solid.
+  // ════════════════════════════════════════════════════
+  const rebalanceClosesPeriodLevel = () => {
+    let pool = ROLES.filter((r) => r !== 'sm');
+    if (pool.length === 0) pool = ROLES.filter((r) => r === 'sm');
+    if (pool.length < 2) return; // sole manager — skip
+
+    const countPeriodCloses = (r) =>
+      allDks.filter((dk) => isClose(schedule[r][dk]) && !isKcCloseNight(dk)).length;
+    const countWeekCloses = (r, w) =>
+      getWeekDks(w).filter((dk) => isClose(schedule[r][dk]) && !isKcCloseNight(dk)).length;
+
+    const dayOC = (dk) => {
+      let opens = 0, closes = 0;
+      ROLES.forEach((r) => {
+        if (isOpen(schedule[r][dk])) opens++;
+        if (isClose(schedule[r][dk])) closes++;
+      });
+      if (isKcCloseNight(dk)) {
+        nonMgrKCs.forEach((kc) => {
+          if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
+        });
+      }
+      return { opens, closes };
+    };
+
+    const wouldClopenOn = (r, dk, newShift) => {
+      if (!PREFS.avoidClopening) return false;
+      const idx = allDks.indexOf(dk);
+      const prev = idx > 0 ? allDks[idx - 1] : null;
+      const next = idx < allDks.length - 1 ? allDks[idx + 1] : null;
+      if (prev && isClose(schedule[r][prev]) && isOpen(newShift)) return true;
+      if (next && isClose(newShift) && isOpen(schedule[r][next])) return true;
+      return false;
+    };
+
+    /** Give under the close; over takes open/mid (or mid if over must open). */
+    const trySwapClose = (over, under, dk) => {
+      if (isKcCloseNight(dk)) return false;
+      if (!isClose(schedule[over][dk])) return false;
+      if (isInputLocked(over, dk) || isInputLocked(under, dk)) return false;
+      if (!isWork(schedule[under][dk]) || isClose(schedule[under][dk])) return false;
+      const underShift = schedule[under][dk];
+      const overShift = schedule[over][dk]; // close / close-ext
+      // Prefer under takes close
+      if (wouldClopenOn(under, dk, overShift)) return false;
+      // over takes under's open/mid — clopen if over closed yesterday and takes open
+      let newOverShift = underShift;
+      if (wouldClopenOn(over, dk, newOverShift)) {
+        // demote to mid if open would clopen
+        if (isOpen(newOverShift)) newOverShift = 'mid-early';
+        else return false;
+      }
+      // If under was sole opener, over (or someone) must open
+      if (isOpen(underShift)) {
+        const otherOpeners = ROLES.filter((rx) => rx !== under && isOpen(schedule[rx][dk])).length;
+        if (otherOpeners === 0) {
+          // over must become opener
+          newOverShift = isOpen(underShift) ? underShift : 'open-early';
+          if (wouldClopenOn(over, dk, newOverShift)) return false;
+        }
+      }
+      schedule[under][dk] = overShift;
+      schedule[over][dk] = newOverShift;
+      const oc = dayOC(dk);
+      if (oc.opens < 1 || oc.closes < 1) {
+        schedule[under][dk] = underShift;
+        schedule[over][dk] = overShift;
+        return false;
+      }
+      return true;
+    };
+
+    const tryBalancePair = (over, under, dayList) => {
+      // Prefer days where under is mid (safer) and under is off next day (good closer shape)
+      const scored = dayList.map((dk) => {
+        let score = 0;
+        if (isMid(schedule[under][dk])) score += 5;
+        if (isOpen(schedule[under][dk])) score += 2;
+        const idx = allDks.indexOf(dk);
+        const next = idx < allDks.length - 1 ? allDks[idx + 1] : null;
+        if (next && (schedule[under][next] === 'off' || schedule[under][next] === 'rto' || schedule[under][next] === 'pto' || schedule[under][next] === 'loa')) score += 4;
+        return { dk, score };
+      });
+      scored.sort((a, b) => b.score - a.score);
+      for (const { dk } of scored) {
+        if (trySwapClose(over, under, dk)) return true;
+      }
+      return false;
+    };
+
+    // Phase 1: weekly balance (capped so it cannot starve period equalizing)
+    for (let pass = 0; pass < 25; pass++) {
+      let did = false;
+      for (let w = 0; w < numWeeks; w++) {
+        const weekCl = {};
+        pool.forEach((r) => { weekCl[r] = countWeekCloses(r, w); });
+        const overs = [...pool].sort((a, b) => weekCl[b] - weekCl[a]);
+        const unders = [...pool].sort((a, b) => weekCl[a] - weekCl[b]);
+        if (weekCl[overs[0]] - weekCl[unders[0]] <= 1) continue;
+        const weekDks = getWeekDks(w);
+        outerWeek:
+        for (const over of overs) {
+          for (const under of unders) {
+            if (over === under) continue;
+            if (weekCl[over] - weekCl[under] <= 1) continue;
+            if (tryBalancePair(over, under, weekDks)) {
+              did = true;
+              break outerWeek;
+            }
+          }
+        }
+        if (did) break;
+      }
+      if (!did) break;
+    }
+
+    // Phase 2: period totals among AMs (catch-up after VAC/LOA)
+    for (let pass = 0; pass < 40; pass++) {
+      const periodCl = {};
+      pool.forEach((r) => { periodCl[r] = countPeriodCloses(r); });
+      const overs = [...pool].sort((a, b) => periodCl[b] - periodCl[a]);
+      const unders = [...pool].sort((a, b) => periodCl[a] - periodCl[b]);
+      if (periodCl[overs[0]] - periodCl[unders[0]] <= 1) break;
+      let did = false;
+      outerPeriod:
+      for (const over of overs) {
+        for (const under of unders) {
+          if (over === under) continue;
+          if (periodCl[over] - periodCl[under] <= 1) continue;
+          if (tryBalancePair(over, under, allDks)) {
+            did = true;
+            break outerPeriod;
+          }
+        }
+      }
+      if (!did) break;
+    }
+
+    // Dual-close soft reduce: non-KC night with 2+ manager closes → demote heaviest to mid
+    allDks.forEach((dk) => {
+      if (isKcCloseNight(dk)) return;
+      const closers = ROLES.filter((r) => isClose(schedule[r][dk]) && !isInputLocked(r, dk));
+      if (closers.length < 2) return;
+      closers.sort((a, b) => countPeriodCloses(b) - countPeriodCloses(a));
+      const demote = closers[0];
+      if (closers.length < 2) return;
+      schedule[demote][dk] = (midVariety % 2 === 0) ? 'mid-late' : 'mid-early';
+      midVariety++;
+      const oc = dayOC(dk);
+      if (oc.opens < 1 || oc.closes < 1) {
+        schedule[demote][dk] = 'close';
+      }
+    });
+  };
+  const lightClopenCleanup = () => {
+    if (!PREFS.avoidClopening) return;
+    for (let i = 1; i < allDks.length; i++) {
+      const dk = allDks[i];
+      const pdk = allDks[i - 1];
+      ROLES.forEach((r) => {
+        if (!isClose(schedule[r][pdk]) || !isOpen(schedule[r][dk])) return;
+        if (isInputLocked(r, dk)) return;
+        const otherOpeners = ROLES.filter((rx) => rx !== r && isOpen(schedule[rx][dk])).length;
+        if (otherOpeners >= 1) {
+          schedule[r][dk] = 'mid-early';
+          return;
+        }
+        const donor = ROLES.find(
+          (rx) =>
+            rx !== r &&
+            isMid(schedule[rx][dk]) &&
+            !isInputLocked(rx, dk) &&
+            !isClose(schedule[rx][pdk])
+        );
+        if (donor) {
+          schedule[donor][dk] = schedule[r][dk];
+          schedule[r][dk] = 'mid-early';
+          return;
+        }
+        // Prefer fixing without stealing closes from low-close people:
+        // soften yesterday close if another can cover
+        if (!isInputLocked(r, pdk) && !isKcCloseNight(pdk)) {
+          const otherClosers = ROLES.filter((rx) => rx !== r && isClose(schedule[rx][pdk])).length;
+          if (otherClosers >= 1) {
+            schedule[r][pdk] = 'mid-late';
+            return;
+          }
+          // Promote someone who already has more period closes if possible (fairness-aware)
+          const poolCl = ROLES.filter((rx) => rx !== 'sm');
+          const closeCount = (rx) =>
+            allDks.filter((d) => isClose(schedule[rx][d]) && !isKcCloseNight(d)).length;
+          const promoteCands = ROLES.filter(
+            (rx) =>
+              rx !== r &&
+              (isMid(schedule[rx][pdk]) || isOpen(schedule[rx][pdk])) &&
+              !isInputLocked(rx, pdk)
+          ).sort((a, b) => closeCount(a) - closeCount(b)); // prefer under for catch-up close
+          for (const promote of promoteCands) {
+            if (isOpen(schedule[promote][pdk])) {
+              const opensLeft = ROLES.filter((rx) => rx !== promote && isOpen(schedule[rx][pdk])).length;
+              if (opensLeft === 0) {
+                const otherMid = ROLES.find(
+                  (rx) => rx !== r && rx !== promote && isMid(schedule[rx][pdk]) && !isInputLocked(rx, pdk)
+                );
+                if (otherMid) schedule[otherMid][pdk] = 'open-early';
+                else continue;
+              }
+            }
+            schedule[promote][pdk] = 'close';
+            schedule[r][pdk] = 'mid-late';
+            return;
+          }
+        }
+        // Last resort: swap open with today's closer who didn't close yesterday
+        if (!isKcCloseNight(dk)) {
+          const swapCloser = ROLES.find(
+            (rx) =>
+              rx !== r &&
+              isClose(schedule[rx][dk]) &&
+              !isInputLocked(rx, dk) &&
+              !isClose(schedule[rx][pdk])
+          );
+          if (swapCloser) {
+            const tmp = schedule[swapCloser][dk];
+            schedule[swapCloser][dk] = schedule[r][dk];
+            schedule[r][dk] = tmp;
+          }
+        }
+      });
+    }
+  };
+
+  // Alternate rebalance + clopen fix so fairness and clopens both converge
+  for (let rb = 0; rb < 3; rb++) {
+    rebalanceClosesPeriodLevel();
+    ensureHardDailyCoverage();
+    lightClopenCleanup();
+    ensureHardDailyCoverage();
   }
 
   // ════════════════════════════════════════════════════
@@ -10124,10 +10585,15 @@ function loadFromStorage() {
     amCount = 3;
   }
   if (data.kcList !== undefined) {
-    kcList = data.kcList;
+    kcList = (data.kcList || []).map((kc) => ({
+      id: kc.id,
+      name: kc.name,
+      asManager: !!kc.asManager,
+      midDows: normalizeKcMidDows(kc.midDows)
+    }));
   } else {
     // Legacy
-    kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false }];
+    kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
   }
 
   // Restore store number / name
@@ -10604,7 +11070,14 @@ function loadSavedSchedule(key) {
 
   // Now restore the data (same logic as loadFromStorage)
   if (data.amCount !== undefined) amCount = data.amCount;
-  if (data.kcList !== undefined) kcList = data.kcList;
+  if (data.kcList !== undefined) {
+    kcList = (data.kcList || []).map((kc) => ({
+      id: kc.id,
+      name: kc.name,
+      asManager: !!kc.asManager,
+      midDows: normalizeKcMidDows(kc.midDows)
+    }));
+  }
 
   if (data.storeNumber !== undefined) {
     document.getElementById('store-number').value = data.storeNumber;
@@ -10698,7 +11171,12 @@ function persistManagerNames() {
     amCount: amCount,
     kcList: kcList.map((kc, idx) => {
       const el = document.getElementById('name-' + kc.id);
-      return { id: kc.id, name: el ? el.value : kc.name, asManager: kc.asManager };
+      return {
+        id: kc.id,
+        name: el ? el.value : kc.name,
+        asManager: kc.asManager,
+        midDows: normalizeKcMidDows(kc.midDows)
+      };
     }),
     ams: {}
   };
@@ -10728,7 +11206,8 @@ function restoreManagerNames() {
       kcList = names.kcList.map(kc => ({
         id: kc.id,
         name: kc.name,
-        asManager: kc.asManager || false
+        asManager: kc.asManager || false,
+        midDows: normalizeKcMidDows(kc.midDows)
       }));
       renderKCRows();
     }

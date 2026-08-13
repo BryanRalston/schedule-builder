@@ -3669,7 +3669,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.3-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.4-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -5703,7 +5703,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.3-staging';
+const APP_VERSION = '2.5.4-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8042,8 +8042,36 @@ function _generateScheduleInner() {
   // ════════════════════════════════════════════════════
   // STEP 5d: HARD DAILY COVERAGE (cannot be soft-optimized away)
   // After weekend balance swaps, every day must have ≥1 open + ≥1 close.
+  // Understaffed days: sole manager must open; non-mgr KCs take emergency kc-close when needed.
   // ════════════════════════════════════════════════════
   const ensureHardDailyCoverage = () => {
+    /** Non-mgr KC emergency close (configured nights or understaffed). Prefer free/off, then mid. */
+    const assignEmergencyKcClose = (dk) => {
+      if (!nonMgrKCs.length) return false;
+      if (nonMgrKCs.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close')) return true;
+      const lockedOff = (kc) => {
+        if (!isInputLocked(kc.id, dk)) return false;
+        const v = inputs[kc.id] && inputs[kc.id][dk];
+        return v === 'pto' || v === 'loa' || v === 'rto' || v === 'off';
+      };
+      const pick = (pred) =>
+        nonMgrKCs.find((kc) => {
+          if (lockedOff(kc)) return false;
+          if (isInputLocked(kc.id, dk) && inputs[kc.id][dk] && isWork(inputs[kc.id][dk]) && inputs[kc.id][dk] !== 'kc-close') {
+            return false;
+          }
+          const s = schedule[kc.id] && schedule[kc.id][dk];
+          return pred(s);
+        });
+      const kc =
+        pick((s) => !s || s === 'off') ||
+        pick((s) => isMid(s)) ||
+        pick((s) => s && s !== 'kc-close' && s !== 'pto' && s !== 'loa' && s !== 'rto');
+      if (!kc) return false;
+      schedule[kc.id][dk] = 'kc-close';
+      return true;
+    };
+
     allDks.forEach((dk, dkIdx) => {
       const pdk = dkIdx > 0 ? allDks[dkIdx - 1] : null;
       const countOC = () => {
@@ -8051,13 +8079,13 @@ function _generateScheduleInner() {
         ROLES.forEach((r) => {
           const s = schedule[r][dk];
           if (isOpen(s)) opens++;
-          if (isClose(s)) closes++;
+          // Manager close only (kc-close is non-mgr)
+          if (s === 'close' || s === 'close-ext') closes++;
         });
-        if (isKcCloseNight(dk)) {
-          nonMgrKCs.forEach((kc) => {
-            if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
-          });
-        }
+        // Count non-mgr KC closes on any night (configured + emergency)
+        nonMgrKCs.forEach((kc) => {
+          if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
+        });
         return { opens, closes };
       };
 
@@ -8086,6 +8114,24 @@ function _generateScheduleInner() {
         ({ opens, closes } = countOC());
       }
 
+      // Sole closer + no opener: manager must open; cover close via other manager or emergency KC
+      if (opens === 0) {
+        const closers = ROLES.filter((r) => (schedule[r][dk] === 'close' || schedule[r][dk] === 'close-ext') && !isInputLocked(r, dk));
+        if (closers.length > 0) {
+          const c = closers[0];
+          const otherMgrClose = closers.length > 1;
+          let hasKcClose = nonMgrKCs.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close');
+          if (!otherMgrClose && !hasKcClose) hasKcClose = assignEmergencyKcClose(dk);
+          if (otherMgrClose || hasKcClose) {
+            schedule[c][dk] = 'open-early';
+          } else if (ROLES.filter((r) => isWork(schedule[r][dk])).length === 1) {
+            // True sole worker, no KC: prefer store open over close
+            schedule[c][dk] = 'open-early';
+          }
+          ({ opens, closes } = countOC());
+        }
+      }
+
       if (closes === 0 && !isKcCloseNight(dk)) {
         const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
         const openers = ROLES.filter((r) => isOpen(schedule[r][dk]) && !isInputLocked(r, dk));
@@ -8096,37 +8142,40 @@ function _generateScheduleInner() {
           // Keep sole opener; bring soft-off person as closer
           schedule[soft][dk] = 'close';
         } else if (openers.length === 1) {
-          // Last resort sole opener becomes closer only if we can promote someone else open later — instead pull nothing and convert mid from empty
-          // Convert sole opener to close ONLY if another worker can open
+          // Sole opener: never steal their open — pull soft-off or emergency KC
           const other = ROLES.find((r) => r !== openers[0] && isWork(schedule[r][dk]) && !isInputLocked(r, dk));
           if (other) {
-            schedule[other][dk] = 'open-early';
-            schedule[openers[0]][dk] = 'close';
+            schedule[other][dk] = 'close';
           } else if (soft) {
             schedule[soft][dk] = 'close';
-          } else {
-            // Extreme: sole worker stays open; still no close — pull any non-locked off
+          } else if (!assignEmergencyKcClose(dk)) {
             const anyOff = ROLES.find((r) => (schedule[r][dk] === 'off' || schedule[r][dk] === 'rto') && !isInputLocked(r, dk));
             if (anyOff) schedule[anyOff][dk] = 'close';
           }
         } else if (soft) {
           schedule[soft][dk] = 'close';
+        } else {
+          assignEmergencyKcClose(dk);
         }
         ({ opens, closes } = countOC());
         // If still no open after close assignment, fix open again
         if (opens === 0) {
           const mid2 = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
           if (mid2) schedule[mid2][dk] = 'open-early';
+          else {
+            const closers2 = ROLES.filter((r) => (schedule[r][dk] === 'close' || schedule[r][dk] === 'close-ext') && !isInputLocked(r, dk));
+            if (closers2.length > 0 && (assignEmergencyKcClose(dk) || closers2.length > 1)) {
+              schedule[closers2[0]][dk] = 'open-early';
+            }
+          }
         }
       }
 
-      // KC-close nights without KC closer: force manager close if needed
-      if (closes === 0 && isKcCloseNight(dk)) {
-        // Try assign non-mgr KC first
-        const freeKc = nonMgrKCs.find((kc) => !schedule[kc.id][dk] || schedule[kc.id][dk] === 'off');
-        if (freeKc && !isInputLocked(freeKc.id, dk)) {
-          schedule[freeKc.id][dk] = 'kc-close';
-        } else {
+      // KC-close nights (or any night still missing close): force KC closer if needed
+      if (closes === 0) {
+        if (assignEmergencyKcClose(dk)) {
+          ({ opens, closes } = countOC());
+        } else if (isKcCloseNight(dk)) {
           const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
           if (mid) schedule[mid][dk] = 'close';
           else {
@@ -9367,6 +9416,33 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
   }
 
   // ── Repair: Coverage gaps (Rules 8) ──
+  const nonMgrKCsRepair = typeof getNonManagerKCs === 'function' ? getNonManagerKCs() : [];
+  const emergencyKcCloseRepair = (dk) => {
+    if (!nonMgrKCsRepair.length) return false;
+    if (nonMgrKCsRepair.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close')) return true;
+    const lockedOff = (kc) => {
+      if (!isInputLocked(kc.id, dk)) return false;
+      const v = inputs[kc.id] && inputs[kc.id][dk];
+      return v === 'pto' || v === 'loa' || v === 'rto' || v === 'off';
+    };
+    const pick = (pred) =>
+      nonMgrKCsRepair.find((kc) => {
+        if (lockedOff(kc)) return false;
+        if (isInputLocked(kc.id, dk) && inputs[kc.id][dk] && isWork(inputs[kc.id][dk]) && inputs[kc.id][dk] !== 'kc-close') {
+          return false;
+        }
+        const s = schedule[kc.id] && schedule[kc.id][dk];
+        return pred(s);
+      });
+    const kc =
+      pick((s) => !s || s === 'off') ||
+      pick((s) => isMid(s)) ||
+      pick((s) => s && s !== 'kc-close' && s !== 'pto' && s !== 'loa' && s !== 'rto');
+    if (!kc) return false;
+    schedule[kc.id][dk] = 'kc-close';
+    return true;
+  };
+
   if (byRule['coverage-open']) {
     byRule['coverage-open'].forEach(v => {
       const dk = v.day;
@@ -9376,8 +9452,27 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       const safe = midders.find(r => !(prevDk && isClose(schedule[r][prevDk])));
       if (safe) {
         schedule[safe][dk] = 'open-early';
-      } else if (midders.length > 0 && aggressive) {
+        return;
+      }
+      if (midders.length > 0 && aggressive) {
         schedule[midders[0]][dk] = 'open-early'; // forced clopen — will be flagged
+        return;
+      }
+      // Sole closer with no mid: convert closer → open if KC (or 2nd closer) can cover close
+      const closers = ROLES.filter(
+        (r) => (schedule[r][dk] === 'close' || schedule[r][dk] === 'close-ext') && !isInputLocked(r, dk)
+      );
+      if (closers.length > 0) {
+        const hasOtherClose =
+          closers.length > 1 ||
+          nonMgrKCsRepair.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') ||
+          emergencyKcCloseRepair(dk);
+        if (hasOtherClose || ROLES.filter((r) => isWork(schedule[r][dk])).length === 1) {
+          schedule[closers[0]][dk] = 'open-early';
+        }
+      } else {
+        const soft = ROLES.find((r) => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
+        if (soft) schedule[soft][dk] = 'open-early';
       }
     });
   }
@@ -9385,18 +9480,11 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
   if (byRule['coverage-close']) {
     byRule['coverage-close'].forEach(v => {
       const dk = v.day;
-      // Already has a closer? (close-ext / kc-close)
-      if (ROLES.some(r => isClose(schedule[r][dk]))) return;
-      if (isKcCloseNight(dk)) {
-        const freeKc = (typeof getNonManagerKCs === 'function' ? getNonManagerKCs() : []).find(
-          (kc) => schedule[kc.id] && (!schedule[kc.id][dk] || schedule[kc.id][dk] === 'off') && !isInputLocked(kc.id, dk)
-        );
-        if (freeKc) {
-          schedule[freeKc.id][dk] = 'kc-close';
-          return;
-        }
-        // fall through to manager close if no KC available
-      }
+      // Already has a closer? (manager close or kc-close)
+      if (ROLES.some(r => schedule[r][dk] === 'close' || schedule[r][dk] === 'close-ext')) return;
+      if (nonMgrKCsRepair.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close')) return;
+      // Prefer emergency KC (configured nights + understaffed) before stealing sole opener
+      if (emergencyKcCloseRepair(dk)) return;
       // No closer — find someone to close this night
       // Priority: mid > open (if 2+ openers) > any worker > soft-off (always — coverage is hard)
       const midders = ROLES.filter(r => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
@@ -9415,11 +9503,8 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
             const offManagers = ROLES.filter(r => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
             if (offManagers.length > 0) {
               schedule[offManagers[0]][dk] = 'close';
-            } else if (workers.length === 1 && openers.length === 1) {
-              // sole opener — pull nothing else; convert only if mid exists elsewhere — leave for next pass
-              // last resort convert sole worker only when aggressive
-              if (aggressive) schedule[workers[0]][dk] = 'close';
             }
+            // Never convert sole opener to close when no second person (store must open)
           }
         }
       }

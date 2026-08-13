@@ -1,0 +1,949 @@
+{
+  "title": "Schedule Pro Engine Stress Test",
+  "version": "2.5.4",
+  "startedAt": "2026-08-13T13:58:15.090Z",
+  "finishedAt": "2026-08-13T13:58:16.787Z",
+  "base": "http://127.0.0.1:56633",
+  "summary": {
+    "pass": 19,
+    "fail": 0,
+    "warn": 6,
+    "total": 25
+  },
+  "hardCriteria": [
+    "noOpen === 0 every day",
+    "noClose === 0 every day (manager open/close + non-mgr kc-close)",
+    "generator does not throw",
+    "mgrCloseOnKcNight === 0 when kcCloseDays set and non-mgr KCs exist"
+  ],
+  "softCriteria": [
+    "AM close period max-min <= 2 when >=2 AMs available most days (strictFairness scenarios assert)",
+    "AM weekend off max-min <= 2 under non-extreme weekend targets (strictFairness)",
+    "Clopens: 0 when avoidClopening and not allowClopens (strictFairness WARN)"
+  ],
+  "scenarios": [
+    {
+      "name": "clean-3am",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":4}"
+      ],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 2,
+          "am2": 5,
+          "am3": 4
+        },
+        "smCloses": 5,
+        "closeSpread": 0,
+        "weSpread": 3,
+        "days": 35,
+        "ms": 26,
+        "error": null
+      }
+    },
+    {
+      "name": "p08-posted-shape",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 6,
+          "am2": 4,
+          "am3": 5
+        },
+        "smCloses": 2,
+        "closeSpread": 1,
+        "weSpread": 2,
+        "days": 35,
+        "ms": 10,
+        "error": null
+      }
+    },
+    {
+      "name": "sole-manager",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "noClose=35 (impossible dual coverage: sole manager, no KC)"
+      ],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 35,
+        "clopens": 0,
+        "thinDays": 35,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {},
+        "amWeOffs": {},
+        "smCloses": 0,
+        "closeSpread": 0,
+        "weSpread": 0,
+        "days": 35,
+        "ms": 11,
+        "error": null
+      }
+    },
+    {
+      "name": "sm-plus-one-am",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [
+        "clopens=1"
+      ],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 9
+        },
+        "amWeOffs": {
+          "am1": 5
+        },
+        "smCloses": 1,
+        "closeSpread": 0,
+        "weSpread": 0,
+        "days": 35,
+        "ms": 10,
+        "error": null
+      }
+    },
+    {
+      "name": "five-ams",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 5,
+          "am4": 5,
+          "am5": 5
+        },
+        "amWeOffs": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4,
+          "am4": 4,
+          "am5": 4
+        },
+        "smCloses": 5,
+        "closeSpread": 0,
+        "weSpread": 0,
+        "days": 35,
+        "ms": 9,
+        "error": null
+      }
+    },
+    {
+      "name": "no-kcs",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=3 {\"am1\":3,\"am2\":2,\"am3\":5}"
+      ],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 9,
+          "am2": 10,
+          "am3": 10
+        },
+        "amWeOffs": {
+          "am1": 3,
+          "am2": 2,
+          "am3": 5
+        },
+        "smCloses": 6,
+        "closeSpread": 1,
+        "weSpread": 3,
+        "days": 35,
+        "ms": 9,
+        "error": null
+      }
+    },
+    {
+      "name": "kc-close-all-week",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 0,
+          "am2": 0,
+          "am3": 0
+        },
+        "amWeOffs": {
+          "am1": 0,
+          "am2": 0,
+          "am3": 0
+        },
+        "smCloses": 0,
+        "closeSpread": 0,
+        "weSpread": 0,
+        "days": 35,
+        "ms": 15,
+        "error": null
+      }
+    },
+    {
+      "name": "kc-close-none",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=3 {\"am1\":3,\"am2\":2,\"am3\":5}"
+      ],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 9,
+          "am2": 10,
+          "am3": 10
+        },
+        "amWeOffs": {
+          "am1": 3,
+          "am2": 2,
+          "am3": 5
+        },
+        "smCloses": 6,
+        "closeSpread": 1,
+        "weSpread": 3,
+        "days": 35,
+        "ms": 9,
+        "error": null
+      }
+    },
+    {
+      "name": "dual-loa",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [
+        "AM close spread=6 {\"am1\":4,\"am2\":10,\"am3\":9}"
+      ],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 4,
+          "am2": 10,
+          "am3": 9
+        },
+        "amWeOffs": {
+          "am1": 6,
+          "am2": 5,
+          "am3": 4
+        },
+        "smCloses": 2,
+        "closeSpread": 6,
+        "weSpread": 2,
+        "days": 35,
+        "ms": 11,
+        "error": null
+      }
+    },
+    {
+      "name": "triple-pto-same-week",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 7,
+          "am3": 7
+        },
+        "amWeOffs": {
+          "am1": 4,
+          "am2": 6,
+          "am3": 4
+        },
+        "smCloses": 4,
+        "closeSpread": 1,
+        "weSpread": 2,
+        "days": 35,
+        "ms": 10,
+        "error": null
+      }
+    },
+    {
+      "name": "all-want-weekends-4",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "smCloses": 5,
+        "closeSpread": 0,
+        "weSpread": 1,
+        "days": 35,
+        "ms": 6,
+        "error": null
+      }
+    },
+    {
+      "name": "zero-weekend-target",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":4}"
+      ],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 2,
+          "am2": 5,
+          "am3": 4
+        },
+        "smCloses": 5,
+        "closeSpread": 0,
+        "weSpread": 3,
+        "days": 35,
+        "ms": 7,
+        "error": null
+      }
+    },
+    {
+      "name": "rto-every-weekend-all-ams",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 7,
+          "am2": 6,
+          "am3": 7
+        },
+        "amWeOffs": {
+          "am1": 10,
+          "am2": 10,
+          "am3": 10
+        },
+        "smCloses": 0,
+        "closeSpread": 1,
+        "weSpread": 0,
+        "days": 35,
+        "ms": 10,
+        "error": null
+      }
+    },
+    {
+      "name": "pto-checkerboard-am1",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [
+        "AM close spread=4 {\"am1\":4,\"am2\":8,\"am3\":8}"
+      ],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 4,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 7,
+          "am2": 6,
+          "am3": 5
+        },
+        "smCloses": 7,
+        "closeSpread": 4,
+        "weSpread": 2,
+        "days": 35,
+        "ms": 11,
+        "error": null
+      }
+    },
+    {
+      "name": "manager-mode-kc",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 9,
+          "am2": 8
+        },
+        "amWeOffs": {
+          "am1": 3,
+          "am2": 5
+        },
+        "smCloses": 4,
+        "closeSpread": 1,
+        "weSpread": 2,
+        "days": 35,
+        "ms": 7,
+        "error": null
+      }
+    },
+    {
+      "name": "kc-mid-all-dows-both",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [
+        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":4}"
+      ],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 2,
+          "am2": 5,
+          "am3": 4
+        },
+        "smCloses": 5,
+        "closeSpread": 0,
+        "weSpread": 3,
+        "days": 35,
+        "ms": 11,
+        "error": null
+      }
+    },
+    {
+      "name": "avoid-clopen-off",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [
+        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":4}",
+        "clopens=19"
+      ],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 19,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 2,
+          "am2": 5,
+          "am3": 4
+        },
+        "smCloses": 5,
+        "closeSpread": 1,
+        "weSpread": 3,
+        "days": 35,
+        "ms": 7,
+        "error": null
+      }
+    },
+    {
+      "name": "packages-off-sm-equal",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "smCloses": 5,
+        "closeSpread": 0,
+        "weSpread": 1,
+        "days": 35,
+        "ms": 7,
+        "error": null
+      }
+    },
+    {
+      "name": "sm-closes-3-per-week",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 6,
+          "am2": 7,
+          "am3": 6
+        },
+        "amWeOffs": {
+          "am1": 4,
+          "am2": 3,
+          "am3": 5
+        },
+        "smCloses": 11,
+        "closeSpread": 1,
+        "weSpread": 2,
+        "days": 35,
+        "ms": 7,
+        "error": null
+      }
+    },
+    {
+      "name": "am-closes-fixed-2",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 3,
+          "am2": 5,
+          "am3": 4
+        },
+        "smCloses": 4,
+        "closeSpread": 1,
+        "weSpread": 2,
+        "days": 35,
+        "ms": 8,
+        "error": null
+      }
+    },
+    {
+      "name": "four-week-period",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 7,
+          "am2": 7,
+          "am3": 6
+        },
+        "amWeOffs": {
+          "am1": 3,
+          "am2": 2,
+          "am3": 3
+        },
+        "smCloses": 4,
+        "closeSpread": 1,
+        "weSpread": 1,
+        "days": 28,
+        "ms": 5,
+        "error": null
+      }
+    },
+    {
+      "name": "six-week-period",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":5}"
+      ],
+      "info": [],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 9,
+          "am2": 10,
+          "am3": 10
+        },
+        "amWeOffs": {
+          "am1": 2,
+          "am2": 5,
+          "am3": 5
+        },
+        "smCloses": 6,
+        "closeSpread": 1,
+        "weSpread": 3,
+        "days": 42,
+        "ms": 9,
+        "error": null
+      }
+    },
+    {
+      "name": "stability-10x",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [
+        "stability: closes stable ±1 of median"
+      ],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 6,
+          "am2": 4,
+          "am3": 5
+        },
+        "smCloses": 2,
+        "closeSpread": 1,
+        "weSpread": 2,
+        "days": 35,
+        "ms": 71,
+        "msAvg": 7,
+        "error": null,
+        "stabilityOk": true,
+        "stabilityNotes": "closes stable ±1 of median",
+        "stabilityCloseSeries": {
+          "am1": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "am2": [
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9,
+            9
+          ],
+          "am3": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "name": "max-stacked-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [
+        "clopens=1"
+      ],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 7,
+          "am2": 6,
+          "am3": 8
+        },
+        "amWeOffs": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 10
+        },
+        "smCloses": 1,
+        "closeSpread": 2,
+        "weSpread": 6,
+        "days": 35,
+        "ms": 12,
+        "error": null
+      }
+    },
+    {
+      "name": "only-two-working-many-days",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "info": [
+        "AM close spread=5 {\"am1\":5,\"am2\":5,\"am3\":0}",
+        "clopens=2"
+      ],
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 2,
+        "thinDays": 0,
+        "dualManagerCloses": 0,
+        "mgrCloseOnKcNight": 0,
+        "amCloseCounts": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 0
+        },
+        "amWeOffs": {
+          "am1": 6,
+          "am2": 5,
+          "am3": 10
+        },
+        "smCloses": 2,
+        "closeSpread": 5,
+        "weSpread": 5,
+        "days": 35,
+        "ms": 13,
+        "error": null
+      }
+    }
+  ],
+  "worst": {
+    "highestClopens": [
+      {
+        "name": "avoid-clopen-off",
+        "clopens": 19,
+        "status": "PASS"
+      },
+      {
+        "name": "only-two-working-many-days",
+        "clopens": 2,
+        "status": "PASS"
+      },
+      {
+        "name": "sm-plus-one-am",
+        "clopens": 1,
+        "status": "PASS"
+      },
+      {
+        "name": "max-stacked-hell",
+        "clopens": 1,
+        "status": "PASS"
+      },
+      {
+        "name": "clean-3am",
+        "clopens": 0,
+        "status": "WARN"
+      }
+    ],
+    "worstCloseSpread": [
+      {
+        "name": "dual-loa",
+        "closeSpread": 6,
+        "amCloseCounts": {
+          "am1": 4,
+          "am2": 10,
+          "am3": 9
+        },
+        "status": "PASS"
+      },
+      {
+        "name": "only-two-working-many-days",
+        "closeSpread": 5,
+        "amCloseCounts": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 0
+        },
+        "status": "PASS"
+      },
+      {
+        "name": "pto-checkerboard-am1",
+        "closeSpread": 4,
+        "amCloseCounts": {
+          "am1": 4,
+          "am2": 8,
+          "am3": 8
+        },
+        "status": "PASS"
+      },
+      {
+        "name": "max-stacked-hell",
+        "closeSpread": 2,
+        "amCloseCounts": {
+          "am1": 7,
+          "am2": 6,
+          "am3": 8
+        },
+        "status": "PASS"
+      },
+      {
+        "name": "p08-posted-shape",
+        "closeSpread": 1,
+        "amCloseCounts": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "status": "PASS"
+      }
+    ]
+  },
+  "engineFixes": [
+    "v2.5.4 ensureHardDailyCoverage: sole closer → open when emergency non-mgr KC can take kc-close (or prefer open if truly sole).",
+    "v2.5.4 Emergency kc-close on understaffed non-template nights (not only configured kcCloseDays).",
+    "v2.5.4 repairViolations coverage-open/close: same sole-closer + emergency KC logic; never steal sole opener for close.",
+    "sole-manager (amCount 0, no KC): dual open+close is mathematically impossible; residual noClose documented as WARN via impossibleDualCoverage."
+  ]
+}

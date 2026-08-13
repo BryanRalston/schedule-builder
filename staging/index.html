@@ -1566,6 +1566,55 @@ input[type="radio"] { accent-color: var(--gold); }
 .holiday-week-toggle input[type="checkbox"] { cursor: pointer; accent-color: var(--warn); width: 14px; height: 14px; }
 .input-week-label.is-holiday-week { background: var(--warn-bg); border-top-color: rgba(255,200,87,0.45); color: #ffd78a; border-radius: 4px 4px 0 0; padding-left: 0.4rem; }
 
+/* Federal paid holidays */
+.federal-holidays-block {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 200, 87, 0.06);
+}
+.fh-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.65rem; margin-bottom: 0.45rem; }
+.fh-title { font-weight: 700; font-size: 0.82rem; color: var(--ink); }
+.fh-sub { font-size: 0.7rem; color: var(--ink-4); }
+.fh-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem 0.65rem;
+  max-height: 11rem;
+  overflow-y: auto;
+}
+@media (max-width: 520px) { .fh-list { grid-template-columns: 1fr; } }
+.fh-item {
+  display: flex; align-items: flex-start; gap: 0.4rem;
+  font-size: 0.75rem; color: var(--ink-2); cursor: pointer; padding: 0.2rem 0;
+}
+.fh-item input { margin-top: 0.15rem; accent-color: #ffc857; }
+.fh-item .fh-date { display: block; font-size: 0.65rem; color: var(--ink-4); font-family: var(--mono); }
+.fh-item.in-period { color: #ffd78a; }
+.fh-note { font-size: 0.68rem; color: var(--ink-4); margin-top: 0.45rem; line-height: 1.35; }
+.cal-cell.federal-holiday {
+  box-shadow: inset 0 0 0 1px rgba(255, 200, 87, 0.55);
+  background: rgba(255, 200, 87, 0.1) !important;
+}
+.cal-cell .fh-badge {
+  display: inline-block; margin-top: 0.15rem; font-size: 0.58rem; font-weight: 700;
+  color: #ffd78a; background: rgba(255, 200, 87, 0.18);
+  border: 1px solid rgba(255, 200, 87, 0.35); border-radius: 4px;
+  padding: 0.05rem 0.28rem;
+}
+.week-table thead th.federal-holiday-col {
+  background: rgba(255, 200, 87, 0.12) !important; color: #ffd78a;
+}
+.week-table thead th .fh-day-label {
+  display: block; font-size: 0.58rem; font-weight: 600; color: #ffd78a;
+  margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 5.5rem;
+}
+.input-week-label.is-federal-holiday-week {
+  background: linear-gradient(90deg, rgba(255,200,87,0.14), transparent);
+}
+
+
 /* Overlay for cell menu */
 .overlay { position: fixed; inset: 0; z-index: 50; }
 
@@ -3512,6 +3561,268 @@ html.auth-locked .toast-host { z-index: 20050; }
   .account-chip { padding: 0.2rem; }
 }
 
+
+/* ========== v2.6.0 FLAGSHIP UX ========== */
+.local-status-pill {
+  display: inline-flex; align-items: center; gap: 0.28rem;
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.88);
+  font-size: 0.66rem; font-weight: 600; padding: 0.18rem 0.5rem;
+  border-radius: 999px; border: 1px solid rgba(255,255,255,0.16);
+  font-family: var(--mono); max-width: 160px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.btn-cmdk { font-family: var(--mono) !important; font-size: 0.72rem !important; min-width: 2.6rem; }
+.view-lock-banner {
+  display: none; align-items: center; justify-content: center; gap: 0.5rem;
+  background: linear-gradient(90deg, rgba(255,200,87,0.18), rgba(124,92,255,0.14));
+  border-bottom: 1px solid rgba(255,200,87,0.35); color: #ffe0a0;
+  font-size: 0.82rem; font-weight: 700; padding: 0.45rem 0.85rem; text-align: center;
+  position: sticky; top: 0; z-index: 120;
+}
+html.view-locked .view-lock-banner { display: flex; }
+html.view-locked .no-lock-hide,
+html.view-locked #btn-generate,
+html.view-locked .generate-actions,
+html.view-locked #request-paint-toolbar,
+html.view-locked #btn-undo-edit,
+html.view-locked #btn-redo-edit { display: none !important; }
+html.view-locked .shift-editable { cursor: default !important; pointer-events: none; }
+html.view-locked .cal-cell { cursor: default !important; pointer-events: none; }
+html.view-locked .ap-btn-danger { display: none !important; }
+
+#cmd-palette {
+  display: none; position: fixed; inset: 0; z-index: 20150;
+  align-items: flex-start; justify-content: center; padding: 12vh 1rem 1rem;
+}
+#cmd-palette.open { display: flex; }
+.cmd-backdrop { position: absolute; inset: 0; background: rgba(3,6,14,0.72); backdrop-filter: blur(8px); }
+.cmd-panel {
+  position: relative; width: min(560px, 100%);
+  background: rgba(10,16,30,0.98); border: 1px solid rgba(61,220,255,0.28);
+  border-radius: 14px; box-shadow: 0 24px 80px rgba(0,0,0,0.55); overflow: hidden;
+  animation: cmdIn 0.16s ease;
+}
+@keyframes cmdIn { from { opacity: 0; transform: translateY(-10px) scale(0.98); } to { opacity: 1; transform: none; } }
+.cmd-input-wrap {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.85rem 1rem; border-bottom: 1px solid var(--line);
+}
+.cmd-input-wrap .cmd-icon { color: var(--ink-4); font-size: 0.95rem; }
+#cmd-palette-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--ink); font-size: 1rem; font-family: var(--font); min-width: 0;
+}
+#cmd-palette-input::placeholder { color: var(--ink-4); }
+.cmd-kbd {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--ink-4);
+  border: 1px solid var(--line); border-radius: 5px; padding: 0.12rem 0.35rem;
+}
+#cmd-palette-results { max-height: min(360px, 50vh); overflow-y: auto; padding: 0.35rem; }
+.cmd-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  width: 100%; text-align: left; padding: 0.55rem 0.7rem; border: none; border-radius: 8px;
+  background: transparent; color: var(--ink-2); font: inherit; font-size: 0.88rem; cursor: pointer;
+}
+.cmd-item:hover, .cmd-item.active { background: rgba(61,220,255,0.12); color: var(--ink); }
+.cmd-item .cmd-label { font-weight: 600; }
+.cmd-item .cmd-group {
+  font-size: 0.68rem; font-family: var(--mono); color: var(--ink-4);
+  text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0;
+}
+.cmd-empty { padding: 1.25rem; text-align: center; color: var(--ink-4); font-size: 0.85rem; }
+
+#post-gen-strip {
+  display: none; position: sticky; top: 0; z-index: 90;
+  background: linear-gradient(180deg, rgba(8,14,28,0.98), rgba(10,18,34,0.96));
+  border-bottom: 1px solid rgba(61,220,255,0.22);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  padding: 0.45rem 0.85rem; gap: 0.55rem; flex-wrap: wrap; align-items: center; font-size: 0.78rem;
+}
+#post-gen-strip.show { display: flex; }
+html.view-locked #post-gen-strip { top: 2rem; }
+.pgs-chip {
+  display: inline-flex; align-items: center; gap: 0.28rem;
+  padding: 0.22rem 0.5rem; border-radius: 999px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--line);
+  color: var(--ink-2); font-weight: 600; white-space: nowrap;
+}
+.pgs-chip.ok { border-color: rgba(61,222,140,0.35); color: #7dffb8; background: rgba(61,222,140,0.1); }
+.pgs-chip.warn { border-color: rgba(255,200,87,0.35); color: #ffd78a; background: rgba(255,200,87,0.1); }
+.pgs-chip.bad { border-color: rgba(255,92,122,0.35); color: #ffb0c0; background: rgba(255,92,122,0.1); }
+.pgs-actions { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-left: auto; }
+.pgs-actions button { font-size: 0.72rem !important; padding: 0.28rem 0.55rem !important; min-height: auto !important; }
+@media (max-width: 640px) {
+  #post-gen-strip { font-size: 0.7rem; padding: 0.35rem 0.55rem; gap: 0.35rem; }
+  .pgs-chip { padding: 0.16rem 0.4rem; }
+  .pgs-actions { width: 100%; margin-left: 0; }
+}
+
+#ops-home {
+  display: none; margin-bottom: 0.85rem; padding: 0.9rem 1rem; border-radius: 14px;
+  border: 1px solid rgba(61,220,255,0.22);
+  background: linear-gradient(135deg, rgba(124,92,255,0.1), transparent 50%), rgba(8,14,28,0.85);
+  box-shadow: var(--shadow-sm);
+}
+#ops-home.show { display: block; }
+#ops-home.collapsed { display: none !important; }
+.ops-home-title { font-family: var(--display); font-size: 1.05rem; font-weight: 650; color: var(--ink); margin: 0 0 0.35rem; }
+.ops-home-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.7rem; }
+.ops-chip {
+  font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 999px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--line); color: var(--ink-3); font-family: var(--mono);
+}
+.ops-home-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+#request-paint-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem;
+  margin-bottom: 0.65rem; padding: 0.5rem 0.65rem; border-radius: 10px;
+  border: 1px solid var(--line); background: rgba(8,14,28,0.6);
+}
+.rpt-label {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ink-4); font-family: var(--mono); margin-right: 0.2rem;
+}
+.rpt-chip {
+  font-size: 0.75rem !important; padding: 0.28rem 0.55rem !important; min-height: 32px !important;
+  border-radius: 999px !important; border: 1px solid var(--line) !important;
+  background: rgba(255,255,255,0.04) !important; color: var(--ink-2) !important;
+  font-weight: 600 !important; cursor: pointer;
+}
+.rpt-chip.active {
+  background: rgba(61,220,255,0.16) !important; border-color: rgba(61,220,255,0.5) !important;
+  color: #9ae8ff !important; box-shadow: 0 0 12px rgba(61,220,255,0.15);
+}
+.cal-cell.paint-hover { outline: 2px solid rgba(61,220,255,0.55); outline-offset: -2px; }
+body.painting-requests { user-select: none; }
+body.painting-requests .cal-cell { cursor: crosshair; }
+
+html[data-density="compact"] .week-table th,
+html[data-density="compact"] .week-table td { padding: 0.18rem 0.12rem; font-size: 0.72rem; }
+html[data-density="compact"] .week-table .name-col { font-size: 0.72rem; min-width: 90px; }
+html[data-density="compact"] .cal-cell { min-height: 48px; padding: 0.25rem; }
+html[data-density="compact"] .cal-cell .cell-tag { font-size: 0.58rem; }
+html[data-density="compact"] .tab-panel-title { font-size: 1rem; }
+html[data-density="compact"] .section-body { padding: 0.65rem; }
+html[data-density="board"] .week-table th,
+html[data-density="board"] .week-table td { padding: 0.55rem 0.35rem; font-size: 0.95rem; }
+html[data-density="board"] .week-table .name-col { font-size: 0.95rem; min-width: 130px; font-weight: 700; }
+html[data-density="board"] .week-table thead th { font-size: 0.88rem; }
+html[data-density="board"] .cal-cell { min-height: 72px; }
+html[data-density="board"] .cal-cell .cell-tag { font-size: 0.8rem; padding: 0.2rem 0.4rem; }
+html[data-density="board"] .shift-open,
+html[data-density="board"] .shift-mid,
+html[data-density="board"] .shift-close,
+html[data-density="board"] .shift-kc-close { font-weight: 700; font-size: 0.95rem; }
+
+html.hc-posting, html[data-contrast="high"] {
+  --ink: #fff; --ink-2: #f5f5f5; --ink-3: #e8e8e8; --ink-4: #c8c8c8;
+}
+html.hc-posting .shift-open, html[data-contrast="high"] .shift-open {
+  background: #0d7a3e !important; color: #fff !important;
+  box-shadow: inset 0 0 0 2px #000 !important; font-weight: 800;
+}
+html.hc-posting .shift-mid, html[data-contrast="high"] .shift-mid {
+  background: #4c1d95 !important; color: #fff !important;
+  box-shadow: inset 0 0 0 2px #000 !important; font-weight: 800;
+}
+html.hc-posting .shift-close, html[data-contrast="high"] .shift-close {
+  background: #b91c1c !important; color: #fff !important;
+  box-shadow: inset 0 0 0 2px #000 !important; font-weight: 800;
+}
+html.hc-posting .shift-kc-close, html[data-contrast="high"] .shift-kc-close {
+  background: #b45309 !important; color: #fff !important;
+  box-shadow: inset 0 0 0 2px #000 !important; font-weight: 800;
+}
+html.hc-posting .shift-pto, html[data-contrast="high"] .shift-pto {
+  background: #0369a1 !important; color: #fff !important; box-shadow: inset 0 0 0 2px #000 !important;
+}
+html.hc-posting .shift-rto, html[data-contrast="high"] .shift-rto {
+  background: #a16207 !important; color: #fff !important; box-shadow: inset 0 0 0 2px #000 !important;
+}
+html.hc-posting .shift-off, html[data-contrast="high"] .shift-off {
+  background: #111 !important; color: #fff !important; box-shadow: inset 0 0 0 1px #fff !important;
+}
+html.hc-posting .week-table th, html.hc-posting .week-table td,
+html[data-contrast="high"] .week-table th, html[data-contrast="high"] .week-table td {
+  border-color: #000 !important;
+}
+html.hc-posting .week-table, html[data-contrast="high"] .week-table { border: 2px solid #000; }
+
+.day-hours {
+  display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 500;
+  color: var(--ink-4); margin-top: 0.1rem; letter-spacing: -0.01em; line-height: 1.1; white-space: nowrap;
+}
+.day-hours.is-override { color: #ffd78a; }
+html[data-density="compact"] .day-hours { font-size: 0.55rem; }
+html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; color: var(--ink-3); }
+
+.schedule-grid-enter { animation: schedEnter 0.38s ease both; }
+@keyframes schedEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.tab-panel { transition: opacity 0.18s ease; }
+.tab-panel:not(.active) { opacity: 0; }
+.tab-panel.active { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .schedule-grid-enter, .cmd-panel, .tab-panel { animation: none !important; transition: none !important; }
+}
+
+#schedule-diff-panel, #smart-suggestions {
+  display: none; margin: 0.65rem 0; padding: 0.7rem 0.85rem; border-radius: 10px;
+  border: 1px solid var(--line); background: rgba(8,14,28,0.7);
+}
+#schedule-diff-panel.show, #smart-suggestions.show { display: block; }
+.diff-head, .sug-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  margin-bottom: 0.45rem; font-weight: 700; font-size: 0.85rem; color: var(--ink);
+}
+.diff-list, .sug-list {
+  display: flex; flex-direction: column; gap: 0.3rem; max-height: 220px; overflow-y: auto;
+}
+.diff-row {
+  font-size: 0.78rem; font-family: var(--mono); color: var(--ink-3);
+  padding: 0.25rem 0.35rem; border-radius: 6px; background: rgba(255,255,255,0.03);
+}
+.sug-chip {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.45rem 0.55rem; border-radius: 8px;
+  border: 1px solid rgba(61,220,255,0.22); background: rgba(61,220,255,0.06);
+  font-size: 0.8rem; color: var(--ink-2);
+}
+.sug-chip button {
+  font-size: 0.72rem !important; padding: 0.28rem 0.55rem !important;
+  min-height: auto !important; white-space: nowrap; flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .week-table tbody td.shift-editable { min-height: 44px; min-width: 44px; }
+  .mw-person { min-height: 44px; padding: 0.35rem 0.4rem; }
+  .month-chip { min-height: 36px; }
+  .sched-edit-menu {
+    position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    top: auto !important; width: 100% !important; max-width: 100% !important; min-width: 100% !important;
+    border-radius: 16px 16px 0 0; max-height: 70vh;
+    padding: 0.55rem 0.55rem calc(0.55rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.45);
+  }
+  .sched-edit-menu button { min-height: 48px; font-size: 0.9rem; padding: 0.6rem 0.85rem; }
+  .cell-menu {
+    position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    top: auto !important; width: 100% !important; max-width: 100% !important;
+    border-radius: 16px 16px 0 0; max-height: 70vh; z-index: 220 !important;
+  }
+  .cell-menu button { min-height: 48px; }
+  html[data-density="comfortable"] .section-body { padding: 0.65rem; }
+  html[data-density="comfortable"] .generate-panel { padding: 0.75rem; }
+  #schedule-view-toggle {
+    position: sticky; top: 0; z-index: 5; background: rgba(8,14,28,0.95); padding: 0.25rem 0;
+  }
+}
+@media print {
+  #post-gen-strip, #cmd-palette, #ops-home, #request-paint-toolbar,
+  #schedule-diff-panel, #smart-suggestions, .view-lock-banner,
+  .local-status-pill, .btn-cmdk { display: none !important; }
+  .day-hours { color: #333 !important; }
+}
+
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
@@ -3620,15 +3931,17 @@ html.auth-locked .toast-host { z-index: 20050; }
         </span>
       </button>
       <span class="pro-badge is-free" id="license-badge" title="License status" hidden>Free</span>
-      <span class="offline-pill"><span class="dot"></span> Offline</span>
+      <span class="offline-pill" id="offline-pill" title="Works offline"><span class="dot"></span> Offline</span>
+      <span class="local-status-pill" id="local-status-pill" title="Local save status">Saved · local</span>
       <span class="pwa-mode-badge">App</span>
     </div>
     <div class="subtitle">Manager shifts · NRF periods · Fair weekends · No clopens</div>
   </div>
   <div class="header-actions no-print">
-    <button class="btn-demo" onclick="loadDemoStore()" title="Load sample store & generate">Demo</button>
-    <button class="btn-outline" onclick="saveToStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Save</button>
-    <button class="btn-outline" onclick="openSavedSchedulesModal()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Load</button>
+    <button type="button" class="btn-outline btn-cmdk" id="btn-cmd-palette" onclick="openCommandPalette()" style="color:#fff;border-color:rgba(255,255,255,0.3)" title="Command palette (Ctrl+K)">⌘K</button>
+    <button class="btn-demo no-lock-hide" onclick="loadDemoStore()" title="Load sample store & generate">Demo</button>
+    <button class="btn-outline no-lock-hide" onclick="saveToStorage()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Save</button>
+    <button class="btn-outline no-lock-hide" onclick="openSavedSchedulesModal()" style="color:#fff;border-color:rgba(255,255,255,0.3)">Load</button>
     <div class="header-menu">
       <button type="button" class="btn-outline header-menu-btn" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false" id="header-more-btn">More ▾</button>
       <div class="header-menu-panel" id="header-menu-panel" hidden>
@@ -3637,6 +3950,12 @@ html.auth-locked .toast-host { z-index: 20050; }
         <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()">Export Excel</button>
         <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON</button>
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
+        <button type="button" onclick="setDensityMode('compact'); closeHeaderMenu()">Density: Compact</button>
+        <button type="button" onclick="setDensityMode('comfortable'); closeHeaderMenu()">Density: Comfortable</button>
+        <button type="button" onclick="setDensityMode('board'); closeHeaderMenu()">Density: Board</button>
+        <button type="button" onclick="toggleHighContrast(); closeHeaderMenu()">Toggle high contrast</button>
+        <button type="button" onclick="togglePeakSeasonPref(); closeHeaderMenu()">Toggle peak season</button>
+        <button type="button" onclick="startNextPeriodSameTeam(); closeHeaderMenu()">Next period same team</button>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()">How it works</button>
         <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()">Take tour</button>
         <button type="button" onclick="openAccountPanel(); closeHeaderMenu()">Account &amp; license</button>
@@ -3646,6 +3965,20 @@ html.auth-locked .toast-host { z-index: 20050; }
     </div>
   </div>
 </header>
+<div class="view-lock-banner no-print" id="view-lock-banner" role="status">View only — schedule board</div>
+<div id="post-gen-strip" class="no-print" role="region" aria-label="Post-generate review" hidden>
+  <span class="pgs-chip" id="pgs-cover">Coverage</span>
+  <span class="pgs-chip" id="pgs-clopens">Clopens</span>
+  <span class="pgs-chip" id="pgs-am-close">AM closes</span>
+  <span class="pgs-chip" id="pgs-we">WE offs</span>
+  <span class="pgs-chip" id="pgs-fair">Fairness</span>
+  <div class="pgs-actions">
+    <button type="button" class="btn-secondary" onclick="jumpToFairnessStrip()">Fairness</button>
+    <button type="button" class="btn-secondary" onclick="jumpToIssuesPanel()">Issues</button>
+    <button type="button" class="btn-secondary" onclick="jumpToSmartSuggestions()">Suggestions</button>
+    <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()">Next period</button>
+  </div>
+</div>
 
 <div class="container">
 
@@ -3760,8 +4093,19 @@ html.auth-locked .toast-host { z-index: 20050; }
               <label>Period:</label>
               <select id="pick-period"></select>
               <button class="btn-primary" onclick="loadPeriod()">Load Period</button>
+              <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()" title="Advance to next period, keep team and hours">Next period</button>
             </div>
             <div class="period-info" id="period-info"></div>
+
+            <div class="federal-holidays-block no-print" id="federal-holidays-block">
+              <div class="fh-head">
+                <span class="fh-title">Federal paid holidays</span>
+                <span class="fh-sub">4-day work week · saved on this device</span>
+              </div>
+              <div class="fh-list" id="federal-holidays-list"></div>
+              <div class="fh-note" id="federal-holidays-note">Check holidays your store observes as paid. Matching weeks auto-mark as holiday (4-day) and show on the calendar.</div>
+            </div>
+
           </div>
           <div class="legend mt-1">
             <div class="legend-item"><span class="legend-swatch" style="background:rgba(61,222,140,0.35)"></span> Open</div>
@@ -3805,9 +4149,21 @@ html.auth-locked .toast-host { z-index: 20050; }
 <!-- INPUT SECTION -->
   <div class="section no-print" id="input-section" style="border:none">
     <div class="section-body" id="input-body" style="padding:0">
+      <div id="request-paint-toolbar" class="no-print" role="toolbar" aria-label="Request paint mode">
+        <span class="rpt-label">Paint</span>
+        <button type="button" class="rpt-chip" data-paint="off" onclick="setRequestPaintMode('off')">Off</button>
+        <button type="button" class="rpt-chip" data-paint="rto" onclick="setRequestPaintMode('rto')">RTO</button>
+        <button type="button" class="rpt-chip" data-paint="pto" onclick="setRequestPaintMode('pto')">PTO</button>
+        <button type="button" class="rpt-chip" data-paint="loa" onclick="setRequestPaintMode('loa')">LOA</button>
+        <button type="button" class="rpt-chip" data-paint="__clear__" onclick="setRequestPaintMode('__clear__')">Clear</button>
+        <button type="button" class="rpt-chip" data-paint="open-late" onclick="setRequestPaintMode('open-late')">Open</button>
+        <button type="button" class="rpt-chip" data-paint="mid-early" onclick="setRequestPaintMode('mid-early')">Mid</button>
+        <button type="button" class="rpt-chip" data-paint="close" onclick="setRequestPaintMode('close')">Close</button>
+        <span class="text-muted" style="font-size:0.72rem;margin-left:0.25rem" id="rpt-active-label">Tap a mode, then drag across days</span>
+      </div>
       <div class="input-tabs" id="input-tabs"></div>
       <div id="input-calendars"></div>
-      <p class="text-muted mt-1">Click any day to set: PTO, RTO, Open, Mid, Close, Off, or Clear.</p>
+      <p class="text-muted mt-1">Paint mode: drag across days. Or click a day for the full menu.</p>
     </div>
   </div>
       <div class="tab-footer-nav">
@@ -3872,11 +4228,21 @@ html.auth-locked .toast-host { z-index: 20050; }
 <!-- GENERATE -->
   <div class="section no-print" id="generate-section" style="border:none;background:transparent">
     <div class="section-body generate-panel">
+      <div id="ops-home" class="no-print" aria-label="Command center">
+        <div class="ops-home-title" id="ops-home-title">Period ready</div>
+        <div class="ops-home-meta" id="ops-home-meta"></div>
+        <div class="ops-home-actions">
+          <button type="button" class="btn-success no-lock-hide" onclick="generateSchedule()">Build</button>
+          <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()">Next period</button>
+          <button type="button" class="btn-outline" onclick="startOnboardingTour(true)">Tour</button>
+          <button type="button" class="btn-outline" onclick="openCommandPalette()">⌘K</button>
+        </div>
+      </div>
       <div class="ready-checklist" id="ready-checklist"></div>
       <div class="generate-actions">
         <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()">Build this period</button>
-        <button class="btn-secondary" onclick="clearSchedule()">Clear board</button>
-        <button class="btn-outline" onclick="loadDemoStore()">Sample store</button>
+        <button class="btn-secondary no-lock-hide" onclick="clearSchedule()">Clear board</button>
+        <button class="btn-outline no-lock-hide" onclick="loadDemoStore()">Sample store</button>
       </div>
       <div class="gen-meta" id="gen-meta">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
     </div>
@@ -3885,8 +4251,9 @@ html.auth-locked .toast-host { z-index: 20050; }
         <strong>No schedule yet</strong>
         Load a period, set any requests, then generate. Or try the demo.
         <div style="margin-top:0.85rem">
-          <button type="button" class="btn-success" onclick="generateSchedule()">Generate Schedule</button>
-          <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="loadDemoStore()">Try Demo</button>
+          <button type="button" class="btn-success no-lock-hide" onclick="generateSchedule()">Generate Schedule</button>
+          <button type="button" class="btn-outline no-lock-hide" style="margin-left:0.4rem" onclick="loadDemoStore()">Try Demo</button>
+          <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
       <div id="schedule-results" style="display:none">
@@ -3909,13 +4276,28 @@ html.auth-locked .toast-host { z-index: 20050; }
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
         <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON</button>
-        <button type="button" class="btn-secondary" id="btn-undo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="undoSchedEdit()" disabled title="Undo last cell edit">Undo</button>
+        <button type="button" class="btn-secondary no-lock-hide" id="btn-undo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="undoSchedEdit()" disabled title="Undo">Undo</button>
+        <button type="button" class="btn-secondary no-lock-hide" id="btn-redo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="redoSchedEdit()" disabled title="Redo">Redo</button>
+        <button type="button" class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="setDensityMode('compact')" title="Compact density">Compact</button>
+        <button type="button" class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="setDensityMode('comfortable')" title="Comfortable density">Comfort</button>
+        <button type="button" class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="setDensityMode('board')" title="Board density">Board</button>
         <span class="gen-timestamp" id="gen-timestamp"></span>
       </div>
       <div class="period-print-header" id="print-header"></div>
       <div class="schedule-hours-line no-print" id="schedule-hours-line"></div>
       <div id="schedule-grid"></div>
       <div id="fairness-under-schedule" class="fairness-under no-print" data-tour="fairness" hidden></div>
+      <div id="schedule-diff-panel" class="no-print" hidden>
+        <div class="diff-head">
+          <span id="diff-head-label">Cells changed</span>
+          <button type="button" class="btn-secondary" style="font-size:0.72rem;padding:0.25rem 0.5rem;min-height:auto" onclick="dismissScheduleDiff()">Dismiss</button>
+        </div>
+        <div class="diff-list" id="diff-list"></div>
+      </div>
+      <div id="smart-suggestions" class="no-print" hidden>
+        <div class="sug-head"><span>Smart suggestions</span></div>
+        <div class="sug-list" id="sug-list"></div>
+      </div>
       <div class="print-schedule" id="print-schedule"></div>
     </div>
   </div>
@@ -3941,7 +4323,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.8-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.9-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -4053,6 +4435,19 @@ html.auth-locked .toast-host { z-index: 20050; }
 <div id="sched-edit-portal"></div>
 <!-- Saved schedules modal (portal) -->
 <div id="saved-modal-portal"></div>
+
+<!-- Command palette -->
+<div id="cmd-palette" class="no-print" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+  <div class="cmd-backdrop" onclick="closeCommandPalette()"></div>
+  <div class="cmd-panel">
+    <div class="cmd-input-wrap">
+      <span class="cmd-icon" aria-hidden="true">⌕</span>
+      <input type="text" id="cmd-palette-input" placeholder="Type a command…" autocomplete="off" aria-label="Search commands" />
+      <span class="cmd-kbd">Esc</span>
+    </div>
+    <div id="cmd-palette-results" role="listbox"></div>
+  </div>
+</div>
 
 <script>
 /* ====================================================================
@@ -6039,7 +6434,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.8-staging';
+const APP_VERSION = '2.5.9-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7355,6 +7750,181 @@ let periodDates = []; // flat array of Date objects for every day in the period
 let inputs = {}; // { 'sm': { 'YYYY-MM-DD': 'pto', ... }, ... }
 let schedule = {}; // same shape but final
 let holidayWeeks = {}; // { wIdx: true } — weeks with a company holiday (target 4 days)
+
+// Federal paid holidays (observed dates; 4-day week when in period)
+const MSB_FED_HOLIDAYS_KEY = 'msb_stg_federal_holidays';
+const FEDERAL_HOLIDAY_DEFS = [
+  { id: 'new-year', name: "New Year's Day", kind: 'fixed', month: 1, day: 1 },
+  { id: 'mlk', name: 'Martin Luther King Jr. Day', kind: 'nth-monday', month: 1, nth: 3 },
+  { id: 'presidents', name: "Presidents' Day", kind: 'nth-monday', month: 2, nth: 3 },
+  { id: 'memorial', name: 'Memorial Day', kind: 'last-monday', month: 5 },
+  { id: 'juneteenth', name: 'Juneteenth', kind: 'fixed', month: 6, day: 19 },
+  { id: 'independence', name: 'Independence Day', kind: 'fixed', month: 7, day: 4 },
+  { id: 'labor', name: 'Labor Day', kind: 'nth-monday', month: 9, nth: 1 },
+  { id: 'columbus', name: 'Columbus / Indigenous Peoples Day', kind: 'nth-monday', month: 10, nth: 2 },
+  { id: 'veterans', name: 'Veterans Day', kind: 'fixed', month: 11, day: 11 },
+  { id: 'thanksgiving', name: 'Thanksgiving Day', kind: 'nth-thursday', month: 11, nth: 4 },
+  { id: 'christmas', name: 'Christmas Day', kind: 'fixed', month: 12, day: 25 }
+];
+let selectedFederalHolidayIds = [];
+let federalHolidayByDate = {};
+
+function observeFederalDate(y, month1to12, day) {
+  const d = new Date(y, month1to12 - 1, day, 12, 0, 0);
+  const dow = d.getDay();
+  if (dow === 6) d.setDate(d.getDate() - 1);
+  else if (dow === 0) d.setDate(d.getDate() + 1);
+  return d;
+}
+function nthWeekdayOfMonth(y, month1to12, weekday, nth) {
+  let count = 0;
+  for (let day = 1; day <= 31; day++) {
+    const d = new Date(y, month1to12 - 1, day, 12, 0, 0);
+    if (d.getMonth() !== month1to12 - 1) break;
+    if (d.getDay() === weekday) {
+      count++;
+      if (count === nth) return d;
+    }
+  }
+  return null;
+}
+function lastWeekdayOfMonth(y, month1to12, weekday) {
+  const last = new Date(y, month1to12, 0, 12, 0, 0);
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(last.getFullYear(), last.getMonth(), last.getDate() - i, 12, 0, 0);
+    if (d.getDay() === weekday) return d;
+  }
+  return last;
+}
+function federalHolidayDateForYear(def, year) {
+  if (!def) return null;
+  if (def.kind === 'fixed') return observeFederalDate(year, def.month, def.day);
+  if (def.kind === 'nth-monday') return nthWeekdayOfMonth(year, def.month, 1, def.nth);
+  if (def.kind === 'nth-thursday') return nthWeekdayOfMonth(year, def.month, 4, def.nth);
+  if (def.kind === 'last-monday') return lastWeekdayOfMonth(year, def.month, 1);
+  return null;
+}
+function loadSelectedFederalHolidays() {
+  try {
+    const raw = localStorage.getItem(MSB_FED_HOLIDAYS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    selectedFederalHolidayIds = Array.isArray(arr)
+      ? arr.filter((id) => FEDERAL_HOLIDAY_DEFS.some((d) => d.id === id))
+      : [];
+  } catch (e) {
+    selectedFederalHolidayIds = [];
+  }
+}
+function persistSelectedFederalHolidays() {
+  try { localStorage.setItem(MSB_FED_HOLIDAYS_KEY, JSON.stringify(selectedFederalHolidayIds)); } catch (e) {}
+}
+function isFederalHolidaySelected(id) {
+  return selectedFederalHolidayIds.indexOf(id) >= 0;
+}
+function getFederalHolidayForDate(dateOrDk) {
+  let dk = null;
+  if (typeof dateOrDk === 'string') dk = dateOrDk;
+  else if (dateOrDk instanceof Date) dk = dateKey(dateOrDk);
+  return (dk && federalHolidayByDate[dk]) || null;
+}
+function syncFederalHolidaysToPeriod() {
+  federalHolidayByDate = {};
+  if (!currentPeriod || !periodDates || !periodDates.length) {
+    renderFederalHolidaysUI();
+    return;
+  }
+  const years = new Set();
+  periodDates.forEach((d) => years.add(d.getFullYear()));
+  years.add(Math.min(...years) - 1);
+  years.add(Math.max(...years) + 1);
+  const periodStart = periodDates[0];
+  const periodEnd = periodDates[periodDates.length - 1];
+  selectedFederalHolidayIds.forEach((id) => {
+    const def = FEDERAL_HOLIDAY_DEFS.find((d) => d.id === id);
+    if (!def) return;
+    years.forEach((y) => {
+      const d = federalHolidayDateForYear(def, y);
+      if (!d || isNaN(d.getTime())) return;
+      if (d >= periodStart && d <= periodEnd) {
+        federalHolidayByDate[dateKey(d)] = { id: def.id, name: def.name };
+      }
+    });
+  });
+  if (currentPeriod.weeks) {
+    currentPeriod.weeks.forEach((week, wIdx) => {
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(week.start);
+        d.setDate(d.getDate() + i);
+        if (federalHolidayByDate[dateKey(d)]) {
+          holidayWeeks[wIdx] = true;
+          break;
+        }
+      }
+    });
+  }
+  renderFederalHolidaysUI();
+}
+function toggleFederalHoliday(id, checked) {
+  const on = !!checked;
+  const i = selectedFederalHolidayIds.indexOf(id);
+  if (on && i < 0) selectedFederalHolidayIds.push(id);
+  if (!on && i >= 0) selectedFederalHolidayIds.splice(i, 1);
+  persistSelectedFederalHolidays();
+  syncFederalHolidaysToPeriod();
+  if (typeof buildInputCalendar === 'function' && typeof activeTab !== 'undefined') {
+    try { buildInputCalendar(activeTab); } catch (e) {}
+  }
+  if (typeof lastScheduleRenderArgs !== 'undefined' && lastScheduleRenderArgs && schedule && Object.keys(schedule).length) {
+    try {
+      renderSchedule(lastScheduleRenderArgs.warnings, lastScheduleRenderArgs.ROLES, lastScheduleRenderArgs.ALL_KC);
+    } catch (e) {}
+  }
+  if (typeof showToast === 'function') {
+    showToast(on ? 'Paid holiday on — 4-day week when it lands in this period.' : 'Federal holiday off.', 'info');
+  }
+}
+function renderFederalHolidaysUI() {
+  const host = document.getElementById('federal-holidays-list');
+  if (!host) return;
+  let refYear = typeof fiscalYear !== 'undefined' ? fiscalYear : new Date().getFullYear();
+  if (periodDates && periodDates.length) {
+    refYear = periodDates[Math.floor(periodDates.length / 2)].getFullYear();
+  }
+  let html = '';
+  FEDERAL_HOLIDAY_DEFS.forEach((def) => {
+    const d = federalHolidayDateForYear(def, refYear);
+    const dk = d ? dateKey(d) : '';
+    const inPeriod = !!(dk && federalHolidayByDate[dk]);
+    const checked = isFederalHolidaySelected(def.id);
+    const dateLabel = d
+      ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      : '';
+    html +=
+      '<label class="fh-item' +
+      (inPeriod ? ' in-period' : '') +
+      '"><input type="checkbox" ' +
+      (checked ? 'checked ' : '') +
+      'onchange="toggleFederalHoliday(\'' +
+      def.id +
+      '\', this.checked)"><span><strong>' +
+      esc(def.name) +
+      '</strong><span class="fh-date">' +
+      esc(dateLabel) +
+      (inPeriod ? ' · in this period' : '') +
+      '</span></span></label>';
+  });
+  host.innerHTML = html;
+  const note = document.getElementById('federal-holidays-note');
+  if (note) {
+    const n = Object.keys(federalHolidayByDate).length;
+    const sel = selectedFederalHolidayIds.length;
+    note.textContent =
+      sel === 0
+        ? 'Check holidays your store observes as paid. Matching weeks become 4-day and days highlight on the calendar.'
+        : sel + ' selected · ' + n + ' in loaded period' + (n ? ' (auto 4-day weeks)' : ' (load a period to match dates)');
+  }
+}
+
 let activeTab = 'sm';
 let openMenu = null;
 
@@ -7564,6 +8134,8 @@ function loadPeriod() {
   // Init inputs for all roles
   getAllPersonIds().forEach(r => { if (!inputs[r]) inputs[r] = {}; });
 
+  try { if (typeof syncFederalHolidaysToPeriod === 'function') syncFederalHolidaysToPeriod(); } catch (e) {}
+
   buildInputTabs();
   buildInputCalendar(activeTab);
   updatePeriodInfo();
@@ -7594,8 +8166,16 @@ function buildInputCalendar(role) {
   // Show each week in the period
   currentPeriod.weeks.forEach((week, wIdx) => {
     const isHoliday = !!holidayWeeks[wIdx];
-    html += `<div class="input-week-label${isHoliday ? ' is-holiday-week' : ''}">`;
-    html += `<span>Week ${wIdx + 1}: ${formatDate(week.start)} - ${formatDate(week.end)}${isHoliday ? ' 🏖 Holiday (4-day)' : ''}</span>`;
+    let fedName = '';
+    for (let fi = 0; fi < 7; fi++) {
+      const fd = new Date(week.start);
+      fd.setDate(fd.getDate() + fi);
+      const fh0 = typeof getFederalHolidayForDate === 'function' ? getFederalHolidayForDate(fd) : null;
+      if (fh0) { fedName = fh0.name; break; }
+    }
+    const fedWeek = !!fedName;
+    html += `<div class="input-week-label${isHoliday ? ' is-holiday-week' : ''}${fedWeek ? ' is-federal-holiday-week' : ''}">`;
+    html += `<span>Week ${wIdx + 1}: ${formatDate(week.start)} - ${formatDate(week.end)}${isHoliday ? ' · Holiday (4-day)' : ''}${fedName ? ' · ' + esc(fedName) : ''}</span>`;
     html += `<label class="holiday-week-toggle"><input type="checkbox" onchange="toggleHolidayWeek(${wIdx}, this.checked)"${isHoliday ? ' checked' : ''}> Company Holiday</label>`;
     html += `</div>`;
     html += '<div class="input-calendar">';
@@ -7614,15 +8194,20 @@ function buildInputCalendar(role) {
       const dayOfWeek = d.getDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       const isMonday = dayOfWeek === 1;
+      const fh = typeof getFederalHolidayForDate === 'function' ? getFederalHolidayForDate(dk) : null;
       let cls = 'cal-cell';
       if (isWeekend) cls += ' weekend';
       if (isMonday) cls += ' monday';
+      if (fh) cls += ' federal-holiday';
 
       const val = inputs[role] && inputs[role][dk];
       let tagHtml = '';
       if (val) {
         const tagCls = getTagCssClass(val);
         tagHtml = `<span class="cell-tag ${tagCls}">${getShiftDisplayLabel(val)}</span>`;
+      }
+      if (fh) {
+        tagHtml += `<span class="fh-badge" title="${esc(fh.name)}">Paid holiday</span>`;
       }
 
       html += `<div class="${cls}" data-dk="${dk}" data-role="${role}" onclick="openCellMenu(event, '${role}', '${dk}')">`;
@@ -10788,10 +11373,14 @@ function renderWeekTableHtml(weekDates, wIdx, names, ALL_KC) {
   html += '<thead><tr><th class="name-col"></th>';
   weekDates.forEach(wd => {
     const dow = wd.getDay();
+    const dkH = dateKey(wd);
+    const fhH = typeof getFederalHolidayForDate === 'function' ? getFederalHolidayForDate(dkH) : null;
     let cls = '';
     if (dow === 0 || dow === 6) cls = 'weekend-col';
     else if (dow === 1) cls = 'monday-col';
-    html += `<th class="${cls}">${DAY_NAMES[dow]}</th>`;
+    if (fhH) cls = (cls ? cls + ' ' : '') + 'federal-holiday-col';
+    const fedLab = fhH ? `<span class="fh-day-label">${esc(fhH.name)}</span>` : '';
+    html += `<th class="${cls}">${DAY_NAMES[dow]}${fedLab}</th>`;
   });
   html += '</tr>';
   html += '<tr><th class="name-col"></th>';
@@ -13246,6 +13835,11 @@ function bootUi() {
   ensureAuthOnBoot();
   updateAccountChip();
   personalizeWelcome();
+  try {
+    if (typeof loadSelectedFederalHolidays === 'function') loadSelectedFederalHolidays();
+    if (typeof renderFederalHolidaysUI === 'function') renderFederalHolidaysUI();
+    if (typeof syncFederalHolidaysToPeriod === 'function') syncFederalHolidaysToPeriod();
+  } catch (e) {}
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', bootUi);

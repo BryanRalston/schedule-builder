@@ -6490,10 +6490,9 @@ function _generateScheduleInner() {
   });
 
   // ════════════════════════════════════════════════════
-  // STEP 2: WEEKEND DAYS OFF (preference-driven)
-  // Target weekend days off per person (global or role override).
-  // Prefer consecutive Sat+Sun when preferConsecutiveDaysOff is on.
-  // Spread across different weekends — max 2 managers sharing the same weekend.
+  // STEP 2: WEEKEND DAYS OFF (coverage-first)
+  // Soft weekend offs never leave a day under-staffed. Targets adapt when LOA/RTO
+  // thin the period (from Grok share balance fix / Period 8 regression).
   // ════════════════════════════════════════════════════
 
   const isDayOff = (s) => s === 'off' || s === 'rto' || s === 'pto' || s === 'loa';
@@ -6505,22 +6504,65 @@ function _generateScheduleInner() {
     return isDayOff(s1) && isDayOff(s2);
   }).length;
 
+  // Managers not already off/LOA/PTO/RTO on this day (working or still unassigned)
+  const managersWorkingOrUnset = (dk) => ROLES.filter(r => !isDayOff(schedule[r][dk])).length;
+
+  // How many managers are NOT hard-locked off by inputs (could still work)
+  const managersNotInputLockedOff = (dk) => ROLES.filter(r => {
+    if (isInputLocked(r, dk) && isDayOff(inputs[r][dk])) return false;
+    return true;
+  }).length;
+
+  // Minimum workers required after soft offs: 2 when 2+ could work, else all remaining
+  const minWorkersAfterSoftOff = (dk) => {
+    const pool = managersNotInputLockedOff(dk);
+    if (pool >= 3) return 2;
+    if (pool === 2) return 2;
+    return Math.max(1, pool);
+  };
+
+  // True if placing a soft off for r on dk would drop below safe coverage
+  const softOffBreaksCoverage = (r, dk) => {
+    if (!dk) return true;
+    if (isDayOff(schedule[r][dk])) return false;
+    const after = managersWorkingOrUnset(dk) - 1;
+    return after < minWorkersAfterSoftOff(dk);
+  };
+
   const canPlaceWeekendDay = (r, dk) => {
     if (!dk) return false;
     if (isInputLocked(r, dk) && isWork(inputs[r][dk])) return false;
     const s = schedule[r][dk];
     if (s && s !== 'off' && s !== 'rto') return false;
+    if (softOffBreaksCoverage(r, dk)) return false;
     return true;
   };
 
-  // Pass A: place full consecutive weekends toward target (2 days each)
-  // Place at most floor(target/2) full pairs so we don't overshoot (remainder → Pass B).
+  // Cap weekend-off targets when the period is short-staffed (LOA / heavy RTO)
+  const getEffectiveWeekendTarget = (r) => {
+    let t = getWeekendTargetForPerson(r);
+    const availWeDays = allDks.filter(dk =>
+      isDkWeekend(dk) && schedule[r][dk] !== 'loa' && schedule[r][dk] !== 'pto'
+    ).length;
+    t = Math.min(t, availWeDays);
+    const weDays = allDks.filter(isDkWeekend);
+    if (weDays.length === 0) return 0;
+    const avgAvail = weDays.reduce((sum, dk) => sum + managersNotInputLockedOff(dk), 0) / weDays.length;
+    if (avgAvail <= 2.2) t = Math.min(t, 1);
+    if (avgAvail <= 1.5) t = 0;
+    const hardWeOff = allDks.filter(dk =>
+      isDkWeekend(dk) && (schedule[r][dk] === 'rto' || schedule[r][dk] === 'pto' || schedule[r][dk] === 'loa')
+    ).length;
+    if (hardWeOff >= 2) t = Math.min(t, hardWeOff);
+    return Math.max(0, t);
+  };
+
+  // Pass A: full consecutive weekends (coverage-guarded)
   ROLES.forEach(r => {
-    const target = getWeekendTargetForPerson(r);
+    const target = getEffectiveWeekendTarget(r);
     if (target <= 0) return;
     const maxFullWeekends = Math.max(PREFS.preferConsecutiveDaysOff && target >= 2 ? 1 : 0, Math.floor(target / 2));
     let fullPlaced = 0;
-    // Count already-complete consecutive weekends from inputs
     allWeekendPairs.forEach(wp => {
       if (isDayOff(schedule[r][wp.sat]) && isDayOff(schedule[r][wp.sun])) fullPlaced++;
     });
@@ -6530,21 +6572,26 @@ function _generateScheduleInner() {
       if (fullPlaced >= maxFullWeekends) break;
       if (countWeekendDaysOff(r) >= target) break;
       const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
-      if (isDayOff(s1) && isDayOff(s2)) continue; // already counted
+      if (isDayOff(s1) && isDayOff(s2)) continue;
       if (!canPlaceWeekendDay(r, wp.sat) && !isDayOff(s1)) continue;
       if (!canPlaceWeekendDay(r, wp.sun) && !isDayOff(s2)) continue;
-      if (wpOffCount(wp) >= maxShare) continue;
+      const freeSat = managersNotInputLockedOff(wp.sat);
+      const freeSun = managersNotInputLockedOff(wp.sun);
+      const localMaxShare = (Math.min(freeSat, freeSun) <= 3) ? 1 : maxShare;
+      if (wpOffCount(wp) >= localMaxShare) continue;
       if (!isDayOff(s1) && canPlaceWeekendDay(r, wp.sat)) schedule[r][wp.sat] = 'off';
       if (!isDayOff(s2) && canPlaceWeekendDay(r, wp.sun)) schedule[r][wp.sun] = 'off';
       if (isDayOff(schedule[r][wp.sat]) && isDayOff(schedule[r][wp.sun])) fullPlaced++;
     }
-    // Guarantee at least one consecutive weekend when preferred and target >= 2
     if (PREFS.preferConsecutiveDaysOff && target >= 2 && fullPlaced < 1) {
       for (const wp of [...allWeekendPairs].sort((a, b) => wpOffCount(a) - wpOffCount(b))) {
         if (fullPlaced >= 1) break;
         const s1 = schedule[r][wp.sat], s2 = schedule[r][wp.sun];
         if (!canPlaceWeekendDay(r, wp.sat) && !isDayOff(s1)) continue;
         if (!canPlaceWeekendDay(r, wp.sun) && !isDayOff(s2)) continue;
+        const freeSat = managersNotInputLockedOff(wp.sat);
+        const freeSun = managersNotInputLockedOff(wp.sun);
+        if (Math.min(freeSat, freeSun) <= 2 && wpOffCount(wp) >= 1) continue;
         if (!isDayOff(s1) && canPlaceWeekendDay(r, wp.sat)) schedule[r][wp.sat] = 'off';
         if (!isDayOff(s2) && canPlaceWeekendDay(r, wp.sun)) schedule[r][wp.sun] = 'off';
         if (isDayOff(schedule[r][wp.sat]) && isDayOff(schedule[r][wp.sun])) fullPlaced++;
@@ -6552,10 +6599,9 @@ function _generateScheduleInner() {
     }
   });
 
-  // Pass B: fill remaining single weekend days toward target (if odd targets or leftover)
-  // Never leave fewer than 2 managers available that day (coverage guard).
+  // Pass B: remaining single weekend days (coverage-first)
   ROLES.forEach(r => {
-    const target = getWeekendTargetForPerson(r);
+    const target = getEffectiveWeekendTarget(r);
     let need = target - countWeekendDaysOff(r);
     if (need <= 0) return;
     const weekendDays = allDks.filter(dk => isDkWeekend(dk));
@@ -6569,15 +6615,14 @@ function _generateScheduleInner() {
         if (next && isDayOff(schedule[r][next])) score -= 10;
       }
       const alreadyOff = ROLES.filter(rx => isDayOff(schedule[rx][dk])).length;
-      score += alreadyOff * 3;
-      // Prefer not stacking beyond half the team
-      if (alreadyOff >= Math.max(1, ROLES.length - 2)) score += 50;
+      score += alreadyOff * 5;
+      if (managersWorkingOrUnset(dk) <= minWorkersAfterSoftOff(dk) + 1) score += 80;
       return { dk, score };
     }).sort((a, b) => a.score - b.score);
     for (const { dk } of scored) {
       if (need <= 0) break;
-      const alreadyOff = ROLES.filter(rx => isDayOff(schedule[rx][dk])).length;
-      if (alreadyOff >= ROLES.length - 2) continue; // keep ≥2 potential workers
+      if (softOffBreaksCoverage(r, dk)) continue;
+      if (managersWorkingOrUnset(dk) <= minWorkersAfterSoftOff(dk)) continue;
       schedule[r][dk] = 'off';
       need--;
     }
@@ -6883,26 +6928,36 @@ function _generateScheduleInner() {
         preferOpen = isSM || rolePrefOpen;
       }
 
-      if (closedYesterday && PREFS.avoidClopening) {
-        // MUST be mid — NEVER open after a close (clopening ban)
-        schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
-        mids++;
-        midVariety++;
-        managerMids[r]++;
-      } else if (opens === 0) {
-        // No opener yet — assign open (unless we should try to balance and have other options)
-        if (preferMid && unassigned.some(r2 => r2 !== r && !schedule[r2][dk] && !(pdk && isClose(schedule[r2][pdk])))) {
-          // Skip — let someone else open, we'll get mid below
-          schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
-          mids++;
-          midVariety++;
-          managerMids[r]++;
+      if (opens === 0) {
+        // Coverage-first: always staff an opener before mid/balance concerns
+        // Prefer someone who didn't close yesterday when possible
+        if (closedYesterday && PREFS.avoidClopening) {
+          const alt = unassigned.find(r2 => r2 !== r && !schedule[r2][dk] && !(pdk && isClose(schedule[r2][pdk])));
+          if (alt) {
+            // Take mid; alt will open when reached
+            schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+            mids++;
+            midVariety++;
+            managerMids[r]++;
+          } else {
+            // Only candidate — coverage wins over clopen soft preference
+            schedule[r][dk] = (openVariety % 2 === 0) ? 'open-early' : 'open-late';
+            opens++;
+            openVariety++;
+            managerOpens[r]++;
+          }
         } else {
           schedule[r][dk] = (openVariety % 2 === 0) ? 'open-early' : 'open-late';
           opens++;
           openVariety++;
           managerOpens[r]++;
         }
+      } else if (closedYesterday && PREFS.avoidClopening) {
+        // MUST be mid — NEVER open after a close (clopening ban)
+        schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+        mids++;
+        midVariety++;
+        managerMids[r]++;
       } else if (mids === 0) {
         // No mid yet — assign mid (unless should balance toward open)
         if (preferOpen && opens < 2) {

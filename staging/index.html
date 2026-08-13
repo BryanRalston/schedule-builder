@@ -3835,14 +3835,17 @@ html[data-density="board"] .week-table thead th .day-hours { font-size: 0.68rem;
   margin-top: 0.15rem;
 }
 @media (max-width: 720px) {
-  .mobile-analytics-toggle { display: block; }
-  /* Default collapsed on mobile: only expand when .analytics-expanded is set */
-  #summary-section:not(.analytics-expanded) .section-body,
-  #summary-section:not(.analytics-expanded) .section-header {
+  .mobile-analytics-toggle { display: block !important; }
+  /* Pure CSS default: always collapsed on mobile unless user expands */
+  #summary-section .section-body,
+  #summary-section .section-header {
     display: none !important;
   }
   #summary-section.analytics-expanded .section-body {
     display: block !important;
+  }
+  #summary-section.analytics-expanded .section-header {
+    display: flex !important;
   }
   /* Fairness stays visible; strip is primary review */
   #fairness-under-schedule {

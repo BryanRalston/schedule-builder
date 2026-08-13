@@ -23,4 +23,4 @@ powershell -File scripts/serve-staging.ps1
 ```
 Then open http://localhost:5174/
 
-Generated from app version **2.6.1** on 2026-08-13 14:56:57.
+Generated from app version **2.6.1** on 2026-08-13 14:57:53.

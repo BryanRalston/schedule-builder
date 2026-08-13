@@ -1,0 +1,735 @@
+{
+  "generatedAt": "2026-08-13T11:43:41.920Z",
+  "base": "http://127.0.0.1:56086",
+  "mode": "local-staging-static",
+  "stagingPath": "C:\\Users\\bryma\\schedule-builder\\staging",
+  "summary": {
+    "passed": 91,
+    "failed": 0,
+    "skipped": 0,
+    "total": 91
+  },
+  "sections": {
+    "P08 unit": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0
+    },
+    "0. Isolation / staging identity": {
+      "pass": 7,
+      "fail": 0,
+      "skip": 0
+    },
+    "1. Engine (in-page generate)": {
+      "pass": 8,
+      "fail": 0,
+      "skip": 0
+    },
+    "2. Boot & navigation UI": {
+      "pass": 12,
+      "fail": 0,
+      "skip": 0
+    },
+    "3. Setup tab": {
+      "pass": 9,
+      "fail": 0,
+      "skip": 0
+    },
+    "4. Requests tab": {
+      "pass": 3,
+      "fail": 0,
+      "skip": 0
+    },
+    "5. Rules / Preferences": {
+      "pass": 10,
+      "fail": 0,
+      "skip": 0
+    },
+    "6. Schedule generate UI": {
+      "pass": 10,
+      "fail": 0,
+      "skip": 0
+    },
+    "7. Exports": {
+      "pass": 4,
+      "fail": 0,
+      "skip": 0
+    },
+    "8. Auth full path (staging keys)": {
+      "pass": 11,
+      "fail": 0,
+      "skip": 0
+    },
+    "9. Monetization / Free limits": {
+      "pass": 3,
+      "fail": 0,
+      "skip": 0
+    },
+    "10. Secondary pages": {
+      "pass": 4,
+      "fail": 0,
+      "skip": 0
+    },
+    "11. Mobile viewport": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0
+    },
+    "12. Regression: prod isolation": {
+      "pass": 4,
+      "fail": 0,
+      "skip": 0
+    },
+    "13. Live staging URL smoke": {
+      "pass": 3,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "results": [
+    {
+      "section": "P08 unit",
+      "name": "p08-coverage-unit",
+      "ok": true,
+      "detail": "exit 0",
+      "severity": null
+    },
+    {
+      "section": "0. Isolation / staging identity",
+      "name": "robots-noindex",
+      "ok": true,
+      "detail": "noindex,nofollow",
+      "severity": null
+    },
+    {
+      "section": "0. Isolation / staging identity",
+      "name": "staging-banner-visible",
+      "ok": true,
+      "detail": "STAGING - not the tester build - data separate from production",
+      "severity": null
+    },
+    {
+      "section": "0. Isolation / staging identity",
+      "name": "version-shows-staging",
+      "ok": true,
+      "detail": "v2.5.2-staging",
+      "severity": null
+    },
+    {
+      "section": "0. Isolation / staging identity",
+      "name": "localStorage-stg-prefix",
+      "ok": true,
+      "detail": "keys=msb_stg_session,msb_stg_workspace",
+      "severity": null
+    },
+    {
+      "section": "0. Isolation / staging identity",
+      "name": "sw-cache-staging-name",
+      "ok": true,
+      "detail": "msb-pro-staging-v2.5.2",
+      "severity": null
+    },
+    {
+      "section": "0. Isolation / staging identity",
+      "name": "auth-does-not-block",
+      "ok": true,
+      "detail": "no auth-locked after boot",
+      "severity": null
+    },
+    {
+      "section": "0. Isolation / staging identity",
+      "name": "offline-session-auto-created",
+      "ok": true,
+      "detail": "offline Device user",
+      "severity": null
+    },
+    {
+      "section": "1. Engine (in-page generate)",
+      "name": "clean-team-coverage",
+      "ok": true,
+      "detail": "days=35 clopens=0",
+      "severity": null
+    },
+    {
+      "section": "1. Engine (in-page generate)",
+      "name": "norma-rto-weekends",
+      "ok": true,
+      "detail": "days=35 clopens=0",
+      "severity": null
+    },
+    {
+      "section": "1. Engine (in-page generate)",
+      "name": "p08-loa-rto-vac",
+      "ok": true,
+      "detail": "days=35 clopens=0",
+      "severity": null
+    },
+    {
+      "section": "1. Engine (in-page generate)",
+      "name": "dual-am-pto-midweek",
+      "ok": true,
+      "detail": "days=35 clopens=1 clopens=1 (allowed under dual PTO)",
+      "severity": null
+    },
+    {
+      "section": "1. Engine (in-page generate)",
+      "name": "aggressive-weekend-target-short-staff",
+      "ok": true,
+      "detail": "days=35 clopens=6 clopens=6",
+      "severity": null
+    },
+    {
+      "section": "1. Engine (in-page generate)",
+      "name": "kc-close-monday-coverage",
+      "ok": true,
+      "detail": "days=35 clopens=1 clopens=1",
+      "severity": null
+    },
+    {
+      "section": "1. Engine (in-page generate)",
+      "name": "all-want-weekends-coverage-wins",
+      "ok": true,
+      "detail": "days=35 clopens=0",
+      "severity": null
+    },
+    {
+      "section": "1. Engine (in-page generate)",
+      "name": "kc-mid-gap-fill",
+      "ok": true,
+      "detail": "generate ok days=35 kcMids=30 clopens=1",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "welcome-card-visible",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "welcome-dismissible",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "tab-setup-active",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "tab-requests-active",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "tab-rules-active",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "tab-schedule-active",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "subtab-preferences",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "subtab-role-rules",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "header-demo-btn",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "header-save-btn",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "header-load-btn",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "2. Boot & navigation UI",
+      "name": "header-more-menu-exports",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "store-name-input",
+      "ok": true,
+      "detail": "Staging Test Store #999",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "sm-name-field",
+      "ok": true,
+      "detail": "Test SM Bryan",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "add-remove-am",
+      "ok": true,
+      "detail": "2→3→2",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "add-remove-kc",
+      "ok": true,
+      "detail": "1→2→1",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "kc-manager-coverage-checkbox",
+      "ok": true,
+      "detail": "false→true",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "load-period",
+      "ok": true,
+      "detail": "FY2026 Period 1 (Q1.1) — February 1, 2026 to February 28, 2026 — 4 weeks, 28 days",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "shift-times-section",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "shift-times-reset",
+      "ok": true,
+      "detail": "panel may be collapsed",
+      "severity": null
+    },
+    {
+      "section": "3. Setup tab",
+      "name": "next-requests-nav",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "4. Requests tab",
+      "name": "request-grid-exists",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "4. Requests tab",
+      "name": "set-rto-on-cell",
+      "ok": true,
+      "detail": "2026-09-02=rto",
+      "severity": null
+    },
+    {
+      "section": "4. Requests tab",
+      "name": "nav-to-rules",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "pref-kc-mid-default-checked",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "pref-kc-mid-toggle-off",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "pref-kc-mid-toggle-on",
+      "ok": true,
+      "detail": "true",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "kc-close-day-checkboxes",
+      "ok": true,
+      "detail": "count=7",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "sm-closes-input",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "am-closes-input",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "weekend-target",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "avoid-clopen-toggle",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "fair-distribution-toggle",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "5. Rules / Preferences",
+      "name": "role-rules-subtab-renders",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "demo-load-schedule-content",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "btn-generate-visible",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "btn-generate-clicked",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "schedule-has-shift-cells",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "view-mode-month",
+      "ok": true,
+      "detail": "len=1929 mode=month",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "view-mode-week",
+      "ok": true,
+      "detail": "len=1932 mode=week",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "view-mode-day",
+      "ok": true,
+      "detail": "len=4459 mode=day",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "click-shift-cell",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "save-to-storage",
+      "ok": true,
+      "detail": "Saved FY2026 Period 7 (August)×",
+      "severity": null
+    },
+    {
+      "section": "6. Schedule generate UI",
+      "name": "load-saved-modal-opens",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "7. Exports",
+      "name": "export-word-no-throw",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "7. Exports",
+      "name": "export-excel-no-throw",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "7. Exports",
+      "name": "export-backup-no-throw",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "7. Exports",
+      "name": "export-download-event",
+      "ok": true,
+      "detail": "count=3",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "auth-stg-offline-session",
+      "ok": true,
+      "detail": "Device user",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "account-chip-opens-panel",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "sign-in-available-offline",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "work-email-create-workspace",
+      "ok": true,
+      "detail": "bryan.stg+1786621390246@ralston.local",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "sign-out-shows-auth-shell",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "work-email-sign-in-again",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "work-email-rejects-bad-password",
+      "ok": true,
+      "detail": "Incorrect password.",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "google-button-present",
+      "ok": true,
+      "detail": "Connect Google (preview)",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "google-opens-provider-modal",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "google-preview-session",
+      "ok": true,
+      "detail": "google",
+      "severity": null
+    },
+    {
+      "section": "8. Auth full path (staging keys)",
+      "name": "license-unlock-msb-pro-test",
+      "ok": true,
+      "detail": "msb_stg_pro_license",
+      "severity": null
+    },
+    {
+      "section": "9. Monetization / Free limits",
+      "name": "free-generate-count-tracked",
+      "ok": true,
+      "detail": "count=1 gen={\"n\":\"0\",\"ok\":true}",
+      "severity": null
+    },
+    {
+      "section": "9. Monetization / Free limits",
+      "name": "pro-unlock-stg-key",
+      "ok": true,
+      "detail": "MSB-PRO-TEST123",
+      "severity": null
+    },
+    {
+      "section": "9. Monetization / Free limits",
+      "name": "pro-license-not-bare-key",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "10. Secondary pages",
+      "name": "buy-html-loads",
+      "ok": true,
+      "detail": "Buy Pro · Manager Schedule Builder",
+      "severity": null
+    },
+    {
+      "section": "10. Secondary pages",
+      "name": "privacy-html-loads",
+      "ok": true,
+      "detail": "Privacy Policy · Schedule Pro",
+      "severity": null
+    },
+    {
+      "section": "10. Secondary pages",
+      "name": "terms-html-loads",
+      "ok": true,
+      "detail": "Terms of Use · Schedule Pro",
+      "severity": null
+    },
+    {
+      "section": "10. Secondary pages",
+      "name": "install-html-loads",
+      "ok": true,
+      "detail": "Publish Setup · Schedule Pro",
+      "severity": null
+    },
+    {
+      "section": "11. Mobile viewport",
+      "name": "mobile-tabs-usable",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "11. Mobile viewport",
+      "name": "mobile-demo-generate",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "12. Regression: prod isolation",
+      "name": "no-write-msb-session",
+      "ok": true,
+      "detail": "only staging session keys",
+      "severity": null
+    },
+    {
+      "section": "12. Regression: prod isolation",
+      "name": "no-bare-monetization-keys",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "12. Regression: prod isolation",
+      "name": "stg-keys-present",
+      "ok": true,
+      "detail": "msb_stg_session, msb_stg_pro_license, msb_stg_welcome_dismissed, msb_stg_store_meta, msb_stg_active_tab, msb_stg_workspace",
+      "severity": null
+    },
+    {
+      "section": "12. Regression: prod isolation",
+      "name": "prod-root-not-under-test",
+      "ok": true,
+      "detail": "suite serves staging/ only; production index.html untouched",
+      "severity": null
+    },
+    {
+      "section": "13. Live staging URL smoke",
+      "name": "live-staging-reachable",
+      "ok": true,
+      "detail": "HTTP 200",
+      "severity": null
+    },
+    {
+      "section": "13. Live staging URL smoke",
+      "name": "live-staging-banner",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    },
+    {
+      "section": "13. Live staging URL smoke",
+      "name": "live-staging-no-auth-lock",
+      "ok": true,
+      "detail": "",
+      "severity": null
+    }
+  ],
+  "failures": [],
+  "p08": {
+    "ok": true,
+    "output": "=== Effective weekend targets ===\nBryan target 2 weOffs 6\nBrian target 2 weOffs 2\nThuy target 2 weOffs 2\nNorma target 2 weOffs 4\n\n=== Weekend staffing ===\n2026-08-30 n=2 o=1 c=1 Bryan=open-early | Brian=off | Thuy=off | Norma=close\n2026-09-05 n=2 o=1 c=1 Bryan=open-early | Brian=off | Thuy=close | Norma=rto\n2026-09-06 n=2 o=1 c=1 Bryan=open-early | Brian=close | Thuy=off | Norma=rto\n2026-09-12 n=3 o=1 c=1 Bryan=open-early | Brian=close | Thuy=mid-early | Norma=rto\n2026-09-13 n=2 o=1 c=1 Bryan=loa | Brian=open-early | Thuy=close | Norma=rto\n2026-09-19 n=3 o=1 c=1 Bryan=loa | Brian=open-early | Thuy=close | Norma=mid-early\n2026-09-20 n=3 o=1 c=1 Bryan=loa | Brian=open-early | Thuy=close | Norma=mid-early\n2026-09-26 n=3 o=1 c=1 Bryan=loa | Brian=open-early | Thuy=close | Norma=mid-early\n2026-09-27 n=3 o=1 c=1 Bryan=loa | Brian=open-early | Thuy=close | Norma=mid-early\n2026-10-03 n=3 o=1 c=1 Bryan=loa | Brian=open-early | Thuy=close | Norma=mid-early\n\n=== RESULT ===\ncoverage failures: NONE\nthin days: NONE\nPASS — all days have opener+closer; no thin soft-off days",
+    "status": 0
+  },
+  "live": "PASS live-staging-reachable: HTTP 200; PASS live-staging-banner: ; PASS live-staging-no-auth-lock: "
+}

@@ -1,13 +1,13 @@
 {
   "title": "Schedule Pro Engine Stress Test",
-  "version": "2.5.4",
-  "startedAt": "2026-08-13T13:58:15.090Z",
-  "finishedAt": "2026-08-13T13:58:16.787Z",
-  "base": "http://127.0.0.1:56633",
+  "version": "2.5.5",
+  "startedAt": "2026-08-13T14:22:22.988Z",
+  "finishedAt": "2026-08-13T14:22:27.444Z",
+  "base": "http://127.0.0.1:57732",
   "summary": {
-    "pass": 19,
+    "pass": 24,
     "fail": 0,
-    "warn": 6,
+    "warn": 1,
     "total": 25
   },
   "hardCriteria": [
@@ -24,11 +24,9 @@
   "scenarios": [
     {
       "name": "clean-3am",
-      "status": "WARN",
+      "status": "PASS",
       "hard": [],
-      "soft": [
-        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":4}"
-      ],
+      "soft": [],
       "info": [],
       "stats": {
         "noOpen": 0,
@@ -43,13 +41,13 @@
           "am3": 8
         },
         "amWeOffs": {
-          "am1": 2,
-          "am2": 5,
+          "am1": 3,
+          "am2": 4,
           "am3": 4
         },
         "smCloses": 5,
         "closeSpread": 0,
-        "weSpread": 3,
+        "weSpread": 1,
         "days": 35,
         "ms": 26,
         "error": null
@@ -74,15 +72,15 @@
           "am3": 8
         },
         "amWeOffs": {
-          "am1": 6,
-          "am2": 4,
+          "am1": 5,
+          "am2": 5,
           "am3": 5
         },
-        "smCloses": 2,
+        "smCloses": 3,
         "closeSpread": 1,
-        "weSpread": 2,
+        "weSpread": 0,
         "days": 35,
-        "ms": 10,
+        "ms": 9,
         "error": null
       }
     },
@@ -171,17 +169,15 @@
         "closeSpread": 0,
         "weSpread": 0,
         "days": 35,
-        "ms": 9,
+        "ms": 10,
         "error": null
       }
     },
     {
       "name": "no-kcs",
-      "status": "WARN",
+      "status": "PASS",
       "hard": [],
-      "soft": [
-        "AM weekend-off spread=3 {\"am1\":3,\"am2\":2,\"am3\":5}"
-      ],
+      "soft": [],
       "info": [],
       "stats": {
         "noOpen": 0,
@@ -197,12 +193,12 @@
         },
         "amWeOffs": {
           "am1": 3,
-          "am2": 2,
-          "am3": 5
+          "am2": 3,
+          "am3": 4
         },
         "smCloses": 6,
         "closeSpread": 1,
-        "weSpread": 3,
+        "weSpread": 1,
         "days": 35,
         "ms": 9,
         "error": null
@@ -241,11 +237,9 @@
     },
     {
       "name": "kc-close-none",
-      "status": "WARN",
+      "status": "PASS",
       "hard": [],
-      "soft": [
-        "AM weekend-off spread=3 {\"am1\":3,\"am2\":2,\"am3\":5}"
-      ],
+      "soft": [],
       "info": [],
       "stats": {
         "noOpen": 0,
@@ -261,12 +255,12 @@
         },
         "amWeOffs": {
           "am1": 3,
-          "am2": 2,
-          "am3": 5
+          "am2": 3,
+          "am3": 4
         },
         "smCloses": 6,
         "closeSpread": 1,
-        "weSpread": 3,
+        "weSpread": 1,
         "days": 35,
         "ms": 9,
         "error": null
@@ -278,7 +272,7 @@
       "hard": [],
       "soft": [],
       "info": [
-        "AM close spread=6 {\"am1\":4,\"am2\":10,\"am3\":9}"
+        "AM close spread=9 {\"am1\":2,\"am2\":11,\"am3\":10}"
       ],
       "stats": {
         "noOpen": 0,
@@ -288,20 +282,20 @@
         "dualManagerCloses": 0,
         "mgrCloseOnKcNight": 0,
         "amCloseCounts": {
-          "am1": 4,
-          "am2": 10,
-          "am3": 9
+          "am1": 2,
+          "am2": 11,
+          "am3": 10
         },
         "amWeOffs": {
-          "am1": 6,
-          "am2": 5,
+          "am1": 8,
+          "am2": 3,
           "am3": 4
         },
-        "smCloses": 2,
-        "closeSpread": 6,
-        "weSpread": 2,
+        "smCloses": 3,
+        "closeSpread": 9,
+        "weSpread": 5,
         "days": 35,
-        "ms": 11,
+        "ms": 12,
         "error": null
       }
     },
@@ -324,13 +318,13 @@
           "am3": 7
         },
         "amWeOffs": {
-          "am1": 4,
-          "am2": 6,
+          "am1": 5,
+          "am2": 5,
           "am3": 4
         },
         "smCloses": 4,
         "closeSpread": 1,
-        "weSpread": 2,
+        "weSpread": 1,
         "days": 35,
         "ms": 10,
         "error": null
@@ -363,17 +357,15 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 6,
+        "ms": 7,
         "error": null
       }
     },
     {
       "name": "zero-weekend-target",
-      "status": "WARN",
+      "status": "PASS",
       "hard": [],
-      "soft": [
-        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":4}"
-      ],
+      "soft": [],
       "info": [],
       "stats": {
         "noOpen": 0,
@@ -388,13 +380,13 @@
           "am3": 8
         },
         "amWeOffs": {
-          "am1": 2,
-          "am2": 5,
+          "am1": 3,
+          "am2": 4,
           "am3": 4
         },
         "smCloses": 5,
         "closeSpread": 0,
-        "weSpread": 3,
+        "weSpread": 1,
         "days": 35,
         "ms": 7,
         "error": null
@@ -427,7 +419,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 10,
+        "ms": 11,
         "error": null
       }
     },
@@ -437,7 +429,7 @@
       "hard": [],
       "soft": [],
       "info": [
-        "AM close spread=4 {\"am1\":4,\"am2\":8,\"am3\":8}"
+        "AM close spread=8 {\"am1\":2,\"am2\":9,\"am3\":10}"
       ],
       "stats": {
         "noOpen": 0,
@@ -447,18 +439,18 @@
         "dualManagerCloses": 0,
         "mgrCloseOnKcNight": 0,
         "amCloseCounts": {
-          "am1": 4,
-          "am2": 8,
-          "am3": 8
+          "am1": 2,
+          "am2": 9,
+          "am3": 10
         },
         "amWeOffs": {
-          "am1": 7,
-          "am2": 6,
-          "am3": 5
+          "am1": 9,
+          "am2": 4,
+          "am3": 4
         },
         "smCloses": 7,
-        "closeSpread": 4,
-        "weSpread": 2,
+        "closeSpread": 8,
+        "weSpread": 5,
         "days": 35,
         "ms": 11,
         "error": null
@@ -482,14 +474,14 @@
           "am2": 8
         },
         "amWeOffs": {
-          "am1": 3,
-          "am2": 5
+          "am1": 4,
+          "am2": 4
         },
         "smCloses": 4,
         "closeSpread": 1,
-        "weSpread": 2,
+        "weSpread": 0,
         "days": 35,
-        "ms": 7,
+        "ms": 8,
         "error": null
       }
     },
@@ -498,9 +490,7 @@
       "status": "PASS",
       "hard": [],
       "soft": [],
-      "info": [
-        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":4}"
-      ],
+      "info": [],
       "stats": {
         "noOpen": 0,
         "noClose": 0,
@@ -514,15 +504,15 @@
           "am3": 8
         },
         "amWeOffs": {
-          "am1": 2,
-          "am2": 5,
+          "am1": 3,
+          "am2": 4,
           "am3": 4
         },
         "smCloses": 5,
         "closeSpread": 0,
-        "weSpread": 3,
+        "weSpread": 1,
         "days": 35,
-        "ms": 11,
+        "ms": 10,
         "error": null
       }
     },
@@ -532,7 +522,6 @@
       "hard": [],
       "soft": [],
       "info": [
-        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":4}",
         "clopens=19"
       ],
       "stats": {
@@ -548,13 +537,13 @@
           "am3": 8
         },
         "amWeOffs": {
-          "am1": 2,
-          "am2": 5,
+          "am1": 3,
+          "am2": 4,
           "am3": 4
         },
         "smCloses": 5,
         "closeSpread": 1,
-        "weSpread": 3,
+        "weSpread": 1,
         "days": 35,
         "ms": 7,
         "error": null
@@ -611,12 +600,12 @@
         },
         "amWeOffs": {
           "am1": 4,
-          "am2": 3,
-          "am3": 5
+          "am2": 4,
+          "am3": 4
         },
         "smCloses": 11,
         "closeSpread": 1,
-        "weSpread": 2,
+        "weSpread": 0,
         "days": 35,
         "ms": 7,
         "error": null
@@ -641,13 +630,13 @@
           "am3": 8
         },
         "amWeOffs": {
-          "am1": 3,
-          "am2": 5,
+          "am1": 4,
+          "am2": 4,
           "am3": 4
         },
         "smCloses": 4,
         "closeSpread": 1,
-        "weSpread": 2,
+        "weSpread": 0,
         "days": 35,
         "ms": 8,
         "error": null
@@ -686,11 +675,9 @@
     },
     {
       "name": "six-week-period",
-      "status": "WARN",
+      "status": "PASS",
       "hard": [],
-      "soft": [
-        "AM weekend-off spread=3 {\"am1\":2,\"am2\":5,\"am3\":5}"
-      ],
+      "soft": [],
       "info": [],
       "stats": {
         "noOpen": 0,
@@ -705,13 +692,13 @@
           "am3": 10
         },
         "amWeOffs": {
-          "am1": 2,
-          "am2": 5,
-          "am3": 5
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
         },
         "smCloses": 6,
         "closeSpread": 1,
-        "weSpread": 3,
+        "weSpread": 0,
         "days": 42,
         "ms": 9,
         "error": null
@@ -738,16 +725,16 @@
           "am3": 8
         },
         "amWeOffs": {
-          "am1": 6,
-          "am2": 4,
+          "am1": 5,
+          "am2": 5,
           "am3": 5
         },
-        "smCloses": 2,
+        "smCloses": 3,
         "closeSpread": 1,
-        "weSpread": 2,
+        "weSpread": 0,
         "days": 35,
-        "ms": 71,
-        "msAvg": 7,
+        "ms": 78,
+        "msAvg": 8,
         "error": null,
         "stabilityOk": true,
         "stabilityNotes": "closes stable ±1 of median",
@@ -820,7 +807,7 @@
         "closeSpread": 2,
         "weSpread": 6,
         "days": 35,
-        "ms": 12,
+        "ms": 11,
         "error": null
       }
     },
@@ -854,7 +841,7 @@
         "closeSpread": 5,
         "weSpread": 5,
         "days": 35,
-        "ms": 13,
+        "ms": 14,
         "error": null
       }
     }
@@ -884,17 +871,27 @@
       {
         "name": "clean-3am",
         "clopens": 0,
-        "status": "WARN"
+        "status": "PASS"
       }
     ],
     "worstCloseSpread": [
       {
         "name": "dual-loa",
-        "closeSpread": 6,
+        "closeSpread": 9,
         "amCloseCounts": {
-          "am1": 4,
-          "am2": 10,
-          "am3": 9
+          "am1": 2,
+          "am2": 11,
+          "am3": 10
+        },
+        "status": "PASS"
+      },
+      {
+        "name": "pto-checkerboard-am1",
+        "closeSpread": 8,
+        "amCloseCounts": {
+          "am1": 2,
+          "am2": 9,
+          "am3": 10
         },
         "status": "PASS"
       },
@@ -905,16 +902,6 @@
           "am1": 5,
           "am2": 5,
           "am3": 0
-        },
-        "status": "PASS"
-      },
-      {
-        "name": "pto-checkerboard-am1",
-        "closeSpread": 4,
-        "amCloseCounts": {
-          "am1": 4,
-          "am2": 8,
-          "am3": 8
         },
         "status": "PASS"
       },

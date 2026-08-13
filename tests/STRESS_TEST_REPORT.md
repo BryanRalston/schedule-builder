@@ -1,15 +1,15 @@
 # Schedule Pro Engine Stress Test Report
 
-Generated: 2026-08-13T13:58:16.787Z
-Engine version: **2.5.4**
-Base: `http://127.0.0.1:56633` (local repo-root static server)
+Generated: 2026-08-13T14:22:27.444Z
+Engine version: **2.5.5**
+Base: `http://127.0.0.1:57732` (local repo-root static server)
 
 ## Summary
 
 | Result | Count |
 |--------|------:|
-| PASS   | 19 |
-| WARN   | 6 |
+| PASS   | 24 |
+| WARN   | 1 |
 | FAIL   | 0 |
 | Total  | 25 |
 
@@ -32,31 +32,31 @@ Exit code is **1 only on FAIL** (hard coverage / throw / manager close on KC nig
 
 | Scenario | Status | noOpen | noClose | clopens | thin | closeSpread | weSpread | ms |
 |----------|--------|-------:|--------:|--------:|-----:|------------:|---------:|---:|
-| clean-3am | WARN | 0 | 0 | 0 | 0 | 0 | 3 | 26 |
-| p08-posted-shape | PASS | 0 | 0 | 0 | 0 | 1 | 2 | 10 |
+| clean-3am | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 26 |
+| p08-posted-shape | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 9 |
 | sole-manager | WARN | 0 | 35 | 0 | 35 | 0 | 0 | 11 |
 | sm-plus-one-am | PASS | 0 | 0 | 1 | 0 | 0 | 0 | 10 |
-| five-ams | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 9 |
-| no-kcs | WARN | 0 | 0 | 0 | 0 | 1 | 3 | 9 |
+| five-ams | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 10 |
+| no-kcs | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 9 |
 | kc-close-all-week | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| kc-close-none | WARN | 0 | 0 | 0 | 0 | 1 | 3 | 9 |
-| dual-loa | PASS | 0 | 0 | 0 | 0 | 6 | 2 | 11 |
-| triple-pto-same-week | PASS | 0 | 0 | 0 | 0 | 1 | 2 | 10 |
-| all-want-weekends-4 | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 6 |
-| zero-weekend-target | WARN | 0 | 0 | 0 | 0 | 0 | 3 | 7 |
-| rto-every-weekend-all-ams | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 10 |
-| pto-checkerboard-am1 | PASS | 0 | 0 | 0 | 0 | 4 | 2 | 11 |
-| manager-mode-kc | PASS | 0 | 0 | 0 | 0 | 1 | 2 | 7 |
-| kc-mid-all-dows-both | PASS | 0 | 0 | 0 | 0 | 0 | 3 | 11 |
-| avoid-clopen-off | PASS | 0 | 0 | 19 | 0 | 1 | 3 | 7 |
+| kc-close-none | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 9 |
+| dual-loa | PASS | 0 | 0 | 0 | 0 | 9 | 5 | 12 |
+| triple-pto-same-week | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 10 |
+| all-want-weekends-4 | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 7 |
+| zero-weekend-target | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 7 |
+| rto-every-weekend-all-ams | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 11 |
+| pto-checkerboard-am1 | PASS | 0 | 0 | 0 | 0 | 8 | 5 | 11 |
+| manager-mode-kc | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
+| kc-mid-all-dows-both | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 10 |
+| avoid-clopen-off | PASS | 0 | 0 | 19 | 0 | 1 | 1 | 7 |
 | packages-off-sm-equal | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 7 |
-| sm-closes-3-per-week | PASS | 0 | 0 | 0 | 0 | 1 | 2 | 7 |
-| am-closes-fixed-2 | PASS | 0 | 0 | 0 | 0 | 1 | 2 | 8 |
+| sm-closes-3-per-week | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 7 |
+| am-closes-fixed-2 | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
 | four-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 5 |
-| six-week-period | WARN | 0 | 0 | 0 | 0 | 1 | 3 | 9 |
-| stability-10x | PASS | 0 | 0 | 0 | 0 | 1 | 2 | 7 |
-| max-stacked-hell | PASS | 0 | 0 | 1 | 0 | 2 | 6 | 12 |
-| only-two-working-many-days | PASS | 0 | 0 | 2 | 0 | 5 | 5 | 13 |
+| six-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 9 |
+| stability-10x | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
+| max-stacked-hell | PASS | 0 | 0 | 1 | 0 | 2 | 6 | 11 |
+| only-two-working-many-days | PASS | 0 | 0 | 2 | 0 | 5 | 5 | 14 |
 
 ## Failures
 
@@ -64,12 +64,7 @@ None.
 
 ## Warnings
 
-- **clean-3am**: AM weekend-off spread=3 {"am1":2,"am2":5,"am3":4}
 - **sole-manager**: noClose=35 (impossible dual coverage: sole manager, no KC)
-- **no-kcs**: AM weekend-off spread=3 {"am1":3,"am2":2,"am3":5}
-- **kc-close-none**: AM weekend-off spread=3 {"am1":3,"am2":2,"am3":5}
-- **zero-weekend-target**: AM weekend-off spread=3 {"am1":2,"am2":5,"am3":4}
-- **six-week-period**: AM weekend-off spread=3 {"am1":2,"am2":5,"am3":5}
 
 ## Worst scenarios (info)
 
@@ -79,13 +74,13 @@ None.
 - only-two-working-many-days: clopens=2 (PASS)
 - sm-plus-one-am: clopens=1 (PASS)
 - max-stacked-hell: clopens=1 (PASS)
-- clean-3am: clopens=0 (WARN)
+- clean-3am: clopens=0 (PASS)
 
 ### Worst AM close spread
 
-- dual-loa: spread=6 {"am1":4,"am2":10,"am3":9} (PASS)
+- dual-loa: spread=9 {"am1":2,"am2":11,"am3":10} (PASS)
+- pto-checkerboard-am1: spread=8 {"am1":2,"am2":9,"am3":10} (PASS)
 - only-two-working-many-days: spread=5 {"am1":5,"am2":5,"am3":0} (PASS)
-- pto-checkerboard-am1: spread=4 {"am1":4,"am2":8,"am3":8} (PASS)
 - max-stacked-hell: spread=2 {"am1":7,"am2":6,"am3":8} (PASS)
 - p08-posted-shape: spread=1 {"am1":8,"am2":9,"am3":8} (PASS)
 

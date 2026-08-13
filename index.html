@@ -3654,7 +3654,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.4</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.5</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -5688,7 +5688,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.4';
+const APP_VERSION = '2.5.5';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7828,9 +7828,9 @@ function _generateScheduleInner() {
         const wdShift = schedule[over][wdDk];
         if (wePrev && isClose(schedule[over][wePrev]) && isOpen(wdShift)) continue;
 
-        // Safety: don't leave the weekday without coverage
+        // Safety: need at least 1 other worker on the weekday (hard coverage rechecks open/close)
         const wdOtherWorkers = ROLES.filter(rx => rx !== over && isWork(schedule[rx][wdDk])).length;
-        if (wdOtherWorkers < 2) continue; // need at least 2 others working that day
+        if (wdOtherWorkers < 1) continue;
 
         // Safety: if this manager is the only opener on that weekday, don't remove them
         if (isOpen(wdShift)) {
@@ -7839,8 +7839,19 @@ function _generateScheduleInner() {
         }
 
         // Swap: weekend off -> work (gets the weekday's shift), weekday work -> off
+        const prevWe = schedule[over][weDk];
+        const prevWd = schedule[over][wdDk];
         schedule[over][weDk] = wdShift;
         schedule[over][wdDk] = 'off';
+        // Soft check weekday still has an opener if we moved an open
+        if (isOpen(wdShift)) {
+          const opensLeft = ROLES.filter(rx => isOpen(schedule[rx][wdDk])).length;
+          if (opensLeft === 0) {
+            schedule[over][weDk] = prevWe;
+            schedule[over][wdDk] = prevWd;
+            continue;
+          }
+        }
         didSwap = true;
         break;
       }
@@ -7849,7 +7860,7 @@ function _generateScheduleInner() {
   }
 
   // STEP 5c: Give under-managers MORE weekend offs (prefer non-SM when smFewerWeekendOffs)
-  for (let balancePass = 0; balancePass < 20; balancePass++) {
+  for (let balancePass = 0; balancePass < 30; balancePass++) {
     const weOffs = {};
     weFairPool.forEach(r => { weOffs[r] = countWeOffSoft(r); });
     const vals = Object.values(weOffs);
@@ -7868,11 +7879,13 @@ function _generateScheduleInner() {
     let didSwap = false;
     for (const wdDk of myWeekdayOffs) {
       if (didSwap) break;
+      // Prefer same-week weekend first, then any weekend in period
       const wdWeek = Math.floor(allDks.indexOf(wdDk) / 7);
       const weekDks = getWeekDks(wdWeek);
-
-      const weCands = weekDks.filter(dk => {
-        if (!isDkWeekend(dk)) return false;
+      const weCands = [
+        ...weekDks.filter(dk => isDkWeekend(dk)),
+        ...allDks.filter(dk => isDkWeekend(dk) && !weekDks.includes(dk))
+      ].filter(dk => {
         const s = schedule[under][dk];
         return isWork(s) && !isClose(s) && !isInputLocked(under, dk);
       });
@@ -7881,7 +7894,7 @@ function _generateScheduleInner() {
         const wdIdx = allDks.indexOf(wdDk);
         const wdPrev = wdIdx > 0 ? allDks[wdIdx - 1] : null;
         const weShift = schedule[under][weDk];
-        if (wdPrev && isClose(schedule[under][wdPrev]) && isOpen(weShift)) continue;
+        if (PREFS.avoidClopening && wdPrev && isClose(schedule[under][wdPrev]) && isOpen(weShift)) continue;
 
         const weOtherWorkers = ROLES.filter(rx => rx !== under && isWork(schedule[rx][weDk])).length;
         if (weOtherWorkers < 1) continue;
@@ -7946,8 +7959,12 @@ function _generateScheduleInner() {
           if (isInputLocked(r, satDk)) return false;
           return true;
         });
-        // Prefer non-SM first for the package recipient
-        candidatesA.sort((a, b) => (a === 'sm' ? 1 : 0) - (b === 'sm' ? 1 : 0));
+        // Prefer non-SM first, then people with fewer weekend offs (balance packages)
+        candidatesA.sort((a, b) => {
+          const smBias = (a === 'sm' ? 1 : 0) - (b === 'sm' ? 1 : 0);
+          if (smBias !== 0) return smBias;
+          return countWeOffSoft(a) - countWeOffSoft(b);
+        });
 
         for (const personA of candidatesA) {
           const candidatesB = ROLES.filter((r) => {
@@ -8703,9 +8720,250 @@ function _generateScheduleInner() {
     }
   };
 
+  /**
+   * STEP 7c: Strong weekend-off rebalance (post-coverage).
+   * Transfers weekend offs from over-staffed → under-staffed managers in the fair pool
+   * (person-to-person), not only within-person weekday↔weekend swaps.
+   * Target: AM weekend-off max−min ≤ 1 when possible (≤2 under stress).
+   */
+  const rebalanceWeekendOffsStrong = () => {
+    const pool = (weFairPool && weFairPool.length >= 2) ? weFairPool.slice() : ROLES.filter((r) => r !== 'sm');
+    if (pool.length < 2) return;
+
+    const softOff = (s) => s === 'off' || s === 'rto';
+    const countWe = (r) =>
+      allDks.filter((dk) => isDkWeekend(dk) && softOff(schedule[r][dk])).length;
+    const dayOC = (dk) => {
+      let opens = 0, closes = 0;
+      ROLES.forEach((r) => {
+        const s = schedule[r][dk];
+        if (isOpen(s)) opens++;
+        if (isClose(s)) closes++;
+      });
+      if (isKcCloseNight(dk)) {
+        nonMgrKCs.forEach((kc) => {
+          if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
+        });
+      }
+      return { opens, closes };
+    };
+    const fixDayOC = (dk) => {
+      let { opens, closes } = dayOC(dk);
+      if (opens === 0) {
+        const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+        if (mid) schedule[mid][dk] = 'open-early';
+        else {
+          const w = ROLES.find((r) => isWork(schedule[r][dk]) && !isClose(schedule[r][dk]) && !isInputLocked(r, dk));
+          if (w) schedule[w][dk] = 'open-early';
+        }
+      }
+      ({ opens, closes } = dayOC(dk));
+      if (closes === 0 && !isKcCloseNight(dk)) {
+        const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+        if (mid) schedule[mid][dk] = 'close';
+      }
+    };
+    const wouldClopenTake = (r, dk, newShift) => {
+      if (!PREFS.avoidClopening || !isOpen(newShift)) return false;
+      const idx = allDks.indexOf(dk);
+      const prev = idx > 0 ? allDks[idx - 1] : null;
+      return !!(prev && isClose(schedule[r][prev]));
+    };
+
+    for (let pass = 0; pass < 50; pass++) {
+      const counts = {};
+      pool.forEach((r) => { counts[r] = countWe(r); });
+      const vals = pool.map((r) => counts[r]);
+      const maxWe = Math.max(...vals);
+      const minWe = Math.min(...vals);
+      if (maxWe - minWe <= 1) break;
+
+      const over = pool.find((r) => counts[r] === maxWe);
+      const under = pool.find((r) => counts[r] === minWe);
+      if (!over || !under || over === under) break;
+
+      let did = false;
+      const weDays = allDks.filter((dk) => isDkWeekend(dk));
+
+      // 1) Direct transfer: over soft-off (unlocked) on WE day; under works open/mid → under gets off
+      for (const weDk of weDays) {
+        if (schedule[over][weDk] !== 'off' || isInputLocked(over, weDk)) continue;
+        const uShift = schedule[under][weDk];
+        if (!isWork(uShift) || isClose(uShift) || isInputLocked(under, weDk)) continue;
+        if (wouldClopenTake(over, weDk, uShift)) continue;
+
+        const snapO = schedule[over][weDk];
+        const snapU = schedule[under][weDk];
+        schedule[under][weDk] = 'off';
+        schedule[over][weDk] = uShift;
+        fixDayOC(weDk);
+        const oc = dayOC(weDk);
+        const workers = ROLES.filter((r) => isWork(schedule[r][weDk])).length;
+        if (oc.opens < 1 || oc.closes < 1 || workers < 1) {
+          schedule[over][weDk] = snapO;
+          schedule[under][weDk] = snapU;
+          continue;
+        }
+        did = true;
+        break;
+      }
+      if (did) continue;
+
+      // 2) Direct transfer when under is closer: over takes close, under off (open must remain)
+      for (const weDk of weDays) {
+        if (isKcCloseNight(weDk)) continue;
+        if (schedule[over][weDk] !== 'off' || isInputLocked(over, weDk)) continue;
+        if (!isClose(schedule[under][weDk]) || isInputLocked(under, weDk)) continue;
+        const otherOpen = ROLES.filter((r) => r !== under && isOpen(schedule[r][weDk])).length;
+        if (otherOpen < 1) continue;
+        // clopen for over if open next day after taking close
+        const idx = allDks.indexOf(weDk);
+        const next = idx < allDks.length - 1 ? allDks[idx + 1] : null;
+        if (PREFS.avoidClopening && next && isOpen(schedule[over][next])) continue;
+
+        const snapO = schedule[over][weDk];
+        const snapU = schedule[under][weDk];
+        schedule[over][weDk] = 'close';
+        schedule[under][weDk] = 'off';
+        fixDayOC(weDk);
+        const oc = dayOC(weDk);
+        if (oc.opens < 1 || oc.closes < 1) {
+          schedule[over][weDk] = snapO;
+          schedule[under][weDk] = snapU;
+          continue;
+        }
+        did = true;
+        break;
+      }
+      if (did) continue;
+
+      // 3) Within-under: weekday off → weekend work becomes off (any week)
+      const underWdOffs = allDks.filter(
+        (dk) =>
+          !isDkWeekend(dk) &&
+          !isKcCloseNight(dk) &&
+          schedule[under][dk] === 'off' &&
+          !isInputLocked(under, dk)
+      );
+      for (const wdDk of underWdOffs) {
+        if (did) break;
+        for (const weDk of weDays) {
+          const weShift = schedule[under][weDk];
+          if (!isWork(weShift) || isClose(weShift) || isInputLocked(under, weDk)) continue;
+          if (ROLES.filter((rx) => rx !== under && isWork(schedule[rx][weDk])).length < 1) continue;
+          if (isOpen(weShift) && ROLES.filter((rx) => rx !== under && isOpen(schedule[rx][weDk])).length === 0) continue;
+          const wdPrev = allDks.indexOf(wdDk) > 0 ? allDks[allDks.indexOf(wdDk) - 1] : null;
+          if (PREFS.avoidClopening && wdPrev && isClose(schedule[under][wdPrev]) && isOpen(weShift)) continue;
+
+          schedule[under][wdDk] = weShift;
+          schedule[under][weDk] = 'off';
+          fixDayOC(weDk);
+          fixDayOC(wdDk);
+          const ocW = dayOC(weDk);
+          const ocD = dayOC(wdDk);
+          if (ocW.opens < 1 || ocW.closes < 1 || ocD.opens < 1 || ocD.closes < 1) {
+            schedule[under][weDk] = weShift;
+            schedule[under][wdDk] = 'off';
+            continue;
+          }
+          did = true;
+          break;
+        }
+      }
+      if (did) continue;
+
+      // 4) Within-over: weekend off → work on weekday they can free
+      const overWeOffs = weDays.filter(
+        (dk) => schedule[over][dk] === 'off' && !isInputLocked(over, dk)
+      );
+      for (const weDk of overWeOffs) {
+        if (did) break;
+        const wdCands = allDks.filter(
+          (dk) =>
+            !isDkWeekend(dk) &&
+            !isKcCloseNight(dk) &&
+            isWork(schedule[over][dk]) &&
+            !isClose(schedule[over][dk]) &&
+            !isInputLocked(over, dk) &&
+            ROLES.filter((rx) => rx !== over && isWork(schedule[rx][dk])).length >= 1
+        );
+        for (const wdDk of wdCands) {
+          const wdShift = schedule[over][wdDk];
+          if (isOpen(wdShift) && ROLES.filter((rx) => rx !== over && isOpen(schedule[rx][wdDk])).length === 0) continue;
+          if (wouldClopenTake(over, weDk, wdShift)) continue;
+          schedule[over][weDk] = wdShift;
+          schedule[over][wdDk] = 'off';
+          fixDayOC(weDk);
+          fixDayOC(wdDk);
+          const ocW = dayOC(weDk);
+          const ocD = dayOC(wdDk);
+          if (ocW.opens < 1 || ocW.closes < 1 || ocD.opens < 1 || ocD.closes < 1) {
+            schedule[over][wdDk] = wdShift;
+            schedule[over][weDk] = 'off';
+            continue;
+          }
+          did = true;
+          break;
+        }
+      }
+      if (did) continue;
+
+      // 5) Cross-person midweek trade: over works weekday, under off weekday;
+      //     under works weekend, over off weekend — swap both people on both days
+      for (const weDk of weDays) {
+        if (did) break;
+        if (schedule[over][weDk] !== 'off' || isInputLocked(over, weDk)) continue;
+        const uWe = schedule[under][weDk];
+        if (!isWork(uWe) || isClose(uWe) || isInputLocked(under, weDk)) continue;
+        if (wouldClopenTake(over, weDk, uWe)) continue;
+        for (const wdDk of allDks) {
+          if (isDkWeekend(wdDk) || isKcCloseNight(wdDk)) continue;
+          if (schedule[under][wdDk] !== 'off' || isInputLocked(under, wdDk)) continue;
+          const oWd = schedule[over][wdDk];
+          if (!isWork(oWd) || isClose(oWd) || isInputLocked(over, wdDk)) continue;
+          if (wouldClopenTake(under, wdDk, oWd)) continue;
+          if (isOpen(oWd) && ROLES.filter((rx) => rx !== over && isOpen(schedule[rx][wdDk])).length === 0) continue;
+          if (isOpen(uWe) && ROLES.filter((rx) => rx !== under && isOpen(schedule[rx][weDk])).length === 0) {
+            // over can become that open
+          }
+
+          const snap = {
+            oWe: schedule[over][weDk],
+            uWe: schedule[under][weDk],
+            oWd: schedule[over][wdDk],
+            uWd: schedule[under][wdDk]
+          };
+          // over works weekend (takes under's WE shift), under off WE
+          // under works weekday (takes over's WD shift), over off WD
+          schedule[over][weDk] = uWe;
+          schedule[under][weDk] = 'off';
+          schedule[under][wdDk] = oWd;
+          schedule[over][wdDk] = 'off';
+          fixDayOC(weDk);
+          fixDayOC(wdDk);
+          const ocW = dayOC(weDk);
+          const ocD = dayOC(wdDk);
+          if (ocW.opens < 1 || ocW.closes < 1 || ocD.opens < 1 || ocD.closes < 1) {
+            schedule[over][weDk] = snap.oWe;
+            schedule[under][weDk] = snap.uWe;
+            schedule[over][wdDk] = snap.oWd;
+            schedule[under][wdDk] = snap.uWd;
+            continue;
+          }
+          did = true;
+          break;
+        }
+      }
+
+      if (!did) break;
+    }
+  };
+
   // Alternate rebalance + clopen fix so fairness and clopens both converge
-  for (let rb = 0; rb < 3; rb++) {
+  for (let rb = 0; rb < 4; rb++) {
     rebalanceClosesPeriodLevel();
+    ensureHardDailyCoverage();
+    rebalanceWeekendOffsStrong();
     ensureHardDailyCoverage();
     lightClopenCleanup();
     ensureHardDailyCoverage();

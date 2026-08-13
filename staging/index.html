@@ -1029,6 +1029,27 @@ input[type="radio"] { accent-color: var(--gold); }
   flex-direction: column;
   gap: 0.25rem;
 }
+.store-hours-panel .sh-mode-seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0.35rem 0 0.5rem;
+}
+.store-hours-panel .sh-mode-seg button {
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.store-hours-panel .sh-mode-seg button.active {
+  background: rgba(61, 220, 255, 0.15);
+  color: var(--cyan, #9ae8ff);
+}
 .store-hours-panel .sh-ov-item {
   display: flex;
   align-items: center;
@@ -3920,7 +3941,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.7-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.8-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -4155,10 +4176,19 @@ const DEFAULT_STORE_HOURS = {
     5: { open: '10a', close: '10p' },
     6: { open: '10a', close: '10p' }
   },
-  overrides: {}
+  /** Per-dateKey overrides (expanded from single-day or ranges). */
+  overrides: {},
+  /**
+   * Named ranges for UI (holiday week etc.).
+   * { id, start, end, open, close, label? }
+   * Expanded into overrides on apply; removeRange clears all days in span.
+   */
+  ranges: []
 };
 let storeHours = JSON.parse(JSON.stringify(DEFAULT_STORE_HOURS));
 let storeHoursPanelOpen = false;
+/** 'day' | 'range' — which apply form is active in the panel */
+let storeHoursApplyMode = 'day';
 
 // ── Monetization / Pro license (offline-first; soft gate) ──
 const MSB_LICENSE_KEY = 'msb_stg_pro_license';
@@ -6009,7 +6039,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.7-staging';
+const APP_VERSION = '2.5.8-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -6139,13 +6169,82 @@ function applyStoreHoursObject(obj) {
     }
   }
   next.overrides = {};
+  const singles = {};
   if (obj.overrides && typeof obj.overrides === 'object') {
     Object.keys(obj.overrides).forEach((k) => {
       const o = obj.overrides[k];
-      if (o && o.open && o.close) next.overrides[k] = { open: String(o.open), close: String(o.close) };
+      if (o && o.open && o.close) {
+        // Keep as single if not tagged as range-owned (or no ranges in payload)
+        if (!o.rangeId) singles[k] = { open: String(o.open), close: String(o.close), rangeId: null };
+        else next.overrides[k] = { open: String(o.open), close: String(o.close), rangeId: String(o.rangeId) };
+      }
     });
   }
+  next.ranges = [];
+  if (Array.isArray(obj.ranges)) {
+    obj.ranges.forEach((r) => {
+      if (!r || !r.start || !r.end || !r.open || !r.close) return;
+      next.ranges.push({
+        id: r.id || ('rng_' + r.start + '_' + r.end),
+        start: String(r.start),
+        end: String(r.end),
+        open: String(r.open),
+        close: String(r.close),
+        label: r.label ? String(r.label) : ''
+      });
+    });
+  }
+  // Expand ranges, then singles on top (single day wins over range for that date)
+  expandStoreHoursRangesIntoOverrides(next);
+  Object.keys(singles).forEach((k) => {
+    next.overrides[k] = singles[k];
+  });
   storeHours = next;
+}
+
+/** Parse YYYY-MM-DD to local Date at noon (avoids DST edge). */
+function parseDateKeyLocal(dk) {
+  if (!dk || !/^\d{4}-\d{2}-\d{2}$/.test(dk)) return null;
+  const parts = dk.split('-').map(Number);
+  const d = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/** Inclusive list of dateKeys from start..end (max 120 days). */
+function listDateKeysInRange(startDk, endDk) {
+  let a = parseDateKeyLocal(startDk);
+  let b = parseDateKeyLocal(endDk);
+  if (!a || !b) return [];
+  if (a.getTime() > b.getTime()) {
+    const t = a; a = b; b = t;
+  }
+  const out = [];
+  const cur = new Date(a.getTime());
+  let guard = 0;
+  while (cur.getTime() <= b.getTime() && guard < 120) {
+    out.push(dateKey(cur));
+    cur.setDate(cur.getDate() + 1);
+    guard++;
+  }
+  return out;
+}
+
+/** Expand ranges[] into overrides map (ranges overwrite prior range days). Keep non-range singles. */
+function expandStoreHoursRangesIntoOverrides(sh) {
+  if (!sh) return;
+  if (!sh.overrides) sh.overrides = {};
+  if (!Array.isArray(sh.ranges)) sh.ranges = [];
+  // Mark which keys came from ranges vs manual singles: re-apply all ranges last
+  sh.ranges.forEach((r) => {
+    const keys = listDateKeysInRange(r.start, r.end);
+    keys.forEach((dk) => {
+      sh.overrides[dk] = {
+        open: r.open,
+        close: r.close,
+        rangeId: r.id || null
+      };
+    });
+  });
 }
 
 function getStoreHoursForDate(dateOrDk) {
@@ -6165,10 +6264,16 @@ function getStoreHoursForDate(dateOrDk) {
   }
   if (dk && storeHours.overrides && storeHours.overrides[dk]) {
     const o = storeHours.overrides[dk];
-    return { open: o.open, close: o.close, isOverride: true, dateKey: dk };
+    return {
+      open: o.open,
+      close: o.close,
+      isOverride: true,
+      dateKey: dk,
+      rangeId: o.rangeId || null
+    };
   }
   const row = (storeHours.byDow && storeHours.byDow[dow]) || DEFAULT_STORE_HOURS.byDow[dow];
-  return { open: row.open, close: row.close, isOverride: false, dateKey: dk };
+  return { open: row.open, close: row.close, isOverride: false, dateKey: dk, rangeId: null };
 }
 
 function summarizeStoreHours() {
@@ -6185,8 +6290,17 @@ function summarizeStoreHours() {
   if (fri === sat) parts.push('Fri–Sat ' + fri);
   else parts.push('Fri ' + fri + ' · Sat ' + sat);
   parts.push('Sun ' + sun);
-  const ovN = Object.keys(storeHours.overrides || {}).length;
-  if (ovN) parts.push(ovN + ' holiday override' + (ovN === 1 ? '' : 's'));
+  const rangeN = (storeHours.ranges || []).length;
+  const singles = Object.keys(storeHours.overrides || {}).filter((k) => {
+    const o = storeHours.overrides[k];
+    return o && !o.rangeId;
+  }).length;
+  if (rangeN || singles) {
+    const bits = [];
+    if (rangeN) bits.push(rangeN + ' range' + (rangeN === 1 ? '' : 's'));
+    if (singles) bits.push(singles + ' day override' + (singles === 1 ? '' : 's'));
+    parts.push(bits.join(' · '));
+  }
   return parts.join(' · ');
 }
 
@@ -6221,11 +6335,29 @@ function toggleStoreHoursPanel() {
   if (storeHoursPanelOpen) renderStoreHoursPanel();
 }
 
+function periodDateOptionsHtml(selectedDk) {
+  let dateOpts = '';
+  if (periodDates && periodDates.length) {
+    periodDates.forEach((d) => {
+      const dk = dateKey(d);
+      const sel = selectedDk && selectedDk === dk ? ' selected' : '';
+      dateOpts += '<option value="' + dk + '"' + sel + '>' + dk + ' (' + DAY_NAMES[d.getDay()] + ')</option>';
+    });
+  }
+  return dateOpts;
+}
+
+function setStoreHoursApplyMode(mode) {
+  storeHoursApplyMode = mode === 'range' ? 'range' : 'day';
+  renderStoreHoursPanel();
+}
+
 function renderStoreHoursPanel() {
   const panel = document.getElementById('store-hours-panel');
   if (!panel) return;
   const by = storeHours.byDow;
   let html = '';
+  html += '<div style="font-weight:600;font-size:0.78rem;margin-bottom:0.25rem">Weekly defaults (by day of week)</div>';
   for (let d = 0; d <= 6; d++) {
     html += '<div class="sh-row">';
     html += '<label>' + DAY_NAMES[d] + '</label>';
@@ -6237,34 +6369,73 @@ function renderStoreHoursPanel() {
   html += '<button type="button" class="btn-secondary" style="font-size:0.72rem;padding:0.3rem 0.55rem;min-height:auto" onclick="applyStoreHoursMonFri()">Apply Mon–Fri</button>';
   html += '<button type="button" class="btn-outline" style="font-size:0.72rem;padding:0.3rem 0.55rem;min-height:auto" onclick="resetStoreHoursDefaults()">Reset defaults</button>';
   html += '</div>';
-  html += '<div style="font-weight:600;font-size:0.78rem;margin-top:0.25rem">Holiday day override</div>';
-  html += '<div class="sh-row" style="grid-template-columns:1.4fr 1fr 1fr auto;margin-top:0.35rem">';
-  let dateOpts = '';
-  if (periodDates && periodDates.length) {
-    periodDates.forEach((d) => {
-      const dk = dateKey(d);
-      dateOpts += '<option value="' + dk + '">' + dk + ' (' + DAY_NAMES[d.getDay()] + ')</option>';
-    });
-  }
-  if (dateOpts) {
-    html += '<select id="sh-ov-date" style="padding:0.25rem;border-radius:5px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);font-size:0.75rem">' + dateOpts + '</select>';
-  } else {
-    html += '<input type="text" id="sh-ov-date" placeholder="YYYY-MM-DD">';
-  }
-  html += '<input type="text" id="sh-ov-open" placeholder="open" value="9a">';
-  html += '<input type="text" id="sh-ov-close" placeholder="close" value="6p">';
-  html += '<button type="button" class="btn-primary" style="font-size:0.7rem;padding:0.25rem 0.45rem;min-height:auto" onclick="addStoreHoursOverride()">Add</button>';
+
+  html += '<div style="font-weight:600;font-size:0.78rem;margin-top:0.65rem">Holiday / special hours</div>';
+  html += '<div class="sh-mode-seg" role="group" aria-label="Apply by day or date range">';
+  html += '<button type="button" class="' + (storeHoursApplyMode !== 'range' ? 'active' : '') + '" onclick="setStoreHoursApplyMode(\'day\')">Single day</button>';
+  html += '<button type="button" class="' + (storeHoursApplyMode === 'range' ? 'active' : '') + '" onclick="setStoreHoursApplyMode(\'range\')">Date range</button>';
   html += '</div>';
+
+  const dateOpts = periodDateOptionsHtml(null);
+  const openDef = '9a';
+  const closeDef = '6p';
+
+  if (storeHoursApplyMode === 'range') {
+    html += '<div class="sh-row" style="grid-template-columns:1fr 1fr;margin-top:0.25rem">';
+    if (dateOpts) {
+      html += '<label style="grid-column:1/-1;font-size:0.72rem;color:var(--ink-4)">From → To (inclusive)</label>';
+      html += '<select id="sh-ov-start" style="padding:0.25rem;border-radius:5px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);font-size:0.75rem">' + dateOpts + '</select>';
+      html += '<select id="sh-ov-end" style="padding:0.25rem;border-radius:5px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);font-size:0.75rem">' + dateOpts + '</select>';
+    } else {
+      html += '<input type="text" id="sh-ov-start" placeholder="Start YYYY-MM-DD">';
+      html += '<input type="text" id="sh-ov-end" placeholder="End YYYY-MM-DD">';
+    }
+    html += '</div>';
+    html += '<div class="sh-row" style="grid-template-columns:1fr 1fr auto;margin-top:0.35rem">';
+    html += '<input type="text" id="sh-ov-open" placeholder="open" value="' + openDef + '">';
+    html += '<input type="text" id="sh-ov-close" placeholder="close" value="' + closeDef + '">';
+    html += '<button type="button" class="btn-primary" style="font-size:0.7rem;padding:0.25rem 0.45rem;min-height:auto" onclick="addStoreHoursDateRange()">Apply range</button>';
+    html += '</div>';
+    html += '<div class="sh-note">Applies the same open–close to every calendar day in the range (e.g. holiday week 12/20–12/26).</div>';
+  } else {
+    html += '<div class="sh-row" style="grid-template-columns:1.4fr 1fr 1fr auto;margin-top:0.25rem">';
+    if (dateOpts) {
+      html += '<select id="sh-ov-date" style="padding:0.25rem;border-radius:5px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);font-size:0.75rem">' + dateOpts + '</select>';
+    } else {
+      html += '<input type="text" id="sh-ov-date" placeholder="YYYY-MM-DD">';
+    }
+    html += '<input type="text" id="sh-ov-open" placeholder="open" value="' + openDef + '">';
+    html += '<input type="text" id="sh-ov-close" placeholder="close" value="' + closeDef + '">';
+    html += '<button type="button" class="btn-primary" style="font-size:0.7rem;padding:0.25rem 0.45rem;min-height:auto" onclick="addStoreHoursOverride()">Apply day</button>';
+    html += '</div>';
+    html += '<div class="sh-note">One calendar day only (e.g. Christmas Eve). Use Date range for multi-day stretches.</div>';
+  }
+
   html += '<div class="sh-ov-list">';
-  const ovs = Object.keys(storeHours.overrides || {}).sort();
-  if (!ovs.length) html += '<div style="font-size:0.72rem;color:var(--ink-4)">No overrides yet.</div>';
-  ovs.forEach((dk) => {
+  const ranges = storeHours.ranges || [];
+  const singleKeys = Object.keys(storeHours.overrides || {}).filter((k) => {
+    const o = storeHours.overrides[k];
+    return o && !o.rangeId;
+  }).sort();
+
+  if (!ranges.length && !singleKeys.length) {
+    html += '<div style="font-size:0.72rem;color:var(--ink-4)">No special hours yet — weekly defaults apply.</div>';
+  }
+
+  ranges.forEach((r) => {
+    const n = listDateKeysInRange(r.start, r.end).length;
+    const lab = r.label ? esc(r.label) + ' · ' : '';
+    html += '<div class="sh-ov-item"><span><strong>Range</strong> ' + lab + esc(r.start) + ' → ' + esc(r.end) + ' · ' + esc(r.open) + '–' + esc(r.close) + ' <span style="color:var(--ink-4)">(' + n + ' day' + (n === 1 ? '' : 's') + ')</span></span>';
+    html += '<button type="button" class="btn-outline" style="font-size:0.65rem;padding:0.15rem 0.4rem;min-height:auto" onclick="removeStoreHoursRange(\'' + esc(r.id).replace(/'/g, '') + '\')">Remove</button></div>';
+  });
+
+  singleKeys.forEach((dk) => {
     const o = storeHours.overrides[dk];
-    html += '<div class="sh-ov-item"><span>' + esc(dk) + ' · ' + esc(o.open) + '–' + esc(o.close) + '</span>';
+    html += '<div class="sh-ov-item"><span><strong>Day</strong> ' + esc(dk) + ' · ' + esc(o.open) + '–' + esc(o.close) + '</span>';
     html += '<button type="button" class="btn-outline" style="font-size:0.65rem;padding:0.15rem 0.4rem;min-height:auto" onclick="removeStoreHoursOverride(\'' + dk + '\')">Remove</button></div>';
   });
   html += '</div>';
-  html += '<div class="sh-note">Overrides win for that calendar day (holiday mid-week).</div>';
+  html += '<div class="sh-note">Priority: date override (day or range) beats weekly default. Ranges expand to each day in the span.</div>';
   panel.innerHTML = html;
 }
 
@@ -6278,6 +6449,7 @@ function updateStoreHoursDow(d) {
   if (!storeHours.byDow) storeHours.byDow = {};
   storeHours.byDow[d] = { open, close };
   persistStoreMeta();
+  updateStoreHoursSummary();
 }
 
 function applyStoreHoursMonFri() {
@@ -6306,16 +6478,91 @@ function addStoreHoursOverride() {
     return;
   }
   if (!storeHours.overrides) storeHours.overrides = {};
-  storeHours.overrides[dk] = { open, close };
+  // Clear range ownership if this day was in a range
+  storeHours.overrides[dk] = { open, close, rangeId: null };
+  // If day was part of a range, leave range list but expand will re-apply ranges —
+  // so strip day from ranges that contain it by splitting is complex; instead remove rangeId only and drop from ranges' expansion by not including in range... 
+  // Simpler: when setting single day, remove rangeId and also remove this day from any range by not listing it in expand if we delete ranges that cover it partially.
+  // Best UX: single-day after range wins — strip rangeId on this day and when expanding ranges, skip days that have explicit single (no rangeId) that were set after... 
+  // Expand runs full range overwrite. So we need expand to NOT overwrite singles without rangeId that are intentional.
+  // Fix expandStoreHoursRangesIntoOverrides to only set days that don't already have a single override without rangeId? No — order should be: start clean from ranges then apply singles.
+  rebuildStoreHoursOverridesFromRangesAndSingles();
+  // re-apply this single on top
+  storeHours.overrides[dk] = { open, close, rangeId: null };
   persistStoreMeta();
   renderStoreHoursPanel();
-  showToast('Holiday override saved for ' + dk, 'success');
+  showToast('Hours set for ' + dk, 'success');
+}
+
+function addStoreHoursDateRange() {
+  const startEl = document.getElementById('sh-ov-start');
+  const endEl = document.getElementById('sh-ov-end');
+  const openEl = document.getElementById('sh-ov-open');
+  const closeEl = document.getElementById('sh-ov-close');
+  if (!startEl || !endEl || !openEl || !closeEl) return;
+  let start = (startEl.value || '').trim();
+  let end = (endEl.value || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end)) {
+    showToast('Pick start and end dates (YYYY-MM-DD).', 'warn');
+    return;
+  }
+  // Normalize order
+  if (start > end) {
+    const t = start; start = end; end = t;
+  }
+  const open = (openEl.value || '').trim();
+  const close = (closeEl.value || '').trim();
+  if (!open || !close) {
+    showToast('Enter open and close times.', 'warn');
+    return;
+  }
+  const keys = listDateKeysInRange(start, end);
+  if (!keys.length) {
+    showToast('Invalid date range.', 'warn');
+    return;
+  }
+  if (keys.length > 90) {
+    showToast('Range too long (max 90 days).', 'warn');
+    return;
+  }
+  if (!storeHours.ranges) storeHours.ranges = [];
+  const id = 'rng_' + start + '_' + end + '_' + Date.now().toString(36);
+  storeHours.ranges.push({ id, start, end, open, close, label: '' });
+  rebuildStoreHoursOverridesFromRangesAndSingles();
+  persistStoreMeta();
+  renderStoreHoursPanel();
+  showToast('Hours applied to ' + keys.length + ' day' + (keys.length === 1 ? '' : 's') + ' (' + start + ' → ' + end + ')', 'success');
+}
+
+/** Rebuild overrides: keep manual singles (no rangeId), re-expand all ranges, then re-apply singles on top. */
+function rebuildStoreHoursOverridesFromRangesAndSingles() {
+  const singles = {};
+  Object.keys(storeHours.overrides || {}).forEach((k) => {
+    const o = storeHours.overrides[k];
+    if (o && !o.rangeId) singles[k] = { open: o.open, close: o.close, rangeId: null };
+  });
+  storeHours.overrides = {};
+  expandStoreHoursRangesIntoOverrides(storeHours);
+  Object.keys(singles).forEach((k) => {
+    storeHours.overrides[k] = singles[k];
+  });
 }
 
 function removeStoreHoursOverride(dk) {
   if (storeHours.overrides) delete storeHours.overrides[dk];
   persistStoreMeta();
   renderStoreHoursPanel();
+  updateStoreHoursSummary();
+}
+
+function removeStoreHoursRange(rangeId) {
+  if (!storeHours.ranges) return;
+  storeHours.ranges = storeHours.ranges.filter((r) => r.id !== rangeId);
+  rebuildStoreHoursOverridesFromRangesAndSingles();
+  persistStoreMeta();
+  renderStoreHoursPanel();
+  updateStoreHoursSummary();
+  showToast('Date range removed.', 'info');
 }
 
 function estimateShiftHours(shift) {

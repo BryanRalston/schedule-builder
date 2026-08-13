@@ -84,10 +84,10 @@ async function main() {
     const ver = await page.evaluate(() =>
       typeof APP_VERSION !== 'undefined' ? APP_VERSION : document.getElementById('app-version-label')?.textContent
     );
-    if (String(ver).includes('2.5.7')) pass('version-2.5.7', ver);
-    else fail('version-2.5.7', ver);
+    if (String(ver).includes('2.5.8') || String(ver).includes('2.5.7')) pass('version-ok', ver);
+    else fail('version-ok', ver);
 
-    // Store hours roundtrip
+    // Store hours roundtrip + date range
     const hoursRt = await page.evaluate(() => {
       if (typeof getStoreHoursForDate !== 'function' || typeof applyStoreHoursObject !== 'function') {
         return { ok: false, detail: 'missing storeHours API' };
@@ -102,18 +102,39 @@ async function main() {
           5: { open: '10a', close: '10p' },
           6: { open: '10a', close: '10p' }
         },
-        overrides: { '2026-12-24': { open: '9a', close: '6p' } }
+        overrides: { '2026-12-24': { open: '9a', close: '6p' } },
+        ranges: [{ id: 'rng_test', start: '2026-12-20', end: '2026-12-23', open: '8a', close: '9p' }]
       });
-      const mon = getStoreHoursForDate(new Date(2026, 11, 21)); // Mon
+      const monDefault = getStoreHoursForDate(new Date(2026, 11, 14)); // Mon Dec 14 — outside range
       const ov = getStoreHoursForDate('2026-12-24');
+      const r1 = getStoreHoursForDate('2026-12-20');
+      const r2 = getStoreHoursForDate('2026-12-22');
+      const rOut = getStoreHoursForDate('2026-12-25'); // outside range → weekly default
+      const keys = typeof listDateKeysInRange === 'function' ? listDateKeysInRange('2026-12-20', '2026-12-23') : [];
       const sum = typeof summarizeStoreHours === 'function' ? summarizeStoreHours() : '';
+      const rangeOk =
+        r1.isOverride &&
+        r1.open === '8a' &&
+        r1.close === '9p' &&
+        r2.open === '8a' &&
+        ov.isOverride &&
+        ov.close === '6p' &&
+        keys.length === 4 &&
+        !rOut.isOverride;
       return {
-        ok: mon.open === '9a' && mon.close === '8p' && !mon.isOverride && ov.isOverride && ov.close === '6p' && /Mon/.test(sum),
-        detail: JSON.stringify({ mon, ov, sum: sum.slice(0, 80) })
+        ok:
+          monDefault.open === '9a' &&
+          monDefault.close === '8p' &&
+          !monDefault.isOverride &&
+          ov.isOverride &&
+          ov.close === '6p' &&
+          rangeOk &&
+          /Mon|range/i.test(sum),
+        detail: JSON.stringify({ monDefault, ov, r1, r2, rOut, keysLen: keys.length, sum: sum.slice(0, 100) })
       };
     });
-    if (hoursRt.ok) pass('storeHours-roundtrip', hoursRt.detail);
-    else fail('storeHours-roundtrip', hoursRt.detail);
+    if (hoursRt.ok) pass('storeHours-day-and-range', hoursRt.detail);
+    else fail('storeHours-day-and-range', hoursRt.detail);
 
     // Team template save/load
     const tplRt = await page.evaluate(() => {

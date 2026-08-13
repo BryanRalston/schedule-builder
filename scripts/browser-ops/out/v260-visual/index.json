@@ -1,0 +1,14 @@
+{
+  "at": "2026-08-13T17:22:00.812Z",
+  "shots": [
+    "\\scripts\\browser-ops\\out\\v260-visual\\01-setup-desktop.png",
+    "\\scripts\\browser-ops\\out\\v260-visual\\02-requests-paint.png",
+    "\\scripts\\browser-ops\\out\\v260-visual\\03-schedule-after-gen.png",
+    "\\scripts\\browser-ops\\out\\v260-visual\\04-density-compact.png",
+    "\\scripts\\browser-ops\\out\\v260-visual\\05-density-board.png",
+    "\\scripts\\browser-ops\\out\\v260-visual\\06-high-contrast.png",
+    "\\scripts\\browser-ops\\out\\v260-visual\\07-command-palette.png",
+    "\\scripts\\browser-ops\\out\\v260-visual\\08-mobile-schedule.png",
+    "\\scripts\\browser-ops\\out\\v260-visual\\09-lock-mode.png"
+  ]
+}

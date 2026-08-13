@@ -3632,7 +3632,7 @@ html.view-locked .ap-btn-danger { display: none !important; }
 .cmd-empty { padding: 1.25rem; text-align: center; color: var(--ink-4); font-size: 0.85rem; }
 
 #post-gen-strip {
-  display: none; position: sticky; top: 0; z-index: 90;
+  display: none; position: sticky; top: 58px; z-index: 95;
   background: linear-gradient(180deg, rgba(8,14,28,0.98), rgba(10,18,34,0.96));
   border-bottom: 1px solid rgba(61,220,255,0.22);
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
@@ -4323,7 +4323,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.5.9-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.0-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -4545,6 +4545,8 @@ function setScheduleResultsVisible(visible) {
       fu.innerHTML = '';
     }
   }
+  try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
+  try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
 }
 
 function restoreAppTab() {
@@ -6434,7 +6436,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.9-staging';
+const APP_VERSION = '2.6.0-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8225,6 +8227,13 @@ function buildInputCalendar(role) {
 // ── Cell Menu ──
 function openCellMenu(e, role, dk) {
   e.stopPropagation();
+  if (window._viewLocked) return;
+  if (window._requestPaintMode) {
+    paintRequestCell(role, dk);
+    buildInputCalendar(role);
+    try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (err) {}
+    return;
+  }
   closeCellMenu();
   const cell = e.currentTarget;
   const rect = cell.getBoundingClientRect();
@@ -8404,6 +8413,7 @@ function applyLoaRange(role) {
 }
 
 function setCellValue(role, dk, value) {
+  if (window._viewLocked) return;
   if (!inputs[role]) inputs[role] = {};
   if (value === null) {
     delete inputs[role][dk];
@@ -8412,6 +8422,7 @@ function setCellValue(role, dk, value) {
   }
   closeCellMenu();
   buildInputCalendar(role);
+  try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
 }
 
 // Close menu on outside click
@@ -8461,6 +8472,10 @@ function prevDateKey(dk) {
 let _generateBusy = false;
 function generateSchedule() {
   if (_generateBusy) return;
+  if (window._viewLocked) {
+    showToast('View only - cannot generate.', 'warn');
+    return;
+  }
   if (!requireGenerateAllowance()) return;
   const btn = document.getElementById('btn-generate');
   const prevLabel = btn ? btn.textContent : '';
@@ -8470,6 +8485,14 @@ function generateSchedule() {
     btn.textContent = 'Building…';
     btn.setAttribute('aria-busy', 'true');
   }
+  try {
+    window._prevScheduleSnap = JSON.parse(JSON.stringify(schedule || {}));
+  } catch (e) {
+    window._prevScheduleSnap = {};
+  }
+  try {
+    if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot('generate');
+  } catch (e) {}
   // Yield so the button state paints before heavy work
   setTimeout(() => {
     try {
@@ -10572,6 +10595,7 @@ function _generateScheduleInner() {
   window._lastGenReport = lastGenReport;
 
   setScheduleResultsVisible(true);
+  window._scheduleEnterMotion = true;
   renderSchedule(warnings, ROLES, ALL_KC);
   renderSummary(warnings, ROLES, ALL_KC, lastGenReport);
   renderFairnessUnderSchedule(ROLES, ALL_KC, lastGenReport);
@@ -10589,7 +10613,23 @@ function _generateScheduleInner() {
         : ' · ' + left + ' free build' + (left === 1 ? '' : 's') + ' left';
   }
   showToast(toastMsg, hasErrors ? 'warn' : 'success');
-  clearSchedUndo();
+  try {
+    if (typeof computeScheduleDiff === 'function') {
+      window._lastScheduleDiff = computeScheduleDiff(window._prevScheduleSnap || {}, schedule);
+      if (typeof renderScheduleDiffPanel === 'function') renderScheduleDiffPanel(window._lastScheduleDiff);
+    }
+  } catch (e) {}
+  try {
+    if (typeof buildSmartSuggestions === 'function') {
+      window._smartSuggestions = buildSmartSuggestions();
+      if (typeof renderSmartSuggestions === 'function') renderSmartSuggestions(window._smartSuggestions);
+    }
+  } catch (e) {}
+  try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
+  try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
+  try { if (typeof updateUndoRedoButtons === 'function') updateUndoRedoButtons(); } catch (e) {}
+  // keep pre-gen undo snapshot; do not clear stack
+  if (false) clearSchedUndo();
   updateReadyChecklist();
   switchTab('schedule');
   setTimeout(() => {
@@ -11380,7 +11420,7 @@ function renderWeekTableHtml(weekDates, wIdx, names, ALL_KC) {
     else if (dow === 1) cls = 'monday-col';
     if (fhH) cls = (cls ? cls + ' ' : '') + 'federal-holiday-col';
     const fedLab = fhH ? `<span class="fh-day-label">${esc(fhH.name)}</span>` : '';
-    html += `<th class="${cls}">${DAY_NAMES[dow]}${fedLab}</th>`;
+    html += `<th class="${cls}">${DAY_NAMES[dow]}${(function(){ try { if (typeof getStoreHoursForDate!=="function") return ""; const h=getStoreHoursForDate(dkH); if(!h||!h.open) return ""; return '<span class="day-hours'+(h.isOverride?' is-override':'')+'" title="'+(h.isOverride?'Hours override':'Store hours')+'">'+esc(h.open)+'-'+esc(h.close)+(h.isOverride?'*':'')+'</span>'; } catch(e){ return ""; } })()}</th>`;
   });
   html += '</tr>';
   html += '<tr><th class="name-col"></th>';
@@ -11511,7 +11551,17 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
     });
   }
 
-  document.getElementById('schedule-grid').innerHTML = html;
+  const gridEl = document.getElementById('schedule-grid');
+  if (gridEl) {
+    gridEl.innerHTML = html;
+    if (window._scheduleEnterMotion) {
+      gridEl.classList.remove('schedule-grid-enter');
+      void gridEl.offsetWidth;
+      gridEl.classList.add('schedule-grid-enter');
+      window._scheduleEnterMotion = false;
+      setTimeout(() => gridEl.classList.remove('schedule-grid-enter'), 500);
+    }
+  }
 
   // Also render the print-optimized version (unchanged)
   renderPrintSchedule(ROLES, ALL_KC);
@@ -11523,6 +11573,9 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
   if (radarHost) {
     radarHost.innerHTML = renderClopenRadar(ROLES) + renderWeekendFairnessBoard(ROLES);
   }
+
+  try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
+  try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
 }
 
 /** Compact fairness card directly under the schedule grid. */
@@ -11803,6 +11856,7 @@ function renderClopenRadar(ROLES) {
 }
 
 function applyClopenFix(idx) {
+  if (window._viewLocked) return;
   const c = (window._clopenList && window._clopenList[idx]) || null;
   if (!c || !c.fix || !schedule) {
     showToast('No automatic fix for that clopen.', 'warn');
@@ -12570,6 +12624,11 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
 
 // ── Clear Generated ──
 function clearSchedule() {
+  if (window._viewLocked) {
+    showToast('View only - cannot clear.', 'warn');
+    return;
+  }
+  try { if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot('clear'); } catch (e) {}
   schedule = {};
   window._lastGenReport = null;
   setScheduleResultsVisible(false);
@@ -12625,6 +12684,8 @@ function saveToStorage() {
   const key = `schedule_FY${fiscalYear}-P${p.number}`;
   localStorage.setItem(key, JSON.stringify(data));
   localStorage.setItem('schedule_last', key);
+  try { localStorage.setItem('msb_stg_last_saved_at', data._savedAt || new Date().toISOString()); } catch (e) {}
+  try { if (typeof updateLocalStatusPill === 'function') updateLocalStatusPill(); } catch (e) {}
   showToast(`Saved FY${fiscalYear} Period ${p.number} (${p.approxMonth})`, 'success');
 }
 
@@ -12636,6 +12697,7 @@ function loadFromStorage() {
     showToast(`No saved schedule for FY${fiscalYear} Period ${p.number}`, 'warn');
     return;
   }
+  try { if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot('load'); } catch (e) {}
   const data = JSON.parse(raw);
 
   // Restore AM count and KC list
@@ -12771,6 +12833,7 @@ let schedEditOpen = false;
 
 function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
   e.stopPropagation();
+  if (window._viewLocked) return;
   closeSchedEditMenu();
 
   const cell = e.currentTarget;
@@ -12849,169 +12912,144 @@ function closeSchedEditMenu() {
   schedEditOpen = false;
 }
 
-// ── Undo stack for manual cell edits ──
-const SCHED_UNDO_MAX = 40;
-let schedUndoStack = [];
+// ── Deep undo/redo stack (schedule + inputs snapshots) ──
+const SCHED_UNDO_MAX = 30;
+let undoStack = [];
+let redoStack = [];
+let schedUndoStack = undoStack;
 
-function pushSchedUndo(role, dk, prevValue) {
-  schedUndoStack.push({
-    role,
-    dk,
-    prev: prevValue === undefined ? null : prevValue,
-    at: Date.now(),
-  });
-  if (schedUndoStack.length > SCHED_UNDO_MAX) schedUndoStack.shift();
-  updateUndoButton();
+function deepCloneState(obj) {
+  try { return JSON.parse(JSON.stringify(obj == null ? {} : obj)); } catch (e) { return {}; }
 }
 
-function updateUndoButton() {
-  const btn = document.getElementById('btn-undo-edit');
-  if (!btn) return;
-  const n = schedUndoStack.length;
-  btn.disabled = n === 0;
-  btn.textContent = n ? `Undo (${n})` : 'Undo';
-  btn.title = n ? 'Undo last cell edit' : 'No edits to undo';
+function pushUndoSnapshot(label) {
+  undoStack.push({
+    label: label || 'edit',
+    schedule: deepCloneState(typeof schedule !== 'undefined' ? schedule : {}),
+    inputs: deepCloneState(typeof inputs !== 'undefined' ? inputs : {}),
+    at: Date.now()
+  });
+  if (undoStack.length > SCHED_UNDO_MAX) undoStack.shift();
+  redoStack = [];
+  schedUndoStack = undoStack;
+  updateUndoRedoButtons();
+}
+
+function pushSchedUndo(role, dk, prevValue) { pushUndoSnapshot('cell'); }
+function updateUndoButton() { updateUndoRedoButtons(); }
+
+function updateUndoRedoButtons() {
+  const u = document.getElementById('btn-undo-edit');
+  const r = document.getElementById('btn-redo-edit');
+  if (u) {
+    u.disabled = !undoStack.length || !!window._viewLocked;
+    u.textContent = undoStack.length ? 'Undo (' + undoStack.length + ')' : 'Undo';
+    u.title = undoStack.length ? 'Undo: ' + (undoStack[undoStack.length - 1].label || 'edit') : 'Nothing to undo';
+  }
+  if (r) {
+    r.disabled = !redoStack.length || !!window._viewLocked;
+    r.textContent = redoStack.length ? 'Redo (' + redoStack.length + ')' : 'Redo';
+    r.title = redoStack.length ? 'Redo: ' + (redoStack[redoStack.length - 1].label || 'edit') : 'Nothing to redo';
+  }
 }
 
 function clearSchedUndo() {
-  schedUndoStack = [];
-  updateUndoButton();
+  undoStack = [];
+  redoStack = [];
+  schedUndoStack = undoStack;
+  updateUndoRedoButtons();
+}
+
+function restoreUndoSnapshot(snap) {
+  schedule = deepCloneState(snap.schedule);
+  inputs = deepCloneState(snap.inputs);
+  try {
+    getAllPersonIds().forEach((r) => {
+      if (!schedule[r]) schedule[r] = {};
+      if (!inputs[r]) inputs[r] = {};
+    });
+  } catch (e) {}
+  try { buildInputTabs(); buildInputCalendar(activeTab); } catch (e) {}
+  const ROLES = getRoles();
+  const ALL_KC = getAllWithKC();
+  const hasCells = schedule && Object.keys(schedule).some((r) => schedule[r] && Object.keys(schedule[r]).length > 0);
+  if (hasCells && periodDates && periodDates.length) {
+    setScheduleResultsVisible(true);
+    try { revalidateAfterManualEdit(ROLES, ALL_KC); }
+    catch (e) { try { renderSchedule([], ROLES, ALL_KC); } catch (e2) {} }
+  } else {
+    setScheduleResultsVisible(false);
+  }
+  try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
+  try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
 }
 
 function undoSchedEdit() {
-  if (!schedUndoStack.length || !schedule) {
-    showToast('Nothing to undo.', 'info');
-    return;
-  }
-  const step = schedUndoStack.pop();
-  if (!schedule[step.role]) schedule[step.role] = {};
-  if (step.prev === null || step.prev === undefined) {
-    delete schedule[step.role][step.dk];
-  } else {
-    schedule[step.role][step.dk] = step.prev;
-  }
-  updateUndoButton();
-  // Re-render like applySchedEdit
-  const ROLES = getRoles();
-  const ALL_KC = getAllWithKC();
-  if (!periodDates || !periodDates.length) {
-    showToast('Undid edit.', 'success');
-    return;
-  }
-  const allDks = periodDates.map(d => dateKey(d)).filter(dk => typeof dk === 'string' && dk.includes('-'));
-  const numWeeks = currentPeriod.numWeeks;
-  const names = getManagerNames();
-  const AMS = getAMs();
-  const closerPool = ROLES.filter(r => r !== 'sm');
-  const dkToDate = (dk) => {
-    if (!dk || typeof dk !== 'string') return new Date(NaN);
-    const parts = dk.split('-');
-    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-  };
-  const isDkMondayL = (dk) => dkToDate(dk).getDay() === 1;
-  const isDkSaturdayL = (dk) => dkToDate(dk).getDay() === 6;
-  const isDkSundayL = (dk) => dkToDate(dk).getDay() === 0;
-  const isDkWeekendL = (dk) => { const dow = dkToDate(dk).getDay(); return dow === 0 || dow === 6; };
-  const dkDowL = (dk) => dkToDate(dk).getDay();
-  const getWeekDksL = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
-  const allWeekendPairsL = [];
-  for (let i = 0; i < allDks.length; i++) {
-    if (isDkSaturdayL(allDks[i]) && i + 1 < allDks.length && isDkSundayL(allDks[i + 1])) {
-      allWeekendPairsL.push({ sat: allDks[i], sun: allDks[i + 1] });
-    }
-  }
-  const finalViolations = validateSchedule(schedule, allDks, numWeeks, getWeekDksL, dkToDate, isDkMondayL, isDkSaturdayL, isDkSundayL, isDkWeekendL, dkDowL, allWeekendPairsL, names, ROLES, ALL_KC, AMS, closerPool);
-  const warnings = finalViolations.map(v => ({
-    type: v.severity === 'error' ? 'error' : (v.severity === 'warning' ? 'warn' : 'info'),
-    msg: v.detail
-  }));
-  renderSchedule(warnings, ROLES, ALL_KC);
-  renderPrintSchedule(ROLES, ALL_KC);
-  if (window._lastGenReport) {
-    window._lastGenReport = buildGenerationReport(
-      schedule, allDks, ROLES, ALL_KC, names,
-      preferences || {}, finalViolations, isDkWeekendL, dkToDate
-    );
-    renderSummary(warnings, ROLES, ALL_KC, window._lastGenReport);
-  }
-  showToast('Undid last cell edit.', 'success');
+  if (window._viewLocked) return;
+  if (!undoStack.length) { showToast('Nothing to undo.', 'info'); return; }
+  const current = { label: 'current', schedule: deepCloneState(schedule), inputs: deepCloneState(inputs), at: Date.now() };
+  const step = undoStack.pop();
+  redoStack.push(current);
+  if (redoStack.length > SCHED_UNDO_MAX) redoStack.shift();
+  restoreUndoSnapshot(step);
+  updateUndoRedoButtons();
+  showToast('Undid ' + (step.label || 'edit') + '.', 'success');
+}
+
+function redoSchedEdit() {
+  if (window._viewLocked) return;
+  if (!redoStack.length) { showToast('Nothing to redo.', 'info'); return; }
+  const current = { label: 'current', schedule: deepCloneState(schedule), inputs: deepCloneState(inputs), at: Date.now() };
+  const step = redoStack.pop();
+  undoStack.push(current);
+  if (undoStack.length > SCHED_UNDO_MAX) undoStack.shift();
+  restoreUndoSnapshot(step);
+  updateUndoRedoButtons();
+  showToast('Redid ' + (step.label || 'edit') + '.', 'success');
 }
 
 function applySchedEdit(role, dk, weekIdx, value) {
-  // Update the schedule data
+  if (window._viewLocked) return;
   if (!schedule[role]) schedule[role] = {};
-  const prev = schedule[role].hasOwnProperty(dk) ? schedule[role][dk] : null;
-  pushSchedUndo(role, dk, prev);
-  if (value === null) {
-    delete schedule[role][dk];
-  } else {
-    schedule[role][dk] = value;
-  }
-
+  pushUndoSnapshot('cell edit');
+  if (value === null) delete schedule[role][dk];
+  else schedule[role][dk] = value;
   closeSchedEditMenu();
-
-  // Re-render and re-validate
   const ROLES = getRoles();
   const ALL_KC = getAllWithKC();
-
-  // Re-run validation to get fresh warnings
-  const allDks = periodDates.map(d => dateKey(d)).filter(dk => typeof dk === 'string' && dk.includes('-'));
-  const numWeeks = currentPeriod.numWeeks;
-  const names = getManagerNames();
-  const AMS = getAMs();
-  const closerPool = ROLES.filter(r => r !== 'sm');
-
-  const dkToDate = (dk) => {
-    if (!dk || typeof dk !== 'string') return new Date(NaN);
-    const parts = dk.split('-');
-    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-  };
-  const isDkMondayL   = (dk) => dkToDate(dk).getDay() === 1;
-  const isDkSaturdayL = (dk) => dkToDate(dk).getDay() === 6;
-  const isDkSundayL   = (dk) => dkToDate(dk).getDay() === 0;
-  const isDkWeekendL  = (dk) => { const dow = dkToDate(dk).getDay(); return dow === 0 || dow === 6; };
-  const dkDowL        = (dk) => dkToDate(dk).getDay();
-  const getWeekDksL   = (wIdx) => allDks.slice(wIdx * 7, wIdx * 7 + 7);
-
-  const allWeekendPairsL = [];
-  for (let i = 0; i < allDks.length; i++) {
-    if (isDkSaturdayL(allDks[i]) && i + 1 < allDks.length && isDkSundayL(allDks[i + 1])) {
-      allWeekendPairsL.push({ sat: allDks[i], sun: allDks[i + 1] });
-    }
+  try { revalidateAfterManualEdit(ROLES, ALL_KC); }
+  catch (e) {
+    renderSchedule([], ROLES, ALL_KC);
+    renderSummary([], ROLES, ALL_KC);
   }
-
-  const finalViolations = validateSchedule(schedule, allDks, numWeeks, getWeekDksL, dkToDate, isDkMondayL, isDkSaturdayL, isDkSundayL, isDkWeekendL, dkDowL, allWeekendPairsL, names, ROLES, ALL_KC, AMS, closerPool);
-  const warnings = finalViolations.map(v => ({
-    type: v.severity === 'error' ? 'error' : (v.severity === 'warning' ? 'warn' : 'info'),
-    msg: v.detail
-  }));
-
-  const nonMgrKCs = getNonManagerKCs();
-  allDks.forEach(dk => {
-    nonMgrKCs.forEach(kc => {
-      if (isMid(schedule[kc.id][dk])) {
-        warnings.push({ type: 'info', msg: `${names[kc.id]}: mid coverage ${formatDate(dkToDate(dk))} (low manager count)` });
-      }
-    });
-  });
-
-  const hasErrors = finalViolations.some(v => v.severity === 'error');
-  if (!hasErrors) {
-    warnings.unshift({ type: 'info', msg: 'All hard constraints satisfied. (manual edit)' });
-  } else {
-    warnings.unshift({ type: 'warn', msg: `${finalViolations.filter(v=>v.severity==='error').length} hard constraint(s) after manual edit.` });
-  }
-
-  // Re-render schedule table and summary
-  renderSchedule(warnings, ROLES, ALL_KC);
-  renderSummary(warnings, ROLES, ALL_KC);
+  try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
 }
 
-// Close schedule edit menu on Escape key
+// Escape + undo/redo + command palette
 document.addEventListener('keydown', (e) => {
+  const mod = e.metaKey || e.ctrlKey;
+  if (mod && (e.key === 'k' || e.key === 'K')) {
+    e.preventDefault();
+    if (typeof openCommandPalette === 'function') openCommandPalette();
+    return;
+  }
+  if (mod && (e.key === 'z' || e.key === 'Z') && !e.shiftKey) {
+    if (!window._viewLocked && typeof undoSchedEdit === 'function') { e.preventDefault(); undoSchedEdit(); }
+    return;
+  }
+  if (mod && ((e.key === 'y' || e.key === 'Y') || ((e.key === 'z' || e.key === 'Z') && e.shiftKey))) {
+    if (!window._viewLocked && typeof redoSchedEdit === 'function') { e.preventDefault(); redoSchedEdit(); }
+    return;
+  }
   if (e.key === 'Escape') {
+    if (typeof closeCommandPalette === 'function' && document.getElementById('cmd-palette')?.classList.contains('open')) {
+      closeCommandPalette(); return;
+    }
     if (schedEditOpen) closeSchedEditMenu();
     if (openMenu) closeCellMenu();
+  }
+  if (document.getElementById('cmd-palette')?.classList.contains('open') && typeof handleCmdPaletteKey === 'function') {
+    handleCmdPaletteKey(e);
   }
 });
 
@@ -13806,6 +13844,737 @@ async function promptPwaInstall() {
   }
 }
 
+/* ====================================================================
+   v2.6.0 FLAGSHIP UX — palette, strip, density, undo, diff, suggestions,
+   lock view, paint, ops-home, next period, local status
+   ==================================================================== */
+
+window._viewLocked = false;
+window._requestPaintMode = null;
+window._requestPainting = false;
+window._cmdPaletteIndex = 0;
+window._cmdPaletteFiltered = [];
+window._lastScheduleDiff = null;
+window._smartSuggestions = [];
+window._prevScheduleSnap = {};
+window._scheduleEnterMotion = false;
+
+function initDensityAndContrast() {
+  let dens = 'comfortable';
+  let hc = false;
+  try {
+    dens = localStorage.getItem('msb_stg_density') || 'comfortable';
+    hc = localStorage.getItem('msb_stg_hc_posting') === '1';
+  } catch (e) {}
+  if (dens !== 'compact' && dens !== 'comfortable' && dens !== 'board') dens = 'comfortable';
+  setDensityMode(dens, true);
+  if (hc) {
+    document.documentElement.classList.add('hc-posting');
+    document.documentElement.setAttribute('data-contrast', 'high');
+  }
+}
+
+function setDensityMode(mode, silent) {
+  if (mode !== 'compact' && mode !== 'comfortable' && mode !== 'board') return;
+  document.documentElement.setAttribute('data-density', mode);
+  try { localStorage.setItem('msb_stg_density', mode); } catch (e) {}
+  if (!silent) showToast('Density: ' + mode, 'info');
+}
+
+function toggleHighContrast() {
+  const on = !document.documentElement.classList.contains('hc-posting');
+  document.documentElement.classList.toggle('hc-posting', on);
+  if (on) document.documentElement.setAttribute('data-contrast', 'high');
+  else document.documentElement.removeAttribute('data-contrast');
+  try { localStorage.setItem('msb_stg_hc_posting', on ? '1' : '0'); } catch (e) {}
+  showToast(on ? 'High-contrast posting on' : 'High-contrast off', 'info');
+}
+
+function togglePeakSeasonPref() {
+  const el = document.getElementById('pref-peak-season');
+  if (el) {
+    el.checked = !el.checked;
+    if (typeof readPreferencesFromUI === 'function') readPreferencesFromUI();
+    showToast(el.checked ? 'Peak season hours on' : 'Peak season hours off', 'info');
+  } else {
+    preferences.peakSeasonHours = !preferences.peakSeasonHours;
+    showToast(preferences.peakSeasonHours ? 'Peak season on' : 'Peak season off', 'info');
+  }
+}
+
+function applyLaunchMode(params) {
+  params = params || new URLSearchParams(location.search);
+  const view = (params.get('view') || '').toLowerCase();
+  const lock = params.get('lock') === '1' || view === 'board' || view === 'lock';
+  window._viewLocked = !!lock;
+  document.documentElement.classList.toggle('view-locked', !!lock);
+  if (view === 'board' && typeof setDensityMode === 'function') {
+    setDensityMode('board', true);
+  }
+  if (typeof updateUndoRedoButtons === 'function') updateUndoRedoButtons();
+}
+
+function updateLocalStatusPill() {
+  const el = document.getElementById('local-status-pill');
+  if (!el) return;
+  let at = null;
+  try { at = localStorage.getItem('msb_stg_last_saved_at'); } catch (e) {}
+  if (!at) {
+    el.textContent = 'Saved · local';
+    el.title = 'Schedules save on this device';
+    return;
+  }
+  let label = 'Saved · local';
+  try {
+    const d = new Date(at);
+    if (!isNaN(d.getTime())) {
+      const t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      label = 'Saved · ' + t;
+      el.title = 'Last saved ' + d.toLocaleString() + ' (this device)';
+    }
+  } catch (e) {}
+  el.textContent = label;
+}
+
+function countRequestLocks() {
+  let n = 0;
+  try {
+    Object.keys(inputs || {}).forEach((r) => {
+      Object.keys(inputs[r] || {}).forEach((dk) => {
+        const v = inputs[r][dk];
+        if (v === 'rto' || v === 'pto' || v === 'loa' || v === 'off') n++;
+      });
+    });
+  } catch (e) {}
+  return n;
+}
+
+function updateOpsHome() {
+  const host = document.getElementById('ops-home');
+  if (!host) return;
+  const hasSched = !!(
+    schedule &&
+    Object.keys(schedule).some((r) => schedule[r] && Object.keys(schedule[r]).length > 0)
+  );
+  if (hasSched) {
+    host.classList.add('collapsed');
+    host.classList.remove('show');
+    return;
+  }
+  host.classList.remove('collapsed');
+  host.classList.add('show');
+  const p = currentPeriod;
+  const title = document.getElementById('ops-home-title');
+  if (title) {
+    title.textContent = p
+      ? 'FY' + fiscalYear + ' Period ' + p.number + ' · ' + p.approxMonth
+      : 'Load a period to start';
+  }
+  const meta = document.getElementById('ops-home-meta');
+  if (meta) {
+    const teamN =
+      (typeof getRoles === 'function' ? getRoles().length : 0) +
+      (typeof getNonManagerKCs === 'function' ? getNonManagerKCs().length : 0);
+    let hours = '—';
+    try {
+      if (typeof summarizeStoreHours === 'function') hours = summarizeStoreHours().split('·')[0].trim();
+    } catch (e) {}
+    const reqN = countRequestLocks();
+    const peak = !!(preferences && preferences.peakSeasonHours);
+    meta.innerHTML =
+      '<span class="ops-chip">' + teamN + ' on team</span>' +
+      '<span class="ops-chip">' + esc(hours) + '</span>' +
+      '<span class="ops-chip">' + reqN + ' requests</span>' +
+      '<span class="ops-chip">Peak ' + (peak ? 'on' : 'off') + '</span>';
+  }
+}
+
+function computeCoverageAndFairnessStats() {
+  const ROLES = typeof getRoles === 'function' ? getRoles() : [];
+  const ALL_KC = typeof getAllWithKC === 'function' ? getAllWithKC() : ROLES;
+  const report = window._lastGenReport || null;
+  const allDks = (periodDates || []).map((d) => dateKey(d));
+  let missDays = 0;
+  let coverOk = true;
+  let clopens = 0;
+  const peerCloses = [];
+  const peerWe = [];
+  const isDayOffish = (s) => s === 'off' || s === 'rto' || s === 'pto' || s === 'loa';
+  const isWeekendDk = (dk) => {
+    const parts = String(dk).split('-');
+    const dow = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getDay();
+    return dow === 0 || dow === 6;
+  };
+  allDks.forEach((dk, i) => {
+    let opens = 0, closes = 0;
+    ROLES.forEach((r) => {
+      const s = schedule[r] && schedule[r][dk];
+      if (isOpen(s)) opens++;
+      if (isClose(s)) closes++;
+      if (i > 0 && isClose(schedule[r] && schedule[r][allDks[i - 1]]) && isOpen(s)) clopens++;
+    });
+    (ALL_KC || []).forEach((kc) => {
+      if (ROLES.includes(kc)) return;
+      const s = schedule[kc] && schedule[kc][dk];
+      if (s === 'kc-close' || isClose(s)) closes++;
+      if (isOpen(s)) opens++;
+    });
+    if (opens < 1 || closes < 1) {
+      coverOk = false;
+      missDays++;
+    }
+  });
+  ROLES.filter((r) => r !== 'sm').forEach((r) => {
+    let closes = 0, we = 0;
+    if (report) {
+      closes = report.closes[r] || 0;
+      we = report.weekendOffs[r] || 0;
+    } else {
+      allDks.forEach((dk) => {
+        const s = schedule[r] && schedule[r][dk];
+        if (isClose(s)) closes++;
+        if (isWeekendDk(dk) && isDayOffish(s)) we++;
+      });
+    }
+    peerCloses.push(closes);
+    peerWe.push(we);
+  });
+  const cMin = peerCloses.length ? Math.min(...peerCloses) : 0;
+  const cMax = peerCloses.length ? Math.max(...peerCloses) : 0;
+  const weMin = peerWe.length ? Math.min(...peerWe) : 0;
+  const weMax = peerWe.length ? Math.max(...peerWe) : 0;
+  const cSpread = cMax - cMin;
+  const weSpread = weMax - weMin;
+  const fairOk = cSpread <= 2 && weSpread <= 1 && clopens === 0;
+  return { coverOk, missDays, clopens, cMin, cMax, cSpread, weMin, weMax, weSpread, fairOk, ROLES, ALL_KC };
+}
+
+function updatePostGenStrip() {
+  const strip = document.getElementById('post-gen-strip');
+  if (!strip) return;
+  const hasSched = !!(schedule && Object.keys(schedule).some((r) => schedule[r] && Object.keys(schedule[r]).length));
+  if (!hasSched) {
+    strip.classList.remove('show');
+    strip.hidden = true;
+    return;
+  }
+  strip.hidden = false;
+  strip.classList.add('show');
+  const st = computeCoverageAndFairnessStats();
+  const cover = document.getElementById('pgs-cover');
+  const cl = document.getElementById('pgs-clopens');
+  const amc = document.getElementById('pgs-am-close');
+  const we = document.getElementById('pgs-we');
+  const fair = document.getElementById('pgs-fair');
+  if (cover) {
+    cover.textContent = st.coverOk ? 'Open+close ✓' : st.missDays + ' missing';
+    cover.className = 'pgs-chip ' + (st.coverOk ? 'ok' : 'bad');
+  }
+  if (cl) {
+    cl.textContent = 'Clopens ' + st.clopens;
+    cl.className = 'pgs-chip ' + (st.clopens === 0 ? 'ok' : 'warn');
+  }
+  if (amc) {
+    amc.textContent = 'AM closes ' + st.cMin + '-' + st.cMax;
+    amc.className = 'pgs-chip ' + (st.cSpread > 2 ? 'warn' : 'ok');
+  }
+  if (we) {
+    we.textContent = 'WE offs ' + st.weMin + '-' + st.weMax;
+    we.className = 'pgs-chip ' + (st.weSpread > 1 ? 'warn' : 'ok');
+  }
+  if (fair) {
+    fair.textContent = st.fairOk ? 'Fairness OK' : 'Fairness Review';
+    fair.className = 'pgs-chip ' + (st.fairOk ? 'ok' : 'warn');
+  }
+}
+
+function jumpToFairnessStrip() {
+  switchTab('schedule');
+  setTimeout(() => {
+    document.getElementById('fairness-under-schedule')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 40);
+}
+
+function jumpToIssuesPanel() {
+  switchTab('schedule');
+  setTimeout(() => {
+    document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 40);
+}
+
+function jumpToSmartSuggestions() {
+  switchTab('schedule');
+  setTimeout(() => {
+    const el = document.getElementById('smart-suggestions');
+    if (el && el.classList.contains('show')) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    else jumpToFairnessStrip();
+  }, 40);
+}
+
+function startNextPeriodSameTeam() {
+  if (window._viewLocked) {
+    showToast('View only — cannot change period.', 'warn');
+    return;
+  }
+  try {
+    if (typeof persistManagerNames === 'function') persistManagerNames();
+    if (typeof persistStoreMeta === 'function') persistStoreMeta();
+    if (typeof readPreferencesFromUI === 'function') readPreferencesFromUI();
+    try {
+      const name =
+        ((document.getElementById('store-name') || {}).value || '').trim() ||
+        'Current team';
+      const tpl = snapshotCurrentTeamTemplate(name);
+      const list = listTeamTemplates();
+      const existing = list.findIndex((t) => t.name === tpl.name);
+      if (existing >= 0) list[existing] = tpl;
+      else list.unshift(tpl);
+      while (list.length > 20) list.pop();
+      writeTeamTemplates(list);
+      localStorage.setItem(MSB_TEAM_TEMPLATE_LAST, tpl.id);
+    } catch (e) {}
+  } catch (e) {}
+
+  let nextIdx = (typeof currentPeriodIndex === 'number' ? currentPeriodIndex : 0) + 1;
+  let nextYear = fiscalYear;
+  if (!allPeriods || !allPeriods.length) {
+    allPeriods = getFiscalPeriods(fiscalYear);
+  }
+  if (nextIdx >= allPeriods.length) {
+    nextYear = fiscalYear + 1;
+    nextIdx = 0;
+    const yEl = document.getElementById('pick-year');
+    if (yEl) yEl.value = nextYear;
+    fiscalYear = nextYear;
+    buildPeriodDropdown();
+  }
+  const sel = document.getElementById('pick-period');
+  if (sel) sel.value = nextIdx;
+  currentPeriodIndex = nextIdx;
+  loadPeriod();
+  inputs = {};
+  schedule = {};
+  holidayWeeks = {};
+  getAllPersonIds().forEach((r) => {
+    inputs[r] = {};
+  });
+  window._lastGenReport = null;
+  window._lastScheduleDiff = null;
+  window._smartSuggestions = [];
+  setScheduleResultsVisible(false);
+  dismissScheduleDiff();
+  renderSmartSuggestions([]);
+  updatePostGenStrip();
+  updateOpsHome();
+  buildInputTabs();
+  buildInputCalendar(activeTab);
+  const pNum = currentPeriod ? currentPeriod.number : nextIdx + 1;
+  switchTab('schedule');
+  showToast('Period ' + pNum + ' ready — set requests then Build', 'success');
+}
+
+function setRequestPaintMode(mode) {
+  if (window._viewLocked) return;
+  if (window._requestPaintMode === mode) {
+    window._requestPaintMode = null;
+  } else {
+    window._requestPaintMode = mode;
+  }
+  document.querySelectorAll('#request-paint-toolbar .rpt-chip').forEach((btn) => {
+    btn.classList.toggle('active', btn.getAttribute('data-paint') === window._requestPaintMode);
+  });
+  const lab = document.getElementById('rpt-active-label');
+  if (lab) {
+    lab.textContent = window._requestPaintMode
+      ? 'Painting: ' + (window._requestPaintMode === '__clear__' ? 'Clear' : window._requestPaintMode)
+      : 'Tap a mode, then drag across days';
+  }
+}
+
+function paintRequestCell(role, dk) {
+  if (!window._requestPaintMode || window._viewLocked) return;
+  if (!inputs[role]) inputs[role] = {};
+  if (window._requestPaintMode === '__clear__') {
+    delete inputs[role][dk];
+  } else {
+    inputs[role][dk] = window._requestPaintMode;
+  }
+}
+
+function setupRequestPaintHandlers() {
+  const host = document.getElementById('input-calendars');
+  if (!host || host._paintBound) return;
+  host._paintBound = true;
+  host.addEventListener('pointerdown', (e) => {
+    if (window._viewLocked || !window._requestPaintMode) return;
+    const cell = e.target.closest('.cal-cell');
+    if (!cell || !cell.dataset.dk) return;
+    e.preventDefault();
+    window._requestPainting = true;
+    document.body.classList.add('painting-requests');
+    try { host.setPointerCapture(e.pointerId); } catch (err) {}
+    paintRequestCell(cell.dataset.role || activeTab, cell.dataset.dk);
+    cell.classList.add('paint-hover');
+  });
+  host.addEventListener('pointerover', (e) => {
+    if (!window._requestPainting || !window._requestPaintMode) return;
+    const cell = e.target.closest('.cal-cell');
+    if (!cell || !cell.dataset.dk) return;
+    paintRequestCell(cell.dataset.role || activeTab, cell.dataset.dk);
+    cell.classList.add('paint-hover');
+  });
+  const endPaint = () => {
+    if (!window._requestPainting) return;
+    window._requestPainting = false;
+    document.body.classList.remove('painting-requests');
+    buildInputCalendar(activeTab);
+    updateOpsHome();
+  };
+  host.addEventListener('pointerup', endPaint);
+  host.addEventListener('pointercancel', endPaint);
+  document.addEventListener('pointerup', endPaint);
+}
+
+function computeScheduleDiff(prev, next) {
+  const changes = [];
+  prev = prev || {};
+  next = next || {};
+  const roles = new Set([...Object.keys(prev), ...Object.keys(next)]);
+  roles.forEach((role) => {
+    const a = prev[role] || {};
+    const b = next[role] || {};
+    const dks = new Set([...Object.keys(a), ...Object.keys(b)]);
+    dks.forEach((dk) => {
+      const from = a[dk] == null ? '' : a[dk];
+      const to = b[dk] == null ? '' : b[dk];
+      if (from !== to) changes.push({ role, dk, from: from || '—', to: to || '—' });
+    });
+  });
+  return changes;
+}
+
+function renderScheduleDiffPanel(diff) {
+  const panel = document.getElementById('schedule-diff-panel');
+  const list = document.getElementById('diff-list');
+  const lab = document.getElementById('diff-head-label');
+  if (!panel || !list) return;
+  if (!diff || !diff.length) {
+    panel.classList.remove('show');
+    panel.hidden = true;
+    list.innerHTML = '';
+    return;
+  }
+  panel.hidden = false;
+  panel.classList.add('show');
+  if (lab) lab.textContent = diff.length + ' cell' + (diff.length === 1 ? '' : 's') + ' changed';
+  const names = typeof getManagerNames === 'function' ? getManagerNames() : {};
+  const top = diff.slice(0, 20);
+  list.innerHTML = top
+    .map((c) => {
+      const nm = names[c.role] || c.role;
+      return (
+        '<div class="diff-row">' +
+        esc(nm) +
+        ' · ' +
+        esc(c.dk) +
+        ': ' +
+        esc(String(c.from)) +
+        ' → ' +
+        esc(String(c.to)) +
+        '</div>'
+      );
+    })
+    .join('');
+  if (diff.length > 20) {
+    list.innerHTML += '<div class="diff-row">… +' + (diff.length - 20) + ' more</div>';
+  }
+}
+
+function dismissScheduleDiff() {
+  window._lastScheduleDiff = null;
+  const panel = document.getElementById('schedule-diff-panel');
+  if (panel) {
+    panel.classList.remove('show');
+    panel.hidden = true;
+  }
+}
+
+function buildSmartSuggestions() {
+  const out = [];
+  if (!schedule || !periodDates || !periodDates.length) return out;
+  const st = computeCoverageAndFairnessStats();
+  const ROLES = st.ROLES.filter((r) => r !== 'sm');
+  const names = getManagerNames();
+  const allDks = periodDates.map((d) => dateKey(d));
+  const report = window._lastGenReport;
+
+  const closeCounts = {};
+  ROLES.forEach((r) => {
+    closeCounts[r] = report
+      ? report.closes[r] || 0
+      : allDks.filter((dk) => isClose(schedule[r] && schedule[r][dk])).length;
+  });
+
+  if (st.cSpread > 1) {
+    const over = ROLES.slice().sort((a, b) => closeCounts[b] - closeCounts[a])[0];
+    const under = ROLES.slice().sort((a, b) => closeCounts[a] - closeCounts[b])[0];
+    if (over && under && over !== under) {
+      for (let i = 0; i < allDks.length && out.length < 5; i++) {
+        const dk = allDks[i];
+        const so = schedule[over] && schedule[over][dk];
+        const su = schedule[under] && schedule[under][dk];
+        if (!isClose(so) || !isMid(su)) continue;
+        const next = i + 1 < allDks.length ? allDks[i + 1] : null;
+        if (next && isOpen(schedule[under][next])) continue;
+        const dayLabel = formatDate
+          ? formatDate(new Date(+dk.slice(0, 4), +dk.slice(5, 7) - 1, +dk.slice(8, 10)))
+          : dk;
+        out.push({
+          id: 'swap-close-' + over + '-' + under + '-' + dk,
+          label:
+            'Give ' +
+            (names[under] || under) +
+            ' +1 close (swap ' +
+            dayLabel +
+            ' with ' +
+            (names[over] || over) +
+            ')',
+          apply: () => {
+            pushUndoSnapshot('suggestion');
+            const a = schedule[over][dk];
+            const b = schedule[under][dk];
+            schedule[over][dk] = b;
+            schedule[under][dk] = a;
+            revalidateAfterManualEdit(getRoles(), getAllWithKC());
+            window._smartSuggestions = buildSmartSuggestions();
+            renderSmartSuggestions(window._smartSuggestions);
+            updatePostGenStrip();
+            showToast('Applied close swap.', 'success');
+          }
+        });
+        break;
+      }
+    }
+  }
+
+  if (st.weSpread > 1 && out.length < 5) {
+    out.push({
+      id: 'we-note',
+      label: 'Weekend off spread is ' + st.weSpread + ' (WE offs ' + st.weMin + '-' + st.weMax + ') — review weekends',
+      apply: null,
+      noteOnly: true
+    });
+  }
+
+  return out.slice(0, 5);
+}
+
+function renderSmartSuggestions(list) {
+  const panel = document.getElementById('smart-suggestions');
+  const host = document.getElementById('sug-list');
+  if (!panel || !host) return;
+  list = list || [];
+  window._smartSuggestions = list;
+  if (!list.length) {
+    panel.classList.remove('show');
+    panel.hidden = true;
+    host.innerHTML = '';
+    return;
+  }
+  panel.hidden = false;
+  panel.classList.add('show');
+  host.innerHTML = list
+    .map((s, idx) => {
+      if (s.noteOnly || !s.apply) {
+        return '<div class="sug-chip"><span>' + esc(s.label) + '</span></div>';
+      }
+      return (
+        '<div class="sug-chip"><span>' +
+        esc(s.label) +
+        '</span><button type="button" class="btn-primary" onclick="applySmartSuggestion(' +
+        idx +
+        ')">Apply</button></div>'
+      );
+    })
+    .join('');
+}
+
+function applySmartSuggestion(idx) {
+  if (window._viewLocked) return;
+  const s = (window._smartSuggestions || [])[idx];
+  if (!s || !s.apply) return;
+  s.apply();
+}
+
+function getCommandPaletteCommands() {
+  return [
+    { id: 'tab-setup', label: 'Switch to Setup', group: 'Nav', run: () => switchTab('setup') },
+    { id: 'tab-requests', label: 'Switch to Requests', group: 'Nav', run: () => switchTab('requests') },
+    { id: 'tab-rules', label: 'Switch to Rules', group: 'Nav', run: () => switchTab('rules') },
+    { id: 'tab-schedule', label: 'Switch to Schedule', group: 'Nav', run: () => switchTab('schedule') },
+    { id: 'generate', label: 'Generate / Build period', group: 'Schedule', run: () => generateSchedule() },
+    { id: 'demo', label: 'Load demo store', group: 'Schedule', run: () => loadDemoStore() },
+    { id: 'save', label: 'Save schedule', group: 'File', run: () => saveToStorage() },
+    { id: 'load', label: 'Load saved schedules', group: 'File', run: () => openSavedSchedulesModal() },
+    { id: 'save-team', label: 'Save team template', group: 'Team', run: () => saveTeamTemplate() },
+    { id: 'tour', label: 'Take tour', group: 'Help', run: () => startOnboardingTour(true) },
+    { id: 'peak', label: 'Toggle peak season', group: 'Rules', run: () => togglePeakSeasonPref() },
+    { id: 'hc', label: 'Toggle high-contrast', group: 'View', run: () => toggleHighContrast() },
+    { id: 'dens-c', label: 'Density: Compact', group: 'View', run: () => setDensityMode('compact') },
+    { id: 'dens-f', label: 'Density: Comfortable', group: 'View', run: () => setDensityMode('comfortable') },
+    { id: 'dens-b', label: 'Density: Board', group: 'View', run: () => setDensityMode('board') },
+    { id: 'next-p', label: 'Next period same team', group: 'Period', run: () => startNextPeriodSameTeam() },
+    { id: 'export-w', label: 'Export Word', group: 'Export', run: () => exportSchedule() },
+    { id: 'export-x', label: 'Export Excel', group: 'Export', run: () => exportScheduleExcel() },
+    { id: 'copy-sum', label: 'Copy summary', group: 'Export', run: () => copySummaryText() },
+    { id: 'clear', label: 'Clear schedule', group: 'Schedule', run: () => clearSchedule() },
+    {
+      id: 'offline-info',
+      label: 'Toggle offline badge info',
+      group: 'Status',
+      run: () => {
+        showToast(
+          'Works fully offline — data stays on this device. ' +
+            (document.getElementById('local-status-pill')?.textContent || ''),
+          'info'
+        );
+      }
+    },
+    { id: 'undo', label: 'Undo', group: 'Edit', run: () => undoSchedEdit() },
+    { id: 'redo', label: 'Redo', group: 'Edit', run: () => redoSchedEdit() },
+    { id: 'print', label: 'Print posting sheet', group: 'Export', run: () => window.print() }
+  ];
+}
+
+function fuzzyScore(query, text) {
+  query = (query || '').toLowerCase().trim();
+  text = (text || '').toLowerCase();
+  if (!query) return 1;
+  if (text.includes(query)) return 100 - text.indexOf(query);
+  let ti = 0, score = 0, streak = 0;
+  for (let qi = 0; qi < query.length; qi++) {
+    const ch = query[qi];
+    let found = false;
+    while (ti < text.length) {
+      if (text[ti] === ch) {
+        score += 2 + streak;
+        streak++;
+        ti++;
+        found = true;
+        break;
+      }
+      streak = 0;
+      ti++;
+    }
+    if (!found) return 0;
+  }
+  return score;
+}
+
+function openCommandPalette() {
+  const el = document.getElementById('cmd-palette');
+  if (!el) return;
+  el.hidden = false;
+  el.classList.add('open');
+  const input = document.getElementById('cmd-palette-input');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  window._cmdPaletteIndex = 0;
+  renderCommandPaletteResults('');
+}
+
+function closeCommandPalette() {
+  const el = document.getElementById('cmd-palette');
+  if (!el) return;
+  el.classList.remove('open');
+  el.hidden = true;
+}
+
+function renderCommandPaletteResults(q) {
+  const host = document.getElementById('cmd-palette-results');
+  if (!host) return;
+  const cmds = getCommandPaletteCommands()
+    .map((c) => ({ c, s: fuzzyScore(q, c.label + ' ' + c.group) }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s);
+  window._cmdPaletteFiltered = cmds.map((x) => x.c);
+  if (!window._cmdPaletteFiltered.length) {
+    host.innerHTML = '<div class="cmd-empty">No matching commands</div>';
+    return;
+  }
+  if (window._cmdPaletteIndex >= window._cmdPaletteFiltered.length) window._cmdPaletteIndex = 0;
+  host.innerHTML = window._cmdPaletteFiltered
+    .map((c, i) => {
+      return (
+        '<button type="button" class="cmd-item' +
+        (i === window._cmdPaletteIndex ? ' active' : '') +
+        '" role="option" data-idx="' +
+        i +
+        '" onclick="runCommandPaletteIndex(' +
+        i +
+        ')">' +
+        '<span class="cmd-label">' +
+        esc(c.label) +
+        '</span>' +
+        '<span class="cmd-group">' +
+        esc(c.group) +
+        '</span></button>'
+      );
+    })
+    .join('');
+}
+
+function runCommandPaletteIndex(i) {
+  const c = window._cmdPaletteFiltered[i];
+  closeCommandPalette();
+  if (c && typeof c.run === 'function') {
+    try {
+      c.run();
+    } catch (e) {
+      console.error(e);
+      showToast('Command failed: ' + (e.message || e), 'error');
+    }
+  }
+}
+
+function handleCmdPaletteKey(e) {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    window._cmdPaletteIndex = Math.min(
+      (window._cmdPaletteFiltered || []).length - 1,
+      (window._cmdPaletteIndex || 0) + 1
+    );
+    renderCommandPaletteResults(document.getElementById('cmd-palette-input')?.value || '');
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    window._cmdPaletteIndex = Math.max(0, (window._cmdPaletteIndex || 0) - 1);
+    renderCommandPaletteResults(document.getElementById('cmd-palette-input')?.value || '');
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    runCommandPaletteIndex(window._cmdPaletteIndex || 0);
+  }
+}
+
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'cmd-palette-input') {
+    window._cmdPaletteIndex = 0;
+    renderCommandPaletteResults(e.target.value || '');
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target && (e.target.id === 'local-status-pill' || e.target.id === 'offline-pill')) {
+    showToast(
+      'Offline-ready · data stays on this device. ' +
+        (document.getElementById('local-status-pill')?.textContent || ''),
+      'info'
+    );
+  }
+});
+
+
 function handleLaunchQuery() {
   try {
     applyUrlProUnlock();
@@ -13816,6 +14585,7 @@ function handleLaunchQuery() {
     if (params.get('demo') === '1' && typeof loadDemoStore === 'function') {
       setTimeout(() => loadDemoStore(), 200);
     }
+    if (typeof applyLaunchMode === 'function') applyLaunchMode(params);
   } catch(e) {}
 }
 
@@ -13831,10 +14601,15 @@ loadMonetizationConfig().then(() => {
 applyPriceLabels();
 // After DOM boot
 function bootUi() {
+  try { if (typeof initDensityAndContrast === 'function') initDensityAndContrast(); } catch (e) {}
   handleLaunchQuery();
   ensureAuthOnBoot();
   updateAccountChip();
   personalizeWelcome();
+  try { if (typeof updateLocalStatusPill === 'function') updateLocalStatusPill(); } catch (e) {}
+  try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
+  try { if (typeof updateUndoRedoButtons === 'function') updateUndoRedoButtons(); } catch (e) {}
+  try { if (typeof setupRequestPaintHandlers === 'function') setupRequestPaintHandlers(); } catch (e) {}
   try {
     if (typeof loadSelectedFederalHolidays === 'function') loadSelectedFederalHolidays();
     if (typeof renderFederalHolidaysUI === 'function') renderFederalHolidaysUI();

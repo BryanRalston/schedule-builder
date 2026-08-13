@@ -1,8 +1,8 @@
 # Schedule Pro Engine Stress Test Report
 
-Generated: 2026-08-13T16:03:10.746Z
-Engine version: **2.5.7**
-Base: `http://127.0.0.1:53601` (local repo-root static server)
+Generated: 2026-08-13T17:20:31.056Z
+Engine version: **2.6.0**
+Base: `http://127.0.0.1:54267` (local repo-root static server)
 
 ## Summary
 
@@ -32,31 +32,31 @@ Exit code is **1 only on FAIL** (hard coverage / throw / manager close on KC nig
 
 | Scenario | Status | noOpen | noClose | clopens | thin | closeSpread | weSpread | ms |
 |----------|--------|-------:|--------:|--------:|-----:|------------:|---------:|---:|
-| clean-3am | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 27 |
-| p08-posted-shape | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 10 |
-| sole-manager | WARN | 0 | 35 | 0 | 35 | 0 | 0 | 11 |
-| sm-plus-one-am | PASS | 0 | 0 | 1 | 0 | 0 | 0 | 10 |
-| five-ams | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 10 |
-| no-kcs | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 10 |
-| kc-close-all-week | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| kc-close-none | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 10 |
-| dual-loa | PASS | 0 | 0 | 0 | 0 | 9 | 5 | 11 |
-| triple-pto-same-week | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 10 |
-| all-want-weekends-4 | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 7 |
-| zero-weekend-target | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 7 |
-| rto-every-weekend-all-ams | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 10 |
-| pto-checkerboard-am1 | PASS | 0 | 0 | 0 | 0 | 8 | 5 | 10 |
-| manager-mode-kc | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 10 |
-| kc-mid-all-dows-both | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 8 |
-| avoid-clopen-off | PASS | 0 | 0 | 19 | 0 | 1 | 1 | 8 |
-| packages-off-sm-equal | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 8 |
-| sm-closes-3-per-week | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
-| am-closes-fixed-2 | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
-| four-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 6 |
-| six-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 9 |
-| stability-10x | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
-| max-stacked-hell | PASS | 0 | 0 | 1 | 0 | 2 | 6 | 12 |
-| only-two-working-many-days | PASS | 0 | 0 | 2 | 0 | 5 | 5 | 13 |
+| clean-3am | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 23 |
+| p08-posted-shape | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 35 |
+| sole-manager | WARN | 0 | 35 | 0 | 35 | 0 | 0 | 18 |
+| sm-plus-one-am | PASS | 0 | 0 | 1 | 0 | 0 | 0 | 17 |
+| five-ams | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 17 |
+| no-kcs | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 20 |
+| kc-close-all-week | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 29 |
+| kc-close-none | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 18 |
+| dual-loa | PASS | 0 | 0 | 0 | 0 | 9 | 5 | 20 |
+| triple-pto-same-week | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 18 |
+| all-want-weekends-4 | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 16 |
+| zero-weekend-target | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 14 |
+| rto-every-weekend-all-ams | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 18 |
+| pto-checkerboard-am1 | PASS | 0 | 0 | 0 | 0 | 8 | 5 | 18 |
+| manager-mode-kc | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 15 |
+| kc-mid-all-dows-both | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 15 |
+| avoid-clopen-off | PASS | 0 | 0 | 19 | 0 | 1 | 1 | 14 |
+| packages-off-sm-equal | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 15 |
+| sm-closes-3-per-week | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 14 |
+| am-closes-fixed-2 | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 15 |
+| four-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 12 |
+| six-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 16 |
+| stability-10x | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 15 |
+| max-stacked-hell | PASS | 0 | 0 | 1 | 0 | 2 | 6 | 20 |
+| only-two-working-many-days | PASS | 0 | 0 | 2 | 0 | 5 | 5 | 22 |
 
 ## Failures
 

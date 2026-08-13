@@ -1,9 +1,9 @@
 {
   "title": "Schedule Pro Engine Stress Test",
-  "version": "2.5.7",
-  "startedAt": "2026-08-13T16:03:09.069Z",
-  "finishedAt": "2026-08-13T16:03:10.746Z",
-  "base": "http://127.0.0.1:53601",
+  "version": "2.6.0",
+  "startedAt": "2026-08-13T17:20:28.809Z",
+  "finishedAt": "2026-08-13T17:20:31.056Z",
+  "base": "http://127.0.0.1:54267",
   "summary": {
     "pass": 24,
     "fail": 0,
@@ -49,7 +49,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 27,
+        "ms": 23,
         "error": null
       }
     },
@@ -80,7 +80,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 10,
+        "ms": 35,
         "error": null
       }
     },
@@ -105,7 +105,7 @@
         "closeSpread": 0,
         "weSpread": 0,
         "days": 35,
-        "ms": 11,
+        "ms": 18,
         "error": null
       }
     },
@@ -134,7 +134,7 @@
         "closeSpread": 0,
         "weSpread": 0,
         "days": 35,
-        "ms": 10,
+        "ms": 17,
         "error": null
       }
     },
@@ -169,7 +169,7 @@
         "closeSpread": 0,
         "weSpread": 0,
         "days": 35,
-        "ms": 10,
+        "ms": 17,
         "error": null
       }
     },
@@ -200,7 +200,7 @@
         "closeSpread": 1,
         "weSpread": 1,
         "days": 35,
-        "ms": 10,
+        "ms": 20,
         "error": null
       }
     },
@@ -231,7 +231,7 @@
         "closeSpread": 0,
         "weSpread": 0,
         "days": 35,
-        "ms": 15,
+        "ms": 29,
         "error": null
       }
     },
@@ -262,7 +262,7 @@
         "closeSpread": 1,
         "weSpread": 1,
         "days": 35,
-        "ms": 10,
+        "ms": 18,
         "error": null
       }
     },
@@ -295,7 +295,7 @@
         "closeSpread": 9,
         "weSpread": 5,
         "days": 35,
-        "ms": 11,
+        "ms": 20,
         "error": null
       }
     },
@@ -326,7 +326,7 @@
         "closeSpread": 1,
         "weSpread": 1,
         "days": 35,
-        "ms": 10,
+        "ms": 18,
         "error": null
       }
     },
@@ -357,7 +357,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 7,
+        "ms": 16,
         "error": null
       }
     },
@@ -388,7 +388,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 7,
+        "ms": 14,
         "error": null
       }
     },
@@ -419,7 +419,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 10,
+        "ms": 18,
         "error": null
       }
     },
@@ -452,7 +452,7 @@
         "closeSpread": 8,
         "weSpread": 5,
         "days": 35,
-        "ms": 10,
+        "ms": 18,
         "error": null
       }
     },
@@ -481,7 +481,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 10,
+        "ms": 15,
         "error": null
       }
     },
@@ -512,7 +512,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 8,
+        "ms": 15,
         "error": null
       }
     },
@@ -545,7 +545,7 @@
         "closeSpread": 1,
         "weSpread": 1,
         "days": 35,
-        "ms": 8,
+        "ms": 14,
         "error": null
       }
     },
@@ -576,7 +576,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 8,
+        "ms": 15,
         "error": null
       }
     },
@@ -607,7 +607,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 8,
+        "ms": 14,
         "error": null
       }
     },
@@ -638,7 +638,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 8,
+        "ms": 15,
         "error": null
       }
     },
@@ -669,7 +669,7 @@
         "closeSpread": 1,
         "weSpread": 1,
         "days": 28,
-        "ms": 6,
+        "ms": 12,
         "error": null
       }
     },
@@ -700,7 +700,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 42,
-        "ms": 9,
+        "ms": 16,
         "error": null
       }
     },
@@ -733,8 +733,8 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 83,
-        "msAvg": 8,
+        "ms": 153,
+        "msAvg": 15,
         "error": null,
         "stabilityOk": true,
         "stabilityNotes": "closes stable ±1 of median",
@@ -807,7 +807,7 @@
         "closeSpread": 2,
         "weSpread": 6,
         "days": 35,
-        "ms": 12,
+        "ms": 20,
         "error": null
       }
     },
@@ -841,7 +841,7 @@
         "closeSpread": 5,
         "weSpread": 5,
         "days": 35,
-        "ms": 13,
+        "ms": 22,
         "error": null
       }
     }

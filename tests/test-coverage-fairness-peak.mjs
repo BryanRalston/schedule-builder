@@ -440,10 +440,13 @@ async function main() {
   // Evaluate assertions
   {
     const ver = String(report.version || '');
-    const m = ver.match(/^2\.5\.(\d+)/);
-    const patch = m ? parseInt(m[1], 10) : -1;
-    if (patch < 6) fail('version', `expected 2.5.6+ got ${ver}`);
-    else pass('version', ver);
+    // Accept 2.5.6+ or any 2.6.x+
+    const m26 = ver.match(/^2\.(\d+)/);
+    const minor = m26 ? parseInt(m26[1], 10) : -1;
+    const m25 = ver.match(/^2\.5\.(\d+)/);
+    const patch = m25 ? parseInt(m25[1], 10) : -1;
+    if (minor > 5 || patch >= 6) pass('version', ver);
+    else fail('version', `expected 2.5.6+ got ${ver}`);
   }
   if (report.defaultPeak === false) {
     pass('default-peakSeasonHours-false', 'DEFAULT_PREFERENCES.peakSeasonHours === false');

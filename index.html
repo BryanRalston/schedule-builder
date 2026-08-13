@@ -2914,6 +2914,13 @@ html.auth-locked .toast-host { z-index: 20050; }
   place-items: center;
 }
 .auth-btn .auth-provider-icon svg { width: 18px; height: 18px; display: block; }
+.auth-btn .auth-btn-label { flex: 1; text-align: left; }
+.google-btn-host:empty { display: none; }
+.google-btn-host:not(:empty) {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 0.65rem;
+}
 .auth-btn-email {
   background: linear-gradient(135deg, rgba(124,92,255,0.25), rgba(61,220,255,0.12));
   border-color: rgba(124,92,255,0.4);
@@ -3230,12 +3237,20 @@ html.auth-locked .toast-host { z-index: 20050; }
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
-/* Early auth gate — hide app before paint if no session */
+/* Early auth gate — hide app before paint if no/expired session */
 (function () {
   try {
     var raw = localStorage.getItem('msb_session');
     var s = raw ? JSON.parse(raw) : null;
-    if (!s || !s.id || !s.method) document.documentElement.classList.add('auth-locked');
+    if (!s || !s.id || !s.method) {
+      document.documentElement.classList.add('auth-locked');
+    } else if (s.expiresAt) {
+      var exp = Date.parse(s.expiresAt);
+      if (isFinite(exp) && exp < Date.now()) {
+        try { localStorage.removeItem('msb_session'); } catch (e2) {}
+        document.documentElement.classList.add('auth-locked');
+      }
+    }
   } catch (e) {
     document.documentElement.classList.add('auth-locked');
   }
@@ -3252,18 +3267,19 @@ html.auth-locked .toast-host { z-index: 20050; }
       <h1 id="auth-title">Schedule Pro</h1>
     </div>
     <p class="auth-subtitle">Workforce scheduling for retail operations</p>
+    <div id="google-btn-host" class="google-btn-host" aria-hidden="true"></div>
     <div class="auth-actions">
       <button type="button" class="auth-btn" id="auth-google-btn" onclick="startProviderSignIn('google')">
         <span class="auth-provider-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.9-.1-1.2H12z"/><path fill="#4285F4" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-2.4 0-4.4-1.6-5.1-3.8l-3.4 2.6C5.1 19.1 8.3 20.7 12 20.7c3.5 0 6.4-1.2 8.1-3.2 2-2.2 2.5-5.3 2.5-7.3 0-.5 0-.9-.1-1.2H12z" opacity=".01"/><path fill="#FBBC05" d="M6.9 14.1c-.2-.7-.4-1.4-.4-2.1s.1-1.4.4-2.1L3.5 7.3C2.7 8.6 2.3 10 2.3 11.5s.4 2.9 1.2 4.2l3.4-1.6z"/><path fill="#34A853" d="M12 20.7c3.2 0 5.9-1.1 7.9-2.9l-3.4-2.6c-.9.6-2.1 1.1-3.5 1.1-2.7 0-5-1.8-5.8-4.3L3.8 14c1.4 2.8 4.3 4.7 8.2 4.7z"/><path fill="#4285F4" d="M21.5 11.2c0-.5 0-.9-.1-1.2H12v3.9h5.5c-.3 1.3-1.1 2.3-2.1 3l3.4 2.6c2-1.8 3.2-4.5 3.2-8.3z"/></svg>
         </span>
-        Continue with Google
+        <span class="auth-btn-label" id="auth-google-label">Connect Google (preview)</span>
       </button>
       <button type="button" class="auth-btn" id="auth-microsoft-btn" onclick="startProviderSignIn('microsoft')">
         <span class="auth-provider-icon" aria-hidden="true">
           <svg viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg"><path fill="#f35325" d="M1 1h10v10H1z"/><path fill="#81bc06" d="M12 1h10v10H12z"/><path fill="#05a6f0" d="M1 12h10v10H1z"/><path fill="#ffba08" d="M12 12h10v10H12z"/></svg>
         </span>
-        Continue with Microsoft
+        <span class="auth-btn-label" id="auth-microsoft-label">Connect Microsoft (preview)</span>
       </button>
       <button type="button" class="auth-btn auth-btn-email" id="auth-email-toggle" onclick="toggleAuthEmailPanel()" aria-expanded="false">
         Work email
@@ -3613,7 +3629,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.4.1</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.0</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3679,18 +3695,18 @@ html.auth-locked .toast-host { z-index: 20050; }
   </div>
 </div>
 
-<!-- Provider sign-in modal (Google / Microsoft work account details) -->
+<!-- Provider / workspace profile modal (preview setup or OAuth org completion) -->
 <div class="provider-modal no-print" id="provider-modal" hidden role="dialog" aria-modal="true" aria-labelledby="provider-modal-title">
   <div class="provider-modal-card">
-    <h3 id="provider-modal-title">Sign in with Google</h3>
-    <p id="provider-modal-desc">Sign in with Google for your work account. Your session stays on this device.</p>
-    <label>Work email
+    <h3 id="provider-modal-title">Complete your workspace</h3>
+    <p id="provider-modal-desc">Your session stays on this device.</p>
+    <label id="provider-email-wrap">Work email
       <input type="email" id="provider-email" autocomplete="email" placeholder="you@company.com" />
     </label>
-    <label>Display name
+    <label id="provider-name-wrap">Display name
       <input type="text" id="provider-name" autocomplete="name" placeholder="Your name" />
     </label>
-    <label>Organization name
+    <label id="provider-org-wrap">Organization name
       <input type="text" id="provider-org" autocomplete="organization" placeholder="Store / company" />
     </label>
     <div class="provider-error" id="provider-error" role="alert"></div>
@@ -3821,9 +3837,21 @@ let monetizationConfig = {
   freeManagerLimit: 0,
   freeGenerateLimit: 2,
   supportEmail: 'b.ralston62989@gmail.com',
-  proFeatures: ['unlimited schedule builds', 'Word export', 'Excel export', 'priority future updates']
+  proFeatures: ['unlimited schedule builds', 'Word export', 'Excel export', 'priority future updates'],
+  googleClientId: '',
+  microsoftClientId: '',
+  microsoftTenantId: 'common',
+  allowedEmailDomains: [],
+  sessionMaxDays: 90,
+  ssoRequireOrgName: true
 };
 let pendingProviderMethod = null; // 'google' | 'microsoft'
+/** When set, provider modal completes workspace after real OAuth (org / missing fields). */
+let pendingOAuthProfile = null;
+let providerModalMode = 'preview'; // 'preview' | 'oauth-complete'
+let msalPublicClient = null;
+let googleTokenClient = null;
+let googleGisReady = false;
 
 function isProUnlocked() {
   try {
@@ -3855,12 +3883,67 @@ function setProUnlocked(key) {
 }
 
 // ── Session / workspace / local accounts ──
+function sessionMaxMs() {
+  const days = Number(monetizationConfig.sessionMaxDays);
+  const d = Number.isFinite(days) && days > 0 ? days : 90;
+  return d * 24 * 60 * 60 * 1000;
+}
+
+function sessionCheckPayload(s) {
+  return String(s.id || '') + String(s.email || '') + String(s.method || '') + String(s.signedInAt || '');
+}
+
+async function sha256Hex(text) {
+  if (window.crypto && crypto.subtle) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(text || '')));
+    return Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+  // Weak fallback only when SubtleCrypto is unavailable
+  let h = 2166136261;
+  const s = String(text || '');
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return ('00000000' + (h >>> 0).toString(16)).slice(-8) + '_fb';
+}
+
+async function attachSessionCheck(session) {
+  if (!session) return session;
+  try {
+    session.sessionCheck = await sha256Hex(sessionCheckPayload(session));
+  } catch (e) {}
+  return session;
+}
+
+async function validateSessionIntegrity(session) {
+  if (!session || !session.sessionCheck) return true;
+  try {
+    const hex = await sha256Hex(sessionCheckPayload(session));
+    return hex === session.sessionCheck;
+  } catch (e) {
+    return true;
+  }
+}
+
+function isSessionExpired(s) {
+  if (!s || !s.expiresAt) return false;
+  const exp = Date.parse(s.expiresAt);
+  return Number.isFinite(exp) && exp < Date.now();
+}
+
 function getSession() {
   try {
     const raw = localStorage.getItem(MSB_SESSION_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
     if (!s || !s.id || !s.method) return null;
+    if (isSessionExpired(s)) {
+      clearSession();
+      return null;
+    }
     s.plan = isProUnlocked() ? 'pro' : 'free';
     return s;
   } catch (e) { return null; }
@@ -3874,6 +3957,34 @@ function saveSession(session) {
 
 function clearSession() {
   try { localStorage.removeItem(MSB_SESSION_KEY); } catch (e) {}
+}
+
+function getAllowedEmailDomains() {
+  const list = monetizationConfig.allowedEmailDomains;
+  if (!Array.isArray(list) || !list.length) return [];
+  return list
+    .map((d) => String(d || '').trim().toLowerCase().replace(/^@/, ''))
+    .filter(Boolean);
+}
+
+function isEmailDomainAllowed(email) {
+  const allowed = getAllowedEmailDomains();
+  if (!allowed.length) return true;
+  const domain = String(email || '')
+    .trim()
+    .toLowerCase()
+    .split('@')[1] || '';
+  return !!domain && allowed.includes(domain);
+}
+
+function domainAllowlistError() {
+  const allowed = getAllowedEmailDomains();
+  if (!allowed.length) return 'Use your company email.';
+  const examples = allowed
+    .slice(0, 3)
+    .map((d) => '@' + d)
+    .join(', ');
+  return 'Use your company email (' + examples + ')';
 }
 
 function getWorkspace() {
@@ -3969,6 +4080,8 @@ function createSessionFromFields(opts) {
   const name = (opts.name || '').trim() || (method === 'offline' ? 'Device user' : 'User');
   const email = (opts.email || '').trim().toLowerCase();
   const orgName = (opts.orgName || '').trim() || 'This device';
+  const signedInAt = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + sessionMaxMs()).toISOString();
   const session = {
     id: newId('sess'),
     method: method,
@@ -3976,10 +4089,16 @@ function createSessionFromFields(opts) {
     name: name,
     orgName: orgName,
     role: opts.role || 'admin',
-    signedInAt: new Date().toISOString(),
+    signedInAt: signedInAt,
+    expiresAt: expiresAt,
+    authVersion: 2,
+    emailVerified: !!opts.emailVerified,
     plan: isProUnlocked() ? 'pro' : 'free'
   };
   if (opts.picture) session.picture = opts.picture;
+  if (opts.providerSub) session.providerSub = String(opts.providerSub);
+  // sessionCheck attached async; session is usable immediately
+  attachSessionCheck(session).then((s) => saveSession(s)).catch(() => saveSession(session));
   saveSession(session);
   saveWorkspace({
     orgName: orgName,
@@ -4037,6 +4156,10 @@ async function createWorkspaceWithEmail() {
     showAuthError('Enter a valid work email.');
     return;
   }
+  if (!isEmailDomainAllowed(email)) {
+    showAuthError(domainAllowlistError());
+    return;
+  }
   if (password.length < 8) {
     showAuthError('Password must be at least 8 characters.');
     return;
@@ -4066,7 +4189,13 @@ async function createWorkspaceWithEmail() {
     createdAt: new Date().toISOString()
   };
   saveLocalAccounts(accounts);
-  createSessionFromFields({ method: 'email', email: email, name: name, orgName: orgName });
+  createSessionFromFields({
+    method: 'email',
+    email: email,
+    name: name,
+    orgName: orgName,
+    emailVerified: false
+  });
   enterAppAfterAuth();
 }
 
@@ -4077,6 +4206,10 @@ async function signInWithEmail() {
   showAuthError('');
   if (!email || !password) {
     showAuthError('Enter email and password.');
+    return;
+  }
+  if (!isEmailDomainAllowed(email)) {
+    showAuthError(domainAllowlistError());
     return;
   }
   const accounts = getLocalAccounts();
@@ -4095,7 +4228,8 @@ async function signInWithEmail() {
     method: 'email',
     email: email,
     name: acc.name || email.split('@')[0],
-    orgName: acc.orgName || 'Workspace'
+    orgName: acc.orgName || 'Workspace',
+    emailVerified: false
   });
   enterAppAfterAuth();
 }
@@ -4123,78 +4257,541 @@ function continueOffline() {
   enterAppAfterAuth();
 }
 
-function startProviderSignIn(method) {
-  pendingProviderMethod = method === 'microsoft' ? 'microsoft' : 'google';
-  // Optional real GIS if client id configured — otherwise professional provider modal
-  if (pendingProviderMethod === 'google' && monetizationConfig.googleClientId) {
-    tryLoadGoogleIdentity(monetizationConfig.googleClientId);
-  }
-  openProviderModal(pendingProviderMethod);
+function hasGoogleOAuth() {
+  return !!(monetizationConfig.googleClientId && String(monetizationConfig.googleClientId).trim());
 }
 
-function openProviderModal(method) {
+function hasMicrosoftOAuth() {
+  return !!(monetizationConfig.microsoftClientId && String(monetizationConfig.microsoftClientId).trim());
+}
+
+function loadExternalScript(src, id) {
+  return new Promise((resolve, reject) => {
+    if (id && document.getElementById(id)) {
+      resolve();
+      return;
+    }
+    const existing = Array.from(document.getElementsByTagName('script')).find((s) => s.src === src);
+    if (existing) {
+      if (existing.getAttribute('data-loaded') === '1') resolve();
+      else {
+        existing.addEventListener('load', () => resolve());
+        existing.addEventListener('error', () => reject(new Error('Failed to load script')));
+      }
+      return;
+    }
+    const s = document.createElement('script');
+    if (id) s.id = id;
+    s.src = src;
+    s.async = true;
+    s.onload = () => {
+      s.setAttribute('data-loaded', '1');
+      resolve();
+    };
+    s.onerror = () => reject(new Error('Failed to load ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+/** Decode JWT payload client-side only (Phase 1). Server verification is Phase 2. */
+function decodeJwtPayload(token) {
+  try {
+    const parts = String(token || '').split('.');
+    if (parts.length < 2) return null;
+    let b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const json = atob(b64);
+    return JSON.parse(json);
+  } catch (e) {
+    return null;
+  }
+}
+
+function setProviderFieldVisibility(showEmail, showName, showOrg) {
+  const ew = document.getElementById('provider-email-wrap');
+  const nw = document.getElementById('provider-name-wrap');
+  const ow = document.getElementById('provider-org-wrap');
+  if (ew) ew.style.display = showEmail ? '' : 'none';
+  if (nw) nw.style.display = showName ? '' : 'none';
+  if (ow) ow.style.display = showOrg ? '' : 'none';
+}
+
+function openProviderModal(method, mode, profile) {
   const modal = document.getElementById('provider-modal');
   const title = document.getElementById('provider-modal-title');
   const desc = document.getElementById('provider-modal-desc');
   const err = document.getElementById('provider-error');
-  if (err) { err.textContent = ''; err.classList.remove('show'); }
-  const label = method === 'microsoft' ? 'Microsoft' : 'Google';
-  if (title) title.textContent = 'Sign in with ' + label;
-  if (desc) {
-    desc.textContent =
-      'Sign in with ' + label + ' for your work account. Enter your work details to create a device session. Full OAuth can be enabled later via monetization.json.';
+  if (err) {
+    err.textContent = '';
+    err.classList.remove('show');
   }
-  pendingProviderMethod = method;
+  providerModalMode = mode || 'preview';
+  pendingProviderMethod = method === 'microsoft' ? 'microsoft' : 'google';
+  pendingOAuthProfile = profile || null;
+  const label = pendingProviderMethod === 'microsoft' ? 'Microsoft' : 'Google';
+  const emailEl = document.getElementById('provider-email');
+  const nameEl = document.getElementById('provider-name');
+  const orgEl = document.getElementById('provider-org');
+
+  if (providerModalMode === 'oauth-complete') {
+    if (title) title.textContent = 'Complete your workspace';
+    if (desc) {
+      desc.textContent =
+        'Signed in with ' +
+        label +
+        '. Add your organization to finish setup on this device.';
+    }
+    const email = (profile && profile.email) || '';
+    const name = (profile && profile.name) || '';
+    if (emailEl) emailEl.value = email;
+    if (nameEl) nameEl.value = name;
+    if (orgEl) orgEl.value = (profile && profile.orgName) || '';
+    const needEmail = !email;
+    const needName = !name;
+    const needOrg =
+      monetizationConfig.ssoRequireOrgName !== false &&
+      !(profile && profile.orgName && String(profile.orgName).trim());
+    setProviderFieldVisibility(needEmail, needName, needOrg || true);
+    // Always show org when completing OAuth workspace
+    setProviderFieldVisibility(needEmail, needName, true);
+  } else {
+    if (title) title.textContent = 'Connect ' + label + ' (device setup)';
+    if (desc) {
+      desc.textContent =
+        'OAuth is not configured yet. Enter work details to create a device workspace session. This is not a live ' +
+        label +
+        ' OAuth sign-in — configure client IDs in monetization.json (see docs/SSO_SETUP.md).';
+    }
+    if (emailEl) emailEl.value = '';
+    if (nameEl) nameEl.value = '';
+    if (orgEl) orgEl.value = '';
+    setProviderFieldVisibility(true, true, true);
+  }
+
   if (modal) modal.removeAttribute('hidden');
-  setTimeout(() => document.getElementById('provider-email')?.focus(), 50);
+  setTimeout(() => {
+    const focusId =
+      providerModalMode === 'oauth-complete' ? 'provider-org' : 'provider-email';
+    document.getElementById(focusId)?.focus();
+  }, 50);
 }
 
 function closeProviderModal() {
   const modal = document.getElementById('provider-modal');
   if (modal) modal.setAttribute('hidden', '');
   pendingProviderMethod = null;
+  pendingOAuthProfile = null;
+  providerModalMode = 'preview';
 }
 
 function confirmProviderSignIn() {
   const method = pendingProviderMethod || 'google';
+  const err = document.getElementById('provider-error');
+  const showErr = (msg) => {
+    if (err) {
+      err.textContent = msg;
+      err.classList.add('show');
+    }
+  };
+
+  if (providerModalMode === 'oauth-complete' && pendingOAuthProfile) {
+    const email =
+      (pendingOAuthProfile.email ||
+        ((document.getElementById('provider-email') || {}).value || '')).trim().toLowerCase();
+    const name =
+      (pendingOAuthProfile.name ||
+        ((document.getElementById('provider-name') || {}).value || '')).trim() ||
+      (email ? email.split('@')[0] : 'User');
+    const orgName = ((document.getElementById('provider-org') || {}).value || '').trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showErr('Enter a valid work email.');
+      return;
+    }
+    if (!isEmailDomainAllowed(email)) {
+      showErr(domainAllowlistError());
+      return;
+    }
+    if (monetizationConfig.ssoRequireOrgName !== false && !orgName) {
+      showErr('Enter an organization name.');
+      return;
+    }
+    createSessionFromFields({
+      method: pendingOAuthProfile.method || method,
+      email: email,
+      name: name,
+      orgName: orgName || 'Workspace',
+      picture: pendingOAuthProfile.picture,
+      providerSub: pendingOAuthProfile.providerSub,
+      emailVerified: !!pendingOAuthProfile.emailVerified
+    });
+    closeProviderModal();
+    enterAppAfterAuth();
+    return;
+  }
+
+  // Preview / device workspace setup (no OAuth tokens)
   const email = ((document.getElementById('provider-email') || {}).value || '').trim().toLowerCase();
   const name = ((document.getElementById('provider-name') || {}).value || '').trim();
   const orgName = ((document.getElementById('provider-org') || {}).value || '').trim();
-  const err = document.getElementById('provider-error');
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    if (err) { err.textContent = 'Enter a valid work email.'; err.classList.add('show'); }
+    showErr('Enter a valid work email.');
+    return;
+  }
+  if (!isEmailDomainAllowed(email)) {
+    showErr(domainAllowlistError());
     return;
   }
   if (!name) {
-    if (err) { err.textContent = 'Enter a display name.'; err.classList.add('show'); }
+    showErr('Enter a display name.');
     return;
   }
   if (!orgName) {
-    if (err) { err.textContent = 'Enter an organization name.'; err.classList.add('show'); }
+    showErr('Enter an organization name.');
     return;
   }
-  createSessionFromFields({ method: method, email: email, name: name, orgName: orgName });
+  createSessionFromFields({
+    method: method,
+    email: email,
+    name: name,
+    orgName: orgName,
+    emailVerified: false
+  });
   closeProviderModal();
   enterAppAfterAuth();
 }
 
-function tryLoadGoogleIdentity(clientId) {
-  // Optional hook — full GIS button only if straightforward; modal remains primary for v2.4.1
-  if (!clientId || document.getElementById('gis-client-script')) return;
+/**
+ * Finish OAuth success: domain check, optional org modal, or enter app.
+ * @param {{ method:string, email:string, name?:string, picture?:string, providerSub?:string, emailVerified?:boolean, orgName?:string }} profile
+ */
+function finishOAuthSignIn(profile) {
+  const email = (profile.email || '').trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showAuthError('Could not read email from the provider. Try again or use work email.');
+    return;
+  }
+  if (!isEmailDomainAllowed(email)) {
+    showAuthError(domainAllowlistError());
+    return;
+  }
+  const name = (profile.name || '').trim() || email.split('@')[0];
+  const orgFromProfile = (profile.orgName || '').trim();
+  const needOrg =
+    monetizationConfig.ssoRequireOrgName !== false && !orgFromProfile;
+  if (needOrg || !name) {
+    openProviderModal(profile.method, 'oauth-complete', {
+      method: profile.method,
+      email: email,
+      name: name,
+      picture: profile.picture,
+      providerSub: profile.providerSub,
+      emailVerified: !!profile.emailVerified,
+      orgName: orgFromProfile
+    });
+    return;
+  }
+  createSessionFromFields({
+    method: profile.method,
+    email: email,
+    name: name,
+    orgName: orgFromProfile || 'Workspace',
+    picture: profile.picture,
+    providerSub: profile.providerSub,
+    emailVerified: !!profile.emailVerified
+  });
+  enterAppAfterAuth();
+}
+
+function startProviderSignIn(method) {
+  const m = method === 'microsoft' ? 'microsoft' : 'google';
+  pendingProviderMethod = m;
+  showAuthError('');
+  if (m === 'google' && hasGoogleOAuth()) {
+    signInWithGoogleOAuth().catch((err) => {
+      console.warn('[sso] Google sign-in failed', err);
+      showAuthError(
+        (err && err.message) || 'Google sign-in failed or was cancelled. No session was created.'
+      );
+    });
+    return;
+  }
+  if (m === 'microsoft' && hasMicrosoftOAuth()) {
+    signInWithMicrosoftOAuth().catch((err) => {
+      console.warn('[sso] Microsoft sign-in failed', err);
+      const msg =
+        err && (err.errorMessage || err.message)
+          ? String(err.errorMessage || err.message)
+          : 'Microsoft sign-in failed or was cancelled. No session was created.';
+      showAuthError(msg.indexOf('user_cancelled') >= 0 || /popup.*clos/i.test(msg)
+        ? 'Microsoft sign-in was cancelled. No session was created.'
+        : msg);
+    });
+    return;
+  }
+  // No client ID — honest device workspace setup (not real OAuth)
+  openProviderModal(m, 'preview', null);
+}
+
+async function ensureGoogleIdentityServices() {
+  const clientId = String(monetizationConfig.googleClientId || '').trim();
+  if (!clientId) throw new Error('Google client ID is not configured.');
+  await loadExternalScript('https://accounts.google.com/gsi/client', 'gis-client-script');
+  if (!window.google || !google.accounts) {
+    throw new Error('Google Identity Services failed to load.');
+  }
+  googleGisReady = true;
+  return clientId;
+}
+
+async function signInWithGoogleOAuth() {
+  const clientId = await ensureGoogleIdentityServices();
+  showAuthError('');
+  // Prefer OAuth2 token client → userinfo (access token). ID token credential is fallback path via One Tap host.
+  return new Promise((resolve, reject) => {
+    try {
+      googleTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'openid email profile',
+        callback: async (tokenResponse) => {
+          try {
+            if (!tokenResponse || tokenResponse.error) {
+              const errMsg =
+                (tokenResponse && (tokenResponse.error_description || tokenResponse.error)) ||
+                'Google sign-in was cancelled or failed.';
+              reject(new Error(errMsg));
+              return;
+            }
+            const accessToken = tokenResponse.access_token;
+            if (!accessToken) {
+              reject(new Error('Google did not return an access token.'));
+              return;
+            }
+            const ur = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+              headers: { Authorization: 'Bearer ' + accessToken }
+            });
+            if (!ur.ok) {
+              reject(new Error('Could not load Google profile (' + ur.status + ').'));
+              return;
+            }
+            const info = await ur.json();
+            finishOAuthSignIn({
+              method: 'google',
+              email: info.email || '',
+              name: info.name || info.given_name || '',
+              picture: info.picture || '',
+              providerSub: info.sub || '',
+              emailVerified: info.email_verified === true || info.email_verified === 'true'
+            });
+            // Revoke is optional; leave token for short-lived browser use only (Phase 1)
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        },
+        error_callback: (err) => {
+          const msg =
+            (err && (err.message || err.type)) ||
+            'Google sign-in was cancelled or failed.';
+          reject(new Error(String(msg)));
+        }
+      });
+      googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+/** Optional GIS One Tap / button host when Google OAuth is configured */
+function setupGoogleOneTapHost() {
+  const host = document.getElementById('google-btn-host');
+  if (!host || !hasGoogleOAuth()) {
+    if (host) host.innerHTML = '';
+    return;
+  }
+  ensureGoogleIdentityServices()
+    .then((clientId) => {
+      if (!window.google || !google.accounts || !google.accounts.id) return;
+      try {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (resp) => {
+            if (!resp || !resp.credential) {
+              showAuthError('Google One Tap did not return a credential.');
+              return;
+            }
+            // Client-side JWT payload decode only — server verification is Phase 2
+            const payload = decodeJwtPayload(resp.credential);
+            if (!payload || !payload.email) {
+              showAuthError('Could not read Google credential.');
+              return;
+            }
+            finishOAuthSignIn({
+              method: 'google',
+              email: payload.email,
+              name: payload.name || payload.given_name || '',
+              picture: payload.picture || '',
+              providerSub: payload.sub || '',
+              emailVerified: payload.email_verified === true || payload.email_verified === 'true'
+            });
+          },
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+        host.innerHTML = '';
+        google.accounts.id.renderButton(host, {
+          theme: 'outline',
+          size: 'large',
+          text: 'continue_with',
+          shape: 'rectangular',
+          width: 320
+        });
+      } catch (e) {
+        console.warn('[sso] Google One Tap host skip', e);
+      }
+    })
+    .catch(() => {});
+}
+
+async function ensureMsal() {
+  const clientId = String(monetizationConfig.microsoftClientId || '').trim();
+  if (!clientId) throw new Error('Microsoft client ID is not configured.');
+  await loadExternalScript(
+    'https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js',
+    'msal-browser-script'
+  );
+  if (!window.msal || !msal.PublicClientApplication) {
+    throw new Error('MSAL browser library failed to load.');
+  }
+  const tenant = String(monetizationConfig.microsoftTenantId || 'common').trim() || 'common';
+  // Must match an SPA redirect URI registered in Entra (origin + pathname)
+  const redirectExact = window.location.origin + window.location.pathname;
+  const config = {
+    auth: {
+      clientId: clientId,
+      authority: 'https://login.microsoftonline.com/' + encodeURIComponent(tenant),
+      redirectUri: redirectExact,
+      postLogoutRedirectUri: redirectExact
+    },
+    cache: {
+      cacheLocation: 'sessionStorage',
+      storeAuthStateInCookie: false
+    }
+  };
+  msalPublicClient = new msal.PublicClientApplication(config);
+  if (typeof msalPublicClient.initialize === 'function') {
+    await msalPublicClient.initialize();
+  }
+  return msalPublicClient;
+}
+
+async function signInWithMicrosoftOAuth() {
+  const pca = await ensureMsal();
+  showAuthError('');
+  const loginRequest = {
+    scopes: ['openid', 'profile', 'email', 'User.Read']
+  };
+  let result;
   try {
-    const s = document.createElement('script');
-    s.id = 'gis-client-script';
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.async = true;
-    document.head.appendChild(s);
-  } catch (e) {}
+    result = await pca.loginPopup(loginRequest);
+  } catch (e) {
+    if (e && (e.errorCode === 'user_cancelled' || e.errorCode === 'popup_window_error')) {
+      throw new Error('Microsoft sign-in was cancelled. No session was created.');
+    }
+    throw e;
+  }
+  if (!result || !result.account) {
+    throw new Error('Microsoft sign-in did not return an account.');
+  }
+  const account = result.account;
+  let email =
+    (account.username || account.idTokenClaims?.email || account.idTokenClaims?.preferred_username || '')
+      .trim()
+      .toLowerCase();
+  let name =
+    account.name ||
+    account.idTokenClaims?.name ||
+    (email ? email.split('@')[0] : '') ||
+    '';
+  // Authenticated via Entra; treat as verified for UI (server token verify is Phase 2)
+  let emailVerified = true;
+  let providerSub = account.localAccountId || account.homeAccountId || account.idTokenClaims?.oid || '';
+
+  // Optional Graph profile enrichment
+  try {
+    const tokenResult = await pca.acquireTokenSilent({
+      ...loginRequest,
+      account: account
+    }).catch(() => null);
+    const accessToken = (tokenResult && tokenResult.accessToken) || result.accessToken;
+    if (accessToken) {
+      const gr = await fetch('https://graph.microsoft.com/v1.0/me', {
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      if (gr.ok) {
+        const me = await gr.json();
+        if (me.mail) email = String(me.mail).trim().toLowerCase();
+        else if (me.userPrincipalName) email = String(me.userPrincipalName).trim().toLowerCase();
+        if (me.displayName) name = me.displayName;
+        if (me.id) providerSub = me.id;
+      }
+    }
+  } catch (e) {
+    /* profile enrichment optional */
+  }
+
+  finishOAuthSignIn({
+    method: 'microsoft',
+    email: email,
+    name: name,
+    providerSub: providerSub,
+    emailVerified: emailVerified
+  });
+}
+
+function updateAuthProviderButtons() {
+  const gLabel = document.getElementById('auth-google-label');
+  const mLabel = document.getElementById('auth-microsoft-label');
+  if (gLabel) {
+    gLabel.textContent = hasGoogleOAuth() ? 'Continue with Google' : 'Connect Google (preview)';
+  }
+  if (mLabel) {
+    mLabel.textContent = hasMicrosoftOAuth()
+      ? 'Continue with Microsoft'
+      : 'Connect Microsoft (preview)';
+  }
+  const gBtn = document.getElementById('auth-google-btn');
+  const mBtn = document.getElementById('auth-microsoft-btn');
+  if (gBtn) {
+    gBtn.title = hasGoogleOAuth()
+      ? 'Sign in with Google OAuth'
+      : 'Device workspace setup (Google OAuth not configured)';
+  }
+  if (mBtn) {
+    mBtn.title = hasMicrosoftOAuth()
+      ? 'Sign in with Microsoft'
+      : 'Device workspace setup (Microsoft OAuth not configured)';
+  }
+  setupGoogleOneTapHost();
 }
 
 function updateAuthSupportNote() {
   const el = document.getElementById('auth-sso-note');
   if (!el) return;
   const email = monetizationConfig.supportEmail || 'support';
-  el.textContent = 'SSO for enterprise: contact ' + email;
+  const g = hasGoogleOAuth();
+  const m = hasMicrosoftOAuth();
+  if (g && m) {
+    el.textContent = 'SSO ready · Google & Microsoft OAuth · contact ' + email;
+  } else if (g) {
+    el.textContent = 'SSO · Google OAuth on · Microsoft preview · ' + email;
+  } else if (m) {
+    el.textContent = 'SSO · Microsoft OAuth on · Google preview · ' + email;
+  } else {
+    el.textContent =
+      'SSO preview mode · set client IDs in monetization.json · ' + email;
+  }
+  updateAuthProviderButtons();
 }
 
 function methodLabel(method) {
@@ -4235,6 +4832,18 @@ function updateAccountChip() {
   }
 }
 
+function formatSignInMethod(s) {
+  if (!s) return '—';
+  const base = methodLabel(s.method);
+  if (s.method === 'google' || s.method === 'microsoft') {
+    if (s.emailVerified) return 'Signed in with ' + base + ' · verified';
+    // providerSub present ⇒ real OAuth subject; otherwise preview device workspace
+    if (s.providerSub) return 'Signed in with ' + base;
+    return base + ' (device setup)';
+  }
+  return base;
+}
+
 function openAccountPanel() {
   closeHeaderMenu();
   const s = getSession();
@@ -4246,7 +4855,7 @@ function openAccountPanel() {
     set('ap-org', s.orgName || (getWorkspace() || {}).orgName || '—');
     set('ap-name', s.name);
     set('ap-email', s.email || (s.method === 'offline' ? 'Device session' : '—'));
-    set('ap-method', methodLabel(s.method));
+    set('ap-method', formatSignInMethod(s));
   } else {
     set('ap-org', '—');
     set('ap-name', '—');
@@ -4349,12 +4958,33 @@ function ensureAuthOnBoot() {
   const s = getSession();
   if (!s) {
     showAuthShell();
-  } else {
-    // Refresh plan flag
+    updateAccountChip();
+    return;
+  }
+  // Light integrity revalidation (async); expired already cleared in getSession
+  validateSessionIntegrity(s).then((ok) => {
+    if (!ok) {
+      clearSession();
+      showAuthShell();
+      updateAccountChip();
+      if (typeof showToast === 'function') {
+        showToast('Session could not be verified. Please sign in again.', 'warn');
+      }
+      return;
+    }
     saveSession(s);
     hideAuthShell();
     personalizeWelcome();
-  }
+    updateAccountChip();
+  }).catch(() => {
+    saveSession(s);
+    hideAuthShell();
+    personalizeWelcome();
+    updateAccountChip();
+  });
+  // Optimistic UI while integrity check runs
+  hideAuthShell();
+  personalizeWelcome();
   updateAccountChip();
 }
 
@@ -4505,6 +5135,7 @@ async function loadMonetizationConfig() {
   } catch (e) { /* offline / missing — keep defaults */ }
   if (typeof applyPriceLabels === 'function') applyPriceLabels();
   if (typeof updateAuthSupportNote === 'function') updateAuthSupportNote();
+  if (typeof updateAuthProviderButtons === 'function') updateAuthProviderButtons();
 }
 
 function applyUrlProUnlock() {
@@ -4971,7 +5602,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.4.1';
+const APP_VERSION = '2.5.0';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';

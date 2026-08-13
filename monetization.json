@@ -15,5 +15,11 @@
     "Word export",
     "Excel export",
     "priority future updates"
-  ]
+  ],
+  "googleClientId": "",
+  "microsoftClientId": "",
+  "microsoftTenantId": "common",
+  "allowedEmailDomains": [],
+  "sessionMaxDays": 90,
+  "ssoRequireOrgName": true
 }

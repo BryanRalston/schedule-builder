@@ -3237,23 +3237,24 @@ html.auth-locked .toast-host { z-index: 20050; }
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
-/* Early auth gate — hide app before paint if no/expired session */
+/* Auth is optional — never block testers/first use.
+   Only re-lock if a non-offline session expired (force re-sign-in for that account).
+   Missing session → app loads; boot creates a silent offline session. */
 (function () {
   try {
     var raw = localStorage.getItem('msb_session');
-    var s = raw ? JSON.parse(raw) : null;
-    if (!s || !s.id || !s.method) {
-      document.documentElement.classList.add('auth-locked');
-    } else if (s.expiresAt) {
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    if (!s || !s.id) return;
+    if (s.method === 'offline') return;
+    if (s.expiresAt) {
       var exp = Date.parse(s.expiresAt);
       if (isFinite(exp) && exp < Date.now()) {
         try { localStorage.removeItem('msb_session'); } catch (e2) {}
-        document.documentElement.classList.add('auth-locked');
+        /* do not lock — offline continue still available */
       }
     }
-  } catch (e) {
-    document.documentElement.classList.add('auth-locked');
-  }
+  } catch (e) {}
 })();
 </script>
 </head>
@@ -3629,7 +3630,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.1</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.2</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -3665,6 +3666,7 @@ html.auth-locked .toast-host { z-index: 20050; }
       <div class="ap-row"><span>Plan</span><span id="ap-plan">Free</span></div>
     </div>
     <div class="ap-actions">
+      <button type="button" class="ap-btn-primary" id="ap-signin-btn" onclick="openSignInFromApp()" style="display:none">Sign in / switch account</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()">Activate team license</button>
       <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center">Manage billing</a>
       <button type="button" class="ap-btn-secondary" onclick="closeAccountPanel()">Close</button>
@@ -4863,6 +4865,11 @@ function openAccountPanel() {
     set('ap-method', '—');
   }
   set('ap-plan', isProUnlocked() ? 'Pro' : 'Free');
+  const signInBtn = document.getElementById('ap-signin-btn');
+  if (signInBtn) {
+    // Offer sign-in when offline or unsigned — never required
+    signInBtn.style.display = !s || s.method === 'offline' ? '' : 'none';
+  }
   const wipe = document.getElementById('ap-wipe-schedules');
   if (wipe) wipe.checked = false;
   const modal = document.getElementById('account-modal');
@@ -4955,37 +4962,59 @@ function personalizeWelcome() {
 
 function ensureAuthOnBoot() {
   updateAuthSupportNote();
-  const s = getSession();
+  hideAuthShell(); // never trap closed testers / first launch
+  let s = getSession();
+  // Silent offline session so Play testers land in the app with zero clicks
   if (!s) {
-    showAuthShell();
+    createSessionFromFields({
+      method: 'offline',
+      email: '',
+      name: 'Device user',
+      orgName: 'This device'
+    });
+    personalizeWelcome();
     updateAccountChip();
     return;
   }
-  // Light integrity revalidation (async); expired already cleared in getSession
+  if (s.method === 'offline') {
+    personalizeWelcome();
+    updateAccountChip();
+    return;
+  }
+  // Signed-in accounts: integrity check async; fall back offline if broken (still not blocking)
   validateSessionIntegrity(s).then((ok) => {
     if (!ok) {
       clearSession();
-      showAuthShell();
+      createSessionFromFields({
+        method: 'offline',
+        email: '',
+        name: 'Device user',
+        orgName: 'This device'
+      });
+      personalizeWelcome();
       updateAccountChip();
       if (typeof showToast === 'function') {
-        showToast('Session could not be verified. Please sign in again.', 'warn');
+        showToast('Signed-in session expired — continuing offline. Use Account → Sign in anytime.', 'info');
       }
       return;
     }
     saveSession(s);
-    hideAuthShell();
     personalizeWelcome();
     updateAccountChip();
   }).catch(() => {
     saveSession(s);
-    hideAuthShell();
     personalizeWelcome();
     updateAccountChip();
   });
-  // Optimistic UI while integrity check runs
-  hideAuthShell();
   personalizeWelcome();
   updateAccountChip();
+}
+
+/** Optional sign-in from Account — does not clear schedules. */
+function openSignInFromApp() {
+  closeAccountPanel();
+  showAuthShell();
+  updateAuthSupportNote();
 }
 
 function validLicenseKey(k) {
@@ -5213,7 +5242,9 @@ const DEFAULT_PREFERENCES = {
   minHoursBetweenShifts: 0,
   kcCloseDays: [1], // 0=Sun … 6=Sat; default Monday
   smClosesPerWeek: 1, // Store Manager target closes per week (manager-close nights only)
-  amClosesPerWeek: null // null = auto fair-share of remaining; number = each AM targets this many
+  amClosesPerWeek: null, // null = auto fair-share of remaining; number = each AM targets this many
+  /** Non-manager KCs can take Mid only when no manager mid that day (gap fill). */
+  kcMidWhenNoMid: true
 };
 
 let preferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
@@ -5392,7 +5423,8 @@ function readPreferencesFromUI() {
     minHoursBetweenShifts: Math.max(0, parseInt(g('pref-min-hours').value, 10) || 0),
     kcCloseDays: normalizeKcCloseDays(kcCloseDays),
     smClosesPerWeek: Number.isFinite(smCl) ? smCl : 1,
-    amClosesPerWeek: (amCl == null || !Number.isFinite(amCl)) ? null : amCl
+    amClosesPerWeek: (amCl == null || !Number.isFinite(amCl)) ? null : amCl,
+    kcMidWhenNoMid: g('pref-kc-mid') ? !!g('pref-kc-mid').checked : true
   };
   syncCloseTargetsToRoleRules();
   return preferences;
@@ -5459,6 +5491,14 @@ function renderPreferencesUI() {
         }).join('')}
       </div>
       <div class="pref-desc">Non-manager key carriers close these nights (rotated if multiple KCs). Managers still work those days and do not close. KCs marked 'manager coverage' are scheduled as managers, not forced to these KC closes. Leave all unchecked so managers cover all 7 closes.</div>
+    </div>
+    <div class="pref-card">
+      <label class="toggle-switch">
+        <input type="checkbox" id="pref-kc-mid" ${p.kcMidWhenNoMid !== false ? 'checked' : ''} onchange="readPreferencesFromUI()">
+        <span class="toggle-track"></span>
+        KC mid coverage when needed
+      </label>
+      <div class="pref-desc">If a day has managers working but <strong>no Mid</strong>, schedule a non-manager key carrier as Mid to fill the gap only. Does not run on KC-close nights. Off by unchecking — KCs still handle close nights as configured above. Manager-coverage KCs are full managers, not used here.</div>
     </div>
     <div class="pref-card">
       <label class="pref-label">Store Manager closes / week
@@ -5602,7 +5642,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.1';
+const APP_VERSION = '2.5.2';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7624,17 +7664,28 @@ function _generateScheduleInner() {
     }
   });
 
-  // Non-manager KC mid for critically understaffed non-KC-night days (< 2 managers working)
+  // Non-manager KC mid fill (optional, gap-only)
+  // 1) Always: critically understaffed days (< 2 managers working)
+  // 2) If PREFS.kcMidWhenNoMid: days with managers but zero mids (fill mid gap only)
   allDks.forEach(dk => {
-    if (isKcCloseNight(dk)) return;
-    if (dayWorkCount(dk) < 2) {
-      // Find a non-manager KC that isn't already scheduled
-      for (const kc of nonMgrKCs) {
-        if (!schedule[kc.id][dk]) {
-          schedule[kc.id][dk] = 'mid-early';
-          break;
-        }
-      }
+    if (isKcCloseNight(dk)) return; // KC already handling close nights separately
+    const mgrWorking = dayWorkCount(dk);
+    let mgrMids = 0;
+    ROLES.forEach((r) => {
+      if (isMid(schedule[r][dk])) mgrMids++;
+    });
+    const needCritical = mgrWorking < 2;
+    const needMidGap = PREFS.kcMidWhenNoMid !== false && mgrWorking >= 1 && mgrMids === 0;
+    if (!needCritical && !needMidGap) return;
+    // Don't displace an existing KC shift (close, mid, open already set)
+    for (const kc of nonMgrKCs) {
+      if (!schedule[kc.id]) schedule[kc.id] = {};
+      const cur = schedule[kc.id][dk];
+      if (cur && cur !== 'off') continue; // already scheduled that day
+      if (isInputLocked(kc.id, dk)) continue;
+      schedule[kc.id][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+      midVariety++;
+      break;
     }
   });
 
@@ -8160,11 +8211,14 @@ function _generateScheduleInner() {
     msg: v.detail
   }));
 
-  // Note non-manager KC mid usage
+  // Note non-manager KC mid usage (gap fill)
   allDks.forEach(dk => {
     nonMgrKCs.forEach(kc => {
       if (isMid(schedule[kc.id][dk])) {
-        warnings.push({ type: 'info', msg: `${names[kc.id]}: mid coverage ${formatDate(dkToDate(dk))} (low manager count)` });
+        warnings.push({
+          type: 'info',
+          msg: `${names[kc.id]}: mid coverage ${formatDate(dkToDate(dk))} (KC mid gap-fill)`
+        });
       }
     });
   });

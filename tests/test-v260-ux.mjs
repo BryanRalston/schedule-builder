@@ -89,7 +89,7 @@ async function main() {
     const ver = await page.evaluate(() =>
       typeof APP_VERSION !== 'undefined' ? APP_VERSION : document.getElementById('app-version-label')?.textContent
     );
-    if (String(ver).includes('2.6.0')) pass('version-2.6.0', ver);
+    if (/^2\.6/.test(String(ver))) pass('version-2.6.0', ver);
     else fail('version-2.6.0', ver);
 
     // Command palette via API + Ctrl+K

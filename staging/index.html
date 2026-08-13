@@ -3590,6 +3590,291 @@ html.view-locked .shift-editable { cursor: default !important; pointer-events: n
 html.view-locked .cal-cell { cursor: default !important; pointer-events: none; }
 html.view-locked .ap-btn-danger { display: none !important; }
 
+
+/* ========== v2.6.1 VISUAL POLISH ========== */
+.brand-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  max-width: min(420px, 100%);
+}
+.brand-status .offline-pill,
+.brand-status .local-status-pill,
+.brand-status .pro-badge {
+  font-size: 0.62rem;
+  padding: 0.14rem 0.42rem;
+  max-width: 120px;
+}
+/* Hide redundant Free badge when account chip already shows plan */
+.brand-status .pro-badge.is-free { display: none !important; }
+.brand-status .pro-badge.is-pro {
+  display: inline-flex !important;
+}
+.offline-pill .pill-text { display: inline; }
+.local-status-pill .pill-text { display: inline; }
+@media (max-width: 900px) {
+  .offline-pill .pill-text,
+  .local-status-pill .pill-text { display: none; }
+  .offline-pill, .local-status-pill {
+    min-width: 1.65rem; min-height: 1.65rem; justify-content: center;
+    padding: 0.2rem 0.35rem; max-width: none;
+  }
+  .pwa-mode-badge { display: none !important; }
+}
+
+/* Post-gen strip: can't-miss review bar */
+#post-gen-strip {
+  display: none;
+  position: sticky;
+  top: 56px;
+  z-index: 96;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+  padding: 0.55rem 1rem;
+  background: linear-gradient(90deg, rgba(12, 22, 42, 0.98), rgba(18, 28, 52, 0.98));
+  border-bottom: 1px solid rgba(61, 220, 255, 0.35);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(61,220,255,0.08);
+  font-size: 0.8rem;
+}
+#post-gen-strip.show { display: flex; }
+#post-gen-strip .pgs-title {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ae8ff;
+  margin-right: 0.15rem;
+}
+#post-gen-strip .pgs-chip {
+  padding: 0.28rem 0.6rem;
+  font-size: 0.76rem;
+}
+#post-gen-strip .pgs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-left: auto;
+  align-items: center;
+}
+#post-gen-strip .pgs-primary {
+  background: linear-gradient(135deg, rgba(61,220,255,0.95), rgba(124,92,255,0.9)) !important;
+  color: #050810 !important;
+  border: none !important;
+  font-weight: 700 !important;
+  font-size: 0.78rem !important;
+  padding: 0.35rem 0.75rem !important;
+  border-radius: 8px !important;
+  min-height: auto !important;
+  box-shadow: 0 0 16px rgba(61,220,255,0.25);
+}
+#post-gen-strip .pgs-primary:hover { filter: brightness(1.06); }
+html.view-locked #post-gen-strip { top: 2.25rem; }
+@media (max-width: 640px) {
+  #post-gen-strip { top: 0; font-size: 0.72rem; padding: 0.45rem 0.6rem; }
+  #post-gen-strip .pgs-title { width: 100%; }
+  #post-gen-strip .pgs-actions { width: 100%; margin-left: 0; }
+  #post-gen-strip .pgs-primary { flex: 1; text-align: center; }
+}
+
+/* Schedule toolbar: segmented density, export menu */
+.schedule-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.55rem;
+  margin-bottom: 0.65rem;
+  padding: 0.45rem 0;
+}
+.schedule-toolbar .toolbar-sep {
+  width: 1px;
+  height: 1.35rem;
+  background: var(--line);
+  margin: 0 0.1rem;
+}
+.density-seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.density-seg button {
+  border: none !important;
+  background: transparent !important;
+  color: var(--ink-3) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  padding: 0.3rem 0.55rem !important;
+  min-height: auto !important;
+  border-radius: 0 !important;
+  cursor: pointer;
+  font-family: inherit;
+}
+.density-seg button.active {
+  background: rgba(61, 220, 255, 0.16) !important;
+  color: #9ae8ff !important;
+}
+.toolbar-menu {
+  position: relative;
+  display: inline-flex;
+}
+.toolbar-menu-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 11rem;
+  z-index: 40;
+  background: rgba(10, 16, 30, 0.98);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  padding: 0.3rem;
+  display: none;
+}
+.toolbar-menu-panel.open { display: block; }
+.toolbar-menu-panel button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--ink-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.45rem 0.65rem;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.toolbar-menu-panel button:hover {
+  background: rgba(61, 220, 255, 0.12);
+  color: var(--ink);
+}
+.gen-timestamp {
+  font-size: 0.7rem;
+  color: var(--ink-4);
+  font-family: var(--mono);
+  margin-left: auto;
+}
+@media (max-width: 720px) {
+  .schedule-toolbar .toolbar-label { display: none; }
+  .gen-timestamp { width: 100%; margin-left: 0; }
+}
+
+/* Day header stack: day · date · hours · holiday */
+.week-table thead th.day-head-cell {
+  vertical-align: top;
+  line-height: 1.2;
+  padding: 0.35rem 0.2rem !important;
+}
+.week-table thead th .dh-day {
+  display: block;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+.week-table thead th .dh-date {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--ink-3);
+  font-weight: 500;
+  margin-top: 0.08rem;
+}
+.week-table thead th .day-hours {
+  display: block;
+  font-size: 0.58rem;
+  font-family: var(--mono);
+  color: var(--ink-4);
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.week-table thead th .day-hours.is-override { color: #ffd78a; }
+.week-table thead th .fh-day-label {
+  display: block;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #ffd78a;
+  margin-top: 0.12rem;
+  line-height: 1.15;
+  white-space: normal;
+  max-width: none;
+  overflow: visible;
+  text-overflow: unset;
+}
+html[data-density="compact"] .week-table thead th .dh-day { font-size: 0.68rem; }
+html[data-density="compact"] .week-table thead th .day-hours,
+html[data-density="compact"] .week-table thead th .fh-day-label { font-size: 0.5rem; }
+html[data-density="board"] .week-table thead th .dh-day { font-size: 0.9rem; }
+html[data-density="board"] .week-table thead th .day-hours { font-size: 0.68rem; font-weight: 600; }
+
+/* Mobile review-first: collapse deep analytics */
+.mobile-analytics-toggle {
+  display: none;
+  width: 100%;
+  margin: 0.65rem 0 0.35rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(8,14,28,0.75);
+  color: var(--ink-2);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+.mobile-analytics-toggle .mat-hint {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--ink-4);
+  margin-top: 0.15rem;
+}
+@media (max-width: 720px) {
+  .mobile-analytics-toggle { display: block; }
+  #summary-section.analytics-collapsed .section-body {
+    display: none !important;
+  }
+  #summary-section.analytics-collapsed .section-header h2::after {
+    content: " (collapsed)";
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ink-4);
+  }
+  /* Fairness stays visible; strip is primary review */
+  #fairness-under-schedule {
+    margin-top: 0.5rem;
+  }
+}
+
+/* Diff + suggestions a bit more premium */
+#schedule-diff-panel,
+#smart-suggestions {
+  border: 1px solid rgba(61, 220, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(8, 14, 28, 0.75);
+  padding: 0.65rem 0.75rem;
+  margin: 0.55rem 0;
+}
+#smart-suggestions .sug-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(61, 220, 255, 0.35);
+  background: rgba(61, 220, 255, 0.1);
+  color: #9ae8ff;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+#smart-suggestions .sug-chip:hover {
+  background: rgba(61, 220, 255, 0.18);
+}
+
 #cmd-palette {
   display: none; position: fixed; inset: 0; z-index: 20150;
   align-items: flex-start; justify-content: center; padding: 12vh 1rem 1rem;
@@ -3930,10 +4215,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           <span class="account-chip-plan is-free" id="account-chip-plan">Free</span>
         </span>
       </button>
-      <span class="pro-badge is-free" id="license-badge" title="License status" hidden>Free</span>
-      <span class="offline-pill" id="offline-pill" title="Works offline"><span class="dot"></span> Offline</span>
-      <span class="local-status-pill" id="local-status-pill" title="Local save status">Saved · local</span>
-      <span class="pwa-mode-badge">App</span>
+      <span class="brand-status" id="brand-status">
+        <span class="pro-badge is-free" id="license-badge" title="License status" hidden>Pro</span>
+        <span class="offline-pill" id="offline-pill" title="Works offline — data on this device"><span class="dot"></span><span class="pill-text"> Offline</span></span>
+        <span class="local-status-pill" id="local-status-pill" title="Last local save"><span class="pill-text">Saved</span></span>
+      </span>
     </div>
     <div class="subtitle">Manager shifts · NRF periods · Fair weekends · No clopens</div>
   </div>
@@ -4270,17 +4556,25 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           <button type="button" data-view="week" onclick="setScheduleViewMode('week')" class="active">Week</button>
           <button type="button" data-view="day" onclick="setScheduleViewMode('day')">Day</button>
         </div>
-        <span class="toolbar-label">Actions</span>
-        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="window.print()">Print posting sheet</button>
-        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportSchedule()">Word</button>
-        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
-        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
-        <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON</button>
-        <button type="button" class="btn-secondary no-lock-hide" id="btn-undo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="undoSchedEdit()" disabled title="Undo">Undo</button>
+        <span class="toolbar-sep" aria-hidden="true"></span>
+        <div class="density-seg" id="density-seg" role="group" aria-label="Density">
+          <button type="button" data-density="compact" onclick="setDensityMode('compact')" title="Compact">Compact</button>
+          <button type="button" data-density="comfortable" class="active" onclick="setDensityMode('comfortable')" title="Comfortable">Comfort</button>
+          <button type="button" data-density="board" onclick="setDensityMode('board')" title="Board / wall">Board</button>
+        </div>
+        <span class="toolbar-sep" aria-hidden="true"></span>
+        <button type="button" class="btn-secondary no-lock-hide" id="btn-undo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="undoSchedEdit()" disabled title="Undo (Ctrl+Z)">Undo</button>
         <button type="button" class="btn-secondary no-lock-hide" id="btn-redo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="redoSchedEdit()" disabled title="Redo">Redo</button>
-        <button type="button" class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="setDensityMode('compact')" title="Compact density">Compact</button>
-        <button type="button" class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="setDensityMode('comfortable')" title="Comfortable density">Comfort</button>
-        <button type="button" class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="setDensityMode('board')" title="Board density">Board</button>
+        <div class="toolbar-menu">
+          <button type="button" class="btn-secondary" id="toolbar-export-btn" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="toggleToolbarExportMenu(event)" aria-haspopup="true" aria-expanded="false">Export ▾</button>
+          <div class="toolbar-menu-panel" id="toolbar-export-panel" hidden>
+            <button type="button" onclick="window.print(); closeToolbarExportMenu()">Print posting sheet</button>
+            <button type="button" onclick="exportSchedule(); closeToolbarExportMenu()">Word</button>
+            <button type="button" onclick="exportScheduleExcel(); closeToolbarExportMenu()">Excel</button>
+            <button type="button" onclick="copySummaryText(); closeToolbarExportMenu()">Copy summary</button>
+            <button type="button" onclick="exportBackupJSON(); closeToolbarExportMenu()">Backup JSON</button>
+          </div>
+        </div>
         <span class="gen-timestamp" id="gen-timestamp"></span>
       </div>
       <div class="period-print-header" id="print-header"></div>
@@ -4302,7 +4596,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     </div>
   </div>
 <!-- SUMMARY -->
-  <div class="section" id="summary-section">
+  <button type="button" class="mobile-analytics-toggle no-print" id="mobile-analytics-toggle" onclick="toggleMobileAnalytics()">
+    Posting &amp; quality analytics
+    <span class="mat-hint" id="mobile-analytics-hint">Tap to expand labor, weekly breakdown, and score details</span>
+  </button>
+  <div class="section analytics-collapsed" id="summary-section">
     <div class="section-header">
       <h2>Posting &amp; quality</h2>
     </div>
@@ -4323,7 +4621,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.0-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.1-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -4547,6 +4845,10 @@ function setScheduleResultsVisible(visible) {
   }
   try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
   try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
+  try { if (typeof syncDensitySegUI === 'function') syncDensitySegUI(); } catch (e) {}
+  try {
+    if (visible && typeof initMobileAnalyticsDefault === 'function') initMobileAnalyticsDefault();
+  } catch (e) {}
 }
 
 function restoreAppTab() {
@@ -6436,7 +6738,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.0-staging';
+const APP_VERSION = '2.6.1-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -11415,23 +11717,28 @@ function renderWeekTableHtml(weekDates, wIdx, names, ALL_KC) {
     const dow = wd.getDay();
     const dkH = dateKey(wd);
     const fhH = typeof getFederalHolidayForDate === 'function' ? getFederalHolidayForDate(dkH) : null;
-    let cls = '';
-    if (dow === 0 || dow === 6) cls = 'weekend-col';
-    else if (dow === 1) cls = 'monday-col';
-    if (fhH) cls = (cls ? cls + ' ' : '') + 'federal-holiday-col';
-    const fedLab = fhH ? `<span class="fh-day-label">${esc(fhH.name)}</span>` : '';
-    html += `<th class="${cls}">${DAY_NAMES[dow]}${(function(){ try { if (typeof getStoreHoursForDate!=="function") return ""; const h=getStoreHoursForDate(dkH); if(!h||!h.open) return ""; return '<span class="day-hours'+(h.isOverride?' is-override':'')+'" title="'+(h.isOverride?'Hours override':'Store hours')+'">'+esc(h.open)+'-'+esc(h.close)+(h.isOverride?'*':'')+'</span>'; } catch(e){ return ""; } })()}</th>`;
+    let cls = 'day-head-cell';
+    if (dow === 0 || dow === 6) cls += ' weekend-col';
+    else if (dow === 1) cls += ' monday-col';
+    if (fhH) cls += ' federal-holiday-col';
+    let hoursHtml = '';
+    try {
+      if (typeof getStoreHoursForDate === 'function') {
+        const h = getStoreHoursForDate(dkH);
+        if (h && h.open && h.close) {
+          hoursHtml = '<span class="day-hours' + (h.isOverride ? ' is-override' : '') + '" title="' +
+            (h.isOverride ? 'Hours override' : 'Store hours') + '">' +
+            esc(h.open) + '–' + esc(h.close) + (h.isOverride ? '*' : '') + '</span>';
+        }
+      }
+    } catch (e) {}
+    const fedLab = fhH ? '<span class="fh-day-label" title="' + esc(fhH.name) + '">' + esc(fhH.name) + '</span>' : '';
+    html += '<th class="' + cls + '"><span class="dh-day">' + DAY_NAMES[dow] + '</span>' +
+      '<span class="dh-date">' + formatDate(wd) + '</span>' + hoursHtml + fedLab + '</th>';
   });
   html += '</tr>';
-  html += '<tr><th class="name-col"></th>';
-  weekDates.forEach(wd => {
-    const dow = wd.getDay();
-    let cls = '';
-    if (dow === 0 || dow === 6) cls = 'weekend-col';
-    else if (dow === 1) cls = 'monday-col';
-    html += `<th class="${cls}">${formatDate(wd)}</th>`;
-  });
-  html += '</tr></thead><tbody>';
+  /* single header row: date merged into day-head-cell */
+  html += '</thead><tbody>';
   ALL_KC.forEach(r => {
     html += '<tr data-role="' + r + '">';
     const isKC = r.startsWith('kc');
@@ -14575,6 +14882,109 @@ document.addEventListener('click', (e) => {
 });
 
 
+
+// ── v2.6.1 visual polish helpers ──
+function toggleToolbarExportMenu(e) {
+  if (e) e.stopPropagation();
+  const panel = document.getElementById('toolbar-export-panel');
+  const btn = document.getElementById('toolbar-export-btn');
+  if (!panel) return;
+  const open = panel.hasAttribute('hidden');
+  if (open) {
+    panel.removeAttribute('hidden');
+    panel.classList.add('open');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  } else {
+    closeToolbarExportMenu();
+  }
+}
+function closeToolbarExportMenu() {
+  const panel = document.getElementById('toolbar-export-panel');
+  const btn = document.getElementById('toolbar-export-btn');
+  if (panel) {
+    panel.setAttribute('hidden', '');
+    panel.classList.remove('open');
+  }
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('click', (e) => {
+  const menu = document.querySelector('.toolbar-menu');
+  if (menu && !menu.contains(e.target)) closeToolbarExportMenu();
+});
+function syncDensitySegUI() {
+  const mode = document.documentElement.getAttribute('data-density') || 'comfortable';
+  document.querySelectorAll('#density-seg button').forEach((b) => {
+    b.classList.toggle('active', b.getAttribute('data-density') === mode);
+  });
+}
+(function wrapDensityMode() {
+  const orig = window.setDensityMode;
+  if (typeof orig !== 'function' || orig._densitySegWrapped) return;
+  function wrapped(mode) {
+    orig(mode);
+    try {
+      syncDensitySegUI();
+    } catch (e) {}
+  }
+  wrapped._densitySegWrapped = true;
+  window.setDensityMode = wrapped;
+})();
+function toggleMobileAnalytics() {
+  const sec = document.getElementById('summary-section');
+  const hint = document.getElementById('mobile-analytics-hint');
+  if (!sec) return;
+  const collapsed = sec.classList.toggle('analytics-collapsed');
+  if (hint) {
+    hint.textContent = collapsed
+      ? 'Tap to expand labor, weekly breakdown, and score details'
+      : 'Tap to collapse analytics';
+  }
+}
+function initMobileAnalyticsDefault() {
+  const sec = document.getElementById('summary-section');
+  if (!sec) return;
+  if (window.innerWidth <= 720) sec.classList.add('analytics-collapsed');
+  else sec.classList.remove('analytics-collapsed');
+}
+(function wrapPostGenStripCta() {
+  const orig = window.updatePostGenStrip;
+  if (typeof orig !== 'function' || orig._ctaWrapped) return;
+  function wrapped() {
+    orig();
+    try {
+      const cta = document.getElementById('pgs-primary-cta');
+      const fair = document.getElementById('pgs-fair');
+      const cover = document.getElementById('pgs-cover');
+      if (!cta) return;
+      const bad =
+        (fair && fair.classList.contains('warn')) ||
+        (cover && (cover.classList.contains('warn') || cover.classList.contains('bad')));
+      cta.textContent = bad ? 'Review issues' : 'Looks good · Fairness';
+      cta.onclick = bad ? jumpToIssuesPanel : jumpToFairnessStrip;
+    } catch (e) {}
+  }
+  wrapped._ctaWrapped = true;
+  window.updatePostGenStrip = wrapped;
+})();
+(function wrapLocalStatusShort() {
+  const orig = window.updateLocalStatusPill;
+  if (typeof orig !== 'function' || orig._shortWrapped) return;
+  function wrapped() {
+    orig();
+    try {
+      const el = document.getElementById('local-status-pill');
+      if (!el) return;
+      const title = el.getAttribute('title') || el.textContent || '';
+      if (el.textContent && el.textContent.length > 14) {
+        el.innerHTML = '<span class="pill-text">Saved</span>';
+        if (title) el.title = title;
+      }
+    } catch (e) {}
+  }
+  wrapped._shortWrapped = true;
+  window.updateLocalStatusPill = wrapped;
+})();
+
 function handleLaunchQuery() {
   try {
     applyUrlProUnlock();
@@ -14610,6 +15020,8 @@ function bootUi() {
   try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
   try { if (typeof updateUndoRedoButtons === 'function') updateUndoRedoButtons(); } catch (e) {}
   try { if (typeof setupRequestPaintHandlers === 'function') setupRequestPaintHandlers(); } catch (e) {}
+  try { if (typeof syncDensitySegUI === 'function') syncDensitySegUI(); } catch (e) {}
+  try { if (typeof initMobileAnalyticsDefault === 'function') initMobileAnalyticsDefault(); } catch (e) {}
   try {
     if (typeof loadSelectedFederalHolidays === 'function') loadSelectedFederalHolidays();
     if (typeof renderFederalHolidaysUI === 'function') renderFederalHolidaysUI();

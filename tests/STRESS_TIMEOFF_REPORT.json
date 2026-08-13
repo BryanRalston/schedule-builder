@@ -1,10 +1,10 @@
 {
   "title": "Schedule Pro Time-Off Monte Carlo Stress",
-  "version": "2.5.5",
+  "version": "2.5.6",
   "seed": 20260813,
-  "startedAt": "2026-08-13T14:29:14.816Z",
-  "finishedAt": "2026-08-13T14:29:17.536Z",
-  "base": "http://127.0.0.1:53730",
+  "startedAt": "2026-08-13T15:28:21.936Z",
+  "finishedAt": "2026-08-13T15:28:24.589Z",
+  "base": "http://127.0.0.1:60377",
   "summary": {
     "pass": 106,
     "warn": 21,
@@ -684,7 +684,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 25,
+        "ms": 24,
         "error": null,
         "days": 35
       }
@@ -728,7 +728,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 6,
-        "ms": 10,
+        "ms": 9,
         "error": null,
         "days": 35
       }
@@ -1154,7 +1154,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 4,
-        "ms": 10,
+        "ms": 11,
         "error": null,
         "days": 35
       }
@@ -1280,7 +1280,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 0,
-        "ms": 10,
+        "ms": 11,
         "error": null,
         "days": 35
       }
@@ -1406,7 +1406,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 11,
+        "ms": 12,
         "error": null,
         "days": 35
       }
@@ -1490,7 +1490,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 7,
+        "ms": 8,
         "error": null,
         "days": 35
       }
@@ -1532,7 +1532,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 10,
+        "ms": 11,
         "error": null,
         "days": 35
       }
@@ -1616,7 +1616,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 8,
+        "ms": 9,
         "error": null,
         "days": 35
       }
@@ -1658,7 +1658,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 6,
+        "ms": 7,
         "error": null,
         "days": 35
       }
@@ -1700,7 +1700,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 6,
+        "ms": 7,
         "error": null,
         "days": 35
       }
@@ -1742,7 +1742,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 9,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -1826,7 +1826,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 6,
+        "ms": 7,
         "error": null,
         "days": 35
       }
@@ -1868,7 +1868,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 6,
+        "ms": 7,
         "error": null,
         "days": 35
       }
@@ -2246,7 +2246,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 9,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -2288,7 +2288,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 6,
+        "ms": 7,
         "error": null,
         "days": 35
       }
@@ -2498,7 +2498,7 @@
         ],
         "closeSpread": 2,
         "weSpread": 0,
-        "ms": 11,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -2540,7 +2540,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 11,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -2708,7 +2708,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 9,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -3002,7 +3002,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 8,
+        "ms": 7,
         "error": null,
         "days": 35
       }
@@ -3044,7 +3044,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 0,
-        "ms": 12,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -3088,7 +3088,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 0,
-        "ms": 12,
+        "ms": 11,
         "error": null,
         "days": 35
       }
@@ -3215,7 +3215,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 11,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -3256,7 +3256,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 9,
+        "ms": 8,
         "error": null,
         "days": 35
       }
@@ -3420,7 +3420,7 @@
         ],
         "closeSpread": 2,
         "weSpread": 0,
-        "ms": 11,
+        "ms": 12,
         "error": null,
         "days": 35
       }
@@ -3502,7 +3502,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 11,
+        "ms": 12,
         "error": null,
         "days": 35
       }
@@ -3626,7 +3626,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 2,
-        "ms": 7,
+        "ms": 8,
         "error": null,
         "days": 35
       }
@@ -3839,7 +3839,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 4,
-        "ms": 11,
+        "ms": 12,
         "error": null,
         "days": 35
       }
@@ -3880,7 +3880,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 0,
-        "ms": 11,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -4003,7 +4003,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 9,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -4092,7 +4092,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 5,
-        "ms": 9,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -4180,7 +4180,7 @@
         ],
         "closeSpread": 2,
         "weSpread": 5,
-        "ms": 7,
+        "ms": 8,
         "error": null,
         "days": 35
       }
@@ -4224,7 +4224,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 5,
-        "ms": 9,
+        "ms": 14,
         "error": null,
         "days": 35
       }
@@ -4268,7 +4268,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 5,
-        "ms": 10,
+        "ms": 11,
         "error": null,
         "days": 35
       }
@@ -4396,7 +4396,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 14,
+        "ms": 11,
         "error": null,
         "days": 35
       }
@@ -4438,7 +4438,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 8,
+        "ms": 7,
         "error": null,
         "days": 35
       }
@@ -4479,7 +4479,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 1,
-        "ms": 12,
+        "ms": 13,
         "error": null,
         "days": 35
       }
@@ -4561,7 +4561,7 @@
         ],
         "closeSpread": 2,
         "weSpread": 0,
-        "ms": 12,
+        "ms": 11,
         "error": null,
         "days": 35
       }
@@ -4683,7 +4683,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 0,
-        "ms": 9,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -4719,7 +4719,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 0,
-        "ms": 9,
+        "ms": 8,
         "error": null,
         "days": 35
       }
@@ -4795,7 +4795,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 2,
-        "ms": 10,
+        "ms": 9,
         "error": null,
         "days": 35
       }
@@ -4987,7 +4987,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 0,
-        "ms": 9,
+        "ms": 10,
         "error": null,
         "days": 35
       }
@@ -5071,7 +5071,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 2,
-        "ms": 8,
+        "ms": 7,
         "error": null,
         "days": 35
       }
@@ -5493,7 +5493,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 2,
-        "ms": 10,
+        "ms": 12,
         "error": null,
         "days": 35
       }
@@ -5619,7 +5619,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 1,
-        "ms": 10,
+        "ms": 9,
         "error": null,
         "days": 35
       }
@@ -5748,7 +5748,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 0,
-        "ms": 11,
+        "ms": 8,
         "error": null,
         "days": 35
       }
@@ -5918,7 +5918,7 @@
         ],
         "closeSpread": 1,
         "weSpread": 4,
-        "ms": 10,
+        "ms": 11,
         "error": null,
         "days": 35
       }
@@ -5960,7 +5960,7 @@
         ],
         "closeSpread": 0,
         "weSpread": 0,
-        "ms": 10,
+        "ms": 9,
         "error": null,
         "days": 35
       }

@@ -1,0 +1,1326 @@
+{
+  "version": "2.5.6",
+  "startedAt": "2026-08-13T15:28:12.483Z",
+  "finishedAt": "2026-08-13T15:28:13.997Z",
+  "totals": {
+    "pass": 76,
+    "warn": 2,
+    "fail": 0,
+    "total": 78
+  },
+  "scenarios": [
+    {
+      "label": "clean-peak-off",
+      "version": "2.5.6",
+      "peak": false,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 0,
+      "weSpread": 1,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 3,
+        "am2": 4,
+        "am3": 4
+      },
+      "earlyOpens": {
+        "am1": 0,
+        "am2": 0,
+        "am3": 0
+      },
+      "extCloses": {
+        "am1": 0,
+        "am2": 0,
+        "am3": 0
+      },
+      "earlySpread": 0,
+      "extSpread": 0,
+      "autoOpenEarly": 0,
+      "autoCloseExt": 0,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 0,
+      "mgrCloseNights": 29,
+      "mgrCloseNightsExt": 0,
+      "pctEarly": 0,
+      "pctExt": 0,
+      "opts": {
+        "section": "C",
+        "clean": true,
+        "peakOff": true
+      }
+    },
+    {
+      "label": "clean-fairness",
+      "version": "2.5.6",
+      "peak": false,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 0,
+      "weSpread": 1,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 3,
+        "am2": 4,
+        "am3": 4
+      },
+      "earlyOpens": {
+        "am1": 0,
+        "am2": 0,
+        "am3": 0
+      },
+      "extCloses": {
+        "am1": 0,
+        "am2": 0,
+        "am3": 0
+      },
+      "earlySpread": 0,
+      "extSpread": 0,
+      "autoOpenEarly": 0,
+      "autoCloseExt": 0,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 0,
+      "mgrCloseNights": 29,
+      "mgrCloseNightsExt": 0,
+      "pctEarly": 0,
+      "pctExt": 0,
+      "opts": {
+        "section": "AB",
+        "clean": true
+      }
+    },
+    {
+      "label": "p08-like",
+      "version": "2.5.6",
+      "peak": false,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 0,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 9,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 5,
+        "am2": 5,
+        "am3": 5
+      },
+      "earlyOpens": {
+        "am1": 0,
+        "am2": 0,
+        "am3": 0
+      },
+      "extCloses": {
+        "am1": 0,
+        "am2": 0,
+        "am3": 0
+      },
+      "earlySpread": 0,
+      "extSpread": 0,
+      "autoOpenEarly": 0,
+      "autoCloseExt": 0,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 0,
+      "mgrCloseNights": 28,
+      "mgrCloseNightsExt": 0,
+      "pctEarly": 0,
+      "pctExt": 0,
+      "opts": {
+        "section": "B",
+        "p08": true
+      }
+    },
+    {
+      "label": "clean-peak-on",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 0,
+      "weSpread": 1,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 3,
+        "am2": 4,
+        "am3": 4
+      },
+      "earlyOpens": {
+        "am1": 10,
+        "am2": 8,
+        "am3": 9
+      },
+      "extCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "earlySpread": 2,
+      "extSpread": 0,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 29,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 29,
+      "mgrCloseNightsExt": 29,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "DF",
+        "clean": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-on-light-rto",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 1,
+      "periodCloses": {
+        "am1": 9,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 3,
+        "am2": 4,
+        "am3": 4
+      },
+      "earlyOpens": {
+        "am1": 8,
+        "am2": 9,
+        "am3": 8
+      },
+      "extCloses": {
+        "am1": 9,
+        "am2": 8,
+        "am3": 8
+      },
+      "earlySpread": 1,
+      "extSpread": 1,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 30,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 30,
+      "mgrCloseNightsExt": 30,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "D",
+        "peakOn": true,
+        "lightRto": true
+      }
+    },
+    {
+      "label": "peak-off-locked-inputs",
+      "version": "2.5.6",
+      "peak": false,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 0,
+      "weSpread": 1,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 3,
+        "am2": 4,
+        "am3": 4
+      },
+      "earlyOpens": {
+        "am1": 1,
+        "am2": 0,
+        "am3": 0
+      },
+      "extCloses": {
+        "am1": 0,
+        "am2": 1,
+        "am3": 0
+      },
+      "earlySpread": 1,
+      "extSpread": 1,
+      "autoOpenEarly": 0,
+      "autoCloseExt": 0,
+      "lockedOpenEarly": 1,
+      "lockedCloseExt": 1,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 1,
+      "mgrCloseNights": 29,
+      "mgrCloseNightsExt": 1,
+      "pctEarly": 2.9,
+      "pctExt": 3.4,
+      "opts": {
+        "section": "C",
+        "locked": true
+      }
+    },
+    {
+      "label": "peak-stress-0",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 2,
+      "periodCloses": {
+        "am1": 6,
+        "am2": 6,
+        "am3": 7
+      },
+      "weOffs": {
+        "am1": 4,
+        "am2": 5,
+        "am3": 3
+      },
+      "earlyOpens": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 9
+      },
+      "extCloses": {
+        "am1": 6,
+        "am2": 6,
+        "am3": 7
+      },
+      "earlySpread": 1,
+      "extSpread": 1,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 23,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 23,
+      "mgrCloseNightsExt": 23,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-1",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 0,
+      "weSpread": 1,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 5,
+        "am2": 5,
+        "am3": 4
+      },
+      "earlyOpens": {
+        "am1": 7,
+        "am2": 7,
+        "am3": 7
+      },
+      "extCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "earlySpread": 0,
+      "extSpread": 0,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 28,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 28,
+      "mgrCloseNightsExt": 28,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-2",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 2,
+      "periodCloses": {
+        "am1": 7,
+        "am2": 7,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 5,
+        "am2": 4,
+        "am3": 3
+      },
+      "earlyOpens": {
+        "am1": 9,
+        "am2": 9,
+        "am3": 9
+      },
+      "extCloses": {
+        "am1": 7,
+        "am2": 7,
+        "am3": 8
+      },
+      "earlySpread": 0,
+      "extSpread": 1,
+      "autoOpenEarly": 36,
+      "autoCloseExt": 28,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 28,
+      "mgrCloseNightsExt": 28,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-3",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 0,
+      "periodCloses": {
+        "am1": 9,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 4,
+        "am2": 4,
+        "am3": 4
+      },
+      "earlyOpens": {
+        "am1": 8,
+        "am2": 9,
+        "am3": 8
+      },
+      "extCloses": {
+        "am1": 9,
+        "am2": 8,
+        "am3": 8
+      },
+      "earlySpread": 1,
+      "extSpread": 1,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 30,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 30,
+      "mgrCloseNightsExt": 30,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-4",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 0,
+      "weSpread": 0,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 4,
+        "am2": 4,
+        "am3": 4
+      },
+      "earlyOpens": {
+        "am1": 7,
+        "am2": 8,
+        "am3": 7
+      },
+      "extCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "earlySpread": 1,
+      "extSpread": 0,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 29,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 29,
+      "mgrCloseNightsExt": 29,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-5",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 0,
+      "weSpread": 2,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 4,
+        "am2": 5,
+        "am3": 6
+      },
+      "earlyOpens": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "extCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 8
+      },
+      "earlySpread": 0,
+      "extSpread": 0,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 29,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 29,
+      "mgrCloseNightsExt": 29,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-6",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 3,
+      "periodCloses": {
+        "am1": 7,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 3,
+        "am2": 4,
+        "am3": 6
+      },
+      "earlyOpens": {
+        "am1": 9,
+        "am2": 10,
+        "am3": 8
+      },
+      "extCloses": {
+        "am1": 7,
+        "am2": 8,
+        "am3": 8
+      },
+      "earlySpread": 2,
+      "extSpread": 1,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 29,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 29,
+      "mgrCloseNightsExt": 29,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-7",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 3,
+      "periodCloses": {
+        "am1": 9,
+        "am2": 8,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 3,
+        "am2": 3,
+        "am3": 6
+      },
+      "earlyOpens": {
+        "am1": 9,
+        "am2": 9,
+        "am3": 7
+      },
+      "extCloses": {
+        "am1": 9,
+        "am2": 8,
+        "am3": 8
+      },
+      "earlySpread": 2,
+      "extSpread": 1,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 29,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 29,
+      "mgrCloseNightsExt": 29,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-8",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 2,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 9
+      },
+      "weOffs": {
+        "am1": 4,
+        "am2": 5,
+        "am3": 3
+      },
+      "earlyOpens": {
+        "am1": 7,
+        "am2": 7,
+        "am3": 7
+      },
+      "extCloses": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 9
+      },
+      "earlySpread": 0,
+      "extSpread": 1,
+      "autoOpenEarly": 36,
+      "autoCloseExt": 30,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 30,
+      "mgrCloseNightsExt": 30,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-9",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 4,
+      "weSpread": 4,
+      "periodCloses": {
+        "am1": 6,
+        "am2": 10,
+        "am3": 6
+      },
+      "weOffs": {
+        "am1": 6,
+        "am2": 2,
+        "am3": 5
+      },
+      "earlyOpens": {
+        "am1": 6,
+        "am2": 7,
+        "am3": 7
+      },
+      "extCloses": {
+        "am1": 6,
+        "am2": 10,
+        "am3": 6
+      },
+      "earlySpread": 1,
+      "extSpread": 4,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 25,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 25,
+      "mgrCloseNightsExt": 25,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-10",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 2,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 7,
+        "am3": 8
+      },
+      "weOffs": {
+        "am1": 5,
+        "am2": 4,
+        "am3": 3
+      },
+      "earlyOpens": {
+        "am1": 8,
+        "am2": 8,
+        "am3": 10
+      },
+      "extCloses": {
+        "am1": 8,
+        "am2": 7,
+        "am3": 8
+      },
+      "earlySpread": 2,
+      "extSpread": 1,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 28,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 28,
+      "mgrCloseNightsExt": 28,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    },
+    {
+      "label": "peak-stress-11",
+      "version": "2.5.6",
+      "peak": true,
+      "noOpen": 0,
+      "noClose": 0,
+      "monMgrCloses": 0,
+      "closeSpread": 1,
+      "weSpread": 1,
+      "periodCloses": {
+        "am1": 8,
+        "am2": 7,
+        "am3": 7
+      },
+      "weOffs": {
+        "am1": 5,
+        "am2": 4,
+        "am3": 5
+      },
+      "earlyOpens": {
+        "am1": 7,
+        "am2": 11,
+        "am3": 8
+      },
+      "extCloses": {
+        "am1": 8,
+        "am2": 7,
+        "am3": 7
+      },
+      "earlySpread": 4,
+      "extSpread": 1,
+      "autoOpenEarly": 35,
+      "autoCloseExt": 26,
+      "lockedOpenEarly": 0,
+      "lockedCloseExt": 0,
+      "daysWithWorkers": 35,
+      "daysWithEarlyOpen": 35,
+      "mgrCloseNights": 26,
+      "mgrCloseNightsExt": 26,
+      "pctEarly": 100,
+      "pctExt": 100,
+      "opts": {
+        "section": "E",
+        "stress": true,
+        "peakOn": true
+      }
+    }
+  ],
+  "assertions": [
+    {
+      "name": "version",
+      "ok": true,
+      "detail": "2.5.6",
+      "severity": "pass"
+    },
+    {
+      "name": "default-peakSeasonHours-false",
+      "ok": true,
+      "detail": "DEFAULT_PREFERENCES.peakSeasonHours === false",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-off-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-off-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-off-we-spread",
+      "ok": true,
+      "detail": "spread=1 {\"am1\":3,\"am2\":4,\"am3\":4}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-off-close-spread",
+      "ok": true,
+      "detail": "spread=0 {\"am1\":8,\"am2\":8,\"am3\":8}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-off-we-spread-preferred",
+      "ok": true,
+      "detail": "≤1 (got 1)",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-off-close-spread-preferred",
+      "ok": true,
+      "detail": "≤1 (got 0)",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-off-peak-off-no-auto-early-ext",
+      "ok": true,
+      "detail": "zero auto open-early / close-ext",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-fairness-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-fairness-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-fairness-we-spread",
+      "ok": true,
+      "detail": "spread=1 {\"am1\":3,\"am2\":4,\"am3\":4}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-fairness-close-spread",
+      "ok": true,
+      "detail": "spread=0 {\"am1\":8,\"am2\":8,\"am3\":8}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-fairness-we-spread-preferred",
+      "ok": true,
+      "detail": "≤1 (got 1)",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-fairness-close-spread-preferred",
+      "ok": true,
+      "detail": "≤1 (got 0)",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-fairness-peak-off-no-auto-early-ext",
+      "ok": true,
+      "detail": "zero auto open-early / close-ext",
+      "severity": "pass"
+    },
+    {
+      "name": "p08-like-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "p08-like-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "p08-like-we-spread",
+      "ok": true,
+      "detail": "spread=0 {\"am1\":5,\"am2\":5,\"am3\":5}",
+      "severity": "pass"
+    },
+    {
+      "name": "p08-like-close-spread",
+      "ok": true,
+      "detail": "spread=1 {\"am1\":8,\"am2\":9,\"am3\":8}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-we-spread",
+      "ok": true,
+      "detail": "spread=1 {\"am1\":3,\"am2\":4,\"am3\":4}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-close-spread",
+      "ok": true,
+      "detail": "spread=0 {\"am1\":8,\"am2\":8,\"am3\":8}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-we-spread-preferred",
+      "ok": true,
+      "detail": "≤1 (got 1)",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-close-spread-preferred",
+      "ok": true,
+      "detail": "≤1 (got 0)",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-every-day-early-open",
+      "ok": true,
+      "detail": "35/35",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-every-mgr-close-ext",
+      "ok": true,
+      "detail": "29/29",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-early-spread",
+      "ok": true,
+      "detail": "spread=2 {\"am1\":10,\"am2\":8,\"am3\":9}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-ext-spread",
+      "ok": true,
+      "detail": "spread=0 {\"am1\":8,\"am2\":8,\"am3\":8}",
+      "severity": "pass"
+    },
+    {
+      "name": "clean-peak-on-optimal-100",
+      "ok": true,
+      "detail": "early 100% ext 100%",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-on-light-rto-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-on-light-rto-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-on-light-rto-we-spread",
+      "ok": true,
+      "detail": "spread=1 {\"am1\":3,\"am2\":4,\"am3\":4}",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-on-light-rto-close-spread",
+      "ok": true,
+      "detail": "spread=1 {\"am1\":9,\"am2\":8,\"am3\":8}",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-on-light-rto-every-day-early-open",
+      "ok": true,
+      "detail": "35/35",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-on-light-rto-every-mgr-close-ext",
+      "ok": true,
+      "detail": "30/30",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-on-light-rto-early-spread",
+      "ok": true,
+      "detail": "spread=1 {\"am1\":8,\"am2\":9,\"am3\":8}",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-on-light-rto-ext-spread",
+      "ok": true,
+      "detail": "spread=1 {\"am1\":9,\"am2\":8,\"am3\":8}",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-off-locked-inputs-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-off-locked-inputs-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-off-locked-inputs-locked-preserved",
+      "ok": true,
+      "detail": "early=1 ext=1",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-0-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-0-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-0-fairness-ok",
+      "ok": true,
+      "detail": "close=1 we=2 early=1 ext=1",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-1-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-1-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-1-fairness-ok",
+      "ok": true,
+      "detail": "close=0 we=1 early=0 ext=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-2-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-2-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-2-fairness-ok",
+      "ok": true,
+      "detail": "close=1 we=2 early=0 ext=1",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-3-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-3-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-3-fairness-ok",
+      "ok": true,
+      "detail": "close=1 we=0 early=1 ext=1",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-4-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-4-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-4-fairness-ok",
+      "ok": true,
+      "detail": "close=0 we=0 early=1 ext=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-5-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-5-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-5-fairness-ok",
+      "ok": true,
+      "detail": "close=0 we=2 early=0 ext=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-6-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-6-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-6-fairness-ok",
+      "ok": true,
+      "detail": "close=1 we=3 early=2 ext=1",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-7-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-7-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-7-fairness-ok",
+      "ok": true,
+      "detail": "close=1 we=3 early=2 ext=1",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-8-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-8-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-8-fairness-ok",
+      "ok": true,
+      "detail": "close=1 we=2 early=0 ext=1",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-9-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-9-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-9-fairness-soft",
+      "ok": true,
+      "detail": "close=4 we=4 early=1 ext=4",
+      "severity": "warn"
+    },
+    {
+      "name": "peak-stress-10-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-10-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-10-fairness-ok",
+      "ok": true,
+      "detail": "close=1 we=2 early=2 ext=1",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-11-hard-coverage",
+      "ok": true,
+      "detail": "noOpen=0 noClose=0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-11-no-mgr-close-kc-mon",
+      "ok": true,
+      "detail": "0",
+      "severity": "pass"
+    },
+    {
+      "name": "peak-stress-11-fairness-soft",
+      "ok": true,
+      "detail": "close=1 we=1 early=4 ext=1",
+      "severity": "warn"
+    }
+  ]
+}

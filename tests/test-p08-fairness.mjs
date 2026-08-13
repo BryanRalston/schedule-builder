@@ -55,7 +55,7 @@ function startStaticServer() {
 }
 
 async function main() {
-  console.log('\n=== P08 fairness (v2.5.3) ===\n');
+  console.log('\n=== P08 fairness (v2.5.6) ===\n');
   const { server, base } = await startStaticServer();
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();

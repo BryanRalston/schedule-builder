@@ -1,9 +1,9 @@
 {
   "title": "Schedule Pro Engine Stress Test",
-  "version": "2.5.5",
-  "startedAt": "2026-08-13T14:29:21.596Z",
-  "finishedAt": "2026-08-13T14:29:23.286Z",
-  "base": "http://127.0.0.1:59323",
+  "version": "2.5.6",
+  "startedAt": "2026-08-13T15:28:17.436Z",
+  "finishedAt": "2026-08-13T15:28:19.241Z",
+  "base": "http://127.0.0.1:52036",
   "summary": {
     "pass": 24,
     "fail": 0,
@@ -49,7 +49,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 26,
+        "ms": 27,
         "error": null
       }
     },
@@ -169,7 +169,7 @@
         "closeSpread": 0,
         "weSpread": 0,
         "days": 35,
-        "ms": 9,
+        "ms": 10,
         "error": null
       }
     },
@@ -200,7 +200,7 @@
         "closeSpread": 1,
         "weSpread": 1,
         "days": 35,
-        "ms": 9,
+        "ms": 10,
         "error": null
       }
     },
@@ -295,7 +295,7 @@
         "closeSpread": 9,
         "weSpread": 5,
         "days": 35,
-        "ms": 12,
+        "ms": 11,
         "error": null
       }
     },
@@ -357,7 +357,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 7,
+        "ms": 6,
         "error": null
       }
     },
@@ -481,7 +481,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 7,
+        "ms": 8,
         "error": null
       }
     },
@@ -512,7 +512,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 11,
+        "ms": 9,
         "error": null
       }
     },
@@ -607,7 +607,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 7,
+        "ms": 8,
         "error": null
       }
     },
@@ -733,7 +733,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 75,
+        "ms": 79,
         "msAvg": 8,
         "error": null,
         "stabilityOk": true,
@@ -807,7 +807,7 @@
         "closeSpread": 2,
         "weSpread": 6,
         "days": 35,
-        "ms": 11,
+        "ms": 12,
         "error": null
       }
     },

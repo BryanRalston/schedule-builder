@@ -3654,7 +3654,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.5</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.5.6</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -5272,7 +5272,9 @@ const DEFAULT_PREFERENCES = {
   /** Favor full Sun+Sat off package for one person when coverage allows. */
   preferWeekendPackages: true,
   /** SM not forced equal weekend offs with AMs (SM can sacrifice weekends). */
-  smFewerWeekendOffs: true
+  smFewerWeekendOffs: true,
+  /** Peak/holiday: auto-use open-early + close-ext for coverage; off = open-late + close only. */
+  peakSeasonHours: false
 };
 
 let preferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
@@ -5454,7 +5456,8 @@ function readPreferencesFromUI() {
     amClosesPerWeek: (amCl == null || !Number.isFinite(amCl)) ? null : amCl,
     kcMidWhenNoMid: g('pref-kc-mid') ? !!g('pref-kc-mid').checked : true,
     preferWeekendPackages: g('pref-we-packages') ? !!g('pref-we-packages').checked : true,
-    smFewerWeekendOffs: g('pref-sm-fewer-we') ? !!g('pref-sm-fewer-we').checked : true
+    smFewerWeekendOffs: g('pref-sm-fewer-we') ? !!g('pref-sm-fewer-we').checked : true,
+    peakSeasonHours: g('pref-peak-season') ? !!g('pref-peak-season').checked : false
   };
   syncCloseTargetsToRoleRules();
   return preferences;
@@ -5557,6 +5560,14 @@ function renderPreferencesUI() {
         <input type="number" id="pref-am-closes" min="0" max="7" placeholder="auto" value="${p.amClosesPerWeek == null || p.amClosesPerWeek === '' ? '' : p.amClosesPerWeek}" onchange="readPreferencesFromUI()">
       </label>
       <div class="pref-desc">Per AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — remaining closes after the SM are split evenly. Set 2 for smaller teams where each AM closes twice. Coverage still wins if totals don’t match nights available.</div>
+    </div>
+    <div class="pref-card">
+      <label class="toggle-switch">
+        <input type="checkbox" id="pref-peak-season" ${p.peakSeasonHours ? 'checked' : ''} onchange="readPreferencesFromUI()">
+        <span class="toggle-track"></span>
+        Peak / holiday season hours
+      </label>
+      <div class="pref-desc">When on, generator uses <strong>early open</strong> (open-early, e.g. 6a) and <strong>extended close</strong> (close-ext, e.g. to 11:30p) for coverage shifts. When off, use <strong>regular open</strong> (open-late) and <strong>regular close</strong> only — early/ext only if manually set in Requests.</div>
     </div>
   `;
 }
@@ -5688,7 +5699,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.5.5';
+const APP_VERSION = '2.5.6';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7071,6 +7082,16 @@ function toggleSection(header) {
 function isClose(shift) { return shift === 'close' || shift === 'close-ext' || shift === 'kc-close'; }
 function isOpen(shift) { return shift === 'open-early' || shift === 'open-late'; }
 function isMid(shift) { return shift === 'mid-early' || shift === 'mid-late'; }
+/** Peak season → open-early; otherwise regular open-late. */
+function pickOpenShift(prefs) {
+  const p = prefs || (typeof preferences !== 'undefined' ? preferences : DEFAULT_PREFERENCES);
+  return p && p.peakSeasonHours ? 'open-early' : 'open-late';
+}
+/** Peak season → close-ext; otherwise regular close. */
+function pickCloseShift(prefs) {
+  const p = prefs || (typeof preferences !== 'undefined' ? preferences : DEFAULT_PREFERENCES);
+  return p && p.peakSeasonHours ? 'close-ext' : 'close';
+}
 function isWork(shift) { return isOpen(shift) || isMid(shift) || isClose(shift) || isCustomShift(shift); }
 function isPto(shift) { return shift === 'pto'; }
 function isRto(shift) { return shift === 'rto'; }
@@ -7192,6 +7213,15 @@ function _generateScheduleInner() {
 
   // Is a day an input-locked value?
   const isInputLocked = (role, dk) => inputs[role] && inputs[role][dk] !== undefined;
+
+  // Peak/holiday season: early open + ext close; otherwise regular open/close only
+  const pickOpen = () => pickOpenShift(PREFS);
+  const pickClose = () => pickCloseShift(PREFS);
+  /** First auto open of day: early when peak; second open same day: late for dual coverage. Peak off: always late. */
+  const nextOpenShift = (opensSoFar) => {
+    if (PREFS.peakSeasonHours) return opensSoFar === 0 ? 'open-early' : 'open-late';
+    return 'open-late';
+  };
 
   // ════════════════════════════════════════════════════
   // STEP 1: LOCK ALL REQUESTS
@@ -7595,8 +7625,8 @@ function _generateScheduleInner() {
 
     scored.sort((a, b) => a.score - b.score);
     const chosen = scored[0].role;
-    // Assign regular close unless already input as close-ext (those nights already filled)
-    schedule[chosen][dk] = 'close';
+    // Peak season → close-ext; off → regular close (input-locked close-ext nights already filled)
+    schedule[chosen][dk] = pickClose();
     closesPerWeek[chosen][w]++;
   }
 
@@ -7604,10 +7634,9 @@ function _generateScheduleInner() {
   // STEP 5: FILL REMAINING SLOTS WITH OPEN/MID SHIFTS
   // If closed previous day -> mid (NEVER open = clopen prevention).
   // Ensure at least 1 opener and 1 closer per day.
-  // Alternate early/late variants for variety.
+  // Peak on: first open = early, second = late; peak off: all opens late.
   // ════════════════════════════════════════════════════
 
-  let openVariety = 0;
   let midVariety = 0;
 
   allDks.forEach((dk, dkIdx) => {
@@ -7637,12 +7666,25 @@ function _generateScheduleInner() {
       managerMids[r] = allDks.filter(d => isMid(schedule[r][d])).length;
     });
 
+    // Count early opens so far (peak fairness among openers)
+    const managerEarlyOpens = {};
+    ROLES.forEach((r) => {
+      managerEarlyOpens[r] = allDks.filter((d) => schedule[r][d] === 'open-early').length;
+    });
+
     // Sort: closed-yesterday first (forced mid), then SM first (prefers open),
-    // then others sorted by who has most opens (they should get mid next for balance)
+    // then others sorted by who has most opens (they should get mid next for balance).
+    // When peak is on and day still needs first open, prefer fewest early opens among AMs.
     unassigned.sort((a, b) => {
       const aClosedYesterday = pdk && isClose(schedule[a][pdk]) ? 1 : 0;
       const bClosedYesterday = pdk && isClose(schedule[b][pdk]) ? 1 : 0;
       if (aClosedYesterday !== bClosedYesterday) return bClosedYesterday - aClosedYesterday;
+      // SM goes early (prefers open shifts) — except peak first-open: light early-fairness nudge
+      if (PREFS.peakSeasonHours && opens === 0) {
+        // Prefer non-clopen already handled; among remaining, fewest early opens first (incl. SM lightly)
+        const earlyDiff = managerEarlyOpens[a] - managerEarlyOpens[b];
+        if (earlyDiff !== 0) return earlyDiff;
+      }
       // SM goes early (prefers open shifts)
       if (a === 'sm' && b !== 'sm') return -1;
       if (b === 'sm' && a !== 'sm') return 1;
@@ -7680,15 +7722,13 @@ function _generateScheduleInner() {
             managerMids[r]++;
           } else {
             // Only candidate — coverage wins over clopen soft preference
-            schedule[r][dk] = (openVariety % 2 === 0) ? 'open-early' : 'open-late';
+            schedule[r][dk] = nextOpenShift(opens);
             opens++;
-            openVariety++;
             managerOpens[r]++;
           }
         } else {
-          schedule[r][dk] = (openVariety % 2 === 0) ? 'open-early' : 'open-late';
+          schedule[r][dk] = nextOpenShift(opens);
           opens++;
-          openVariety++;
           managerOpens[r]++;
         }
       } else if (closedYesterday && PREFS.avoidClopening) {
@@ -7700,9 +7740,8 @@ function _generateScheduleInner() {
       } else if (mids === 0) {
         // No mid yet — assign mid (unless should balance toward open)
         if (preferOpen && opens < 2) {
-          schedule[r][dk] = (openVariety % 2 === 0) ? 'open-late' : 'open-early';
+          schedule[r][dk] = nextOpenShift(opens);
           opens++;
-          openVariety++;
           managerOpens[r]++;
         } else {
           schedule[r][dk] = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
@@ -7718,9 +7757,8 @@ function _generateScheduleInner() {
           midVariety++;
           managerMids[r]++;
         } else {
-          schedule[r][dk] = (openVariety % 2 === 0) ? 'open-late' : 'open-early';
+          schedule[r][dk] = nextOpenShift(opens);
           opens++;
-          openVariety++;
           managerOpens[r]++;
         }
       } else {
@@ -8014,11 +8052,11 @@ function _generateScheduleInner() {
                 }
                 if (opens === 0) {
                   const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-                  if (mid) schedule[mid][dk] = 'open-early';
+                  if (mid) schedule[mid][dk] = pickOpen();
                 }
                 if (closes === 0 && !isKcCloseNight(dk)) {
                   const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-                  if (mid) schedule[mid][dk] = 'close';
+                  if (mid) schedule[mid][dk] = pickClose();
                 }
               };
               fixDay(satDk);
@@ -8095,7 +8133,7 @@ function _generateScheduleInner() {
       let workers = ROLES.filter((r) => isWork(schedule[r][dk]));
       if (workers.length === 0) {
         const soft = ROLES.find((r) => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
-        if (soft) schedule[soft][dk] = 'open-early';
+        if (soft) schedule[soft][dk] = pickOpen();
         workers = ROLES.filter((r) => isWork(schedule[r][dk]));
       }
 
@@ -8109,10 +8147,10 @@ function _generateScheduleInner() {
         const midAny = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
         const worker = ROLES.find((r) => isWork(schedule[r][dk]) && !isClose(schedule[r][dk]) && !isInputLocked(r, dk));
         const soft = ROLES.find((r) => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
-        if (midSafe) schedule[midSafe][dk] = 'open-early';
-        else if (midAny) schedule[midAny][dk] = 'open-early';
-        else if (worker && !isOpen(schedule[worker][dk])) schedule[worker][dk] = 'open-early';
-        else if (soft) schedule[soft][dk] = 'open-early';
+        if (midSafe) schedule[midSafe][dk] = pickOpen();
+        else if (midAny) schedule[midAny][dk] = pickOpen();
+        else if (worker && !isOpen(schedule[worker][dk])) schedule[worker][dk] = pickOpen();
+        else if (soft) schedule[soft][dk] = pickOpen();
         ({ opens, closes } = countOC());
       }
 
@@ -8125,10 +8163,10 @@ function _generateScheduleInner() {
           let hasKcClose = nonMgrKCs.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close');
           if (!otherMgrClose && !hasKcClose) hasKcClose = assignEmergencyKcClose(dk);
           if (otherMgrClose || hasKcClose) {
-            schedule[c][dk] = 'open-early';
+            schedule[c][dk] = pickOpen();
           } else if (ROLES.filter((r) => isWork(schedule[r][dk])).length === 1) {
             // True sole worker, no KC: prefer store open over close
-            schedule[c][dk] = 'open-early';
+            schedule[c][dk] = pickOpen();
           }
           ({ opens, closes } = countOC());
         }
@@ -8138,24 +8176,24 @@ function _generateScheduleInner() {
         const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
         const openers = ROLES.filter((r) => isOpen(schedule[r][dk]) && !isInputLocked(r, dk));
         const soft = ROLES.find((r) => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
-        if (mid) schedule[mid][dk] = 'close';
-        else if (openers.length >= 2) schedule[openers[openers.length - 1]][dk] = 'close';
+        if (mid) schedule[mid][dk] = pickClose();
+        else if (openers.length >= 2) schedule[openers[openers.length - 1]][dk] = pickClose();
         else if (openers.length === 1 && soft) {
           // Keep sole opener; bring soft-off person as closer
-          schedule[soft][dk] = 'close';
+          schedule[soft][dk] = pickClose();
         } else if (openers.length === 1) {
           // Sole opener: never steal their open — pull soft-off or emergency KC
           const other = ROLES.find((r) => r !== openers[0] && isWork(schedule[r][dk]) && !isInputLocked(r, dk));
           if (other) {
-            schedule[other][dk] = 'close';
+            schedule[other][dk] = pickClose();
           } else if (soft) {
-            schedule[soft][dk] = 'close';
+            schedule[soft][dk] = pickClose();
           } else if (!assignEmergencyKcClose(dk)) {
             const anyOff = ROLES.find((r) => (schedule[r][dk] === 'off' || schedule[r][dk] === 'rto') && !isInputLocked(r, dk));
-            if (anyOff) schedule[anyOff][dk] = 'close';
+            if (anyOff) schedule[anyOff][dk] = pickClose();
           }
         } else if (soft) {
-          schedule[soft][dk] = 'close';
+          schedule[soft][dk] = pickClose();
         } else {
           assignEmergencyKcClose(dk);
         }
@@ -8163,11 +8201,11 @@ function _generateScheduleInner() {
         // If still no open after close assignment, fix open again
         if (opens === 0) {
           const mid2 = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-          if (mid2) schedule[mid2][dk] = 'open-early';
+          if (mid2) schedule[mid2][dk] = pickOpen();
           else {
             const closers2 = ROLES.filter((r) => (schedule[r][dk] === 'close' || schedule[r][dk] === 'close-ext') && !isInputLocked(r, dk));
             if (closers2.length > 0 && (assignEmergencyKcClose(dk) || closers2.length > 1)) {
-              schedule[closers2[0]][dk] = 'open-early';
+              schedule[closers2[0]][dk] = pickOpen();
             }
           }
         }
@@ -8179,13 +8217,13 @@ function _generateScheduleInner() {
           ({ opens, closes } = countOC());
         } else if (isKcCloseNight(dk)) {
           const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-          if (mid) schedule[mid][dk] = 'close';
+          if (mid) schedule[mid][dk] = pickClose();
           else {
             const openers = ROLES.filter((r) => isOpen(schedule[r][dk]) && !isInputLocked(r, dk));
-            if (openers.length >= 2) schedule[openers[1]][dk] = 'close';
+            if (openers.length >= 2) schedule[openers[1]][dk] = pickClose();
             else if (openers.length === 1) {
               const soft = ROLES.find((r) => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
-              if (soft) schedule[soft][dk] = 'close';
+              if (soft) schedule[soft][dk] = pickClose();
             }
           }
         }
@@ -8471,11 +8509,11 @@ function _generateScheduleInner() {
                   const otherMid = ROLES.find(
                     (rx) => rx !== r && rx !== promote && isMid(schedule[rx][pdk]) && !isInputLocked(rx, pdk)
                   );
-                  if (otherMid) schedule[otherMid][pdk] = 'open-early';
+                  if (otherMid) schedule[otherMid][pdk] = pickOpen();
                   else return; // can't safely restructure
                 }
               }
-              schedule[promote][pdk] = 'close';
+              schedule[promote][pdk] = pickClose();
               schedule[r][pdk] = 'mid-late';
             }
           }
@@ -8544,8 +8582,8 @@ function _generateScheduleInner() {
       if (isOpen(underShift)) {
         const otherOpeners = ROLES.filter((rx) => rx !== under && isOpen(schedule[rx][dk])).length;
         if (otherOpeners === 0) {
-          // over must become opener
-          newOverShift = isOpen(underShift) ? underShift : 'open-early';
+          // over must become opener — preserve open variant or use peak-aware default
+          newOverShift = isOpen(underShift) ? underShift : pickOpen();
           if (wouldClopenOn(over, dk, newOverShift)) return false;
         }
       }
@@ -8638,7 +8676,7 @@ function _generateScheduleInner() {
       midVariety++;
       const oc = dayOC(dk);
       if (oc.opens < 1 || oc.closes < 1) {
-        schedule[demote][dk] = 'close';
+        schedule[demote][dk] = pickClose();
       }
     });
   };
@@ -8692,11 +8730,11 @@ function _generateScheduleInner() {
                 const otherMid = ROLES.find(
                   (rx) => rx !== r && rx !== promote && isMid(schedule[rx][pdk]) && !isInputLocked(rx, pdk)
                 );
-                if (otherMid) schedule[otherMid][pdk] = 'open-early';
+                if (otherMid) schedule[otherMid][pdk] = pickOpen();
                 else continue;
               }
             }
-            schedule[promote][pdk] = 'close';
+            schedule[promote][pdk] = pickClose();
             schedule[r][pdk] = 'mid-late';
             return;
           }
@@ -8751,16 +8789,16 @@ function _generateScheduleInner() {
       let { opens, closes } = dayOC(dk);
       if (opens === 0) {
         const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-        if (mid) schedule[mid][dk] = 'open-early';
+        if (mid) schedule[mid][dk] = pickOpen();
         else {
           const w = ROLES.find((r) => isWork(schedule[r][dk]) && !isClose(schedule[r][dk]) && !isInputLocked(r, dk));
-          if (w) schedule[w][dk] = 'open-early';
+          if (w) schedule[w][dk] = pickOpen();
         }
       }
       ({ opens, closes } = dayOC(dk));
       if (closes === 0 && !isKcCloseNight(dk)) {
         const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-        if (mid) schedule[mid][dk] = 'close';
+        if (mid) schedule[mid][dk] = pickClose();
       }
     };
     const wouldClopenTake = (r, dk, newShift) => {
@@ -8823,7 +8861,7 @@ function _generateScheduleInner() {
 
         const snapO = schedule[over][weDk];
         const snapU = schedule[under][weDk];
-        schedule[over][weDk] = 'close';
+        schedule[over][weDk] = pickClose();
         schedule[under][weDk] = 'off';
         fixDayOC(weDk);
         const oc = dayOC(weDk);
@@ -8968,6 +9006,191 @@ function _generateScheduleInner() {
     lightClopenCleanup();
     ensureHardDailyCoverage();
   }
+
+  // ════════════════════════════════════════════════════
+  // STEP 7d: Peak / holiday season open-early + close-ext polish
+  // Peak ON: ensure early open every staffed day, ext close every manager-close night,
+  //          balance early/ext variants among AMs (variants only).
+  // Peak OFF: strip auto early/ext back to regular open-late / close (respect input locks).
+  // ════════════════════════════════════════════════════
+  const applyPeakSeasonVariants = () => {
+    if (PREFS.peakSeasonHours) {
+      // Every day with manager open(s): ≥1 open-early
+      allDks.forEach((dk) => {
+        const openers = ROLES.filter((r) => isOpen(schedule[r][dk]));
+        if (openers.length === 0) return;
+        if (openers.some((r) => schedule[r][dk] === 'open-early')) return;
+        const earlyCount = (r) => allDks.filter((d) => schedule[r][d] === 'open-early').length;
+        const cands = openers.filter((r) => schedule[r][dk] === 'open-late' && !isInputLocked(r, dk));
+        if (!cands.length) return;
+        cands.sort((a, b) => {
+          if (a === 'sm' && b !== 'sm') return -1;
+          if (b === 'sm' && a !== 'sm') return 1;
+          return earlyCount(a) - earlyCount(b);
+        });
+        schedule[cands[0]][dk] = 'open-early';
+      });
+
+      // Manager-close nights: plain close → close-ext (not KC nights)
+      allDks.forEach((dk) => {
+        if (isKcCloseNight(dk)) return;
+        ROLES.forEach((r) => {
+          if (schedule[r][dk] === 'close' && !isInputLocked(r, dk)) {
+            schedule[r][dk] = 'close-ext';
+          }
+        });
+      });
+
+      // Balance open-early among AMs (max−min ≤ 1) via open-early ↔ open-late only
+      const amPool = ROLES.filter((r) => r !== 'sm');
+      if (amPool.length >= 2) {
+        const countEarly = (r) => allDks.filter((d) => schedule[r][d] === 'open-early').length;
+        const dayHasOtherEarly = (dk, except) =>
+          ROLES.some((r) => r !== except && schedule[r][dk] === 'open-early');
+
+        for (let pass = 0; pass < 80; pass++) {
+          const counts = {};
+          amPool.forEach((r) => { counts[r] = countEarly(r); });
+          const vals = amPool.map((r) => counts[r]);
+          if (Math.max(...vals) - Math.min(...vals) <= 1) break;
+          const over = amPool.find((r) => counts[r] === Math.max(...vals));
+          const under = amPool.find((r) => counts[r] === Math.min(...vals));
+          if (!over || !under || over === under) break;
+          let did = false;
+
+          // 1) Same day: over early + under late → swap variants
+          for (const dk of allDks) {
+            if (schedule[over][dk] !== 'open-early' || isInputLocked(over, dk)) continue;
+            if (schedule[under][dk] !== 'open-late' || isInputLocked(under, dk)) continue;
+            schedule[over][dk] = 'open-late';
+            schedule[under][dk] = 'open-early';
+            did = true;
+            break;
+          }
+          if (did) continue;
+
+          // 2) Same day: any donor (SM or other AM with more early) early + under late
+          const donorCands = ROLES.filter((r) => r !== under).sort(
+            (a, b) => countEarly(b) - countEarly(a)
+          );
+          outerDonor:
+          for (const donor of donorCands) {
+            for (const dk of allDks) {
+              if (schedule[donor][dk] !== 'open-early' || isInputLocked(donor, dk)) continue;
+              if (schedule[under][dk] !== 'open-late' || isInputLocked(under, dk)) continue;
+              // Don't strip SM below under's early count when donor is SM (keep SM preference soft)
+              if (donor === 'sm' && countEarly('sm') <= counts[under] + 1) continue;
+              schedule[donor][dk] = 'open-late';
+              schedule[under][dk] = 'open-early';
+              did = true;
+              break outerDonor;
+            }
+          }
+          if (did) continue;
+
+          // 3) Cross-day: demote over early only if day keeps another early; promote under late→early
+          const overDays = allDks.filter(
+            (dk) => schedule[over][dk] === 'open-early' && !isInputLocked(over, dk)
+          );
+          const underDays = allDks.filter(
+            (dk) => schedule[under][dk] === 'open-late' && !isInputLocked(under, dk)
+          );
+          outerX:
+          for (const od of overDays) {
+            if (!dayHasOtherEarly(od, over)) continue;
+            for (const ud of underDays) {
+              schedule[over][od] = 'open-late';
+              schedule[under][ud] = 'open-early';
+              did = true;
+              break outerX;
+            }
+          }
+          if (did) continue;
+
+          // 4) Cross-day with SM/other donor who has spare early on od
+          outerX2:
+          for (const donor of donorCands) {
+            if (donor === under) continue;
+            for (const od of allDks) {
+              if (schedule[donor][od] !== 'open-early' || isInputLocked(donor, od)) continue;
+              if (!dayHasOtherEarly(od, donor)) continue;
+              for (const ud of underDays) {
+                if (donor === 'sm' && countEarly('sm') <= counts[under] + 1) continue;
+                schedule[donor][od] = 'open-late';
+                schedule[under][ud] = 'open-early';
+                did = true;
+                break outerX2;
+              }
+            }
+          }
+          if (did) continue;
+
+          // 5) Same day: over early + under mid → under open-early, over open-late
+          // (coverage: day keeps open + early; mid→open only when variant swap stuck)
+          for (const dk of allDks) {
+            if (schedule[over][dk] !== 'open-early' || isInputLocked(over, dk)) continue;
+            if (!isMid(schedule[under][dk]) || isInputLocked(under, dk)) continue;
+            // Don't leave day without mid if policy cares — mid is soft; open-early is peak goal
+            schedule[over][dk] = 'open-late';
+            schedule[under][dk] = 'open-early';
+            did = true;
+            break;
+          }
+          if (did) continue;
+
+          // 6) Same day: donor early + under mid (when over has no shared day)
+          outerMid:
+          for (const donor of donorCands) {
+            if (donor === under) continue;
+            if (donor !== over && countEarly(donor) <= counts[under] + 1) continue;
+            for (const dk of allDks) {
+              if (schedule[donor][dk] !== 'open-early' || isInputLocked(donor, dk)) continue;
+              if (!isMid(schedule[under][dk]) || isInputLocked(under, dk)) continue;
+              schedule[donor][dk] = 'open-late';
+              schedule[under][dk] = 'open-early';
+              did = true;
+              break outerMid;
+            }
+          }
+          if (!did) break;
+        }
+
+        // Balance close-ext among AMs (variant-only: promote plain close → ext; never strip sole ext on a night)
+        const countExt = (r) => allDks.filter((d) => schedule[r][d] === 'close-ext').length;
+        for (let pass = 0; pass < 40; pass++) {
+          const counts = {};
+          amPool.forEach((r) => { counts[r] = countExt(r); });
+          const vals = amPool.map((r) => counts[r]);
+          if (Math.max(...vals) - Math.min(...vals) <= 1) break;
+          const under = amPool.find((r) => counts[r] === Math.min(...vals));
+          if (!under) break;
+          const underPlain = allDks.find(
+            (dk) =>
+              !isKcCloseNight(dk) &&
+              schedule[under][dk] === 'close' &&
+              !isInputLocked(under, dk)
+          );
+          if (underPlain) {
+            schedule[under][underPlain] = 'close-ext';
+            continue;
+          }
+          break;
+        }
+      }
+    } else {
+      // Peak off: auto open-early → open-late, close-ext → close (preserve input locks)
+      allDks.forEach((dk) => {
+        ROLES.forEach((r) => {
+          if (isInputLocked(r, dk)) return;
+          if (schedule[r][dk] === 'open-early') schedule[r][dk] = 'open-late';
+          if (schedule[r][dk] === 'close-ext') schedule[r][dk] = 'close';
+        });
+      });
+    }
+  };
+  applyPeakSeasonVariants();
+  ensureHardDailyCoverage();
+  applyPeakSeasonVariants();
 
   // ════════════════════════════════════════════════════
   // STEP 8: Final validation report
@@ -9369,7 +9592,7 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       if (candidates.length > 0) {
         const target = candidates[0];
         const oldShift = schedule[r][target];
-        schedule[r][target] = 'close';
+        schedule[r][target] = pickCloseShift();
         // Only rewrite KC night if not input-locked
         if (!isInputLocked(r, dk)) schedule[r][dk] = oldShift;
       } else if (!isInputLocked(r, dk)) {
@@ -9399,7 +9622,7 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       if (!isInputLocked(r, dk) && (!schedule[r][dk] || !isWork(schedule[r][dk]))) {
         const prevDk = allDks.indexOf(dk) > 0 ? allDks[allDks.indexOf(dk) - 1] : null;
         const closedYesterday = prevDk && isClose(schedule[r][prevDk]);
-        schedule[r][dk] = closedYesterday ? 'mid-early' : 'open-early';
+        schedule[r][dk] = closedYesterday ? 'mid-early' : pickOpenShift();
       }
 
       // They may now be over target this week — find a non-KC-night to give off
@@ -9464,7 +9687,7 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
           const closedYesterday = prevDk && isClose(schedule[r][prevDk]);
           const dayOpens = ROLES.filter(rx => isOpen(schedule[rx][dk])).length;
           if (dayOpens === 0 && !closedYesterday) {
-            schedule[r][dk] = 'open-early';
+            schedule[r][dk] = pickOpenShift();
           } else {
             schedule[r][dk] = closedYesterday ? 'mid-late' : 'mid-early';
           }
@@ -9546,7 +9769,7 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
           if (needed <= 0) break;
           // Don't dual-close a night
           if (ROLES.some(rx => isClose(schedule[rx][dk]))) continue;
-          schedule[closer][dk] = 'close';
+          schedule[closer][dk] = pickCloseShift();
           needed--;
         }
       } else if (current > effectiveTarget + 1) {
@@ -9694,11 +9917,11 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       const midders = ROLES.filter(r => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
       const safe = midders.find(r => !(prevDk && isClose(schedule[r][prevDk])));
       if (safe) {
-        schedule[safe][dk] = 'open-early';
+        schedule[safe][dk] = pickOpenShift();
         return;
       }
       if (midders.length > 0 && aggressive) {
-        schedule[midders[0]][dk] = 'open-early'; // forced clopen — will be flagged
+        schedule[midders[0]][dk] = pickOpenShift(); // forced clopen — will be flagged
         return;
       }
       // Sole closer with no mid: convert closer → open if KC (or 2nd closer) can cover close
@@ -9711,11 +9934,11 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
           nonMgrKCsRepair.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') ||
           emergencyKcCloseRepair(dk);
         if (hasOtherClose || ROLES.filter((r) => isWork(schedule[r][dk])).length === 1) {
-          schedule[closers[0]][dk] = 'open-early';
+          schedule[closers[0]][dk] = pickOpenShift();
         }
       } else {
         const soft = ROLES.find((r) => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
-        if (soft) schedule[soft][dk] = 'open-early';
+        if (soft) schedule[soft][dk] = pickOpenShift();
       }
     });
   }
@@ -9732,20 +9955,20 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       // Priority: mid > open (if 2+ openers) > any worker > soft-off (always — coverage is hard)
       const midders = ROLES.filter(r => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
       if (midders.length > 0) {
-        schedule[midders[0]][dk] = 'close';
+        schedule[midders[0]][dk] = pickCloseShift();
       } else {
         const openers = ROLES.filter(r => isOpen(schedule[r][dk]) && !isInputLocked(r, dk));
         if (openers.length >= 2) {
-          schedule[openers[0]][dk] = 'close';
+          schedule[openers[0]][dk] = pickCloseShift();
         } else {
           const workers = ROLES.filter(r => isWork(schedule[r][dk]) && !isInputLocked(r, dk));
           if (workers.length > 1) {
-            schedule[workers[workers.length - 1]][dk] = 'close';
+            schedule[workers[workers.length - 1]][dk] = pickCloseShift();
           } else {
             // Always pull soft-off for missing closer (not only aggressive)
             const offManagers = ROLES.filter(r => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
             if (offManagers.length > 0) {
-              schedule[offManagers[0]][dk] = 'close';
+              schedule[offManagers[0]][dk] = pickCloseShift();
             }
             // Never convert sole opener to close when no second person (store must open)
           }

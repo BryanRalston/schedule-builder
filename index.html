@@ -3613,7 +3613,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.4.0</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.4.1</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -4179,7 +4179,7 @@ function confirmProviderSignIn() {
 }
 
 function tryLoadGoogleIdentity(clientId) {
-  // Optional hook — full GIS button only if straightforward; modal remains primary for v2.4.0
+  // Optional hook — full GIS button only if straightforward; modal remains primary for v2.4.1
   if (!clientId || document.getElementById('gis-client-script')) return;
   try {
     const s = document.createElement('script');
@@ -4971,7 +4971,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.4.1';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';

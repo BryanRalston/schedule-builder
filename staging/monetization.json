@@ -1,0 +1,25 @@
+{
+  "priceLabel": "$19.99",
+  "priceNote": "one-time · lifetime Pro unlock",
+  "playPrice": "$19.99",
+  "playPackage": "com.managerschedulebuilder.pro",
+  "checkoutUrl": "https://ralstonia5.gumroad.com/l/pwplbc?wanted=true",
+  "productUrl": "https://ralstonia5.gumroad.com/l/pwplbc",
+  "checkoutProvider": "gumroad",
+  "productName": "Manager Schedule Builder Pro",
+  "supportEmail": "b.ralston62989@gmail.com",
+  "freeManagerLimit": 0,
+  "freeGenerateLimit": 2,
+  "proFeatures": [
+    "unlimited schedule builds",
+    "Word export",
+    "Excel export",
+    "priority future updates"
+  ],
+  "googleClientId": "",
+  "microsoftClientId": "",
+  "microsoftTenantId": "common",
+  "allowedEmailDomains": [],
+  "sessionMaxDays": 90,
+  "ssoRequireOrgName": true
+}

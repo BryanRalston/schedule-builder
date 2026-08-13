@@ -163,6 +163,17 @@ async function main() {
     await page.waitForTimeout(300);
     await page.evaluate(() => {
       if (typeof switchTab === 'function') switchTab('schedule');
+      if (typeof initMobileAnalyticsDefault === 'function') initMobileAnalyticsDefault();
+      // Belt-and-suspenders: force collapse for screenshot
+      const sec = document.getElementById('summary-section');
+      const body = document.getElementById('summary-body');
+      const head = sec && sec.querySelector('.section-header');
+      if (sec) {
+        sec.classList.remove('analytics-expanded');
+        sec.classList.add('analytics-collapsed');
+      }
+      if (body) body.style.setProperty('display', 'none', 'important');
+      if (head) head.style.setProperty('display', 'none', 'important');
       window.scrollTo(0, 0);
     });
     await page.waitForTimeout(300);

@@ -14922,6 +14922,15 @@ function toggleMobileAnalytics() {
   if (!sec) return;
   const expanded = sec.classList.toggle('analytics-expanded');
   sec.classList.toggle('analytics-collapsed', !expanded);
+  const body = sec.querySelector('.section-body') || document.getElementById('summary-body');
+  const head = sec.querySelector('.section-header');
+  if (expanded) {
+    if (body) body.style.removeProperty('display');
+    if (head) head.style.removeProperty('display');
+  } else {
+    if (body) body.style.setProperty('display', 'none', 'important');
+    if (head) head.style.setProperty('display', 'none', 'important');
+  }
   if (hint) {
     hint.textContent = expanded
       ? 'Tap to collapse analytics'
@@ -14931,13 +14940,19 @@ function toggleMobileAnalytics() {
 function initMobileAnalyticsDefault() {
   const sec = document.getElementById('summary-section');
   if (!sec) return;
+  const body = sec.querySelector('.section-body') || document.getElementById('summary-body');
+  const head = sec.querySelector('.section-header');
   // Mobile: keep collapsed (no analytics-expanded). Desktop: always expanded.
   if (window.innerWidth <= 720) {
     sec.classList.remove('analytics-expanded');
     sec.classList.add('analytics-collapsed');
+    if (body) body.style.setProperty('display', 'none', 'important');
+    if (head) head.style.setProperty('display', 'none', 'important');
   } else {
     sec.classList.add('analytics-expanded');
     sec.classList.remove('analytics-collapsed');
+    if (body) body.style.removeProperty('display');
+    if (head) head.style.removeProperty('display');
   }
 }
 (function wrapPostGenStripCta() {

@@ -1,8 +1,8 @@
 # Schedule Pro Engine Stress Test Report
 
-Generated: 2026-08-13T14:22:27.444Z
+Generated: 2026-08-13T14:29:23.286Z
 Engine version: **2.5.5**
-Base: `http://127.0.0.1:57732` (local repo-root static server)
+Base: `http://127.0.0.1:59323` (local repo-root static server)
 
 ## Summary
 
@@ -33,10 +33,10 @@ Exit code is **1 only on FAIL** (hard coverage / throw / manager close on KC nig
 | Scenario | Status | noOpen | noClose | clopens | thin | closeSpread | weSpread | ms |
 |----------|--------|-------:|--------:|--------:|-----:|------------:|---------:|---:|
 | clean-3am | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 26 |
-| p08-posted-shape | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 9 |
-| sole-manager | WARN | 0 | 35 | 0 | 35 | 0 | 0 | 11 |
+| p08-posted-shape | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 10 |
+| sole-manager | WARN | 0 | 35 | 0 | 35 | 0 | 0 | 10 |
 | sm-plus-one-am | PASS | 0 | 0 | 1 | 0 | 0 | 0 | 10 |
-| five-ams | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 10 |
+| five-ams | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 9 |
 | no-kcs | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 9 |
 | kc-close-all-week | PASS | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
 | kc-close-none | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 9 |
@@ -44,16 +44,16 @@ Exit code is **1 only on FAIL** (hard coverage / throw / manager close on KC nig
 | triple-pto-same-week | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 10 |
 | all-want-weekends-4 | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 7 |
 | zero-weekend-target | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 7 |
-| rto-every-weekend-all-ams | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 11 |
-| pto-checkerboard-am1 | PASS | 0 | 0 | 0 | 0 | 8 | 5 | 11 |
-| manager-mode-kc | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
-| kc-mid-all-dows-both | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 10 |
+| rto-every-weekend-all-ams | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 10 |
+| pto-checkerboard-am1 | PASS | 0 | 0 | 0 | 0 | 8 | 5 | 10 |
+| manager-mode-kc | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 7 |
+| kc-mid-all-dows-both | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 11 |
 | avoid-clopen-off | PASS | 0 | 0 | 19 | 0 | 1 | 1 | 7 |
 | packages-off-sm-equal | PASS | 0 | 0 | 0 | 0 | 0 | 1 | 7 |
 | sm-closes-3-per-week | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 7 |
 | am-closes-fixed-2 | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
 | four-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 1 | 5 |
-| six-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 9 |
+| six-week-period | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 10 |
 | stability-10x | PASS | 0 | 0 | 0 | 0 | 1 | 0 | 8 |
 | max-stacked-hell | PASS | 0 | 0 | 1 | 0 | 2 | 6 | 11 |
 | only-two-working-many-days | PASS | 0 | 0 | 2 | 0 | 5 | 5 | 14 |

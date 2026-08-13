@@ -1,0 +1,6010 @@
+{
+  "title": "Schedule Pro Time-Off Monte Carlo Stress",
+  "version": "2.5.5",
+  "seed": 20260813,
+  "startedAt": "2026-08-13T14:29:14.816Z",
+  "finishedAt": "2026-08-13T14:29:17.536Z",
+  "base": "http://127.0.0.1:53730",
+  "summary": {
+    "pass": 106,
+    "warn": 21,
+    "fail": 0,
+    "total": 127,
+    "perfectCoverage": 127,
+    "perfectCoveragePct": 100
+  },
+  "categories": {
+    "rto-weekend": {
+      "pass": 16,
+      "warn": 4,
+      "fail": 0,
+      "total": 20
+    },
+    "rto-single": {
+      "pass": 15,
+      "warn": 0,
+      "fail": 0,
+      "total": 15
+    },
+    "pto-blocks": {
+      "pass": 20,
+      "warn": 0,
+      "fail": 0,
+      "total": 20
+    },
+    "loa-long": {
+      "pass": 13,
+      "warn": 2,
+      "fail": 0,
+      "total": 15
+    },
+    "mixed-hell": {
+      "pass": 16,
+      "warn": 9,
+      "fail": 0,
+      "total": 25
+    },
+    "team-size": {
+      "pass": 8,
+      "warn": 2,
+      "fail": 0,
+      "total": 10
+    },
+    "kc-prefs": {
+      "pass": 9,
+      "warn": 1,
+      "fail": 0,
+      "total": 10
+    },
+    "deterministic": {
+      "pass": 9,
+      "warn": 3,
+      "fail": 0,
+      "total": 12
+    }
+  },
+  "hardCriteria": [
+    "noOpen === 0 every day",
+    "noClose === 0 every day (manager open/close + non-mgr kc-close)",
+    "generator does not throw",
+    "mgrCloseOnKc === 0 when kcCloseDays set and non-mgr KCs exist"
+  ],
+  "softCriteria": [
+    "clopens > 0 when avoidClopening → WARN",
+    "AM close spread > 3 among AMs who worked ≥50% of period → WARN",
+    "AM weekend-off spread > 3 among same → WARN"
+  ],
+  "clopenHistogram": {
+    "0": 116,
+    "1-2": 11,
+    "3+": 0
+  },
+  "worst": {
+    "highestClopens": [
+      {
+        "id": "team-096",
+        "name": "team-096-amCount-1",
+        "clopens": 2,
+        "status": "WARN"
+      },
+      {
+        "id": "team-097",
+        "name": "team-097-amCount-1",
+        "clopens": 2,
+        "status": "WARN"
+      },
+      {
+        "id": "loa-058",
+        "name": "loa-058-long",
+        "clopens": 1,
+        "status": "WARN"
+      },
+      {
+        "id": "loa-060",
+        "name": "loa-060-long",
+        "clopens": 1,
+        "status": "WARN"
+      },
+      {
+        "id": "mix-076",
+        "name": "mix-076-hell",
+        "clopens": 1,
+        "status": "WARN"
+      },
+      {
+        "id": "mix-081",
+        "name": "mix-081-hell",
+        "clopens": 1,
+        "status": "WARN"
+      },
+      {
+        "id": "mix-082",
+        "name": "mix-082-hell",
+        "clopens": 1,
+        "status": "WARN"
+      },
+      {
+        "id": "mix-089",
+        "name": "mix-089-hell",
+        "clopens": 1,
+        "status": "WARN"
+      },
+      {
+        "id": "pref-115",
+        "name": "pref-115-kc[0,6]-we3",
+        "clopens": 1,
+        "status": "WARN"
+      },
+      {
+        "id": "det-sm-loa-entire",
+        "name": "sm-loa-entire-period",
+        "clopens": 1,
+        "status": "WARN"
+      }
+    ],
+    "worstCloseSpread": [
+      {
+        "id": "mix-081",
+        "name": "mix-081-hell",
+        "closeSpread": 5,
+        "amCloses": {
+          "am1": 13,
+          "am2": 8,
+          "am3": 2
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "mix-095",
+        "name": "mix-095-hell",
+        "closeSpread": 5,
+        "amCloses": {
+          "am1": 5,
+          "am2": 9,
+          "am3": 10
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "team-104",
+        "name": "team-104-amCount-2",
+        "closeSpread": 3,
+        "amCloses": {
+          "am1": 9,
+          "am2": 12
+        },
+        "status": "PASS"
+      },
+      {
+        "id": "pto-044",
+        "name": "pto-044-block",
+        "closeSpread": 2,
+        "amCloses": {
+          "am1": 6,
+          "am2": 7,
+          "am3": 8
+        },
+        "status": "PASS"
+      },
+      {
+        "id": "loa-066",
+        "name": "loa-066-long",
+        "closeSpread": 2,
+        "amCloses": {
+          "am1": 10,
+          "am2": 8,
+          "am3": 4
+        },
+        "status": "PASS"
+      },
+      {
+        "id": "loa-069",
+        "name": "loa-069-long",
+        "closeSpread": 2,
+        "amCloses": {
+          "am1": 2,
+          "am2": 9,
+          "am3": 11
+        },
+        "status": "PASS"
+      },
+      {
+        "id": "mix-084",
+        "name": "mix-084-hell",
+        "closeSpread": 2,
+        "amCloses": {
+          "am1": 8,
+          "am2": 7,
+          "am3": 9
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "mix-093",
+        "name": "mix-093-hell",
+        "closeSpread": 2,
+        "amCloses": {
+          "am1": 8,
+          "am2": 6,
+          "am3": 6
+        },
+        "status": "PASS"
+      },
+      {
+        "id": "mix-094",
+        "name": "mix-094-hell",
+        "closeSpread": 2,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 10
+        },
+        "status": "PASS"
+      },
+      {
+        "id": "rto-we-001",
+        "name": "rto-we-001-one-am-w2",
+        "closeSpread": 1,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "status": "PASS"
+      }
+    ],
+    "worstWeSpread": [
+      {
+        "id": "rto-we-002",
+        "name": "rto-we-002-one-am-w4",
+        "weSpread": 6,
+        "amWeOff": {
+          "am1": 8,
+          "am2": 2,
+          "am3": 5
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "rto-we-003",
+        "name": "rto-we-003-one-am-w4",
+        "weSpread": 6,
+        "amWeOff": {
+          "am1": 8,
+          "am2": 2,
+          "am3": 5
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "rto-we-004",
+        "name": "rto-we-004-one-am-w4",
+        "weSpread": 6,
+        "amWeOff": {
+          "am1": 8,
+          "am2": 2,
+          "am3": 5
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "mix-082",
+        "name": "mix-082-hell",
+        "weSpread": 5,
+        "amWeOff": {
+          "am1": 3,
+          "am2": 8,
+          "am3": 6
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "mix-083",
+        "name": "mix-083-hell",
+        "weSpread": 5,
+        "amWeOff": {
+          "am1": 3,
+          "am2": 5,
+          "am3": 8
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "mix-084",
+        "name": "mix-084-hell",
+        "weSpread": 5,
+        "amWeOff": {
+          "am1": 8,
+          "am2": 3,
+          "am3": 6
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "mix-085",
+        "name": "mix-085-hell",
+        "weSpread": 5,
+        "amWeOff": {
+          "am1": 3,
+          "am2": 5,
+          "am3": 8
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "mix-086",
+        "name": "mix-086-hell",
+        "weSpread": 5,
+        "amWeOff": {
+          "am1": 8,
+          "am2": 3,
+          "am3": 6
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "det-am1-loa-am2-rto-we",
+        "name": "am1-loa-entire+am2-rto-all-we",
+        "weSpread": 5,
+        "amWeOff": {
+          "am1": 10,
+          "am2": 8,
+          "am3": 3
+        },
+        "status": "WARN"
+      },
+      {
+        "id": "rto-we-012",
+        "name": "rto-we-012-two-ams-same-w4",
+        "weSpread": 4,
+        "amWeOff": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 4
+        },
+        "status": "WARN"
+      }
+    ]
+  },
+  "failures": [],
+  "warnings": [
+    {
+      "id": "rto-we-002",
+      "name": "rto-we-002-one-am-w4",
+      "category": "rto-weekend",
+      "soft": [
+        "AM weekend-off spread=6 {\"am1\":8,\"am2\":2,\"am3\":5} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 1,
+        "weSpread": 6
+      }
+    },
+    {
+      "id": "rto-we-003",
+      "name": "rto-we-003-one-am-w4",
+      "category": "rto-weekend",
+      "soft": [
+        "AM weekend-off spread=6 {\"am1\":8,\"am2\":2,\"am3\":5} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 1,
+        "weSpread": 6
+      }
+    },
+    {
+      "id": "rto-we-004",
+      "name": "rto-we-004-one-am-w4",
+      "category": "rto-weekend",
+      "soft": [
+        "AM weekend-off spread=6 {\"am1\":8,\"am2\":2,\"am3\":5} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 1,
+        "weSpread": 6
+      }
+    },
+    {
+      "id": "rto-we-012",
+      "name": "rto-we-012-two-ams-same-w4",
+      "category": "rto-weekend",
+      "soft": [
+        "AM weekend-off spread=4 {\"am1\":8,\"am2\":8,\"am3\":4} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 1,
+        "weSpread": 4
+      }
+    },
+    {
+      "id": "loa-058",
+      "name": "loa-058-long",
+      "category": "loa-long",
+      "soft": [
+        "clopens=1"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 0,
+        "weSpread": 0
+      }
+    },
+    {
+      "id": "loa-060",
+      "name": "loa-060-long",
+      "category": "loa-long",
+      "soft": [
+        "clopens=1"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 1,
+        "weSpread": 0
+      }
+    },
+    {
+      "id": "mix-076",
+      "name": "mix-076-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "clopens=1",
+        "AM weekend-off spread=4 {\"am1\":5,\"am2\":7,\"am3\":3} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 1,
+        "weSpread": 4
+      }
+    },
+    {
+      "id": "mix-081",
+      "name": "mix-081-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "clopens=1",
+        "AM close spread=5 {\"am1\":13,\"am2\":8,\"am3\":2} active=[\"am1\",\"am2\"]"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 5,
+        "weSpread": 1
+      }
+    },
+    {
+      "id": "mix-082",
+      "name": "mix-082-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "clopens=1",
+        "AM weekend-off spread=5 {\"am1\":3,\"am2\":8,\"am3\":6} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 1,
+        "weSpread": 5
+      }
+    },
+    {
+      "id": "mix-083",
+      "name": "mix-083-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":3,\"am2\":5,\"am3\":8} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 1,
+        "weSpread": 5
+      }
+    },
+    {
+      "id": "mix-084",
+      "name": "mix-084-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":8,\"am2\":3,\"am3\":6} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 2,
+        "weSpread": 5
+      }
+    },
+    {
+      "id": "mix-085",
+      "name": "mix-085-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":3,\"am2\":5,\"am3\":8} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 0,
+        "weSpread": 5
+      }
+    },
+    {
+      "id": "mix-086",
+      "name": "mix-086-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":8,\"am2\":3,\"am3\":6} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 1,
+        "weSpread": 5
+      }
+    },
+    {
+      "id": "mix-089",
+      "name": "mix-089-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "clopens=1"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 1,
+        "weSpread": 1
+      }
+    },
+    {
+      "id": "mix-095",
+      "name": "mix-095-hell",
+      "category": "mixed-hell",
+      "soft": [
+        "AM close spread=5 {\"am1\":5,\"am2\":9,\"am3\":10} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 5,
+        "weSpread": 1
+      }
+    },
+    {
+      "id": "team-096",
+      "name": "team-096-amCount-1",
+      "category": "team-size",
+      "soft": [
+        "clopens=2"
+      ],
+      "stats": {
+        "clopens": 2,
+        "closeSpread": 0,
+        "weSpread": 0
+      }
+    },
+    {
+      "id": "team-097",
+      "name": "team-097-amCount-1",
+      "category": "team-size",
+      "soft": [
+        "clopens=2"
+      ],
+      "stats": {
+        "clopens": 2,
+        "closeSpread": 0,
+        "weSpread": 0
+      }
+    },
+    {
+      "id": "pref-115",
+      "name": "pref-115-kc[0,6]-we3",
+      "category": "kc-prefs",
+      "soft": [
+        "clopens=1"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 1,
+        "weSpread": 2
+      }
+    },
+    {
+      "id": "det-sm-loa-entire",
+      "name": "sm-loa-entire-period",
+      "category": "deterministic",
+      "soft": [
+        "clopens=1"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 0,
+        "weSpread": 0
+      }
+    },
+    {
+      "id": "det-am1-loa-am2-rto-we",
+      "name": "am1-loa-entire+am2-rto-all-we",
+      "category": "deterministic",
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":10,\"am2\":8,\"am3\":3} active=[\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 0,
+        "closeSpread": 0,
+        "weSpread": 5
+      }
+    },
+    {
+      "id": "det-max-chaos",
+      "name": "max-chaos",
+      "category": "deterministic",
+      "soft": [
+        "clopens=1",
+        "AM weekend-off spread=4 {\"am1\":5,\"am2\":8,\"am3\":4} active=[\"am2\",\"am3\"]"
+      ],
+      "stats": {
+        "clopens": 1,
+        "closeSpread": 1,
+        "weSpread": 4
+      }
+    }
+  ],
+  "simulations": [
+    {
+      "id": "rto-we-001",
+      "name": "rto-we-001-one-am-w2",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 25,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-002",
+      "name": "rto-we-002-one-am-w4",
+      "category": "rto-weekend",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=6 {\"am1\":8,\"am2\":2,\"am3\":5} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 8,
+          "am2": 2,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 6,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-003",
+      "name": "rto-we-003-one-am-w4",
+      "category": "rto-weekend",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=6 {\"am1\":8,\"am2\":2,\"am3\":5} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 8,
+          "am2": 2,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 6,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-004",
+      "name": "rto-we-004-one-am-w4",
+      "category": "rto-weekend",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=6 {\"am1\":8,\"am2\":2,\"am3\":5} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 8,
+          "am2": 2,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 6,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-005",
+      "name": "rto-we-005-one-am-w3",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 6,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 2,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-006",
+      "name": "rto-we-006-one-am-w2",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-007",
+      "name": "rto-we-007-two-ams-same-w1",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-008",
+      "name": "rto-we-008-two-ams-same-w3",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 6,
+          "am3": 6
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 3,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-009",
+      "name": "rto-we-009-two-ams-same-w1",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 26,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-010",
+      "name": "rto-we-010-two-ams-same-w2",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-011",
+      "name": "rto-we-011-two-ams-same-w1",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-012",
+      "name": "rto-we-012-two-ams-same-w4",
+      "category": "rto-weekend",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=4 {\"am1\":8,\"am2\":8,\"am3\":4} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 7,
+          "am3": 6
+        },
+        "amWeOff": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 4,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-013",
+      "name": "rto-we-013-all-three-same-w2",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-014",
+      "name": "rto-we-014-all-three-same-w1",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 24,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-015",
+      "name": "rto-we-015-all-three-same-w4",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 7,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-016",
+      "name": "rto-we-016-all-three-same-w3",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 6,
+          "am2": 6,
+          "am3": 7
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-017",
+      "name": "rto-we-017-mixed-w2",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-018",
+      "name": "rto-we-018-mixed-w1",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-019",
+      "name": "rto-we-019-mixed-w3",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 6,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 2,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-we-020",
+      "name": "rto-we-020-mixed-w1",
+      "category": "rto-weekend",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-021",
+      "name": "rto-day-021-single-we-x2",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-022",
+      "name": "rto-day-022-single-we-x6",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 25,
+          "am3": 26
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-023",
+      "name": "rto-day-023-single-we-x6",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-024",
+      "name": "rto-day-024-single-we-x3",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-025",
+      "name": "rto-day-025-single-we-x5",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-026",
+      "name": "rto-day-026-single-we-x5",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-027",
+      "name": "rto-day-027-single-we-x2",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 26,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-028",
+      "name": "rto-day-028-single-we-x5",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-029",
+      "name": "rto-day-029-single-we-x2",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-030",
+      "name": "rto-day-030-single-we-x2",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 23,
+          "am2": 27,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-031",
+      "name": "rto-day-031-single-we-x2",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-032",
+      "name": "rto-day-032-single-we-x4",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-033",
+      "name": "rto-day-033-single-we-x3",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-034",
+      "name": "rto-day-034-single-we-x3",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 26,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "rto-day-035",
+      "name": "rto-day-035-single-we-x4",
+      "category": "rto-single",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 24,
+          "am3": 26
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-036",
+      "name": "pto-036-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 24,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-037",
+      "name": "pto-037-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-038",
+      "name": "pto-038-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 21,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-039",
+      "name": "pto-039-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 22,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-040",
+      "name": "pto-040-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 23,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-041",
+      "name": "pto-041-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 21
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-042",
+      "name": "pto-042-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-043",
+      "name": "pto-043-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 7,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 20,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-044",
+      "name": "pto-044-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 6,
+          "am2": 7,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 21,
+          "am3": 21
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 2,
+        "weSpread": 0,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-045",
+      "name": "pto-045-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 7,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 20,
+          "am2": 22,
+          "am3": 21
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-046",
+      "name": "pto-046-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 24,
+          "am3": 23
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-047",
+      "name": "pto-047-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 7,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 6,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 22,
+          "am2": 24,
+          "am3": 23
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-048",
+      "name": "pto-048-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 23,
+          "am3": 22
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-049",
+      "name": "pto-049-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 23,
+          "am2": 23,
+          "am3": 23
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-050",
+      "name": "pto-050-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 7,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 20,
+          "am2": 20,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-051",
+      "name": "pto-051-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 7,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 20,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-052",
+      "name": "pto-052-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 21,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-053",
+      "name": "pto-053-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-054",
+      "name": "pto-054-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 7,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 19,
+          "am2": 26,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pto-055",
+      "name": "pto-055-block",
+      "category": "pto-blocks",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-056",
+      "name": "loa-056-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 10,
+          "am2": 10,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-057",
+      "name": "loa-057-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 26,
+          "am3": 24
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 12,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-058",
+      "name": "loa-058-long",
+      "category": "loa-long",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 25,
+          "am3": 24
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 12,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-059",
+      "name": "loa-059-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 24,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-060",
+      "name": "loa-060-long",
+      "category": "loa-long",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 10
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-061",
+      "name": "loa-061-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 0,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 10,
+          "am2": 3,
+          "am3": 2
+        },
+        "amWorkDays": {
+          "am1": 0,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-062",
+      "name": "loa-062-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 11,
+          "am2": 0,
+          "am3": 11
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 10,
+          "am3": 2
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 0,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-063",
+      "name": "loa-063-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 6,
+          "am3": 6
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 8,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 11,
+          "am3": 26
+        },
+        "activeAMs": [
+          "am1",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-064",
+      "name": "loa-064-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 0,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 10,
+          "am2": 3,
+          "am3": 2
+        },
+        "amWorkDays": {
+          "am1": 0,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-065",
+      "name": "loa-065-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 7
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 25,
+          "am3": 13
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-066",
+      "name": "loa-066-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 10,
+          "am2": 8,
+          "am3": 4
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 8
+        },
+        "amWorkDays": {
+          "am1": 27,
+          "am2": 26,
+          "am3": 8
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 2,
+        "weSpread": 0,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-067",
+      "name": "loa-067-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 8,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 7,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 14,
+          "am3": 27
+        },
+        "activeAMs": [
+          "am1",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 12,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-068",
+      "name": "loa-068-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 7,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 7
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 25,
+          "am3": 15
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-069",
+      "name": "loa-069-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 2,
+          "am2": 9,
+          "am3": 11
+        },
+        "amWeOff": {
+          "am1": 8,
+          "am2": 3,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 8,
+          "am2": 27,
+          "am3": 26
+        },
+        "activeAMs": [
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 2,
+        "weSpread": 0,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "loa-070",
+      "name": "loa-070-long",
+      "category": "loa-long",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 6,
+          "am2": 6,
+          "am3": 5
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 7
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 25,
+          "am3": 15
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-071",
+      "name": "mix-071-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 6,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 2,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-072",
+      "name": "mix-072-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 6,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 20,
+          "am2": 26,
+          "am3": 24
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 2,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-073",
+      "name": "mix-073-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 20,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-074",
+      "name": "mix-074-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 4,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 2,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-075",
+      "name": "mix-075-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 10,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 22,
+          "am2": 26,
+          "am3": 24
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-076",
+      "name": "mix-076-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1",
+        "AM weekend-off spread=4 {\"am1\":5,\"am2\":7,\"am3\":3} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 7,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 4,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-077",
+      "name": "mix-077-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 11,
+          "am2": 4,
+          "am3": 10
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 7,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 7,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-078",
+      "name": "mix-078-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 5
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 3,
+          "am3": 7
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 25,
+          "am3": 7
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-079",
+      "name": "mix-079-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 10,
+          "am2": 2,
+          "am3": 10
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 9,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 27,
+          "am2": 5,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-080",
+      "name": "mix-080-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 5
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 3,
+          "am3": 7
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 25,
+          "am3": 7
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-081",
+      "name": "mix-081-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1",
+        "AM close spread=5 {\"am1\":13,\"am2\":8,\"am3\":2} active=[\"am1\",\"am2\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 13,
+          "am2": 8,
+          "am3": 2
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 3,
+          "am3": 9
+        },
+        "amWorkDays": {
+          "am1": 27,
+          "am2": 25,
+          "am3": 5
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 5,
+        "weSpread": 1,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-082",
+      "name": "mix-082-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1",
+        "AM weekend-off spread=5 {\"am1\":3,\"am2\":8,\"am3\":6} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 8,
+          "am3": 6
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 5,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-083",
+      "name": "mix-083-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":3,\"am2\":5,\"am3\":8} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 5,
+          "am3": 8
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 20,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 5,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-084",
+      "name": "mix-084-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":8,\"am2\":3,\"am3\":6} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 7,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 8,
+          "am2": 3,
+          "am3": 6
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 20,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 2,
+        "weSpread": 5,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-085",
+      "name": "mix-085-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":3,\"am2\":5,\"am3\":8} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 5,
+          "am3": 8
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 20,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 5,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-086",
+      "name": "mix-086-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":8,\"am2\":3,\"am3\":6} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 8,
+          "am2": 3,
+          "am3": 6
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 20,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 5,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-087",
+      "name": "mix-087-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 24,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-088",
+      "name": "mix-088-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 24,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-089",
+      "name": "mix-089-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 6,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 22,
+          "am2": 25,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 14,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-090",
+      "name": "mix-090-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 24,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-091",
+      "name": "mix-091-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 6,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 17,
+          "am2": 19,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 12,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-092",
+      "name": "mix-092-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 6,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 16,
+          "am2": 18,
+          "am3": 26
+        },
+        "activeAMs": [
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-093",
+      "name": "mix-093-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 6,
+          "am3": 6
+        },
+        "amWeOff": {
+          "am1": 6,
+          "am2": 5,
+          "am3": 6
+        },
+        "amWorkDays": {
+          "am1": 19,
+          "am2": 17,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am3"
+        ],
+        "closeSpread": 2,
+        "weSpread": 0,
+        "ms": 12,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-094",
+      "name": "mix-094-hell",
+      "category": "mixed-hell",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 10
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 4,
+          "am3": 6
+        },
+        "amWorkDays": {
+          "am1": 19,
+          "am2": 21,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 2,
+        "weSpread": 2,
+        "ms": 12,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "mix-095",
+      "name": "mix-095-hell",
+      "category": "mixed-hell",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM close spread=5 {\"am1\":5,\"am2\":9,\"am3\":10} active=[\"am1\",\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 5,
+          "am2": 9,
+          "am3": 10
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 6
+        },
+        "amWorkDays": {
+          "am1": 20,
+          "am2": 18,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 5,
+        "weSpread": 1,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-096",
+      "name": "team-096-amCount-1",
+      "category": "team-size",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=2"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 2,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8
+        },
+        "amWeOff": {
+          "am1": 4
+        },
+        "amWorkDays": {
+          "am1": 22
+        },
+        "activeAMs": [
+          "am1"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-097",
+      "name": "team-097-amCount-1",
+      "category": "team-size",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=2"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 2,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8
+        },
+        "amWeOff": {
+          "am1": 4
+        },
+        "amWorkDays": {
+          "am1": 23
+        },
+        "activeAMs": [
+          "am1"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-098",
+      "name": "team-098-amCount-2",
+      "category": "team-size",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 11,
+          "am2": 11
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4
+        },
+        "amWorkDays": {
+          "am1": 23,
+          "am2": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-099",
+      "name": "team-099-amCount-2",
+      "category": "team-size",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 10,
+          "am2": 11
+        },
+        "amWeOff": {
+          "am1": 2,
+          "am2": 4
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 21
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 1,
+        "weSpread": 2,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-100",
+      "name": "team-100-amCount-4",
+      "category": "team-size",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 6,
+          "am3": 6,
+          "am4": 6
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4,
+          "am4": 3
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 23,
+          "am4": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3",
+          "am4"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-101",
+      "name": "team-101-amCount-4",
+      "category": "team-size",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 6,
+          "am2": 6,
+          "am3": 6,
+          "am4": 6
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 3,
+          "am3": 3,
+          "am4": 4
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 25,
+          "am3": 25,
+          "am4": 26
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3",
+          "am4"
+        ],
+        "closeSpread": 0,
+        "weSpread": 2,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-102",
+      "name": "team-102-amCount-5",
+      "category": "team-size",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5,
+          "am4": 5,
+          "am5": 5
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 5,
+          "am4": 5,
+          "am5": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 24,
+          "am3": 25,
+          "am4": 24,
+          "am5": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3",
+          "am4",
+          "am5"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-103",
+      "name": "team-103-amCount-5",
+      "category": "team-size",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 5,
+          "am4": 5,
+          "am5": 5
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4,
+          "am4": 4,
+          "am5": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 26,
+          "am3": 23,
+          "am4": 24,
+          "am5": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3",
+          "am4",
+          "am5"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-104",
+      "name": "team-104-amCount-2",
+      "category": "team-size",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 12
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 23
+        },
+        "activeAMs": [
+          "am1",
+          "am2"
+        ],
+        "closeSpread": 3,
+        "weSpread": 0,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "team-105",
+      "name": "team-105-amCount-4",
+      "category": "team-size",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 6,
+          "am2": 7,
+          "am3": 6,
+          "am4": 6
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 5,
+          "am4": 3
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 25,
+          "am3": 21,
+          "am4": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3",
+          "am4"
+        ],
+        "closeSpread": 1,
+        "weSpread": 2,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-106",
+      "name": "pref-106-kc[1]-we2",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-107",
+      "name": "pref-107-kc[1,4]-we2",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 6,
+          "am2": 7,
+          "am3": 6
+        },
+        "amWeOff": {
+          "am1": 7,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 26,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 2,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-108",
+      "name": "pref-108-kc[]-we2",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 10,
+          "am2": 9,
+          "am3": 10
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 24,
+          "am3": 26
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-109",
+      "name": "pref-109-kc[0,6]-we2",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 6,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 0,
+          "am2": 0,
+          "am3": 0
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-110",
+      "name": "pref-110-kc[1]-we0",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 26,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 6,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-111",
+      "name": "pref-111-kc[1]-we2",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 23,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-112",
+      "name": "pref-112-kc[1]-we3",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 24,
+          "am2": 26,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-113",
+      "name": "pref-113-kc[1]-we4",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 22
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-114",
+      "name": "pref-114-kc[1,4]-we0",
+      "category": "kc-prefs",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 6,
+          "am2": 6,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "pref-115",
+      "name": "pref-115-kc[0,6]-we3",
+      "category": "kc-prefs",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 6,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 0,
+          "am2": 2,
+          "am3": 0
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 21,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 2,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-p08-replica",
+      "name": "p08-replica",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 9,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 24,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 8,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-all-ams-rto-same-we",
+      "name": "all-ams-rto-same-weekend",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 3,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 24,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 9,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-two-ams-pto-same-week",
+      "name": "two-ams-pto-same-week",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 7,
+          "am3": 6
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 19,
+          "am2": 21,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-sm-loa-entire",
+      "name": "sm-loa-entire-period",
+      "category": "deterministic",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 9,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 26,
+          "am2": 25,
+          "am3": 24
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 12,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-am1-loa-am2-rto-we",
+      "name": "am1-loa-entire+am2-rto-all-we",
+      "category": "deterministic",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "AM weekend-off spread=5 {\"am1\":10,\"am2\":8,\"am3\":3} active=[\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 0,
+          "am2": 9,
+          "am3": 9
+        },
+        "amWeOff": {
+          "am1": 10,
+          "am2": 8,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 0,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 5,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-rotating-pto-weeks",
+      "name": "rotating-pto-each-am-one-week",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 8,
+          "am3": 7
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 5,
+          "am3": 5
+        },
+        "amWorkDays": {
+          "am1": 19,
+          "am2": 21,
+          "am3": 20
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 11,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-holiday-ams-rto",
+      "name": "holiday-style-all-ams-rto-one-we",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 3,
+          "am2": 3,
+          "am3": 3
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 25,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 0,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-b2b-pto-weeks",
+      "name": "back-to-back-pto-weeks-am1-am2",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 5,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 19,
+          "am2": 21,
+          "am3": 25
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 1,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-rto-sat-sun-packages",
+      "name": "rto-sat-sun-packages",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 23,
+          "am2": 26,
+          "am3": 26
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 7,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-max-chaos",
+      "name": "max-chaos",
+      "category": "deterministic",
+      "status": "WARN",
+      "hard": [],
+      "soft": [
+        "clopens=1",
+        "AM weekend-off spread=4 {\"am1\":5,\"am2\":8,\"am3\":4} active=[\"am2\",\"am3\"]"
+      ],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 1,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 7,
+          "am2": 7,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 5,
+          "am2": 8,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 17,
+          "am2": 25,
+          "am3": 21
+        },
+        "activeAMs": [
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 1,
+        "weSpread": 4,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-triple-pto-3days",
+      "name": "triple-pto-same-3-days",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 8,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 4,
+          "am3": 4
+        },
+        "amWorkDays": {
+          "am1": 21,
+          "am2": 23,
+          "am3": 22
+        },
+        "activeAMs": [
+          "am1",
+          "am2",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 0,
+        "ms": 10,
+        "error": null,
+        "days": 35
+      }
+    },
+    {
+      "id": "det-am2-loa-sm-late",
+      "name": "am2-loa-entire+sm-loa-late",
+      "category": "deterministic",
+      "status": "PASS",
+      "hard": [],
+      "soft": [],
+      "perfectCoverage": true,
+      "stats": {
+        "noOpen": 0,
+        "noClose": 0,
+        "clopens": 0,
+        "thin": 0,
+        "dualMgrCloses": 0,
+        "mgrCloseOnKc": 0,
+        "amCloses": {
+          "am1": 8,
+          "am2": 0,
+          "am3": 8
+        },
+        "amWeOff": {
+          "am1": 4,
+          "am2": 10,
+          "am3": 2
+        },
+        "amWorkDays": {
+          "am1": 25,
+          "am2": 0,
+          "am3": 26
+        },
+        "activeAMs": [
+          "am1",
+          "am3"
+        ],
+        "closeSpread": 0,
+        "weSpread": 2,
+        "ms": 12,
+        "error": null,
+        "days": 35
+      }
+    }
+  ]
+}

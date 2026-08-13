@@ -1,9 +1,9 @@
 {
   "title": "Schedule Pro Engine Stress Test",
   "version": "2.5.5",
-  "startedAt": "2026-08-13T14:22:22.988Z",
-  "finishedAt": "2026-08-13T14:22:27.444Z",
-  "base": "http://127.0.0.1:57732",
+  "startedAt": "2026-08-13T14:29:21.596Z",
+  "finishedAt": "2026-08-13T14:29:23.286Z",
+  "base": "http://127.0.0.1:59323",
   "summary": {
     "pass": 24,
     "fail": 0,
@@ -80,7 +80,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 9,
+        "ms": 10,
         "error": null
       }
     },
@@ -105,7 +105,7 @@
         "closeSpread": 0,
         "weSpread": 0,
         "days": 35,
-        "ms": 11,
+        "ms": 10,
         "error": null
       }
     },
@@ -169,7 +169,7 @@
         "closeSpread": 0,
         "weSpread": 0,
         "days": 35,
-        "ms": 10,
+        "ms": 9,
         "error": null
       }
     },
@@ -419,7 +419,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 11,
+        "ms": 10,
         "error": null
       }
     },
@@ -452,7 +452,7 @@
         "closeSpread": 8,
         "weSpread": 5,
         "days": 35,
-        "ms": 11,
+        "ms": 10,
         "error": null
       }
     },
@@ -481,7 +481,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 8,
+        "ms": 7,
         "error": null
       }
     },
@@ -512,7 +512,7 @@
         "closeSpread": 0,
         "weSpread": 1,
         "days": 35,
-        "ms": 10,
+        "ms": 11,
         "error": null
       }
     },
@@ -700,7 +700,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 42,
-        "ms": 9,
+        "ms": 10,
         "error": null
       }
     },
@@ -733,7 +733,7 @@
         "closeSpread": 1,
         "weSpread": 0,
         "days": 35,
-        "ms": 78,
+        "ms": 75,
         "msAvg": 8,
         "error": null,
         "stabilityOk": true,

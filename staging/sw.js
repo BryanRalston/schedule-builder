@@ -1,6 +1,6 @@
 /* Manager Schedule Builder Pro — service worker
    Paths are relative to this script so GitHub project pages (/schedule-builder/) work. */
-const CACHE = 'msb-pro-staging-v2.6.4';
+const CACHE = 'msb-pro-staging-v2.6.5';
 const PRECACHE = [
   './',
   './index.html',

@@ -1070,19 +1070,29 @@ input[type="radio"] { accent-color: var(--gold); }
   margin-top: 0.25rem;
 }
 
-/* Onboarding tour */
+/* Onboarding tour — hole-punch overlay (v2.6.5) */
 #onboarding-tour {
   position: fixed;
   inset: 0;
   z-index: 25000;
   pointer-events: none;
 }
-#onboarding-tour:not([hidden]) { pointer-events: auto; }
+#onboarding-tour:not([hidden]) { pointer-events: none; }
 .tour-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(3, 6, 14, 0.72);
-  backdrop-filter: blur(2px);
+  background: rgba(3, 6, 14, 0.75);
+  pointer-events: none;
+}
+.tour-ring {
+  position: absolute;
+  pointer-events: none;
+  display: none;
+  border-radius: 12px;
+  border: 2px solid rgba(61, 220, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(61, 220, 255, 0.22), 0 0 22px rgba(61, 220, 255, 0.4);
+  z-index: 1;
+  box-sizing: border-box;
 }
 .tour-card {
   position: absolute;
@@ -1096,6 +1106,7 @@ input[type="radio"] { accent-color: var(--gold); }
   background: linear-gradient(165deg, rgba(18,28,48,0.98), rgba(10,16,28,0.98));
   box-shadow: var(--glow), var(--shadow-lg);
   z-index: 2;
+  pointer-events: auto;
 }
 .tour-card h3 {
   font-size: 1rem;
@@ -1125,11 +1136,9 @@ input[type="radio"] { accent-color: var(--gold); }
 }
 .tour-actions button { font-size: 0.78rem !important; padding: 0.4rem 0.75rem !important; }
 [data-tour-highlight="1"] {
-  position: relative;
-  z-index: 25001 !important;
-  box-shadow: 0 0 0 3px rgba(61,220,255,0.55), 0 0 28px rgba(61,220,255,0.35) !important;
   border-radius: 10px;
-  outline: 1px solid rgba(61,220,255,0.4);
+  outline: 2px solid rgba(61, 220, 255, 0.85);
+  outline-offset: 3px;
 }
 
 @media (max-width: 720px) {
@@ -4586,12 +4595,12 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="startOnboardingTour(true)">Take tour</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
-      <button class="welcome-dismiss" onclick="dismissWelcome()">Dismiss</button>
+      <button class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
     </div>
   </div>
 
   <div class="workspace no-print-workspace">
-    <nav class="app-tabs no-print" role="tablist" aria-label="Main">
+    <nav class="app-tabs no-print" role="tablist" aria-label="Main" data-tour="app-tabs">
       <button type="button" class="app-tab active" role="tab" id="tabbtn-setup" data-tour="tab-setup" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')">Setup</button>
       <button type="button" class="app-tab" role="tab" id="tabbtn-requests" data-tour="tab-requests" aria-selected="false" aria-controls="tab-requests" onclick="switchTab('requests')">Requests</button>
       <button type="button" class="app-tab" role="tab" id="tabbtn-rules" data-tour="tab-rules" aria-selected="false" aria-controls="tab-rules" onclick="switchTab('rules')">Rules</button>
@@ -4731,7 +4740,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <!-- INPUT SECTION -->
   <div class="section no-print" id="input-section" style="border:none">
     <div class="section-body" id="input-body" style="padding:0">
-      <div id="request-paint-toolbar" class="no-print" role="toolbar" aria-label="Request paint mode">
+      <div id="request-paint-toolbar" class="no-print" role="toolbar" aria-label="Request paint mode" data-tour="request-paint">
         <span class="rpt-label">Paint</span>
         <button type="button" class="rpt-chip" data-paint="off" onclick="setRequestPaintMode('off')">Off</button>
         <button type="button" class="rpt-chip" data-paint="rto" onclick="setRequestPaintMode('rto')">RTO</button>
@@ -4927,7 +4936,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.4-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.5-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -5020,7 +5029,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 <!-- Onboarding tour overlay -->
 <div id="onboarding-tour" class="no-print" hidden role="dialog" aria-modal="true" aria-labelledby="tour-title">
-  <div class="tour-backdrop" onclick="skipOnboardingTour()"></div>
+  <div class="tour-backdrop" id="tour-backdrop" aria-hidden="true"></div>
+  <div class="tour-ring" id="tour-ring" aria-hidden="true"></div>
   <div class="tour-card" id="tour-card">
     <div class="tour-step-num" id="tour-step-num">Step 1 of 5</div>
     <h3 id="tour-title">Welcome</h3>
@@ -6818,7 +6828,7 @@ function renderPreferencesUI() {
   if (!el) return;
   const p = preferences;
   el.innerHTML = `
-    <div class="pref-card">
+    <div class="pref-card" data-tour="pref-first">
       <label class="pref-label">Target weekend days off
         <input type="number" id="pref-weekend-target" min="0" max="10" value="${p.targetWeekendDaysOff}" onchange="readPreferencesFromUI()">
       </label>
@@ -7049,7 +7059,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.4-staging';
+const APP_VERSION = '2.6.5-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -9116,6 +9126,7 @@ function generateSchedule() {
   setTimeout(() => {
     try {
       _generateScheduleInner();
+      try { if (typeof notifyTourGenerateComplete === 'function') notifyTourGenerateComplete(); } catch (e2) {}
     } catch (e) {
       console.error(e);
       showToast('Generate error: ' + (e.message || e), 'error');
@@ -14596,29 +14607,30 @@ function restoreLastTeamTemplateIfNeeded(hadNames) {
 // ONBOARDING TOUR (lightweight, no deps)
 // ════════════════════════════════════════════════════
 const MSB_TOUR_DONE = 'msb_stg_tour_done';
+const TOUR_HOLE_PAD = 8;
 let tourStepIndex = 0;
 const TOUR_STEPS = [
   {
     tab: 'setup',
-    highlight: 'tab-setup',
+    highlight: 'app-tabs',
     title: 'Welcome to Schedule Pro',
     body: 'Build fair manager schedules fully offline. Use the tabs to set up your team, lock requests, tune rules, then generate. Continue offline is already available on the sign-in screen.'
   },
   {
     tab: 'setup',
-    highlight: 'setup-team',
+    highlight: 'team-templates',
     title: 'Setup — team & store',
     body: 'Enter SM / AM / KC names, store name & number, and store hours. Save a Team template so next period you load the roster in one tap. Load a fiscal period before generating.'
   },
   {
     tab: 'requests',
-    highlight: 'tab-requests',
+    highlight: 'request-paint',
     title: 'Requests — RTO / PTO / LOA',
     body: 'Lock time off and preferred shifts here. The generator treats these as hard constraints and builds around them.'
   },
   {
     tab: 'rules',
-    highlight: 'tab-rules',
+    highlight: 'pref-first',
     title: 'Rules — preferences',
     body: 'Tune weekend fairness, clopen avoidance, peak season, and KC close nights. Soft goals yield to hard coverage.'
   },
@@ -14644,10 +14656,179 @@ function setTourDone() {
   } catch (e) {}
 }
 
+function isWelcomeCardVisible() {
+  const c = document.getElementById('welcome-card');
+  if (!c || c.hasAttribute('hidden')) return false;
+  if (c.style.display === 'none') return false;
+  try {
+    const cs = window.getComputedStyle(c);
+    if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+  } catch (e) {}
+  const r = c.getBoundingClientRect();
+  return r.width > 2 && r.height > 2;
+}
+
 function clearTourHighlights() {
   document.querySelectorAll('[data-tour-highlight="1"]').forEach((el) => {
     el.removeAttribute('data-tour-highlight');
   });
+}
+
+function resolveTourTarget(key) {
+  if (!key) return null;
+  const byTour = document.querySelector('[data-tour="' + key + '"]');
+  if (byTour) return byTour;
+  const byId = document.getElementById(key);
+  if (byId) return byId;
+  try {
+    return document.querySelector(key);
+  } catch (e) {
+    return null;
+  }
+}
+
+function updateTourHole() {
+  const backdrop = document.getElementById('tour-backdrop');
+  const ring = document.getElementById('tour-ring');
+  const hl = document.querySelector('[data-tour-highlight="1"]');
+  if (!backdrop) return;
+  if (!hl) {
+    backdrop.style.clipPath = 'none';
+    backdrop.style.webkitClipPath = 'none';
+    if (ring) ring.style.display = 'none';
+    return;
+  }
+  const r = hl.getBoundingClientRect();
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const x1 = Math.max(0, Math.round(r.left) - TOUR_HOLE_PAD);
+  const y1 = Math.max(0, Math.round(r.top) - TOUR_HOLE_PAD);
+  const x2 = Math.min(w, Math.round(r.right) + TOUR_HOLE_PAD);
+  const y2 = Math.min(h, Math.round(r.bottom) + TOUR_HOLE_PAD);
+  if (x2 <= x1 || y2 <= y1) {
+    backdrop.style.clipPath = 'none';
+    backdrop.style.webkitClipPath = 'none';
+    if (ring) ring.style.display = 'none';
+    return;
+  }
+  const clip =
+    'polygon(evenodd, 0px 0px, ' +
+    w +
+    'px 0px, ' +
+    w +
+    'px ' +
+    h +
+    'px, 0px ' +
+    h +
+    'px, 0px 0px, ' +
+    x1 +
+    'px ' +
+    y1 +
+    'px, ' +
+    x1 +
+    'px ' +
+    y2 +
+    'px, ' +
+    x2 +
+    'px ' +
+    y2 +
+    'px, ' +
+    x2 +
+    'px ' +
+    y1 +
+    'px, ' +
+    x1 +
+    'px ' +
+    y1 +
+    'px)';
+  backdrop.style.clipPath = clip;
+  backdrop.style.webkitClipPath = clip;
+  if (ring) {
+    ring.style.display = 'block';
+    ring.style.top = y1 + 'px';
+    ring.style.left = x1 + 'px';
+    ring.style.width = x2 - x1 + 'px';
+    ring.style.height = y2 - y1 + 'px';
+  }
+}
+
+function placeTourCard() {
+  const card = document.getElementById('tour-card');
+  const hl = document.querySelector('[data-tour-highlight="1"]');
+  if (!card) return;
+  const pad = 12;
+  const cardH = card.offsetHeight || 200;
+  let placeTop = false;
+  if (hl) {
+    const r = hl.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - r.bottom;
+    const spaceAbove = r.top;
+    if (spaceBelow < cardH + 28 && spaceAbove > spaceBelow) placeTop = true;
+    else if (r.bottom > window.innerHeight * 0.58) placeTop = true;
+  }
+  card.style.left = '50%';
+  card.style.right = 'auto';
+  card.style.transform = 'translateX(-50%)';
+  if (placeTop) {
+    card.style.top = 'max(' + pad + 'px, env(safe-area-inset-top))';
+    card.style.bottom = 'auto';
+  } else {
+    card.style.bottom = 'max(1.25rem, env(safe-area-inset-bottom))';
+    card.style.top = 'auto';
+  }
+}
+
+function bindTourHoleListeners() {
+  if (window._tourHoleBound) return;
+  window._tourHoleBound = true;
+  const onMove = () => {
+    const root = document.getElementById('onboarding-tour');
+    if (!root || root.hasAttribute('hidden')) return;
+    updateTourHole();
+    placeTourCard();
+  };
+  window.addEventListener('resize', onMove);
+  window.addEventListener('scroll', onMove, true);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onMove);
+    window.visualViewport.addEventListener('scroll', onMove);
+  }
+}
+
+function scheduleTourLayout() {
+  const run = () => {
+    const el = document.querySelector('[data-tour-highlight="1"]');
+    const tabs = document.querySelector('.app-tabs');
+    if (tabs) {
+      try {
+        tabs.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      } catch (e) {}
+    }
+    if (el) {
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      } catch (e) {}
+    }
+    updateTourHole();
+    placeTourCard();
+  };
+  run();
+  requestAnimationFrame(() => {
+    updateTourHole();
+    placeTourCard();
+  });
+  setTimeout(() => {
+    updateTourHole();
+    placeTourCard();
+  }, 80);
+  setTimeout(() => {
+    updateTourHole();
+    placeTourCard();
+  }, 380);
+  setTimeout(() => {
+    updateTourHole();
+    placeTourCard();
+  }, 720);
 }
 
 function applyTourStep(idx) {
@@ -14656,15 +14837,8 @@ function applyTourStep(idx) {
   tourStepIndex = idx;
   if (step.tab) switchTab(step.tab);
   clearTourHighlights();
-  if (step.highlight) {
-    const el = document.querySelector('[data-tour="' + step.highlight + '"]');
-    if (el) {
-      el.setAttribute('data-tour-highlight', '1');
-      try {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } catch (e) {}
-    }
-  }
+  const el = resolveTourTarget(step.highlight);
+  if (el) el.setAttribute('data-tour-highlight', '1');
   const root = document.getElementById('onboarding-tour');
   const title = document.getElementById('tour-title');
   const body = document.getElementById('tour-body');
@@ -14677,12 +14851,16 @@ function applyTourStep(idx) {
   if (back) back.style.display = idx === 0 ? 'none' : '';
   if (next) next.textContent = idx >= TOUR_STEPS.length - 1 ? 'Done' : 'Next';
   if (root) root.removeAttribute('hidden');
+  bindTourHoleListeners();
+  scheduleTourLayout();
 }
 
 function startOnboardingTour(force) {
   if (!force && isTourDone()) return;
-  // Don't start while auth shell is locked
   if (document.documentElement.classList.contains('auth-locked')) return;
+  try {
+    if (typeof dismissWelcome === 'function') dismissWelcome();
+  } catch (e) {}
   applyTourStep(0);
 }
 
@@ -14707,7 +14885,20 @@ function endOnboardingTour(markDone) {
   const root = document.getElementById('onboarding-tour');
   if (root) root.setAttribute('hidden', '');
   clearTourHighlights();
+  const bd = document.getElementById('tour-backdrop');
+  if (bd) {
+    bd.style.clipPath = '';
+    bd.style.webkitClipPath = '';
+  }
+  const ring = document.getElementById('tour-ring');
+  if (ring) ring.style.display = 'none';
   if (markDone) setTourDone();
+}
+
+function notifyTourGenerateComplete() {
+  const root = document.getElementById('onboarding-tour');
+  if (!root || root.hasAttribute('hidden')) return;
+  endOnboardingTour(true);
 }
 
 function maybeAutoStartTour() {
@@ -14716,6 +14907,7 @@ function maybeAutoStartTour() {
   setTimeout(() => {
     if (isTourDone()) return;
     if (document.documentElement.classList.contains('auth-locked')) return;
+    if (isWelcomeCardVisible()) return;
     startOnboardingTour(false);
   }, 900);
 }

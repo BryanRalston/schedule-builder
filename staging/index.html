@@ -4281,6 +4281,16 @@ html.view-locked #post-gen-strip { top: 2rem; }
   background: rgba(61,220,255,0.16) !important; border-color: rgba(61,220,255,0.5) !important;
   color: #9ae8ff !important; box-shadow: 0 0 12px rgba(61,220,255,0.15);
 }
+.rpt-stop {
+  font-size: 0.75rem !important; padding: 0.28rem 0.7rem !important; min-height: 32px !important;
+  margin-left: 0.2rem; border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  background: rgba(0,0,0,0.28) !important; color: var(--ink-3) !important;
+  font-weight: 700 !important; cursor: pointer; letter-spacing: 0.02em;
+}
+.rpt-stop:hover {
+  border-color: rgba(255,140,140,0.55) !important; color: #ffc9c9 !important;
+}
 .cal-cell.paint-hover { outline: 2px solid rgba(61,220,255,0.55); outline-offset: -2px; }
 body.painting-requests { user-select: none; }
 body.painting-requests .cal-cell { cursor: crosshair; }
@@ -4742,7 +4752,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="section-body" id="input-body" style="padding:0">
       <div id="request-paint-toolbar" class="no-print" role="toolbar" aria-label="Request paint mode" data-tour="request-paint">
         <span class="rpt-label">Paint</span>
-        <button type="button" class="rpt-chip" data-paint="off" onclick="setRequestPaintMode('off')">Off</button>
+        <button type="button" class="rpt-chip" data-paint="off" onclick="setRequestPaintMode('off')">Day off</button>
         <button type="button" class="rpt-chip" data-paint="rto" onclick="setRequestPaintMode('rto')">RTO</button>
         <button type="button" class="rpt-chip" data-paint="pto" onclick="setRequestPaintMode('pto')">PTO</button>
         <button type="button" class="rpt-chip" data-paint="loa" onclick="setRequestPaintMode('loa')">LOA</button>
@@ -4750,7 +4760,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" class="rpt-chip" data-paint="open-late" onclick="setRequestPaintMode('open-late')">Open</button>
         <button type="button" class="rpt-chip" data-paint="mid-early" onclick="setRequestPaintMode('mid-early')">Mid</button>
         <button type="button" class="rpt-chip" data-paint="close" onclick="setRequestPaintMode('close')">Close</button>
-        <span class="text-muted" style="font-size:0.72rem;margin-left:0.25rem" id="rpt-active-label">Tap a mode, then drag across days</span>
+        <span class="text-muted" style="font-size:0.72rem;margin-left:0.25rem" id="rpt-active-label">Tap a mode, then drag. Stop or Esc to exit.</span>
+        <button type="button" class="rpt-stop" id="rpt-stop" onclick="clearRequestPaintMode()" title="Stop painting (Esc)">Stop</button>
       </div>
       <div class="input-tabs" id="input-tabs"></div>
       <div id="input-calendars"></div>
@@ -4936,7 +4947,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.5-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.6-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
@@ -6499,6 +6510,11 @@ function closeProGate() {
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
+  if (window._requestPaintMode && typeof currentAppTab !== 'undefined' && currentAppTab === 'requests') {
+    if (typeof clearRequestPaintMode === 'function') clearRequestPaintMode();
+    e.stopImmediatePropagation();
+    return;
+  }
   closeProGate();
   closeHeaderMenu();
   if (typeof closeLicenseModal === 'function') closeLicenseModal();
@@ -7059,7 +7075,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.5-staging';
+const APP_VERSION = '2.6.6-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -13692,6 +13708,10 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if (e.key === 'Escape') {
+    if (window._requestPaintMode && typeof currentAppTab !== 'undefined' && currentAppTab === 'requests') {
+      if (typeof clearRequestPaintMode === 'function') clearRequestPaintMode();
+      return;
+    }
     if (typeof closeCommandPalette === 'function' && document.getElementById('cmd-palette')?.classList.contains('open')) {
       closeCommandPalette(); return;
     }
@@ -15475,21 +15495,53 @@ function startNextPeriodSameTeam() {
   showToast('Period ' + pNum + ' ready — set requests then Build', 'success');
 }
 
-function setRequestPaintMode(mode) {
-  if (window._viewLocked) return;
-  if (window._requestPaintMode === mode) {
-    window._requestPaintMode = null;
-  } else {
-    window._requestPaintMode = mode;
-  }
+function requestPaintModeLabel(mode) {
+  const labels = {
+    off: 'Day off',
+    rto: 'RTO',
+    pto: 'PTO',
+    loa: 'LOA',
+    __clear__: 'Clear',
+    'open-late': 'Open',
+    'mid-early': 'Mid',
+    close: 'Close'
+  };
+  return labels[mode] || String(mode || '');
+}
+
+function syncRequestPaintToolbar() {
   document.querySelectorAll('#request-paint-toolbar .rpt-chip').forEach((btn) => {
     btn.classList.toggle('active', btn.getAttribute('data-paint') === window._requestPaintMode);
   });
   const lab = document.getElementById('rpt-active-label');
   if (lab) {
     lab.textContent = window._requestPaintMode
-      ? 'Painting: ' + (window._requestPaintMode === '__clear__' ? 'Clear' : window._requestPaintMode)
-      : 'Tap a mode, then drag across days';
+      ? 'Painting: ' + requestPaintModeLabel(window._requestPaintMode) + ' — tap Stop or Esc'
+      : 'Tap a mode, then drag. Stop or Esc to exit.';
+  }
+}
+
+function setRequestPaintMode(mode) {
+  if (window._viewLocked) return;
+  if (mode == null) {
+    window._requestPaintMode = null;
+  } else if (window._requestPaintMode === mode) {
+    window._requestPaintMode = null;
+  } else {
+    window._requestPaintMode = mode;
+  }
+  syncRequestPaintToolbar();
+}
+
+function clearRequestPaintMode() {
+  const wasPainting = !!window._requestPainting;
+  window._requestPaintMode = null;
+  window._requestPainting = false;
+  document.body.classList.remove('painting-requests');
+  syncRequestPaintToolbar();
+  if (wasPainting) {
+    try { if (typeof buildInputCalendar === 'function') buildInputCalendar(activeTab); } catch (e) {}
+    try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
   }
 }
 
@@ -15514,6 +15566,7 @@ function setupRequestPaintHandlers() {
     e.preventDefault();
     window._requestPainting = true;
     document.body.classList.add('painting-requests');
+    try { if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot('paint'); } catch (err) {}
     try { host.setPointerCapture(e.pointerId); } catch (err) {}
     paintRequestCell(cell.dataset.role || activeTab, cell.dataset.dk);
     cell.classList.add('paint-hover');

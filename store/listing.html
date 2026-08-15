@@ -13,54 +13,86 @@
     .box pre { margin: 0; white-space: pre-wrap; font-family: inherit; font-size: 0.92rem; }
     button.copy { position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.75rem; font-weight: 700; border: 1px solid #d1d5db; background: #fff; border-radius: 6px; padding: 0.3rem 0.55rem; cursor: pointer; }
     .meta { color: #6b7280; font-size: 0.88rem; }
+    .warn { background: #fff7ed; border: 1px solid #fdba74; border-radius: 10px; padding: 0.75rem 0.9rem; font-size: 0.9rem; }
     a { color: #2563eb; }
     ul { padding-left: 1.2rem; }
   </style>
 </head>
 <body>
-  <p><a href="../install.html">← Publish setup</a></p>
+  <p><a href="../install.html">← Publish setup</a> · <a href="../docs/PLAY_REVIEW.md">PLAY_REVIEW.md</a></p>
   <h1>Google Play listing pack</h1>
-  <p class="meta">Copy these fields into Play Console. Screenshots: use the app on a phone (or the store/screenshots folder when available).</p>
+  <p class="meta">Copy these fields into Play Console. Phone shots: <code>store/screenshots/</code> and <code>store/play-assets/</code> (dark Schedule Pro, 1080×1920).</p>
+  <p class="warn"><strong>TWA loads live root</strong> (<code>https://bryanralston.github.io/schedule-builder/?source=pwa</code>), not staging. Do not submit production review until listing screenshots match that live URL. Do not promise zero clopens, SSO, or cloud sync.</p>
 
   <h2>App name <span class="meta">(30 chars max)</span></h2>
   <div class="box"><button class="copy" type="button" data-copy="Schedule Pro: Manager Shifts">Copy</button><pre>Schedule Pro: Manager Shifts</pre></div>
 
-  <h2>Short description <span class="meta">(80 chars max)</span></h2>
-  <div class="box"><button class="copy" type="button" data-copy="Fair retail schedules in minutes. NRF calendar, no clopens, offline.">Copy</button><pre>Fair retail schedules in minutes. NRF calendar, no clopens, offline.</pre></div>
+  <h2>Short description <span class="meta">(68 / 80 chars)</span></h2>
+  <div class="box"><button class="copy" type="button" data-copy="Fair retail manager schedules. NRF 4-5-4, PTO, offline. No login.">Copy</button><pre>Fair retail manager schedules. NRF 4-5-4, PTO, offline. No login.</pre></div>
 
   <h2>Full description</h2>
-  <div class="box"><button class="copy" type="button" id="copy-full">Copy</button><pre id="full-desc">Manager Schedule Builder Pro — build fair retail manager schedules without the spreadsheet fight.
+  <div class="box"><button class="copy" type="button" id="copy-full">Copy</button><pre id="full-desc">Schedule Pro builds retail manager and key-carrier schedules on your device.
 
 WHO IT'S FOR
 Store managers and multi-unit leaders who schedule assistant managers and key carriers.
 
 WHAT YOU GET
 • NRF 4-5-4 fiscal period calendar
-• Preference engine: weekends, clopening ban, consecutive days, role rules
-• Hard locks for PTO, RTO, LOA, and requested shifts
-• Quality score with labor hours
-• Edit after generate, then print / Word / Excel / JSON backup
-• Works offline — your data stays on the device
+• PTO, RTO, and LOA treated as hard locks
+• Fairness and weekend balancing as preferences — always review before you post
+• Clopen-avoidance as a preference, not a guarantee
+• Generate, then edit or swap shifts on the board
+• Word, Excel, print, and JSON backup
+• Works offline — data stays on the device
 
 HOW IT WORKS
 1. Set up your team and store period
 2. Enter time-off and shift requests
-3. Tune preferences & role rules
-4. Generate, review the score, export
+3. Tune preferences and role rules
+4. Generate, review the sheet, export
 
-Privacy-first: schedules are stored on your device. No account required for core use.
+PRICE
+Paid Google Play app: $19.99 one-time. Two free generates are included so you can try the engine. Pro unlocks unlimited builds plus Word/Excel.
 
-Note: Always review generated schedules for policy and labor compliance before posting.</pre></div>
+No account required. No cloud sync. Sign-in is optional and not required for core use.
 
-  <h2>Category & tags</h2>
-  <div class="box"><pre>Category: Business
-Tags: scheduling, retail, workforce, productivity, store manager</pre></div>
+Always review generated schedules for policy and labor compliance before posting.</pre></div>
 
-  <h2>Contact & policy URLs</h2>
-  <div class="box"><pre>Privacy policy: https://bryanralston.github.io/schedule-builder/legal/privacy.html
+  <h2>Category &amp; tags</h2>
+  <div class="box"><button class="copy" type="button">Copy</button><pre>Category: Business
+Tags: scheduling, retail, workforce, productivity, store manager
+
+This is a retail scheduling utility. Do not set Health, Government, or Financial (personal developer accounts cannot ship those verticals).</pre></div>
+
+  <h2>App access <span class="meta">Policy → App content → App access</span></h2>
+  <p class="meta">Console choice: <strong>All functionality is available without special access</strong>. Still paste the demo path so reviewers are not stuck on the 2-generate Free gate.</p>
+  <div class="box"><button class="copy" type="button">Copy</button><pre>All core features are available without an account.
+No login.
+
+To review a full schedule:
+1. Open the app
+2. More → Demo   OR   append ?demo=1 to the URL
+3. Wait for generate; open Schedule tab
+4. If a Pro / generate-limit gate appears, Account → Activate license and enter:
+   MSB-PRO-PLAY-REVIEW</pre></div>
+
+  <h2>Data safety cheat <span class="meta">Policy → App content → Data safety</span></h2>
+  <div class="box"><button class="copy" type="button">Copy</button><pre>Does the app collect or share user data? No
+(If the form forces a collection answer: schedules/names/prefs stored on device only, not shared.)
+
+Account required? No
+Data shared with third parties? No
+Sold? No
+Encrypted in transit? Yes — HTTPS when online
+Users can delete data? Yes — clear app / site data or uninstall
+Independent security review? No</pre></div>
+
+  <h2>Contact &amp; policy URLs</h2>
+  <div class="box"><button class="copy" type="button">Copy</button><pre>Privacy policy: https://bryanralston.github.io/schedule-builder/legal/privacy.html
 Terms: https://bryanralston.github.io/schedule-builder/legal/terms.html
-Support email: (set in Play Console)
+Support email: b.ralston62989@gmail.com
 App package: com.managerschedulebuilder.pro
+Price: $19.99 one-time
 Sales page: https://bryanralston.github.io/schedule-builder/buy.html</pre></div>
 
   <h2>Content rating questionnaire tips</h2>
@@ -69,16 +101,20 @@ Sales page: https://bryanralston.github.io/schedule-builder/buy.html</pre></div>
     <li>No ads / no gambling / no violence</li>
     <li>Business utility; not targeted at children</li>
     <li>Does not require account for core features</li>
+    <li>Not a health, government, or financial app</li>
   </ul>
 
-  <h2>Graphic assets needed</h2>
+  <h2>Graphic assets</h2>
   <ul>
-    <li>App icon — already generated (512px)</li>
-    <li>Feature graphic 1024×500 — create in Canva (“Fair schedules in minutes”)</li>
-    <li>Phone screenshots — Setup, Requests, Schedule score, Excel export (min 2)</li>
+    <li>App icon — <code>store/play-assets/hi-res-icon-512.png</code> or <code>icons/icon-512.png</code></li>
+    <li>Feature graphic 1024×500 — <code>store/feature-graphic-1024x500.png</code> (generic; keep)</li>
+    <li>Phone 1 Setup — <code>store/screenshots/01-setup.png</code></li>
+    <li>Phone 2 Requests — <code>store/screenshots/02-requests.png</code></li>
+    <li>Phone 3 Rules — <code>store/screenshots/03-rules.png</code></li>
+    <li>Phone 4 Schedule board — <code>store/screenshots/04-schedule-score.png</code></li>
+    <li>Phone 5 Review sheet — <code>store/screenshots/05-review-sheet.png</code> (alias <code>05-publish-setup.png</code>)</li>
   </ul>
-
-  <p class="meta">Icon files ship with the app under icons/. Feature graphic: store/feature-graphic-1024x500.png. Screenshots: store/screenshots/.</p>
+  <p class="meta">Same files live under <code>store/play-assets/</code>. Recapture: <code>node scripts/capture-play-screenshots.mjs</code>. Full Console checklist: <a href="../docs/PLAY_REVIEW.md">docs/PLAY_REVIEW.md</a>.</p>
 
   <script>
     document.querySelectorAll('button.copy').forEach((btn) => {

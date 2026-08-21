@@ -1,5 +1,5 @@
 /**
- * v2.6.7 Play-launch polish: clopen copy, generate toasts, next-period tab,
+ * v2.6.8 Play-launch polish: clopen copy, generate toasts, next-period tab,
  * feedback page, hide Publish setup, first-run offline, AM close-floor warn.
  * Run: node tests/test-v267-play-polish.mjs
  */
@@ -61,14 +61,14 @@ function toastText() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.7 Play-launch polish ===');
+  console.log('\n=== v2.6.8 Play-launch polish ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.7') pass('version.json', version.version);
+  if (version.version === '2.6.8') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.7'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.8'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
   if (sw.includes("'./feedback.html'") || sw.includes('"./feedback.html"')) pass('sw-precache-feedback');
   else fail('sw-precache-feedback', 'feedback.html missing from PRECACHE');
@@ -79,7 +79,7 @@ async function main() {
   const feedback = read('feedback.html');
   const stagingPs1 = read('scripts/publish-staging.ps1');
 
-  if (index.includes("const APP_VERSION = '2.6.7'") && index.includes('id="app-version-label">v2.6.7')) {
+  if (index.includes("const APP_VERSION = '2.6.8'") && index.includes('id="app-version-label">v2.6.8')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -132,8 +132,8 @@ async function main() {
     fail('no-publish-setup-chrome', 'install.html still linked from index.html');
   } else pass('no-publish-setup-chrome');
 
-  if (/mailto:b\.ralston62989@gmail\.com/.test(index)) {
-    fail('no-mailto-in-app', 'raw support mailto in index.html');
+  if (/mailto:b\.ralston62989@gmail\.com/.test(index) || /mailto:b\.ralston62989@gmail\.com/.test(feedback)) {
+    fail('no-mailto-in-app', 'raw support mailto in scheduler or feedback.html');
   } else pass('no-mailto-in-app');
 
   if (/id: 'feedback'/.test(index) && !/id: 'publish'/.test(index) && !/label: 'Sign in'/.test(index)) {
@@ -152,9 +152,11 @@ async function main() {
   if (floor && floor[1] === 'warning') pass('am-close-2-floor-warning');
   else fail('am-close-2-floor-warning', floor ? floor[1] : 'not found');
 
+  const FORM_ID = '1FAIpQLSdTItic0S6Z0PPjZHqMrxCOuOTJ-kDpEeZPMssry-14DCqq4Q';
   if (!existsSync(join(ROOT, 'feedback.html'))) fail('feedback-file', 'missing');
-  else if (!/Send feedback/.test(feedback) || !/fb-note/.test(feedback)) fail('feedback-file', 'missing form');
-  else pass('feedback-file');
+  else if (!/Send feedback/.test(feedback) || !feedback.includes(FORM_ID) || /mailto:/i.test(feedback)) {
+    fail('feedback-file', 'must be a thin Google Form redirect with no mailto');
+  } else pass('feedback-file');
 
   if (/feedback\.html/.test(stagingPs1)) pass('publish-staging-lists-feedback');
   else fail('publish-staging-lists-feedback', 'scripts/publish-staging.ps1');
@@ -193,7 +195,7 @@ async function main() {
         subtitle: (document.querySelector('.subtitle') || {}).textContent || '',
       };
     });
-    if (boot.ver === '2.6.7') pass('live-app-version', boot.ver);
+    if (boot.ver === '2.6.8') pass('live-app-version', boot.ver);
     else fail('live-app-version', boot.ver);
     if (!boot.authLocked && boot.shellDisplay === 'none') pass('first-run-offline-no-auth-shell', boot.shellDisplay);
     else fail('first-run-offline-no-auth-shell', JSON.stringify(boot));
@@ -253,16 +255,14 @@ async function main() {
       pass('next-period-requests', nextP.toast);
     } else fail('next-period-requests', JSON.stringify(nextP));
 
-    await page.goto(base + '/feedback.html?v=2.6.7', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    const fb = await page.evaluate(() => ({
-      title: document.title,
-      ver: (document.getElementById('fb-version') || {}).value || '',
-      hasNote: !!document.getElementById('fb-note'),
-      hasCopy: !!document.getElementById('btn-copy'),
-      hasEmail: !!document.getElementById('btn-email'),
-    }));
-    if (fb.hasNote && fb.hasCopy && fb.hasEmail && fb.ver === '2.6.7') pass('feedback-page', JSON.stringify(fb));
-    else fail('feedback-page', JSON.stringify(fb));
+    const fbResp = await page.goto(base + '/feedback.html?v=2.6.8', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const fbUrl = page.url();
+    const fbHtml = await page.content();
+    const formHit = /1FAIpQLSdTItic0S6Z0PPjZHqMrxCOuOTJ-kDpEeZPMssry-14DCqq4Q/.test(fbUrl + fbHtml)
+      || /docs\.google\.com\/forms/.test(fbUrl);
+    const mailed = /mailto:b\.ralston62989@gmail\.com/i.test(fbHtml);
+    if (formHit && !mailed) pass('feedback-page', fbUrl);
+    else fail('feedback-page', JSON.stringify({ fbUrl, mailed, status: fbResp && fbResp.status() }));
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

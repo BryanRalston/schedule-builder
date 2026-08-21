@@ -4599,7 +4599,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <!-- WELCOME / ONBOARDING -->
   <div class="welcome-card no-print compact" id="welcome-card">
     <h2 id="welcome-title">Build the period. Post with confidence.</h2>
-    <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen control. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel.</p>
+    <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
     <div class="welcome-actions">
       <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
       <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
@@ -4947,7 +4947,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.7-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro (Staging)</strong> · <span id="app-version-label">v2.6.8-staging</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7075,7 +7075,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.7-staging';
+const APP_VERSION = '2.6.8-staging';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';

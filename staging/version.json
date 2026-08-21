@@ -1,8 +1,8 @@
 {
   "name": "Manager Schedule Builder Pro (Staging)",
-  "version": "2.6.6-staging",
+  "version": "2.6.7-staging",
   "platform": "pwa",
   "playPackage": "com.managerschedulebuilder.pro",
   "staging": true,
-  "sourceVersion": "2.6.6"
+  "sourceVersion": "2.6.7"
 }

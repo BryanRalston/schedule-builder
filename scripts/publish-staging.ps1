@@ -31,6 +31,7 @@ $files = @(
   'index.html',
   'sw.js',
   'buy.html',
+  'feedback.html',
   'install.html',
   'monetization.json',
   'version.json',
@@ -83,7 +84,7 @@ Set-Utf8NoBom $swPath $sw
 Write-Host "SW CACHE → $stagingCache"
 
 # --- isolation: localStorage keys + branding in HTML ---
-$htmlFiles = @('index.html', 'buy.html', 'install.html')
+$htmlFiles = @('index.html', 'buy.html', 'feedback.html', 'install.html')
 foreach ($name in $htmlFiles) {
   $path = Join-Path $Staging $name
   if (-not (Test-Path $path)) { continue }

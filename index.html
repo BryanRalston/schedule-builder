@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Manager Schedule Builder Pro — preference-driven retail scheduling for store managers. NRF 4-5-4 calendar, fair weekends, clopen prevention, role rules, labor hours, Word/Excel export. Works offline.">
+<meta name="description" content="Manager Schedule Builder Pro — preference-driven retail scheduling for store managers. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Works offline. Always review before you post.">
 <meta name="theme-color" content="#070b14">
 <meta name="application-name" content="Schedule Pro">
 <meta name="mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta property="og:title" content="Manager Schedule Builder Pro">
-<meta property="og:description" content="Fair retail schedules in minutes. NRF 4-5-4, no clopens, role rules, offline.">
+<meta property="og:description" content="Fair retail schedules in minutes. NRF 4-5-4, PTO, role rules, offline. Always review before you post.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icons/icon-512.png">
 <title>Schedule Pro · Manager Shifts</title>
@@ -4520,7 +4520,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <span class="local-status-pill" id="local-status-pill" title="Last local save"><span class="pill-text">Saved</span></span>
       </span>
     </div>
-    <div class="subtitle">Manager shifts · NRF periods · Fair weekends · No clopens</div>
+    <div class="subtitle">Manager shifts · NRF periods · Fair weekends · Review before you post</div>
   </div>
   <div class="header-actions no-print">
     <button type="button" class="btn-outline btn-cmdk" id="btn-cmd-palette" onclick="openCommandPalette()" style="color:#fff;border-color:rgba(255,255,255,0.3)" title="Command palette (Ctrl+K)">⌘K</button>
@@ -4542,10 +4542,10 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" onclick="togglePeakSeasonPref(); closeHeaderMenu()">Toggle peak season</button>
         <button type="button" onclick="startNextPeriodSameTeam(); closeHeaderMenu()">Next period same team</button>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()">How it works</button>
+        <button type="button" onclick="openFeedbackPage()">Send feedback</button>
         <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()">Take tour</button>
         <button type="button" onclick="openAccountPanel(); closeHeaderMenu()">Account &amp; license</button>
         <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label>Buy Pro — $19.99</button>
-        <button type="button" onclick="location.href='install.html'; closeHeaderMenu()">Install / Play path</button>
       </div>
     </div>
   </div>
@@ -4932,11 +4932,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.6</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.7</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
+    <button type="button" onclick="openFeedbackPage()">Send feedback</button>
     <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
-    <button type="button" onclick="location.href='install.html'">Publish setup</button>
     <button type="button" onclick="location.href='legal/privacy.html'">Privacy</button>
   </div>
 </footer>
@@ -6198,7 +6198,7 @@ function updateAccountChip() {
       })();
   if (!s) {
     if (avatar) avatar.textContent = '?';
-    if (nameEl) nameEl.textContent = 'Sign in';
+    if (nameEl) nameEl.textContent = 'Account';
     if (planEl) {
       planEl.textContent = planText;
       planEl.classList.toggle('is-pro', pro);
@@ -7060,7 +7060,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.6';
+const APP_VERSION = '2.6.7';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7133,6 +7133,12 @@ function restoreWelcomeState() {
     }
   } catch(e) {}
   if (typeof personalizeWelcome === 'function') personalizeWelcome();
+}
+
+function openFeedbackPage() {
+  try { closeHeaderMenu(); } catch (e) {}
+  const v = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '';
+  location.href = 'feedback.html?v=' + encodeURIComponent(v);
 }
 
 function showHowItWorks() {
@@ -7690,7 +7696,7 @@ function explainQualityScore(q, genReport, ROLES) {
         : 'Clopen preference is costing points — check close→open pairs.'
     );
   } else if (q.avoidOn !== false) {
-    tips.push('No clopens under current preferences.');
+    tips.push('No close→open pairs under current preferences — still review before posting.');
   }
   if ((q.parts.weekend || 0) < 20 && n) {
     const met = q.met != null ? q.met : 0;
@@ -7873,14 +7879,26 @@ function scoreRingSVG(score) {
   </svg>`;
 }
 
+function isPlaceholderManagerName(n) {
+  const s = String(n || '').trim();
+  if (!s) return true;
+  if (/^store manager$/i.test(s)) return true;
+  if (/^am\d+$/i.test(s)) return true;
+  if (/^assistant manager(\s*\d+)?$/i.test(s)) return true;
+  if (/^key carrier(\s*\d+)?$/i.test(s)) return true;
+  return false;
+}
+
+function managersAreNamed() {
+  const names = typeof getManagerNames === 'function' ? getManagerNames() : {};
+  return Object.values(names).filter((n) => !isPlaceholderManagerName(n)).length >= 2;
+}
+
 function updateReadyChecklist() {
   const el = document.getElementById('ready-checklist');
   if (!el) return;
   const hasPeriod = !!(periodDates && periodDates.length && currentPeriod);
-  const names = getManagerNames ? getManagerNames() : {};
-  const hasNames = !!(names.sm && names.sm.trim() && names.sm !== 'Store Manager' ? true : (names.sm && names.sm.length > 0));
-  // Consider ready if period loaded; names optional but recommended
-  const named = Object.values(names).filter(n => n && String(n).trim()).length >= 2;
+  const named = managersAreNamed();
   const hasPrefs = typeof preferences !== 'undefined';
   const storeName = ((document.getElementById('store-name') || {}).value || '').trim();
   const canGen = canGenerateSchedule();
@@ -9098,6 +9116,16 @@ function generateSchedule() {
   if (_generateBusy) return;
   if (window._viewLocked) {
     showToast('View only - cannot generate.', 'warn');
+    return;
+  }
+  if (!periodDates || !periodDates.length || !currentPeriod) {
+    showToast('Load a fiscal period first (Setup → Load Period).', 'warn');
+    switchTab('setup');
+    return;
+  }
+  if (!managersAreNamed()) {
+    showToast('Name your managers on Setup before building.', 'warn');
+    switchTab('setup');
     return;
   }
   if (!requireGenerateAllowance()) return;
@@ -11430,7 +11458,7 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
       const maxTarget = amFixed ? target : target;
       // Auto mode allows +1 slack for coverage; fixed mode is exact with +1 soft slack
       if (closes < minTarget) {
-        v('error', 'am-close-2', r, w, null,
+        v('warning', 'am-close-2', r, w, null,
           `${names[r]}: Week ${w+1} has ${closes} closes (need at least ${minTarget}${amFixed ? '' : ' — auto share'})`);
       } else if (closes > maxTarget + 1) {
         v('error', 'am-close-2', r, w, null,
@@ -13113,7 +13141,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
         <p>${bannerText}</p>
         <div class="score-bars">
           ${bar('Hard rules', q.parts.hard, 40)}
-          ${bar('No clopens', q.parts.clopen, 20)}
+          ${bar('Clopen avoidance', q.parts.clopen, 20)}
           ${bar('Weekends', q.parts.weekend, 20)}
           ${bar('Work streaks', q.parts.streak, 10)}
           ${bar('Soft prefs', q.parts.soft, 10)}
@@ -14619,7 +14647,7 @@ const TOUR_STEPS = [
     tab: 'setup',
     highlight: 'app-tabs',
     title: 'Welcome to Schedule Pro',
-    body: 'Build fair manager schedules fully offline. Use the tabs to set up your team, lock requests, tune rules, then generate. Continue offline is already available on the sign-in screen.'
+    body: 'Build fair manager schedules fully offline. Use the tabs to set up your team, lock requests, tune rules, then generate. No account required.'
   },
   {
     tab: 'setup',
@@ -15476,8 +15504,9 @@ function startNextPeriodSameTeam() {
   buildInputTabs();
   buildInputCalendar(activeTab);
   const pNum = currentPeriod ? currentPeriod.number : nextIdx + 1;
-  switchTab('schedule');
-  showToast('Period ' + pNum + ' ready — set requests then Build', 'success');
+  if (currentPeriod && periodDates && periodDates.length) switchTab('requests');
+  else switchTab('setup');
+  showToast('Paint next period RTO/PTO, then Build.', 'success');
 }
 
 function requestPaintModeLabel(mode) {
@@ -15758,6 +15787,7 @@ function getCommandPaletteCommands() {
     { id: 'load', label: 'Load saved schedules', group: 'File', run: () => openSavedSchedulesModal() },
     { id: 'save-team', label: 'Save team template', group: 'Team', run: () => saveTeamTemplate() },
     { id: 'tour', label: 'Take tour', group: 'Help', run: () => startOnboardingTour(true) },
+    { id: 'feedback', label: 'Send feedback', group: 'Help', run: () => openFeedbackPage() },
     { id: 'peak', label: 'Toggle peak season', group: 'Rules', run: () => togglePeakSeasonPref() },
     { id: 'hc', label: 'Toggle high-contrast', group: 'View', run: () => toggleHighContrast() },
     { id: 'dens-c', label: 'Density: Compact', group: 'View', run: () => setDensityMode('compact') },

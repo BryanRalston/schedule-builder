@@ -2,7 +2,7 @@
   "id": "./staging",
   "name": "Manager Schedule Builder Pro (Staging)",
   "short_name": "Schedule Pro Staging",
-  "description": "Preference-driven retail manager scheduling. NRF 4-5-4 calendar, fair weekends, clopen prevention, role rules, labor hours, Word/Excel export. Works offline.",
+  "description": "Preference-driven retail manager scheduling. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Works offline. Always review before you post.",
   "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",

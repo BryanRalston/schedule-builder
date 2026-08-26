@@ -196,7 +196,8 @@ async function main() {
       const sheet = document.getElementById('review-sheet');
       const text = (sheet && sheet.innerText) || '';
       const mustClopen = /Must[\s\S]{0,80}clopen/i.test(text);
-      const ban = /clopening ban|clopen-free|hard constraint/i.test(text);
+      const ban = /clopening ban|clopen-free|zero clopen/i.test(text)
+        || /clopen[\s\S]{0,40}hard constraint|hard constraint[\s\S]{0,40}clopen/i.test(text);
       return {
         open: !!(sheet && !sheet.hidden),
         mustClopen,

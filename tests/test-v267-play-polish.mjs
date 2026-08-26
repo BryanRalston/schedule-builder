@@ -162,7 +162,11 @@ async function main() {
   else fail('publish-staging-lists-feedback', 'scripts/publish-staging.ps1');
 
   const { server, base } = await startStaticServer();
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    executablePath: existsSync('/usr/bin/google-chrome-stable') ? '/usr/bin/google-chrome-stable' : undefined,
+    headless: true,
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
+  });
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 
   try {

@@ -70,7 +70,7 @@ async function main() {
   console.log('\n=== v2.6.9 first-run Start with my team ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.9') pass('version.json', version.version);
+  if (version.version === '2.6.10') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const index = read('index.html');
@@ -89,6 +89,13 @@ async function main() {
   if (/Next: Requests/.test(index)) {
     fail('setup-footer-not-gauntlet', 'old Next: Requests still present');
   } else pass('setup-footer-not-gauntlet');
+
+  if (/function placePortaledMenu\(/.test(index) && /function layerRectFromClient\(/.test(index)) {
+    pass('menu-layer-helpers');
+  } else fail('menu-layer-helpers', 'missing placePortaledMenu / layerRectFromClient');
+  if (/#sched-edit-portal\.is-open/.test(index) && /\.sched-edit-menu \{\s*position: absolute;/.test(index)) {
+    pass('menu-portal-layer-css');
+  } else fail('menu-portal-layer-css', 'portal/menu positioning CSS');
 
   const { chromium } = { chromium: await loadChromium() };
   const { server, base } = await startStaticServer();
@@ -172,6 +179,59 @@ async function main() {
     if (built.tab === 'schedule' && built.named && built.cells > 20 && /Schedule ready/.test(built.toast)) {
       pass('build-from-setup-named', built.cells + ' cells');
     } else fail('build-from-setup-named', JSON.stringify(built));
+
+    const desk = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await desk.goto(base + '/index.html?pro=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await desk.evaluate(() => {
+      localStorage.clear();
+      localStorage.setItem('msb_tour_done', '1');
+      localStorage.setItem('msb_welcome_dismissed', '1');
+      localStorage.setItem('msb_pro_license', JSON.stringify({ key: 'TEST-PRO-KEY-999', unlockedAt: Date.now() }));
+    });
+    await desk.reload({ waitUntil: 'domcontentloaded' });
+    await desk.waitForTimeout(500);
+    await desk.evaluate(() => {
+      if (typeof dismissWelcome === 'function') dismissWelcome();
+      if (typeof skipOnboardingTour === 'function') skipOnboardingTour();
+      const sm = document.getElementById('name-sm');
+      const am1 = document.getElementById('name-am1');
+      if (sm) sm.value = 'Pat Nguyen';
+      if (am1) am1.value = 'Chris Ortiz';
+      persistManagerNames();
+      buildFromSetup();
+    });
+    await desk.waitForTimeout(1800);
+    const menuHit = await desk.evaluate(async () => {
+      const cells = [...document.querySelectorAll('#schedule-grid td.shift-editable')];
+      const work = cells.find((c) => /O |C |M /i.test(c.textContent || ''));
+      if (!work) return { error: 'no work cell' };
+      work.scrollIntoView({ block: 'center' });
+      work.click();
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const menu = document.querySelector('.sched-edit-menu');
+      const off = menu && [...menu.querySelectorAll('button')].find((b) => /^Off$/i.test((b.textContent || '').trim()));
+      if (!off) return { error: 'no Off button', portalOpen: document.getElementById('sched-edit-portal')?.classList.contains('is-open') };
+      const r = off.getBoundingClientRect();
+      const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      const hitOff = !!(el && (el === off || (el.closest && el.closest('button') === off)));
+      const menuPos = getComputedStyle(menu).position;
+      const role = work.getAttribute('data-role');
+      const dk = work.getAttribute('data-dk');
+      off.click();
+      await new Promise((res) => setTimeout(res, 250));
+      const live = document.querySelector('td.shift-editable[data-role="' + role + '"][data-dk="' + dk + '"]');
+      return {
+        hitOff,
+        hitText: el ? (el.textContent || '').trim().slice(0, 24) : '',
+        menuPos,
+        stored: schedule[role] && schedule[role][dk],
+        after: live ? (live.textContent || '').replace(/\s+/g, ' ').trim() : '',
+      };
+    });
+    if (menuHit.hitOff && menuHit.menuPos === 'absolute' && menuHit.stored === 'off') {
+      pass('desktop-off-hit-matches-paint', menuHit.after);
+    } else fail('desktop-off-hit-matches-paint', JSON.stringify(menuHit));
+    await desk.close();
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

@@ -3070,10 +3070,17 @@ input[type="radio"] { accent-color: var(--gold); }
   flex-wrap: wrap;
 }
 .tab-footer-nav button { font-size: 0.85rem; }
+#tab-setup .tab-footer-nav .btn-success { min-width: 10.5rem; }
 
 @media (max-width: 640px) {
   .app-tab { padding: 0.85rem 0.75rem; font-size: 0.82rem; }
   .tab-panel { padding: 1rem; }
+  #tab-setup .tab-footer-nav {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  #tab-setup .tab-footer-nav .btn-success,
+  #tab-setup .tab-footer-nav .btn-secondary { width: 100%; }
 }
 @media print {
   .app-tabs, .tab-footer-nav, .empty-schedule, .sub-tabs { display: none !important; }
@@ -4586,8 +4593,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <h2 id="welcome-title">Build the period. Post with confidence.</h2>
     <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
     <div class="welcome-actions">
-      <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
-      <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
+      <button class="btn-demo" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
+      <button class="btn-primary" onclick="loadDemoStore()">Tour sample store</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="startOnboardingTour(true)">Take tour</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
       <button class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
@@ -4723,8 +4730,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     </div>
   </div>
       <div class="tab-footer-nav">
-        <span></span>
-        <button type="button" class="btn-primary" onclick="switchTab('requests')">Next: Requests →</button>
+        <button type="button" class="btn-secondary" onclick="switchTab('requests')">Requests (optional)</button>
+        <button type="button" class="btn-success" id="btn-build-from-setup" onclick="buildFromSetup()">Build this period</button>
       </div>
     </div>
 
@@ -4837,7 +4844,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   </div>
       <div id="schedule-empty" class="empty-schedule no-print">
         <strong>No schedule yet</strong>
-        Load a period, set any requests, then generate. Or try the demo.
+        Name two managers on Setup, then Build. Requests and rules can wait.
         <div style="margin-top:0.85rem">
           <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore()">Try Demo</button>
           <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
@@ -4932,7 +4939,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.8</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.9</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7060,7 +7067,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.8';
+const APP_VERSION = '2.6.9';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7125,6 +7132,48 @@ function dismissWelcome() {
   try { localStorage.setItem('msb_welcome_dismissed', '1'); } catch(e) {}
 }
 
+function startWithMyTeam() {
+  try { dismissWelcome(); } catch (e) {}
+  try {
+    if (typeof endOnboardingTour === 'function') endOnboardingTour(true);
+    else if (typeof setTourDone === 'function') setTourDone();
+  } catch (e) {}
+  if (typeof switchTab === 'function') switchTab('setup');
+  setTimeout(() => {
+    const sm = document.getElementById('name-sm');
+    if (sm) {
+      try { sm.focus({ preventScroll: true }); } catch (e2) { try { sm.focus(); } catch (e3) {} }
+      if (typeof isPlaceholderManagerName === 'function' && isPlaceholderManagerName(sm.value)) {
+        try { sm.select(); } catch (e4) {}
+      }
+    }
+    const team = document.querySelector('#tab-setup .setup-left') || sm;
+    if (team && typeof team.scrollIntoView === 'function') {
+      team.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 50);
+  showToast('Name two managers, then Build this period. Requests can wait.', 'info');
+}
+
+function buildFromSetup() {
+  try { persistManagerNames(); } catch (e) {}
+  try { persistStoreMeta(); } catch (e) {}
+  if (typeof managersAreNamed === 'function' && !managersAreNamed()) {
+    if (typeof switchTab === 'function') switchTab('setup');
+    const sm = document.getElementById('name-sm');
+    if (sm) {
+      try { sm.focus({ preventScroll: true }); } catch (e2) { try { sm.focus(); } catch (e3) {} }
+      if (typeof isPlaceholderManagerName === 'function' && isPlaceholderManagerName(sm.value)) {
+        try { sm.select(); } catch (e4) {}
+      }
+    }
+    showToast('Name your managers on Setup before building.', 'warn');
+    return;
+  }
+  if (typeof switchTab === 'function') switchTab('schedule');
+  if (typeof generateSchedule === 'function') generateSchedule();
+}
+
 function restoreWelcomeState() {
   try {
     if (localStorage.getItem('msb_welcome_dismissed') === '1') {
@@ -7149,7 +7198,7 @@ function showHowItWorks() {
     c.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   switchTab('setup');
-  showToast('Tabs: Setup → Requests → Rules → Schedule. Try Demo for a full walkthrough.', 'info');
+  showToast('Name two managers on Setup, then Build. Requests and rules are optional.', 'info');
 }
 
 function persistStoreMeta() {

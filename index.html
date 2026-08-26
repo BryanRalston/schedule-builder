@@ -2505,6 +2505,13 @@ input[type="radio"] { accent-color: var(--gold); }
   gap: 0.4rem;
   margin-top: 0.75rem;
 }
+.score-backup-hint {
+  flex: 1 0 100%;
+  margin: 0 0 0.1rem;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  font-weight: 500;
+}
 .score-why {
   margin-top: 0.75rem;
   padding: 0.65rem 0.75rem;
@@ -2799,6 +2806,13 @@ input[type="radio"] { accent-color: var(--gold); }
   background: rgba(61,220,255,0.1);
   color: #9ae8ff;
   filter: none;
+}
+.header-menu-hint {
+  margin: 0.2rem 0.75rem 0.35rem;
+  font-size: 0.72rem;
+  color: var(--ink-3);
+  line-height: 1.35;
+  font-weight: 500;
 }
 
 /* ========== APP TABS (clean workspace) ========== */
@@ -4197,6 +4211,7 @@ body.msb-board-live .app-footer { display: none !important; }
     font-size: 0.68rem !important;
     padding: 0.22rem 0.42rem !important;
   }
+  #schedule-toolbar .toolbar-menu { display: none; }
 }
 
 #cmd-palette {
@@ -4554,7 +4569,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" onclick="window.print(); closeHeaderMenu()">Print</button>
         <button type="button" onclick="exportSchedule(); closeHeaderMenu()">Export Word</button>
         <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()">Export Excel</button>
-        <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON</button>
+        <p class="header-menu-hint">New phone? Export a JSON backup, then Load. No cloud — file stays yours.</p>
+        <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON — new phone</button>
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
         <button type="button" onclick="setDensityMode('compact'); closeHeaderMenu()">Density: Compact</button>
         <button type="button" onclick="setDensityMode('comfortable'); closeHeaderMenu()">Density: Comfortable</button>
@@ -4628,7 +4644,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <!-- TAB: SETUP -->
     <div class="tab-panel active" id="tab-setup" role="tabpanel" aria-labelledby="tabbtn-setup">
       <div class="tab-panel-title">Store & team</div>
-      <div class="tab-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating.</div>
+      <div class="tab-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.</div>
 <!-- SETUP SECTION -->
   <div class="section no-print" style="border:none">
     <div class="section-body" id="setup-body" style="padding:0" data-tour="setup-team">
@@ -4796,7 +4812,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <!-- filled by renderPreferencesUI() -->
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;margin-top:0.75rem">
-        <p class="text-muted mt-1" style="margin:0">These preferences guide Generate Schedule. Hard constraints (PTO/RTO/LOA, coverage, clopening ban when on) always win over soft goals.</p>
+        <p class="text-muted mt-1" style="margin:0">These preferences guide Generate Schedule. Hard constraints (PTO/RTO/LOA, coverage) always win. Clopen-avoidance is a preference — not a guarantee. Review before you post.</p>
         <button class="btn-secondary" onclick="resetPreferences()" style="font-size:0.75rem;white-space:nowrap">Reset Preferences</button>
       </div>
     </div>
@@ -4894,7 +4910,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <button type="button" onclick="exportSchedule(); closeToolbarExportMenu()">Word</button>
             <button type="button" onclick="exportScheduleExcel(); closeToolbarExportMenu()">Excel</button>
             <button type="button" onclick="copySummaryText(); closeToolbarExportMenu()">Copy summary</button>
-            <button type="button" onclick="exportBackupJSON(); closeToolbarExportMenu()">Backup JSON</button>
+            <button type="button" onclick="exportBackupJSON(); closeToolbarExportMenu()">Backup JSON — new phone</button>
           </div>
         </div>
         <span class="gen-timestamp" id="gen-timestamp"></span>
@@ -4953,7 +4969,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.10</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.11</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -6181,18 +6197,16 @@ function updateAuthProviderButtons() {
 function updateAuthSupportNote() {
   const el = document.getElementById('auth-sso-note');
   if (!el) return;
-  const email = monetizationConfig.supportEmail || 'support';
   const g = hasGoogleOAuth();
   const m = hasMicrosoftOAuth();
   if (g && m) {
-    el.textContent = 'SSO ready · Google & Microsoft OAuth · contact ' + email;
+    el.textContent = 'SSO ready · Google & Microsoft OAuth';
   } else if (g) {
-    el.textContent = 'SSO · Google OAuth on · Microsoft preview · ' + email;
+    el.textContent = 'SSO · Google OAuth on · Microsoft preview';
   } else if (m) {
-    el.textContent = 'SSO · Microsoft OAuth on · Google preview · ' + email;
+    el.textContent = 'SSO · Microsoft OAuth on · Google preview';
   } else {
-    el.textContent =
-      'SSO preview mode · set client IDs in monetization.json · ' + email;
+    el.textContent = 'SSO preview mode · set client IDs in monetization.json';
   }
   updateAuthProviderButtons();
 }
@@ -6881,7 +6895,7 @@ function renderPreferencesUI() {
         <span class="toggle-track"></span>
         Avoid clopening
       </label>
-      <div class="pref-desc">No Close / Ext. Close followed by Open the next day. On by default (hard constraint).</div>
+      <div class="pref-desc">Prefer no Close / Ext. Close followed by Open the next day. On by default — a preference, not a guarantee. Coverage still wins.</div>
     </div>
     <div class="pref-card">
       <label class="toggle-switch">
@@ -7081,7 +7095,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.10';
+const APP_VERSION = '2.6.11';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7741,12 +7755,12 @@ function explainQualityScore(q, genReport, ROLES) {
   if (!q) return [];
   const tips = [];
   const n = (ROLES && ROLES.length) || 0;
-  if ((q.parts.hard || 0) < 40) {
-    const hard = q.hard != null ? q.hard : (genReport && genReport.hardErrorCount) || 0;
+  const mustFix = countMustFixErrors(genReport);
+  if (mustFix > 0) {
     tips.push(
-      hard === 1
+      mustFix === 1
         ? '1 must-fix issue remains (coverage, hours, or role rules). Fix those first.'
-        : hard + ' must-fix issues remain (coverage, hours, or role rules). Fix those first.'
+        : mustFix + ' must-fix issues remain (coverage, hours, or role rules). Fix those first.'
     );
   } else {
     tips.push('Must-fix rules look clean — openers, closers, and role constraints hold.');
@@ -7755,7 +7769,7 @@ function explainQualityScore(q, genReport, ROLES) {
     const cl = q.cl != null ? q.cl : (genReport && genReport.totalClopens) || 0;
     tips.push(
       cl
-        ? cl + ' clopen(s) remain (close then open the next day). Swap those before posting.'
+        ? cl + ' clopen(s) remain (close then open the next day). Preference — review those pairs before you post.'
         : 'Clopen preference is costing points — check close→open pairs.'
     );
   } else if (q.avoidOn !== false) {
@@ -7780,6 +7794,15 @@ function explainQualityScore(q, genReport, ROLES) {
   return tips.slice(0, 6);
 }
 
+/** Hard errors that are not leftover clopens (preference, not a ban). */
+function countMustFixErrors(genReport) {
+  const hard = (genReport && genReport.hardErrorCount) || 0;
+  const cl = (genReport && genReport.totalClopens) || 0;
+  const avoidOn = !!(genReport && genReport.prefs && genReport.prefs.avoidClopening);
+  if (!avoidOn || cl <= 0) return hard;
+  return Math.max(0, hard - cl);
+}
+
 /** Build actionable posting issues from the last generation report + violations. */
 function buildPostingIssues(genReport, ROLES, warnings) {
   const issues = [];
@@ -7787,7 +7810,7 @@ function buildPostingIssues(genReport, ROLES, warnings) {
   const nameOf = (r) => names[r] || r;
 
   if (genReport) {
-    const hard = genReport.hardErrorCount || 0;
+    const hard = countMustFixErrors(genReport);
     if (hard > 0) {
       issues.push({
         sev: 'must',
@@ -7799,9 +7822,9 @@ function buildPostingIssues(genReport, ROLES, warnings) {
     const cl = genReport.totalClopens || 0;
     if (cl > 0 && genReport.prefs && genReport.prefs.avoidClopening) {
       issues.push({
-        sev: 'must',
+        sev: 'review',
         title: cl + ' clopen' + (cl === 1 ? '' : 's') + ' on the board',
-        meta: 'Close followed by open the next morning. Tap a person to edit their week.',
+        meta: 'Preference: close followed by open the next morning. Review before you post.',
         target: 'grid',
         role: null,
       });
@@ -7837,6 +7860,7 @@ function buildPostingIssues(genReport, ROLES, warnings) {
       if (!msg) return;
       // Avoid exact duplicates of hard count banner
       if (/hard constraint/i.test(msg) && issues.some((i) => /must-fix/i.test(i.title))) return;
+      if (/clopen/i.test(msg)) return;
       issues.push({
         sev: w.type === 'error' ? 'must' : 'review',
         title: String(msg).slice(0, 140),
@@ -8130,7 +8154,7 @@ function exportBackupJSON() {
   a.download = `schedule-backup_FY${fiscalYear}-P${currentPeriod.number}_${store}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast('Backup JSON downloaded.', 'success');
+  showToast('Backup JSON downloaded. New phone? Load that file there.', 'success');
 }
 
 function copySummaryText() {
@@ -11352,11 +11376,12 @@ function _generateScheduleInner() {
     });
   });
 
-  const hasErrors = finalViolations.some(v => v.severity === 'error');
+  const hardNonClopen = finalViolations.filter(v => v.severity === 'error' && v.rule !== 'no-clopen');
+  const hasErrors = hardNonClopen.length > 0;
   if (!hasErrors) {
     warnings.unshift({ type: 'info', msg: `All hard constraints satisfied. (${pass} repair pass${pass !== 1 ? 'es' : ''})` });
   } else {
-    warnings.unshift({ type: 'warn', msg: `${finalViolations.filter(v=>v.severity==='error').length} hard constraint(s) remain after ${pass} repair passes.` });
+    warnings.unshift({ type: 'warn', msg: `${hardNonClopen.length} hard constraint(s) remain after ${pass} repair passes.` });
   }
 
   // Build generation quality report
@@ -11381,6 +11406,9 @@ function _generateScheduleInner() {
       left === 0
         ? ' · Free builds used (edits still free)'
         : ' · ' + left + ' free build' + (left === 1 ? '' : 's') + ' left';
+  }
+  if (lastGenReport && lastGenReport.prefs && lastGenReport.prefs.avoidClopening && lastGenReport.totalClopens > 0) {
+    toastMsg += ' · review leftover clopens';
   }
   showToast(toastMsg, hasErrors ? 'warn' : 'success');
   try {
@@ -11441,7 +11469,7 @@ function buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, vi
 
   const totalClopens = Object.values(clopens).reduce((a, b) => a + b, 0);
   if (PREFS.avoidClopening && totalClopens > 0) {
-    unmet.push(`${totalClopens} clopen(s) remain (avoid clopening is ON)`);
+    unmet.push(`${totalClopens} clopen(s) remain (avoid-clopen preference is ON — not a guarantee)`);
   }
 
   // Fairness variance (among same-family roles; SM open preference is expected)
@@ -11459,7 +11487,7 @@ function buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, vi
     }
   }
 
-  const hardErrors = (violations || []).filter(v => v.severity === 'error');
+  const hardErrors = (violations || []).filter(v => v.severity === 'error' && v.rule !== 'no-clopen');
   hardErrors.forEach(e => {
     if (e.detail && !unmet.includes(e.detail)) unmet.push(e.detail);
   });
@@ -12590,7 +12618,7 @@ function renderClopenRadar(ROLES) {
     return (
       '<div class="clopen-radar empty-ok no-print">' +
       '<h3>Clopen radar</h3>' +
-      '<div class="cr-sub">No close→open pairs. Team gets real rest between nights and mornings.</div>' +
+      '<div class="cr-sub">No close→open pairs on this board. Still review before you post.</div>' +
       '</div>'
     );
   }
@@ -13223,14 +13251,14 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     const totalClopens = genReport.totalClopens || 0;
     const avoidOn = genReport.prefs && genReport.prefs.avoidClopening;
     const clopenOk = !avoidOn || totalClopens === 0;
-    const hardOk = (genReport.hardErrorCount || 0) === 0;
+    const hardOk = countMustFixErrors(genReport) === 0;
     const unmet = genReport.unmet || [];
-    const bannerCls = !hardOk || (avoidOn && totalClopens > 0) ? 'bad' : (unmet.length ? 'warn' : 'ok');
+    const bannerCls = !hardOk ? 'bad' : ((avoidOn && totalClopens > 0) || unmet.length ? 'warn' : 'ok');
     const bannerText = bannerCls === 'ok'
       ? 'Must-fix rules look good — check the posting board before you hang this.'
       : (bannerCls === 'bad'
         ? 'Must-fix issues remain — review before you post to the team.'
-        : 'Must-fix rules OK; some preferences not fully met.');
+        : 'Must-fix rules OK; some preferences not fully met. Review before you post.');
 
     const q = genReport.quality || computeQualityScore(genReport, ROLES);
     const postingIssues = buildPostingIssues(genReport, ROLES, warnings);
@@ -13258,8 +13286,9 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
           <ul>${explainQualityScore(q, genReport, ROLES).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
         </div>
         <div class="score-actions no-print">
+          <p class="score-backup-hint">New phone? Export a JSON backup, then Load on the new device.</p>
           <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
-          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON</button>
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON — new phone</button>
           <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
         </div>
       </div>
@@ -13296,7 +13325,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     const metWe = ROLES.filter(r => (genReport.weekendOffs[r] || 0) >= getWeekendTargetForPerson(r)).length;
     html += '<div class="gen-summary">';
     html += `<div class="gen-stat-card"><h4>Weekend days off</h4><div class="stat-value ${metWe === ROLES.length ? 'ok' : 'warn'}">${metWe}/${ROLES.length}</div><div class="stat-sub">met target (avg ${avgWe.toFixed(1)}, goal ${weTarget})</div></div>`;
-    html += `<div class="gen-stat-card"><h4>Clopens</h4><div class="stat-value ${clopenOk ? 'ok' : 'bad'}">${totalClopens}</div><div class="stat-sub">${avoidOn ? 'Avoid clopening ON' : 'Avoid clopening OFF'}</div></div>`;
+    html += `<div class="gen-stat-card"><h4>Clopens</h4><div class="stat-value ${clopenOk ? 'ok' : 'warn'}">${totalClopens}</div><div class="stat-sub">${avoidOn ? 'Avoid-clopen preference ON' : 'Avoid-clopen preference OFF'}</div></div>`;
     const totalOpens = ROLES.reduce((s,r)=>s+(genReport.opens[r]||0),0);
     const totalCloses = ROLES.reduce((s,r)=>s+(genReport.closes[r]||0),0);
     const totalMids = ROLES.reduce((s,r)=>s+(genReport.mids[r]||0),0);
@@ -15888,6 +15917,7 @@ function getCommandPaletteCommands() {
     { id: 'export-w', label: 'Export Word', group: 'Export', run: () => exportSchedule() },
     { id: 'export-x', label: 'Export Excel', group: 'Export', run: () => exportScheduleExcel() },
     { id: 'copy-sum', label: 'Copy summary', group: 'Export', run: () => copySummaryText() },
+    { id: 'backup-json', label: 'Backup JSON — new phone', group: 'Export', run: () => exportBackupJSON() },
     { id: 'clear', label: 'Clear schedule', group: 'Schedule', run: () => clearSchedule() },
     {
       id: 'offline-info',

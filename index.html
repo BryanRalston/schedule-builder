@@ -489,9 +489,8 @@ input[type="radio"] { accent-color: var(--gold); }
 /* Cell context menu */
 .cell-menu {
   position: absolute;
-  top: 100%;
-  left: 0;
   z-index: 100;
+  pointer-events: auto;
   background: rgba(12, 18, 32, 0.97);
   border: 1px solid var(--line-strong);
   border-radius: 8px;
@@ -1624,17 +1623,29 @@ input[type="radio"] { accent-color: var(--gold); }
 
 
 /* Overlay for cell menu */
-.overlay { position: fixed; inset: 0; z-index: 50; }
+.overlay { position: absolute; inset: 0; z-index: 50; pointer-events: auto; }
+#cell-menu-portal.is-open,
+#sched-edit-portal.is-open,
+#cell-inspector-portal.is-open {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+#cell-menu-portal.is-open { z-index: 100; }
+#sched-edit-portal.is-open { z-index: 210; }
+#cell-inspector-portal.is-open { z-index: 230; }
 
 /* ========== SCHEDULE EDIT POPUP ========== */
 .sched-edit-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 200;
+  pointer-events: auto;
 }
 .sched-edit-menu {
-  position: fixed;
+  position: absolute;
   z-index: 210;
+  pointer-events: auto;
   background: rgba(12, 18, 32, 0.97);
   border: 1px solid var(--line-strong);
   border-radius: 10px;
@@ -3070,10 +3081,17 @@ input[type="radio"] { accent-color: var(--gold); }
   flex-wrap: wrap;
 }
 .tab-footer-nav button { font-size: 0.85rem; }
+#tab-setup .tab-footer-nav .btn-success { min-width: 10.5rem; }
 
 @media (max-width: 640px) {
   .app-tab { padding: 0.85rem 0.75rem; font-size: 0.82rem; }
   .tab-panel { padding: 1rem; }
+  #tab-setup .tab-footer-nav {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  #tab-setup .tab-footer-nav .btn-success,
+  #tab-setup .tab-footer-nav .btn-secondary { width: 100%; }
 }
 @media print {
   .app-tabs, .tab-footer-nav, .empty-schedule, .sub-tabs { display: none !important; }
@@ -3949,13 +3967,15 @@ html.view-locked .cell-swap-btn { display: none !important; }
 @media print { .cell-swap-btn { display: none !important; } }
 
 .cell-insp-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 220;
+  pointer-events: auto;
 }
 .cell-inspector {
-  position: fixed;
+  position: absolute;
   z-index: 230;
+  pointer-events: auto;
   width: min(280px, calc(100vw - 1.25rem));
   max-height: min(72vh, 420px);
   overflow: auto;
@@ -4139,6 +4159,7 @@ body.msb-board-live .app-footer { display: none !important; }
   #post-gen-strip .pgs-actions .btn-secondary { display: none !important; }
   #post-gen-strip .pgs-primary { flex: 0 0 auto; }
   .cell-inspector {
+    position: absolute !important;
     left: 0 !important; right: 0 !important;
     top: auto !important; bottom: 0 !important;
     width: 100% !important; max-width: none;
@@ -4395,7 +4416,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   .mw-person { min-height: 44px; padding: 0.35rem 0.4rem; }
   .month-chip { min-height: 36px; }
   .sched-edit-menu {
-    position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    position: absolute !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
     top: auto !important; width: 100% !important; max-width: 100% !important; min-width: 100% !important;
     border-radius: 16px 16px 0 0; max-height: 70vh;
     padding: 0.55rem 0.55rem calc(0.55rem + env(safe-area-inset-bottom));
@@ -4403,7 +4424,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   }
   .sched-edit-menu button { min-height: 48px; font-size: 0.9rem; padding: 0.6rem 0.85rem; }
   .cell-menu {
-    position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    position: absolute !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
     top: auto !important; width: 100% !important; max-width: 100% !important;
     border-radius: 16px 16px 0 0; max-height: 70vh; z-index: 220 !important;
   }
@@ -4586,8 +4607,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <h2 id="welcome-title">Build the period. Post with confidence.</h2>
     <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
     <div class="welcome-actions">
-      <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
-      <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
+      <button class="btn-demo" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
+      <button class="btn-primary" onclick="loadDemoStore()">Tour sample store</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="startOnboardingTour(true)">Take tour</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
       <button class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
@@ -4723,8 +4744,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     </div>
   </div>
       <div class="tab-footer-nav">
-        <span></span>
-        <button type="button" class="btn-primary" onclick="switchTab('requests')">Next: Requests →</button>
+        <button type="button" class="btn-secondary" onclick="switchTab('requests')">Requests (optional)</button>
+        <button type="button" class="btn-success" id="btn-build-from-setup" onclick="buildFromSetup()">Build this period</button>
       </div>
     </div>
 
@@ -4837,7 +4858,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   </div>
       <div id="schedule-empty" class="empty-schedule no-print">
         <strong>No schedule yet</strong>
-        Load a period, set any requests, then generate. Or try the demo.
+        Name two managers on Setup, then Build. Requests and rules can wait.
         <div style="margin-top:0.85rem">
           <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore()">Try Demo</button>
           <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
@@ -4932,7 +4953,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.8</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.10</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7060,7 +7081,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.8';
+const APP_VERSION = '2.6.10';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7125,6 +7146,48 @@ function dismissWelcome() {
   try { localStorage.setItem('msb_welcome_dismissed', '1'); } catch(e) {}
 }
 
+function startWithMyTeam() {
+  try { dismissWelcome(); } catch (e) {}
+  try {
+    if (typeof endOnboardingTour === 'function') endOnboardingTour(true);
+    else if (typeof setTourDone === 'function') setTourDone();
+  } catch (e) {}
+  if (typeof switchTab === 'function') switchTab('setup');
+  setTimeout(() => {
+    const sm = document.getElementById('name-sm');
+    if (sm) {
+      try { sm.focus({ preventScroll: true }); } catch (e2) { try { sm.focus(); } catch (e3) {} }
+      if (typeof isPlaceholderManagerName === 'function' && isPlaceholderManagerName(sm.value)) {
+        try { sm.select(); } catch (e4) {}
+      }
+    }
+    const team = document.querySelector('#tab-setup .setup-left') || sm;
+    if (team && typeof team.scrollIntoView === 'function') {
+      team.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 50);
+  showToast('Name two managers, then Build this period. Requests can wait.', 'info');
+}
+
+function buildFromSetup() {
+  try { persistManagerNames(); } catch (e) {}
+  try { persistStoreMeta(); } catch (e) {}
+  if (typeof managersAreNamed === 'function' && !managersAreNamed()) {
+    if (typeof switchTab === 'function') switchTab('setup');
+    const sm = document.getElementById('name-sm');
+    if (sm) {
+      try { sm.focus({ preventScroll: true }); } catch (e2) { try { sm.focus(); } catch (e3) {} }
+      if (typeof isPlaceholderManagerName === 'function' && isPlaceholderManagerName(sm.value)) {
+        try { sm.select(); } catch (e4) {}
+      }
+    }
+    showToast('Name your managers on Setup before building.', 'warn');
+    return;
+  }
+  if (typeof switchTab === 'function') switchTab('schedule');
+  if (typeof generateSchedule === 'function') generateSchedule();
+}
+
 function restoreWelcomeState() {
   try {
     if (localStorage.getItem('msb_welcome_dismissed') === '1') {
@@ -7149,7 +7212,7 @@ function showHowItWorks() {
     c.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   switchTab('setup');
-  showToast('Tabs: Setup → Requests → Rules → Schedule. Try Demo for a full walkthrough.', 'info');
+  showToast('Name two managers on Setup, then Build. Requests and rules are optional.', 'info');
 }
 
 function persistStoreMeta() {
@@ -8867,6 +8930,50 @@ function buildInputCalendar(role) {
 }
 
 // ── Cell Menu ──
+function visualViewportOffset() {
+  const vv = window.visualViewport;
+  if (!vv) return { x: 0, y: 0 };
+  return { x: vv.offsetLeft || 0, y: vv.offsetTop || 0 };
+}
+
+function layerRectFromClient(rect) {
+  const o = visualViewportOffset();
+  return {
+    left: rect.left - o.x,
+    top: rect.top - o.y,
+    right: rect.right - o.x,
+    bottom: rect.bottom - o.y,
+    width: rect.width,
+    height: rect.height
+  };
+}
+
+function viewportSize() {
+  const vv = window.visualViewport;
+  return {
+    w: vv && vv.width ? vv.width : window.innerWidth,
+    h: vv && vv.height ? vv.height : window.innerHeight
+  };
+}
+
+function placePortaledMenu(menu, anchorRect) {
+  if (!menu || !anchorRect) return;
+  if (window.innerWidth <= 640) return;
+  const a = layerRectFromClient(anchorRect);
+  const view = viewportSize();
+  let top = a.bottom + 4;
+  let left = a.left;
+  menu.style.top = top + 'px';
+  menu.style.left = left + 'px';
+  const m = layerRectFromClient(menu.getBoundingClientRect());
+  if (m.bottom > view.h - 4) top = Math.max(4, a.top - m.height - 4);
+  if (m.right > view.w - 4) left = Math.max(4, view.w - m.width - 8);
+  if (left < 4) left = 4;
+  if (top < 4) top = 4;
+  menu.style.top = top + 'px';
+  menu.style.left = left + 'px';
+}
+
 function openCellMenu(e, role, dk) {
   e.stopPropagation();
   if (window._viewLocked) return;
@@ -8922,8 +9029,9 @@ function openCellMenu(e, role, dk) {
   ];
 
   const portal = document.getElementById('cell-menu-portal');
+  const layer = layerRectFromClient(rect);
   let html = '<div class="overlay" onclick="closeCellMenu()"></div>';
-  html += `<div class="cell-menu" style="position:fixed;top:${rect.bottom + 4}px;left:${rect.left}px;z-index:100">`;
+  html += `<div class="cell-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px">`;
 
   groups.forEach((group, gi) => {
     if (gi > 0) html += '<div class="cell-menu-divider"></div>';
@@ -8947,17 +9055,12 @@ function openCellMenu(e, role, dk) {
   });
 
   html += '</div>';
+  portal.classList.add('is-open');
   portal.innerHTML = html;
   openMenu = true;
 
-  // Adjust if off screen
   requestAnimationFrame(() => {
-    const menu = portal.querySelector('.cell-menu');
-    if (menu) {
-      const mr = menu.getBoundingClientRect();
-      if (mr.bottom > window.innerHeight) menu.style.top = (rect.top - mr.height - 4) + 'px';
-      if (mr.right > window.innerWidth) menu.style.left = (rect.right - mr.width) + 'px';
-    }
+    placePortaledMenu(portal.querySelector('.cell-menu'), rect);
   });
 }
 
@@ -8979,7 +9082,11 @@ function applyCustomCellValue(role, dk) {
 }
 
 function closeCellMenu() {
-  document.getElementById('cell-menu-portal').innerHTML = '';
+  const portal = document.getElementById('cell-menu-portal');
+  if (portal) {
+    portal.classList.remove('is-open');
+    portal.innerHTML = '';
+  }
   openMenu = null;
 }
 
@@ -13517,8 +13624,9 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
   const options = isKCRole ? getKCEditOptions() : getManagerEditOptions();
 
   const portal = document.getElementById('sched-edit-portal');
+  const layer = layerRectFromClient(rect);
   let html = '<div class="sched-edit-overlay" onclick="closeSchedEditMenu()"></div>';
-  html += `<div class="sched-edit-menu" style="top:${rect.bottom + 4}px;left:${rect.left}px">`;
+  html += `<div class="sched-edit-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px">`;
   html += `<button type="button" onclick="event.stopPropagation(); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});">`;
   html += `<span class="swatch" style="background:rgba(61,220,255,0.45)"></span>Swap with…</button>`;
   html += `<div class="menu-divider"></div>`;
@@ -13546,26 +13654,12 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
   });
 
   html += '</div>';
+  portal.classList.add('is-open');
   portal.innerHTML = html;
   schedEditOpen = true;
 
-  // Adjust position if off-screen
   requestAnimationFrame(() => {
-    const menu = portal.querySelector('.sched-edit-menu');
-    if (!menu) return;
-    const mr = menu.getBoundingClientRect();
-    // Bottom overflow
-    if (mr.bottom > window.innerHeight) {
-      menu.style.top = Math.max(4, rect.top - mr.height - 4) + 'px';
-    }
-    // Right overflow
-    if (mr.right > window.innerWidth) {
-      menu.style.left = Math.max(4, window.innerWidth - mr.width - 8) + 'px';
-    }
-    // Left overflow
-    if (mr.left < 0) {
-      menu.style.left = '4px';
-    }
+    placePortaledMenu(portal.querySelector('.sched-edit-menu'), rect);
   });
 }
 
@@ -13587,7 +13681,11 @@ function applySchedCustom(role, dk, weekIdx) {
 }
 
 function closeSchedEditMenu() {
-  document.getElementById('sched-edit-portal').innerHTML = '';
+  const portal = document.getElementById('sched-edit-portal');
+  if (portal) {
+    portal.classList.remove('is-open');
+    portal.innerHTML = '';
+  }
   schedEditOpen = false;
 }
 
@@ -13961,7 +14059,10 @@ function listSwapCandidates(role, dk) {
 
 function closeCellInspector() {
   const portal = document.getElementById('cell-inspector-portal');
-  if (portal) portal.innerHTML = '';
+  if (portal) {
+    portal.classList.remove('is-open');
+    portal.innerHTML = '';
+  }
   window._cellInspectorOpen = false;
 }
 
@@ -14023,6 +14124,7 @@ function openCellInspector(e, role, dk, weekIdx, isKCRole) {
   }
   html += '<button type="button" class="cell-insp-close" onclick="closeCellInspector()">Close</button>';
   html += '</div>';
+  portal.classList.add('is-open');
   portal.innerHTML = html;
   window._cellInspectorOpen = true;
   const anchor = (e && e.currentTarget && e.currentTarget.getBoundingClientRect)
@@ -14036,19 +14138,8 @@ function openCellInspector(e, role, dk, weekIdx, isKCRole) {
       menu.style.left = '';
       return;
     }
-    let top = 80, left = 16;
-    if (anchor && anchor.getBoundingClientRect) {
-      const rect = anchor.getBoundingClientRect();
-      top = rect.bottom + 6;
-      left = rect.left;
-    }
-    const mr = menu.getBoundingClientRect();
-    if (top < 8) top = 8;
-    if (top + mr.height > window.innerHeight - 8) top = Math.max(8, window.innerHeight - mr.height - 8);
-    if (left + mr.width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - mr.width - 8);
-    if (left < 8) left = 8;
-    menu.style.top = top + 'px';
-    menu.style.left = left + 'px';
+    const rect = (anchor && anchor.getBoundingClientRect) ? anchor.getBoundingClientRect() : { left: 16, top: 80, bottom: 80, right: 16, width: 0, height: 0 };
+    placePortaledMenu(menu, rect);
   });
 }
 
@@ -15983,8 +16074,8 @@ function syncDensitySegUI() {
 (function wrapDensityMode() {
   const orig = window.setDensityMode;
   if (typeof orig !== 'function' || orig._densitySegWrapped) return;
-  function wrapped(mode) {
-    orig(mode);
+  function wrapped(mode, silent) {
+    orig(mode, silent);
     try {
       syncDensitySegUI();
     } catch (e) {}

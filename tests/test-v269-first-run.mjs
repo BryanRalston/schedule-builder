@@ -108,6 +108,12 @@ async function main() {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(700);
 
+    const bootToasts = await page.evaluate(() =>
+      [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent || '')
+    );
+    if (bootToasts.some((t) => /Density:/i.test(t))) fail('no-boot-density-toast', bootToasts.join(' | '));
+    else pass('no-boot-density-toast');
+
     await page.locator('#btn-start-with-team').click();
     await page.waitForTimeout(400);
 
@@ -120,7 +126,7 @@ async function main() {
         tourHidden: !tour || tour.hasAttribute('hidden'),
         tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
         focused: document.activeElement && document.activeElement.id,
-        toast: (document.querySelector('#toast-host .toast-msg') || {}).textContent || '',
+        toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
         hasPeriod: !!(typeof periodDates !== 'undefined' && periodDates && periodDates.length),
       };
     });
@@ -134,7 +140,7 @@ async function main() {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
       buildFromSetup();
       return {
-        toast: (document.querySelector('#toast-host .toast-msg') || {}).textContent || '',
+        toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
         tab: currentAppTab,
         hasGrid: document.querySelectorAll('#schedule-grid td.shift-editable').length,
       };
@@ -157,7 +163,7 @@ async function main() {
             tab: currentAppTab,
             named: managersAreNamed(),
             cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
-            toast: (document.querySelector('#toast-host .toast-msg') || {}).textContent || '',
+            toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
             boardLive: document.getElementById('tab-schedule')?.classList.contains('board-live') || false,
           });
         }, 1600);

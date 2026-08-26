@@ -16032,8 +16032,8 @@ function syncDensitySegUI() {
 (function wrapDensityMode() {
   const orig = window.setDensityMode;
   if (typeof orig !== 'function' || orig._densitySegWrapped) return;
-  function wrapped(mode) {
-    orig(mode);
+  function wrapped(mode, silent) {
+    orig(mode, silent);
     try {
       syncDensitySegUI();
     } catch (e) {}

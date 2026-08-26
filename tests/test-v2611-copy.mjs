@@ -129,6 +129,13 @@ async function main() {
   if (/"feedbackPath": "feedback.html"/.test(mon)) pass('monetization-feedback-path');
   else fail('monetization-feedback-path', 'monetization.json');
 
+  if (/New phone\? More → Backup JSON, then Load/.test(index)
+    && /New phone\? Export a JSON backup, then Load/.test(index)
+    && /Backup JSON — new phone/.test(index)
+    && !/Credential Manager|cloud sync/i.test(index)) {
+    pass('new-phone-backup-hint');
+  } else fail('new-phone-backup-hint', 'Setup/More/review backup copy');
+
   const FORM_ID = '1FAIpQLSdTItic0S6Z0PPjZHqMrxCOuOTJ-kDpEeZPMssry-14DCqq4Q';
   const chromium = await loadChromium();
   const { server, base } = await startStaticServer();
@@ -203,22 +210,29 @@ async function main() {
         mustClopen,
         ban,
         hasPreference: /preference/i.test(text) || /Review before you post/i.test(text) || /review leftover/i.test(text) || /Clopen/i.test(text),
+        backupHint: /New phone\? Export a JSON backup/i.test(text) && /Backup JSON — new phone/.test(text),
       };
     });
-    if (review.open && !review.mustClopen && !review.ban) pass('playtest-review-sheet');
+    if (review.open && !review.mustClopen && !review.ban && review.backupHint) pass('playtest-review-sheet');
     else fail('playtest-review-sheet', JSON.stringify(review));
 
     const exportUi = await page.evaluate(() => {
       const toolbarMenu = document.querySelector('#schedule-toolbar .toolbar-menu');
       const more = [...document.querySelectorAll('#header-menu-panel button')].map((b) => (b.textContent || '').trim());
+      const hint = (document.querySelector('#header-menu-panel .header-menu-hint') || {}).textContent || '';
+      const setup = (document.querySelector('#tab-setup .tab-panel-desc') || {}).textContent || '';
       const cs = toolbarMenu ? getComputedStyle(toolbarMenu) : null;
       return {
         toolbarHidden: !toolbarMenu || cs.display === 'none',
         moreHasExport: more.some((t) => /Export Word|Export Excel/i.test(t)),
+        moreBackup: more.some((t) => /Backup JSON — new phone/.test(t)),
+        moreHint: /New phone\? Export a JSON backup/.test(hint),
+        setupNote: /New phone\? More → Backup JSON/.test(setup),
       };
     });
-    if (exportUi.toolbarHidden && exportUi.moreHasExport) pass('playtest-phone-export');
-    else fail('playtest-phone-export', JSON.stringify(exportUi));
+    if (exportUi.toolbarHidden && exportUi.moreHasExport && exportUi.moreBackup && exportUi.moreHint && exportUi.setupNote) {
+      pass('playtest-phone-export');
+    } else fail('playtest-phone-export', JSON.stringify(exportUi));
 
     const fb = await page.evaluate(() => {
       const href = typeof openFeedbackPage === 'function' ? null : 'missing';

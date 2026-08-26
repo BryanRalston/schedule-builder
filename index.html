@@ -2505,6 +2505,13 @@ input[type="radio"] { accent-color: var(--gold); }
   gap: 0.4rem;
   margin-top: 0.75rem;
 }
+.score-backup-hint {
+  flex: 1 0 100%;
+  margin: 0 0 0.1rem;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  font-weight: 500;
+}
 .score-why {
   margin-top: 0.75rem;
   padding: 0.65rem 0.75rem;
@@ -2799,6 +2806,13 @@ input[type="radio"] { accent-color: var(--gold); }
   background: rgba(61,220,255,0.1);
   color: #9ae8ff;
   filter: none;
+}
+.header-menu-hint {
+  margin: 0.2rem 0.75rem 0.35rem;
+  font-size: 0.72rem;
+  color: var(--ink-3);
+  line-height: 1.35;
+  font-weight: 500;
 }
 
 /* ========== APP TABS (clean workspace) ========== */
@@ -4555,7 +4569,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" onclick="window.print(); closeHeaderMenu()">Print</button>
         <button type="button" onclick="exportSchedule(); closeHeaderMenu()">Export Word</button>
         <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()">Export Excel</button>
-        <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON</button>
+        <p class="header-menu-hint">New phone? Export a JSON backup, then Load. No cloud — file stays yours.</p>
+        <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON — new phone</button>
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
         <button type="button" onclick="setDensityMode('compact'); closeHeaderMenu()">Density: Compact</button>
         <button type="button" onclick="setDensityMode('comfortable'); closeHeaderMenu()">Density: Comfortable</button>
@@ -4629,7 +4644,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <!-- TAB: SETUP -->
     <div class="tab-panel active" id="tab-setup" role="tabpanel" aria-labelledby="tabbtn-setup">
       <div class="tab-panel-title">Store & team</div>
-      <div class="tab-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating.</div>
+      <div class="tab-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.</div>
 <!-- SETUP SECTION -->
   <div class="section no-print" style="border:none">
     <div class="section-body" id="setup-body" style="padding:0" data-tour="setup-team">
@@ -4895,7 +4910,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <button type="button" onclick="exportSchedule(); closeToolbarExportMenu()">Word</button>
             <button type="button" onclick="exportScheduleExcel(); closeToolbarExportMenu()">Excel</button>
             <button type="button" onclick="copySummaryText(); closeToolbarExportMenu()">Copy summary</button>
-            <button type="button" onclick="exportBackupJSON(); closeToolbarExportMenu()">Backup JSON</button>
+            <button type="button" onclick="exportBackupJSON(); closeToolbarExportMenu()">Backup JSON — new phone</button>
           </div>
         </div>
         <span class="gen-timestamp" id="gen-timestamp"></span>
@@ -8139,7 +8154,7 @@ function exportBackupJSON() {
   a.download = `schedule-backup_FY${fiscalYear}-P${currentPeriod.number}_${store}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast('Backup JSON downloaded.', 'success');
+  showToast('Backup JSON downloaded. New phone? Load that file there.', 'success');
 }
 
 function copySummaryText() {
@@ -13271,8 +13286,9 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
           <ul>${explainQualityScore(q, genReport, ROLES).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
         </div>
         <div class="score-actions no-print">
+          <p class="score-backup-hint">New phone? Export a JSON backup, then Load on the new device.</p>
           <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
-          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON</button>
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON — new phone</button>
           <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
         </div>
       </div>
@@ -15901,6 +15917,7 @@ function getCommandPaletteCommands() {
     { id: 'export-w', label: 'Export Word', group: 'Export', run: () => exportSchedule() },
     { id: 'export-x', label: 'Export Excel', group: 'Export', run: () => exportScheduleExcel() },
     { id: 'copy-sum', label: 'Copy summary', group: 'Export', run: () => copySummaryText() },
+    { id: 'backup-json', label: 'Backup JSON — new phone', group: 'Export', run: () => exportBackupJSON() },
     { id: 'clear', label: 'Clear schedule', group: 'Schedule', run: () => clearSchedule() },
     {
       id: 'offline-info',

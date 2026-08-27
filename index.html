@@ -8160,9 +8160,14 @@ function hasSavedUserRoster() {
         for (let i = 0; i < list.length; i++) {
           const t = list[i] || {};
           if (storeIndicatesUserRoster(t.storeName)) return true;
-          if (peopleIndicateUserRoster(collectRosterPeople(t.names || {}))) return true;
+          const people = collectRosterPeople(t.names || {});
+          if (Array.isArray(t.kcList)) {
+            t.kcList.forEach((kc) => {
+              if (kc && kc.name) people.push(kc.name);
+            });
+          }
+          if (peopleIndicateUserRoster(people)) return true;
         }
-        return true;
       }
     }
     for (let i = 0; i < localStorage.length; i++) {
@@ -8198,9 +8203,16 @@ function wantsDemoLaunch(params) {
 function loadDemoStore(opts) {
   opts = opts || {};
   const explicit = opts.explicit === true;
+  const fromUrl = opts.fromUrl === true;
   // Auto / first-run / ?source=pwa / leftover ?demo=1 must never clobber a real roster.
   // Only Demo / Tour sample / Sample store (explicit:true) may replace it.
   if (!explicit && typeof hasSavedUserRoster === 'function' && hasSavedUserRoster()) {
+    if (fromUrl) {
+      try {
+        if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();
+      } catch (e) {}
+      return false;
+    }
     try {
       if (typeof showToast === 'function') {
         showToast('Kept your saved team — sample store was not loaded over it.', 'info');
@@ -14921,10 +14933,23 @@ function renderTeamTemplateUI() {
 function restoreLastTeamTemplateIfNeeded(hadNames) {
   if (hadNames) return;
   try {
+    if (typeof wantsDemoLaunch === 'function' && wantsDemoLaunch()) return;
     const last = localStorage.getItem(MSB_TEAM_TEMPLATE_LAST);
     if (!last) return;
     const list = listTeamTemplates();
-    if (list.some((t) => t.id === last)) loadTeamTemplate(last);
+    const tpl = list.find((t) => t.id === last);
+    if (!tpl) return;
+    const people = collectRosterPeople(tpl.names || {});
+    if (Array.isArray(tpl.kcList)) {
+      tpl.kcList.forEach((kc) => {
+        if (kc && kc.name) people.push(kc.name);
+      });
+    }
+    const looksLikeDemo =
+      (typeof isDemoStoreName === 'function' && isDemoStoreName(tpl.storeName)) ||
+      (people.length && people.every((n) => isPlaceholderManagerName(n) || isDemoPersonName(n)));
+    if (looksLikeDemo) return;
+    loadTeamTemplate(last);
   } catch (e) {}
 }
 
@@ -16372,7 +16397,10 @@ function handleLaunchQuery() {
     }
     // Never treat ?source=pwa (Play/PWA start_url) as a demo seed.
     if (typeof wantsDemoLaunch === 'function' ? wantsDemoLaunch(params) : params.get('demo') === '1') {
-      if (typeof loadDemoStore === 'function') {
+      const saved = typeof hasSavedUserRoster === 'function' && hasSavedUserRoster();
+      if (saved) {
+        if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();
+      } else if (typeof loadDemoStore === 'function') {
         setTimeout(() => {
           loadDemoStore({ fromUrl: true });
           if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();

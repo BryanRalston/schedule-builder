@@ -6,7 +6,7 @@
 import { createServer } from 'http';
 import { readFileSync, existsSync } from 'fs';
 import { join, extname, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -61,7 +61,7 @@ async function loadChromium() {
   ];
   for (const spec of candidates) {
     if (!existsSync(spec)) continue;
-    const mod = await import(spec);
+    const mod = await import(pathToFileURL(spec).href);
     if (mod.chromium) return mod.chromium;
   }
   throw new Error('Playwright not installed');
@@ -154,9 +154,13 @@ async function main() {
     pass('explicit-demo-clicks');
   } else fail('explicit-demo-clicks', 'Demo / Tour sample must pass explicit:true');
 
-  if (/if \(!explicit && typeof hasSavedUserRoster/.test(index)) {
+  if (/if \(!explicit && typeof hasSavedUserRoster/.test(index) && /const fromUrl = opts\.fromUrl === true/.test(index)) {
     pass('loadDemo-refuses-overwrite');
   } else fail('loadDemo-refuses-overwrite', 'loadDemoStore missing roster guard');
+
+  if (/const saved = typeof hasSavedUserRoster/.test(index) && /stripDemoQueryParam/.test(index)) {
+    pass('saved-roster-strips-demo-url');
+  } else fail('saved-roster-strips-demo-url', 'leftover ?demo=1 must strip without loading sample');
 
   const { chromium } = { chromium: await loadChromium() };
   const { server, base } = await startStaticServer();
@@ -232,6 +236,21 @@ async function main() {
     else fail('demo-1-does-not-overwrite', JSON.stringify(keptDemo));
     if (keptDemo.hasSaved === true) pass('hasSavedUserRoster-true', 'true');
     else fail('hasSavedUserRoster-true', String(keptDemo.hasSaved));
+    if (!/[?&]demo=1/.test(keptDemo.search)) pass('leftover-demo-1-stripped', keptDemo.search || '(none)');
+    else fail('leftover-demo-1-stripped', keptDemo.search);
+
+    // Unguarded loadDemoStore() (no explicit flag) must still refuse
+    const refused = await page.evaluate(() => {
+      const ok = loadDemoStore();
+      return {
+        ok,
+        sm: (document.getElementById('name-sm') || {}).value || '',
+        store: (document.getElementById('store-name') || {}).value || '',
+      };
+    });
+    if (refused.ok === false && refused.sm === REAL.sm && refused.store === REAL.store) {
+      pass('unguarded-loadDemo-refuses', refused.store);
+    } else fail('unguarded-loadDemo-refuses', JSON.stringify(refused));
 
     // Explicit Demo click still loads sample over a roster
     const explicit = await page.evaluate(() => {

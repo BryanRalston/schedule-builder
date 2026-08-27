@@ -7401,11 +7401,20 @@ function defaultRolePersonName(family, n) {
   return t + ' ' + n;
 }
 
+function normalizeStoredRoleTitle(family, raw) {
+  const t = String(raw || '').trim();
+  if (!t) return '';
+  const def = DEFAULT_ROLE_TITLES[family] || '';
+  if (def && t.toLowerCase() === def.toLowerCase()) return '';
+  return t;
+}
+
 function readRoleTitlesFromInputs() {
-  const sm = ((document.getElementById('role-title-sm') || {}).value || '').trim();
-  const am = ((document.getElementById('role-title-am') || {}).value || '').trim();
-  const kc = ((document.getElementById('role-title-kc') || {}).value || '').trim();
-  roleTitles = { sm: sm, am: am, kc: kc };
+  roleTitles = {
+    sm: normalizeStoredRoleTitle('sm', (document.getElementById('role-title-sm') || {}).value),
+    am: normalizeStoredRoleTitle('am', (document.getElementById('role-title-am') || {}).value),
+    kc: normalizeStoredRoleTitle('kc', (document.getElementById('role-title-kc') || {}).value)
+  };
   return roleTitles;
 }
 

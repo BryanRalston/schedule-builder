@@ -1,5 +1,6 @@
 /**
  * v2.6.12: sample store must never overwrite a saved roster.
+ * Leftover Harbor East persist is not a real roster — / and ?source=pwa go blank.
  * ?source=pwa does not inject Harbor East. ?demo=1 still loads sample on empty.
  * Run: node tests/test-v2612-demo-roster.mjs
  */
@@ -121,6 +122,54 @@ async function seedRealRoster(page) {
   }, seedRealRosterScript());
 }
 
+const DEMO_LEFTOVER = {
+  names: {
+    sm: 'Alex Morgan',
+    amCount: 3,
+    ams: { am1: 'Casey Brooks', am2: 'Riley Quinn', am3: 'Taylor Hayes' },
+    kcList: [
+      { id: 'kc1', name: 'Jordan Lee', asManager: false, midDows: [0, 2, 4, 5] },
+      { id: 'kc2', name: 'Sam Rivera', asManager: false, midDows: [3, 6] },
+    ],
+  },
+  meta: { storeName: 'Harbor East Demo Store', storeNumber: '851' },
+};
+
+async function seedLeftoverDemo(page) {
+  await page.evaluate((payload) => {
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem('msb_tour_done', '1');
+    localStorage.setItem('msb_welcome_dismissed', '1');
+    localStorage.setItem('schedule_manager_names', JSON.stringify(payload.names));
+    localStorage.setItem('msb_store_meta', JSON.stringify(payload.meta));
+    const n = payload.names;
+    amCount = n.amCount;
+    kcList = (n.kcList || []).map((kc) => ({
+      id: kc.id,
+      name: kc.name,
+      asManager: !!kc.asManager,
+      midDows: kc.midDows || [],
+    }));
+    if (typeof renderAMRows === 'function') renderAMRows();
+    if (typeof renderKCRows === 'function') renderKCRows();
+    const sm = document.getElementById('name-sm');
+    if (sm) sm.value = n.sm;
+    Object.keys(n.ams || {}).forEach((id) => {
+      const el = document.getElementById('name-' + id);
+      if (el) el.value = n.ams[id];
+    });
+    (n.kcList || []).forEach((kc) => {
+      const el = document.getElementById('name-' + kc.id);
+      if (el) el.value = kc.name;
+    });
+    const store = document.getElementById('store-name');
+    const num = document.getElementById('store-number');
+    if (store) store.value = payload.meta.storeName;
+    if (num) num.value = payload.meta.storeNumber;
+  }, DEMO_LEFTOVER);
+}
+
 async function readRoster(page) {
   return page.evaluate(() => {
     let stored = null;
@@ -189,6 +238,10 @@ async function main() {
     pass('loadDemo-refuses-overwrite');
   } else fail('loadDemo-refuses-overwrite', 'loadDemoStore missing roster confirm guard');
 
+  if (/function applyBlankTeam\(/.test(index) && /function storedNamesLookLikeDemo\(/.test(index) && /Leftover Harbor East persist/.test(index)) {
+    pass('leftover-demo-clear-fns');
+  } else fail('leftover-demo-clear-fns', 'missing applyBlankTeam / leftover-demo restore skip');
+
   if (/const saved = typeof hasSavedUserRoster/.test(index) && /stripDemoQueryParam/.test(index)) {
     pass('saved-roster-strips-demo-url');
   } else fail('saved-roster-strips-demo-url', 'leftover ?demo=1 must strip without loading sample');
@@ -224,6 +277,26 @@ async function main() {
     });
     if (welcome.welcome && welcome.startCta) pass('empty-start-with-my-team');
     else fail('empty-start-with-my-team', JSON.stringify(welcome));
+
+    // Leftover Harbor East persist (Bryan's phone after Demo overwrite) → blank on ?source=pwa
+    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await seedLeftoverDemo(page);
+    await page.goto(base + '/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForTimeout(700);
+    const leftoverPwa = await readRoster(page);
+    if (!isHarborEast(leftoverPwa) && !/alex morgan/i.test(leftoverPwa.storedSm || '')) {
+      pass('leftover-demo-cleared-on-pwa', leftoverPwa.sm || '(blank)');
+    } else fail('leftover-demo-cleared-on-pwa', JSON.stringify(leftoverPwa));
+
+    // Same leftover persist on / must also go blank (not treat demo as his roster)
+    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await seedLeftoverDemo(page);
+    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForTimeout(700);
+    const leftoverRoot = await readRoster(page);
+    if (!isHarborEast(leftoverRoot) && !/alex morgan/i.test(leftoverRoot.storedSm || '')) {
+      pass('leftover-demo-cleared-on-root', leftoverRoot.sm || '(blank)');
+    } else fail('leftover-demo-cleared-on-root', JSON.stringify(leftoverRoot));
 
     // Empty session + ?demo=1 → Harbor East sample
     await clearSession(page);

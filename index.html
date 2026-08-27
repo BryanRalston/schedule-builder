@@ -7217,6 +7217,11 @@ function startWithMyTeam() {
     if (typeof endOnboardingTour === 'function') endOnboardingTour(true);
     else if (typeof setTourDone === 'function') setTourDone();
   } catch (e) {}
+  try {
+    if (typeof liveRosterLooksLikeDemo === 'function' && liveRosterLooksLikeDemo()) {
+      applyBlankTeam({ persist: true });
+    }
+  } catch (e) {}
   if (typeof switchTab === 'function') switchTab('setup');
   setTimeout(() => {
     const sm = document.getElementById('name-sm');
@@ -7304,9 +7309,21 @@ function restoreStoreMeta() {
     const d = JSON.parse(raw);
     const sn = document.getElementById('store-name');
     const num = document.getElementById('store-number');
-    if (sn && d.storeName) sn.value = d.storeName;
-    if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
-    if (d.storeHours) applyStoreHoursObject(d.storeHours);
+    const skipDemoStore =
+      typeof wantsDemoLaunch === 'function' &&
+      !wantsDemoLaunch() &&
+      typeof storedStoreMetaLooksLikeDemo === 'function' &&
+      storedStoreMetaLooksLikeDemo(d);
+    if (skipDemoStore) {
+      if (sn) sn.value = '';
+      if (num && String(num.value || d.storeNumber || '').trim() === DEMO_STORE_NUMBER) num.value = '';
+      if (d.storeHours) applyStoreHoursObject(d.storeHours);
+      persistStoreMeta();
+    } else {
+      if (sn && d.storeName) sn.value = d.storeName;
+      if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
+      if (d.storeHours) applyStoreHoursObject(d.storeHours);
+    }
   } catch(e) {}
   if (typeof updateStoreHoursSummary === 'function') updateStoreHoursSummary();
 }
@@ -8104,6 +8121,58 @@ function isDemoPersonName(n) {
   return /^(alex morgan|casey brooks|riley quinn|taylor hayes|jordan lee|sam rivera)$/i.test(
     String(n || '').trim()
   );
+}
+
+const DEMO_AM_NAMES = ['Casey Brooks', 'Riley Quinn', 'Taylor Hayes'];
+
+function isExplicitDemoLaunch() {
+  return typeof wantsDemoLaunch === 'function' ? wantsDemoLaunch() : false;
+}
+
+function storedNamesLookLikeDemo(names) {
+  if (!names || typeof names !== 'object') return false;
+  if (!isDemoPersonName(names.sm)) return false;
+  const ams = names.ams || {};
+  return DEMO_AM_NAMES.every((n, i) => String(ams['am' + (i + 1)] || '').trim() === n);
+}
+
+function storedStoreMetaLooksLikeDemo(meta) {
+  return !!(meta && typeof meta === 'object' && isDemoStoreName(meta.storeName));
+}
+
+function liveRosterLooksLikeDemo() {
+  const sm = ((document.getElementById('name-sm') || {}).value || '').trim();
+  const store = ((document.getElementById('store-name') || {}).value || '').trim();
+  if (isDemoStoreName(store)) return true;
+  if (!isDemoPersonName(sm)) return false;
+  return DEMO_AM_NAMES.every((n, i) => {
+    const el = document.getElementById('name-am' + (i + 1));
+    return !!(el && String(el.value || '').trim() === n);
+  });
+}
+
+function applyBlankTeam(opts) {
+  const persist = !opts || opts.persist !== false;
+  amCount = 2;
+  kcList = [{ id: 'kc1', name: '', asManager: false, midDows: [] }];
+  if (typeof renderAMRows === 'function') renderAMRows();
+  if (typeof renderKCRows === 'function') renderKCRows();
+  const sm = document.getElementById('name-sm');
+  if (sm) sm.value = '';
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    if (el) el.value = '';
+  }
+  const sn = document.getElementById('store-name');
+  const num = document.getElementById('store-number');
+  if (sn && (!sn.value.trim() || isDemoStoreName(sn.value))) sn.value = '';
+  if (num && (!num.value.trim() || String(num.value).trim() === DEMO_STORE_NUMBER)) {
+    if (!sn || !sn.value.trim()) num.value = '';
+  }
+  if (persist && typeof persistSetupDraft === 'function') persistSetupDraft();
+  try {
+    if (typeof updateReadyChecklist === 'function') updateReadyChecklist();
+  } catch (e) {}
 }
 
 function collectRosterPeople(names) {
@@ -14735,6 +14804,16 @@ function restoreManagerNames() {
     const stored = localStorage.getItem('schedule_manager_names');
     if (!stored) return false;
     const names = JSON.parse(stored);
+    // Leftover Harbor East persist is not a real roster. / and ?source=pwa stay blank.
+    if (
+      typeof wantsDemoLaunch === 'function' &&
+      !wantsDemoLaunch() &&
+      typeof storedNamesLookLikeDemo === 'function' &&
+      storedNamesLookLikeDemo(names)
+    ) {
+      try { localStorage.removeItem('schedule_manager_names'); } catch (e) {}
+      return false;
+    }
 
     if (names.sm) {
       document.getElementById('name-sm').value = names.sm;
@@ -16511,6 +16590,14 @@ document.addEventListener('click', (e) => {
 const _hadRestoredNames = !!restoreManagerNames();
 restoreLastTeamTemplateIfNeeded(_hadRestoredNames);
 restoreStoreMeta();
+if (
+  !_hadRestoredNames &&
+  typeof wantsDemoLaunch === 'function' &&
+  !wantsDemoLaunch() &&
+  typeof applyBlankTeam === 'function'
+) {
+  applyBlankTeam({ persist: true });
+}
 restoreWelcomeState();
 renderTeamTemplateUI();
 updateStoreHoursSummary();

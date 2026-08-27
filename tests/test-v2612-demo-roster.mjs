@@ -154,9 +154,17 @@ async function main() {
     pass('explicit-demo-clicks');
   } else fail('explicit-demo-clicks', 'Demo / Tour sample must pass explicit:true');
 
-  if (/if \(!explicit && typeof hasSavedUserRoster/.test(index) && /const fromUrl = opts\.fromUrl === true/.test(index)) {
+  if (/function confirmReplaceRosterWithDemo\(/.test(index) && /window\.confirm\(/.test(index)) {
+    pass('confirm-before-overwrite');
+  } else fail('confirm-before-overwrite', 'missing confirmReplaceRosterWithDemo');
+
+  if (/id="store-name"[^>]*oninput="persistStoreMeta\(\)"/.test(index) && /id="name-sm"[^>]*oninput="persistManagerNames\(\)"/.test(index)) {
+    pass('persist-on-input');
+  } else fail('persist-on-input', 'store/SM must persist on input, not only blur');
+
+  if (/const fromUrl = opts\.fromUrl === true/.test(index) && /opts\.confirmed === true/.test(index) && /if \(hasRoster\)/.test(index)) {
     pass('loadDemo-refuses-overwrite');
-  } else fail('loadDemo-refuses-overwrite', 'loadDemoStore missing roster guard');
+  } else fail('loadDemo-refuses-overwrite', 'loadDemoStore missing roster confirm guard');
 
   if (/const saved = typeof hasSavedUserRoster/.test(index) && /stripDemoQueryParam/.test(index)) {
     pass('saved-roster-strips-demo-url');
@@ -252,8 +260,25 @@ async function main() {
       pass('unguarded-loadDemo-refuses', refused.store);
     } else fail('unguarded-loadDemo-refuses', JSON.stringify(refused));
 
-    // Explicit Demo click still loads sample over a roster
-    const explicit = await page.evaluate(() => {
+    // More → Demo / explicit click: Cancel keeps roster (no persist of Harbor East)
+    page.once('dialog', (d) => d.dismiss());
+    const denied = await page.evaluate(() => {
+      const ok = loadDemoStore({ explicit: true });
+      return {
+        ok,
+        sm: (document.getElementById('name-sm') || {}).value || '',
+        store: (document.getElementById('store-name') || {}).value || '',
+        storedSm: JSON.parse(localStorage.getItem('schedule_manager_names') || 'null')?.sm,
+        storedStore: JSON.parse(localStorage.getItem('msb_store_meta') || 'null')?.storeName,
+      };
+    });
+    if (denied.ok === false && denied.sm === REAL.sm && denied.store === REAL.store && denied.storedSm === REAL.sm) {
+      pass('explicit-demo-cancel-keeps-roster', denied.store);
+    } else fail('explicit-demo-cancel-keeps-roster', JSON.stringify(denied));
+
+    // Explicit Demo + Confirm still loads sample
+    page.once('dialog', (d) => d.accept());
+    const accepted = await page.evaluate(() => {
       const ok = loadDemoStore({ explicit: true });
       return {
         ok,
@@ -261,9 +286,79 @@ async function main() {
         store: (document.getElementById('store-name') || {}).value || '',
       };
     });
-    if (explicit.ok !== false && /harbor east/i.test(explicit.store) && /alex morgan/i.test(explicit.sm)) {
-      pass('explicit-demo-still-loads', explicit.store);
-    } else fail('explicit-demo-still-loads', JSON.stringify(explicit));
+    if (accepted.ok !== false && /harbor east/i.test(accepted.store) && /alex morgan/i.test(accepted.sm)) {
+      pass('explicit-demo-confirm-loads', accepted.store);
+    } else fail('explicit-demo-confirm-loads', JSON.stringify(accepted));
+
+    // Typed SM without blur: persist on input; More → Demo cancel keeps "Bryan Test"
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('msb_tour_done', '1');
+      localStorage.setItem('msb_welcome_dismissed', '1');
+    });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(400);
+    await page.evaluate(() => {
+      if (typeof dismissWelcome === 'function') dismissWelcome();
+      const sm = document.getElementById('name-sm');
+      sm.focus();
+      sm.value = '';
+      sm.dispatchEvent(new Event('input', { bubbles: true }));
+      sm.value = 'Bryan Test';
+      sm.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    const typed = await page.evaluate(() => {
+      const stored = JSON.parse(localStorage.getItem('schedule_manager_names') || 'null');
+      return { live: (document.getElementById('name-sm') || {}).value, storedSm: stored && stored.sm };
+    });
+    if (typed.live === 'Bryan Test' && typed.storedSm === 'Bryan Test') {
+      pass('typed-sm-persists-on-input', typed.storedSm);
+    } else fail('typed-sm-persists-on-input', JSON.stringify(typed));
+
+    page.once('dialog', (d) => d.dismiss());
+    const typedKeep = await page.evaluate(() => {
+      document.getElementById('header-menu-demo')?.click();
+      return {
+        sm: (document.getElementById('name-sm') || {}).value || '',
+        storedSm: JSON.parse(localStorage.getItem('schedule_manager_names') || 'null')?.sm,
+        store: (document.getElementById('store-name') || {}).value || '',
+      };
+    });
+    if (typedKeep.sm === 'Bryan Test' && typedKeep.storedSm === 'Bryan Test' && !/harbor east/i.test(typedKeep.store)) {
+      pass('header-demo-cancel-keeps-typed-sm', typedKeep.sm);
+    } else fail('header-demo-cancel-keeps-typed-sm', JSON.stringify(typedKeep));
+
+    // Store name persists on input (no blur)
+    const storeIn = await page.evaluate(() => {
+      const el = document.getElementById('store-name');
+      el.value = 'Riverside #214';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      const meta = JSON.parse(localStorage.getItem('msb_store_meta') || 'null');
+      return { stored: meta && meta.storeName };
+    });
+    if (storeIn.stored === 'Riverside #214') pass('store-name-persists-on-input', storeIn.stored);
+    else fail('store-name-persists-on-input', JSON.stringify(storeIn));
+
+    // Empty session + explicit Demo: no confirm, sample loads
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(400);
+    let emptyDialog = false;
+    page.once('dialog', (d) => {
+      emptyDialog = true;
+      d.dismiss();
+    });
+    const emptyExplicit = await page.evaluate(() => {
+      const ok = loadDemoStore({ explicit: true });
+      return { ok, sm: (document.getElementById('name-sm') || {}).value || '', store: (document.getElementById('store-name') || {}).value || '' };
+    });
+    if (!emptyDialog && /harbor east/i.test(emptyExplicit.store) && /alex morgan/i.test(emptyExplicit.sm)) {
+      pass('empty-explicit-demo-no-confirm', emptyExplicit.store);
+    } else fail('empty-explicit-demo-no-confirm', JSON.stringify({ emptyDialog, ...emptyExplicit }));
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

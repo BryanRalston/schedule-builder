@@ -4640,7 +4640,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store Manager</label>
             <div class="manager-row">
               <span class="role-badge role-sm">SM</span>
-              <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name" onblur="persistManagerNames()" onchange="persistManagerNames()">
+              <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
             </div>
           </div>
 
@@ -4671,11 +4671,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store</label>
             <div class="store-name-row">
               <label style="font-weight:600;font-size:0.9rem;white-space:nowrap">Name:</label>
-              <input type="text" id="store-name" value="" placeholder="e.g. Harbor East #851" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+              <input type="text" id="store-name" value="" placeholder="e.g. Harbor East #851" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.65rem">
               <label style="font-weight:600;font-size:0.9rem">Store #:</label>
-              <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+              <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div class="store-hours-block no-print" id="store-hours-block" data-tour="store-hours">
               <div class="store-hours-chip">
@@ -5085,6 +5085,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 function toggleHeaderMenu(e) {
   if (e) e.stopPropagation();
+  try {
+    if (typeof persistSetupDraft === 'function') persistSetupDraft();
+  } catch (err) {}
   const panel = document.getElementById('header-menu-panel');
   const btn = document.getElementById('header-more-btn');
   if (!panel) return;
@@ -7167,6 +7170,11 @@ function showHowItWorks() {
   showToast('Tabs: Setup → Requests → Rules → Schedule. Try Demo for a full walkthrough.', 'info');
 }
 
+function persistSetupDraft() {
+  try { persistManagerNames(); } catch (e) {}
+  try { persistStoreMeta(); } catch (e2) {}
+}
+
 function persistStoreMeta() {
   try {
     localStorage.setItem('msb_stg_store_meta', JSON.stringify({
@@ -8080,25 +8088,55 @@ function wantsDemoLaunch(params) {
   return params.get('demo') === '1';
 }
 
+function confirmReplaceRosterWithDemo() {
+  const sm = ((document.getElementById('name-sm') || {}).value || '').trim();
+  const store = ((document.getElementById('store-name') || {}).value || '').trim();
+  const who =
+    store ||
+    (sm && typeof isPlaceholderManagerName === 'function' && !isPlaceholderManagerName(sm) ? sm : '') ||
+    'your saved team';
+  const msg =
+    'Replace ' + who + ' with the Harbor East sample store? This overwrites names and store on this device.';
+  try {
+    return window.confirm(msg);
+  } catch (e) {
+    return false;
+  }
+}
+
 function loadDemoStore(opts) {
   opts = opts || {};
   const explicit = opts.explicit === true;
   const fromUrl = opts.fromUrl === true;
-  // Auto / first-run / ?source=pwa / leftover ?demo=1 must never clobber a real roster.
-  // Only Demo / Tour sample / Sample store (explicit:true) may replace it.
-  if (!explicit && typeof hasSavedUserRoster === 'function' && hasSavedUserRoster()) {
-    if (fromUrl) {
+  try {
+    if (typeof persistSetupDraft === 'function') persistSetupDraft();
+  } catch (e0) {}
+  const hasRoster = typeof hasSavedUserRoster === 'function' && hasSavedUserRoster();
+  if (hasRoster) {
+    if (!explicit) {
+      if (fromUrl) {
+        try {
+          if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();
+        } catch (e) {}
+        return false;
+      }
       try {
-        if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();
+        if (typeof showToast === 'function') {
+          showToast('Kept your saved team — sample store was not loaded over it.', 'info');
+        }
       } catch (e) {}
       return false;
     }
-    try {
-      if (typeof showToast === 'function') {
-        showToast('Kept your saved team — sample store was not loaded over it.', 'info');
-      }
-    } catch (e) {}
-    return false;
+    let allowed = false;
+    if (opts.confirmed === true) allowed = true;
+    else if (opts.confirmed === false) allowed = false;
+    else allowed = typeof confirmReplaceRosterWithDemo === 'function' && confirmReplaceRosterWithDemo();
+    if (!allowed) {
+      try {
+        if (typeof showToast === 'function') showToast('Kept your saved team.', 'info');
+      } catch (e) {}
+      return false;
+    }
   }
   try {
     // Team
@@ -8741,7 +8779,7 @@ function renderAMRows() {
     const val = existing ? existing.value : 'AM' + i;
     html += `<div class="manager-row">
       <span class="role-badge role-am">AM${i}</span>
-      <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}" onblur="persistManagerNames()" onchange="persistManagerNames()">
+      <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
     </div>`;
   }
   container.innerHTML = html;
@@ -8776,7 +8814,7 @@ function renderKCRows() {
     html += `<div class="manager-row" style="flex-wrap:wrap">
       <span class="role-badge role-kc">KC${idx + 1}</span>
       <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="Key Carrier ${idx + 1}"
-        onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
+        oninput="kcList[${idx}].name = this.value; persistManagerNames()" onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
       <label class="kc-toggle-label">
         <input type="checkbox" ${kc.asManager ? 'checked' : ''}
           onchange="toggleKcAsManager(${idx}, this)">
@@ -16293,6 +16331,14 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(bootUi, 0);
 }
+window.addEventListener('pagehide', () => {
+  try { if (typeof persistSetupDraft === 'function') persistSetupDraft(); } catch (e) {}
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    try { if (typeof persistSetupDraft === 'function') persistSetupDraft(); } catch (e) {}
+  }
+});
 
 // Backdrop click to close account / license / provider modals
 document.addEventListener('click', (e) => {

@@ -4542,7 +4542,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="header-menu">
       <button type="button" class="btn-outline header-menu-btn" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false" id="header-more-btn">More ▾</button>
       <div class="header-menu-panel" id="header-menu-panel" hidden>
-        <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore(); closeHeaderMenu()" title="Load sample store & generate">Demo</button>
+        <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore({explicit:true}); closeHeaderMenu()" title="Load sample store & generate">Demo</button>
         <button type="button" class="no-lock-hide" onclick="saveToStorage(); closeHeaderMenu()">Save</button>
         <button type="button" class="no-lock-hide" onclick="openSavedSchedulesModal(); closeHeaderMenu()">Load</button>
         <button type="button" onclick="window.print(); closeHeaderMenu()">Print</button>
@@ -4601,7 +4601,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <h2 id="welcome-title">Build the period. Post with confidence.</h2>
     <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
     <div class="welcome-actions">
-      <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
+      <button class="btn-demo" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
       <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="startOnboardingTour(true)">Take tour</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
@@ -4845,7 +4845,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <span class="built-pill" id="built-pill" hidden>Built</span>
         <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()">Build this period</button>
         <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()">Clear board</button>
-        <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore()">Sample store</button>
+        <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})">Sample store</button>
       </div>
       <div class="gen-meta" id="gen-meta">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
     </div>
@@ -4854,7 +4854,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <strong>No schedule yet</strong>
         Load a period, set any requests, then generate. Or try the demo.
         <div style="margin-top:0.85rem">
-          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore()">Try Demo</button>
+          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Try Demo</button>
           <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
@@ -7965,7 +7965,129 @@ function updateReadyChecklist() {
   }
 }
 
-function loadDemoStore() {
+const DEMO_STORE_NAME = 'Harbor East Demo Store';
+const DEMO_STORE_NUMBER = '851';
+
+function isDemoStoreName(name) {
+  return /harbor east/i.test(String(name || '').trim());
+}
+
+function isDemoPersonName(n) {
+  return /^(alex morgan|casey brooks|riley quinn|taylor hayes|jordan lee|sam rivera)$/i.test(
+    String(n || '').trim()
+  );
+}
+
+function collectRosterPeople(names) {
+  const out = [];
+  if (!names || typeof names !== 'object') return out;
+  if (names.sm) out.push(names.sm);
+  if (names.ams && typeof names.ams === 'object') {
+    Object.keys(names.ams).forEach((k) => out.push(names.ams[k]));
+  }
+  Object.keys(names).forEach((k) => {
+    if (/^am\d+$/i.test(k)) out.push(names[k]);
+  });
+  if (Array.isArray(names.kcList)) {
+    names.kcList.forEach((kc) => {
+      if (kc && kc.name) out.push(kc.name);
+    });
+  }
+  return out.map((n) => String(n || '').trim()).filter(Boolean);
+}
+
+function peopleIndicateUserRoster(people) {
+  return (people || []).some((n) => !isPlaceholderManagerName(n) && !isDemoPersonName(n));
+}
+
+function storeIndicatesUserRoster(storeName) {
+  const n = String(storeName || '').trim();
+  return !!(n && !isDemoStoreName(n));
+}
+
+/** True when this device already has a real team/store (not empty, not Harbor East sample). */
+function hasSavedUserRoster() {
+  try {
+    const liveStore = ((document.getElementById('store-name') || {}).value || '').trim();
+    if (storeIndicatesUserRoster(liveStore)) return true;
+    const livePeople = [((document.getElementById('name-sm') || {}).value || '')];
+    const amMax = typeof amCount === 'number' ? amCount : 8;
+    for (let i = 1; i <= amMax; i++) {
+      const el = document.getElementById('name-am' + i);
+      if (el && el.value) livePeople.push(el.value);
+    }
+    if (typeof kcList !== 'undefined' && Array.isArray(kcList)) {
+      kcList.forEach((kc) => {
+        const el = kc && document.getElementById('name-' + kc.id);
+        livePeople.push(el ? el.value : (kc && kc.name) || '');
+      });
+    }
+    if (peopleIndicateUserRoster(livePeople)) return true;
+
+    const rawNames = localStorage.getItem('schedule_manager_names');
+    if (rawNames) {
+      const names = JSON.parse(rawNames);
+      if (peopleIndicateUserRoster(collectRosterPeople(names))) return true;
+    }
+    const rawMeta = localStorage.getItem('msb_store_meta');
+    if (rawMeta) {
+      const meta = JSON.parse(rawMeta);
+      if (meta && storeIndicatesUserRoster(meta.storeName)) return true;
+    }
+    if (typeof listTeamTemplates === 'function') {
+      const list = listTeamTemplates();
+      if (Array.isArray(list) && list.length) {
+        for (let i = 0; i < list.length; i++) {
+          const t = list[i] || {};
+          if (storeIndicatesUserRoster(t.storeName)) return true;
+          if (peopleIndicateUserRoster(collectRosterPeople(t.names || {}))) return true;
+        }
+        return true;
+      }
+    }
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !/^schedule_FY\d+-P\d+$/.test(k)) continue;
+      try {
+        const d = JSON.parse(localStorage.getItem(k) || 'null');
+        if (!d) continue;
+        if (storeIndicatesUserRoster(d.storeName)) return true;
+        if (peopleIndicateUserRoster(collectRosterPeople(d.names || {}))) return true;
+      } catch (e2) {}
+    }
+  } catch (e) {}
+  return false;
+}
+
+function stripDemoQueryParam() {
+  try {
+    const u = new URL(location.href);
+    if (u.searchParams.get('demo') !== '1') return;
+    u.searchParams.delete('demo');
+    const q = u.searchParams.toString();
+    history.replaceState({}, '', u.pathname + (q ? '?' + q : '') + u.hash);
+  } catch (e) {}
+}
+
+function wantsDemoLaunch(params) {
+  params = params || new URLSearchParams(location.search);
+  // Play TWA / PWA start_url is ?source=pwa — never a demo seed.
+  return params.get('demo') === '1';
+}
+
+function loadDemoStore(opts) {
+  opts = opts || {};
+  const explicit = opts.explicit === true;
+  // Auto / first-run / ?source=pwa / leftover ?demo=1 must never clobber a real roster.
+  // Only Demo / Tour sample / Sample store (explicit:true) may replace it.
+  if (!explicit && typeof hasSavedUserRoster === 'function' && hasSavedUserRoster()) {
+    try {
+      if (typeof showToast === 'function') {
+        showToast('Kept your saved team — sample store was not loaded over it.', 'info');
+      }
+    } catch (e) {}
+    return false;
+  }
   try {
     // Team
     amCount = 3;
@@ -7980,8 +8102,8 @@ function loadDemoStore() {
     document.getElementById('name-am2').value = 'Riley Quinn';
     document.getElementById('name-am3').value = 'Taylor Hayes';
     const sn = document.getElementById('store-name');
-    if (sn) sn.value = 'Harbor East Demo Store';
-    document.getElementById('store-number').value = '851';
+    if (sn) sn.value = DEMO_STORE_NAME;
+    document.getElementById('store-number').value = DEMO_STORE_NUMBER;
     persistManagerNames();
     persistStoreMeta();
 
@@ -8028,9 +8150,11 @@ function loadDemoStore() {
         dismissWelcome();
       }, 200);
     }, 100);
+    return true;
   } catch (e) {
     console.error(e);
     showToast('Demo failed: ' + e.message, 'error');
+    return false;
   }
 }
 
@@ -15797,7 +15921,7 @@ function getCommandPaletteCommands() {
     { id: 'tab-rules', label: 'Switch to Rules', group: 'Nav', run: () => switchTab('rules') },
     { id: 'tab-schedule', label: 'Switch to Schedule', group: 'Nav', run: () => switchTab('schedule') },
     { id: 'generate', label: 'Generate / Build period', group: 'Schedule', run: () => generateSchedule() },
-    { id: 'demo', label: 'Load demo store', group: 'Schedule', run: () => loadDemoStore() },
+    { id: 'demo', label: 'Load demo store', group: 'Schedule', run: () => loadDemoStore({ explicit: true }) },
     { id: 'save', label: 'Save schedule', group: 'File', run: () => saveToStorage() },
     { id: 'load', label: 'Load saved schedules', group: 'File', run: () => openSavedSchedulesModal() },
     { id: 'save-team', label: 'Save team template', group: 'Team', run: () => saveTeamTemplate() },
@@ -16092,8 +16216,14 @@ function handleLaunchQuery() {
     if (params.get('tab') && typeof switchTab === 'function') {
       setTimeout(() => switchTab(params.get('tab')), 50);
     }
-    if (params.get('demo') === '1' && typeof loadDemoStore === 'function') {
-      setTimeout(() => loadDemoStore(), 200);
+    // Never treat ?source=pwa (Play/PWA start_url) as a demo seed.
+    if (typeof wantsDemoLaunch === 'function' ? wantsDemoLaunch(params) : params.get('demo') === '1') {
+      if (typeof loadDemoStore === 'function') {
+        setTimeout(() => {
+          loadDemoStore({ fromUrl: true });
+          if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();
+        }, 200);
+      }
     }
     if (typeof applyLaunchMode === 'function') applyLaunchMode(params);
   } catch(e) {}

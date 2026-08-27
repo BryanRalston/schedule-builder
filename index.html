@@ -301,6 +301,60 @@ input[type="radio"] { accent-color: var(--gold); }
   font-weight: 600;
   font-size: 0.9rem;
 }
+.role-names-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background: rgba(61, 220, 255, 0.04);
+}
+.role-names-label {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-right: 0.15rem;
+}
+.role-title-field {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  flex: 1 1 140px;
+}
+.role-title-field > span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 0.12rem 0.35rem;
+  border-radius: 4px;
+  min-width: 28px;
+  text-align: center;
+}
+.role-title-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.32rem 0.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(8, 12, 22, 0.9);
+  color: var(--ink);
+}
+.role-title-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(61, 220, 255, 0.2);
+}
+.role-section-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
 .manager-section-header .count-badge {
   background: rgba(61,220,255,0.12);
   color: var(--ink-2);
@@ -4601,9 +4655,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="header-menu">
       <button type="button" class="btn-outline header-menu-btn" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false" id="header-more-btn">More ▾</button>
       <div class="header-menu-panel" id="header-menu-panel" hidden>
-        <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore({explicit:true}); closeHeaderMenu()" title="Load sample store & generate">Demo</button>
         <button type="button" class="no-lock-hide" onclick="saveToStorage(); closeHeaderMenu()">Save</button>
         <button type="button" class="no-lock-hide" onclick="openSavedSchedulesModal(); closeHeaderMenu()">Load</button>
+        <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore({explicit:true}); closeHeaderMenu()" title="Load sample store & generate">Load sample store</button>
         <button type="button" onclick="window.print(); closeHeaderMenu()">Print</button>
         <button type="button" onclick="exportSchedule(); closeHeaderMenu()">Export Word</button>
         <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()">Export Excel</button>
@@ -4704,9 +4758,24 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </div>
       <div class="setup-grid">
         <div class="setup-left">
+          <div class="role-names-bar" id="role-names-bar">
+            <span class="role-names-label">Role names</span>
+            <label class="role-title-field">
+              <span class="role-sm">SM</span>
+              <input type="text" id="role-title-sm" class="role-title-input" value="Store Manager" placeholder="Store Manager" aria-label="Store manager role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
+            </label>
+            <label class="role-title-field">
+              <span class="role-am">AM</span>
+              <input type="text" id="role-title-am" class="role-title-input" value="Assistant Manager" placeholder="Assistant Manager" aria-label="Assistant manager role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
+            </label>
+            <label class="role-title-field">
+              <span class="role-kc">KC</span>
+              <input type="text" id="role-title-kc" class="role-title-input" value="Key Carrier" placeholder="Key Carrier" aria-label="Key carrier role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
+            </label>
+          </div>
           <!-- SM (always 1) -->
           <div>
-            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store Manager</label>
+            <label id="label-role-sm" class="role-section-label" style="display:block;margin-bottom:0.5rem">Store Manager</label>
             <div class="manager-row">
               <span class="role-badge role-sm">SM</span>
               <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
@@ -4716,10 +4785,10 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           <!-- AMs (dynamic) -->
           <div>
             <div class="manager-section-header">
-              <label>Assistant Managers</label>
+              <label id="label-role-am">Assistant Managers</label>
               <span class="count-badge" id="am-count-badge">3</span>
               <button class="btn-round btn-danger" onclick="removeAM()" title="Remove last AM">-</button>
-              <button class="btn-round btn-primary" onclick="addAM()" title="Add assistant manager">+</button>
+              <button class="btn-round btn-primary" id="btn-add-am" onclick="addAM()" title="Add assistant manager">+</button>
             </div>
             <div id="am-rows"></div>
           </div>
@@ -4727,10 +4796,10 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           <!-- KCs (dynamic) -->
           <div>
             <div class="manager-section-header">
-              <label>Key Carriers</label>
+              <label id="label-role-kc">Key Carriers</label>
               <span class="count-badge" id="kc-count-badge">1</span>
               <button class="btn-round btn-danger" onclick="removeKC()" title="Remove last KC">-</button>
-              <button class="btn-round btn-primary" onclick="addKC()" title="Add key carrier">+</button>
+              <button class="btn-round btn-primary" id="btn-add-kc" onclick="addKC()" title="Add key carrier">+</button>
             </div>
             <div id="kc-rows"></div>
           </div>
@@ -4740,11 +4809,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store</label>
             <div class="store-name-row">
               <label style="font-weight:600;font-size:0.9rem;white-space:nowrap">Name:</label>
-              <input type="text" id="store-name" value="" placeholder="e.g. Harbor East #851" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+              <input type="text" id="store-name" value="" placeholder="e.g. your store name" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.65rem">
               <label style="font-weight:600;font-size:0.9rem">Store #:</label>
-              <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+              <input type="text" id="store-number" value="" placeholder="e.g. 100" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div class="store-hours-block no-print" id="store-hours-block" data-tour="store-hours">
               <div class="store-hours-chip">
@@ -4914,7 +4983,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <span class="built-pill" id="built-pill" hidden>Built</span>
         <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()">Build this period</button>
         <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()">Clear board</button>
-        <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})">Sample store</button>
+        <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})">Load sample store</button>
       </div>
       <div class="gen-meta" id="gen-meta">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
     </div>
@@ -4923,7 +4992,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <strong>No schedule yet</strong>
         Name two managers on Setup, then Build. Requests and rules can wait.
         <div style="margin-top:0.85rem">
-          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Try Demo</button>
+          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
           <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
@@ -5016,7 +5085,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.12</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.13</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -6848,6 +6917,14 @@ const DEFAULT_ROLE_RULES = {
 
 let roleRules = JSON.parse(JSON.stringify(DEFAULT_ROLE_RULES));
 
+const MSB_ROLE_TITLES_KEY = 'msb_role_titles';
+const DEFAULT_ROLE_TITLES = {
+  sm: 'Store Manager',
+  am: 'Assistant Manager',
+  kc: 'Key Carrier'
+};
+let roleTitles = { sm: '', am: '', kc: '' };
+
 const SHIFT_PREF_OPTIONS = [
   { value: 'open-early', label: 'Open early' },
   { value: 'open-late', label: 'Open late' },
@@ -6994,16 +7071,16 @@ function renderPreferencesUI() {
         <span class="toggle-track"></span>
         SM fewer weekend offs
       </label>
-      <div class="pref-desc">Do not force the Store Manager up to the same weekend-off count as AMs. SM can sacrifice weekends when staffing is tight.</div>
+      <div class="pref-desc">Do not force the ${esc(typeof getRoleTitle === 'function' ? getRoleTitle('sm') : 'Store Manager')} up to the same weekend-off count as AMs. SM can sacrifice weekends when staffing is tight.</div>
     </div>
     <div class="pref-card">
-      <label class="pref-label">Store Manager closes / week
+      <label class="pref-label">${esc(typeof getRoleTitle === 'function' ? getRoleTitle('sm') : 'Store Manager')} closes / week
         <input type="number" id="pref-sm-closes" min="0" max="7" value="${p.smClosesPerWeek != null ? p.smClosesPerWeek : 1}" onchange="readPreferencesFromUI()">
       </label>
       <div class="pref-desc">How many manager-close nights the SM takes each week (default 1). Raise to 2 if you close twice. Capped by nights that aren’t KC-close nights. Sole manager always covers all manager nights.</div>
     </div>
     <div class="pref-card">
-      <label class="pref-label">Assistant Manager closes / week
+      <label class="pref-label">${esc(typeof getRoleTitle === 'function' ? getRoleTitle('am') : 'Assistant Manager')} closes / week
         <input type="number" id="pref-am-closes" min="0" max="7" placeholder="auto" value="${p.amClosesPerWeek == null || p.amClosesPerWeek === '' ? '' : p.amClosesPerWeek}" onchange="readPreferencesFromUI()">
       </label>
       <div class="pref-desc">Per AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — remaining closes after the SM are split evenly. Set 2 for smaller teams where each AM closes twice. Coverage still wins if totals don’t match nights available.</div>
@@ -7045,7 +7122,7 @@ function renderRoleRulesUI() {
         <div class="role-rule-body ${collapsed ? 'collapsed' : ''}" id="${bodyId}">
           <div class="role-field">
             <label>Display name</label>
-            <input type="text" value="${esc(rule.label)}" onchange="roleRules['${rule.id}'].label=this.value; renderRoleRulesUI()">
+            <input type="text" value="${esc(rule.label)}" onchange="updateRoleRuleLabel('${rule.id}', this.value)">
           </div>
           <div class="role-field">
             <label>Weekend days off (blank = global)</label>
@@ -7136,6 +7213,7 @@ function removeCustomRoleRule(id) {
 function resetRoleRules() {
   if (!confirm('Reset all role rules to defaults? Custom role types will be removed.')) return;
   roleRules = JSON.parse(JSON.stringify(DEFAULT_ROLE_RULES));
+  try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (e) {}
   renderRoleRulesUI();
 }
 
@@ -7146,7 +7224,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.12';
+const APP_VERSION = '2.6.13';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7300,6 +7378,135 @@ function persistStoreMeta() {
 function persistSetupDraft() {
   try { persistManagerNames(); } catch (e) {}
   try { persistStoreMeta(); } catch (e2) {}
+  try { persistRoleTitles(); } catch (e3) {}
+}
+
+function getRoleTitle(family) {
+  const key = family === 'sm' || family === 'am' || family === 'kc' ? family : 'am';
+  const typed = roleTitles && String(roleTitles[key] || '').trim();
+  if (typed) return typed;
+  return DEFAULT_ROLE_TITLES[key];
+}
+
+function pluralRoleTitle(family) {
+  const t = getRoleTitle(family);
+  if (!t) return t;
+  if (/s$/i.test(t)) return t;
+  return t + 's';
+}
+
+function defaultRolePersonName(family, n) {
+  const t = getRoleTitle(family);
+  if (family === 'sm' || n == null || n === '') return t;
+  return t + ' ' + n;
+}
+
+function readRoleTitlesFromInputs() {
+  const sm = ((document.getElementById('role-title-sm') || {}).value || '').trim();
+  const am = ((document.getElementById('role-title-am') || {}).value || '').trim();
+  const kc = ((document.getElementById('role-title-kc') || {}).value || '').trim();
+  roleTitles = { sm: sm, am: am, kc: kc };
+  return roleTitles;
+}
+
+function persistRoleTitles() {
+  try {
+    if (document.getElementById('role-title-sm')) readRoleTitlesFromInputs();
+    localStorage.setItem(MSB_ROLE_TITLES_KEY, JSON.stringify({
+      sm: roleTitles.sm,
+      am: roleTitles.am,
+      kc: roleTitles.kc
+    }));
+  } catch (e) {}
+}
+
+function restoreRoleTitles() {
+  try {
+    const raw = localStorage.getItem(MSB_ROLE_TITLES_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d && typeof d === 'object') {
+        roleTitles.sm = String(d.sm || '').trim();
+        roleTitles.am = String(d.am || '').trim();
+        roleTitles.kc = String(d.kc || '').trim();
+      }
+    }
+  } catch (e) {}
+  applyRoleTitleUI();
+}
+
+function applyRoleTitleUI() {
+  const smT = getRoleTitle('sm');
+  const amT = getRoleTitle('am');
+  const kcT = getRoleTitle('kc');
+  const active = document.activeElement;
+  const smIn = document.getElementById('role-title-sm');
+  const amIn = document.getElementById('role-title-am');
+  const kcIn = document.getElementById('role-title-kc');
+  if (smIn && active !== smIn) smIn.value = roleTitles.sm || smT;
+  if (amIn && active !== amIn) amIn.value = roleTitles.am || amT;
+  if (kcIn && active !== kcIn) kcIn.value = roleTitles.kc || kcT;
+  const smLab = document.getElementById('label-role-sm');
+  const amLab = document.getElementById('label-role-am');
+  const kcLab = document.getElementById('label-role-kc');
+  if (smLab) smLab.textContent = smT;
+  if (amLab) amLab.textContent = pluralRoleTitle('am');
+  if (kcLab) kcLab.textContent = pluralRoleTitle('kc');
+  const smName = document.getElementById('name-sm');
+  if (smName) smName.placeholder = smT + ' name';
+  const amMax = typeof amCount === 'number' ? amCount : 8;
+  for (let i = 1; i <= amMax; i++) {
+    const el = document.getElementById('name-am' + i);
+    if (el) el.placeholder = amT + ' ' + i;
+  }
+  if (typeof kcList !== 'undefined' && Array.isArray(kcList)) {
+    kcList.forEach((kc, idx) => {
+      const el = kc && document.getElementById('name-' + kc.id);
+      if (el) el.placeholder = kcT + ' ' + (idx + 1);
+    });
+  }
+  const addAm = document.getElementById('btn-add-am');
+  const addKc = document.getElementById('btn-add-kc');
+  if (addAm) addAm.title = 'Add ' + amT.toLowerCase();
+  if (addKc) addKc.title = 'Add ' + kcT.toLowerCase();
+  const base = document.getElementById('new-role-base');
+  if (base && base.options) {
+    for (let i = 0; i < base.options.length; i++) {
+      const opt = base.options[i];
+      if (opt.value === 'sm') opt.textContent = 'Base: ' + smT;
+      if (opt.value === 'am') opt.textContent = 'Base: ' + amT;
+      if (opt.value === 'kc') opt.textContent = 'Base: ' + kcT;
+    }
+  }
+  if (typeof roleRules !== 'undefined' && roleRules) {
+    if (roleRules.sm && roleRules.sm.isBuiltin !== false) roleRules.sm.label = smT;
+    if (roleRules.am && roleRules.am.isBuiltin !== false) roleRules.am.label = amT;
+    if (roleRules.kc && roleRules.kc.isBuiltin !== false) roleRules.kc.label = kcT;
+  }
+}
+
+function onRoleTitleChange(fromBlur) {
+  persistRoleTitles();
+  applyRoleTitleUI();
+  if (!fromBlur) return;
+  try {
+    if (typeof readPreferencesFromUI === 'function') readPreferencesFromUI();
+    if (typeof renderPreferencesUI === 'function') renderPreferencesUI();
+    if (typeof renderRoleRulesUI === 'function') renderRoleRulesUI();
+  } catch (e) {}
+}
+
+function updateRoleRuleLabel(id, value) {
+  if (id === 'sm' || id === 'am' || id === 'kc') {
+    const el = document.getElementById('role-title-' + id);
+    if (el) el.value = value;
+    persistRoleTitles();
+    applyRoleTitleUI();
+    if (typeof renderRoleRulesUI === 'function') renderRoleRulesUI();
+    return;
+  }
+  if (roleRules[id]) roleRules[id].label = value;
+  if (typeof renderRoleRulesUI === 'function') renderRoleRulesUI();
 }
 
 function restoreStoreMeta() {
@@ -8046,6 +8253,17 @@ function isPlaceholderManagerName(n) {
   if (/^am\d+$/i.test(s)) return true;
   if (/^assistant manager(\s*\d+)?$/i.test(s)) return true;
   if (/^key carrier(\s*\d+)?$/i.test(s)) return true;
+  if (typeof getRoleTitle === 'function' && typeof DEFAULT_ROLE_TITLES !== 'undefined') {
+    const titles = ['sm', 'am', 'kc'].map((f) => [getRoleTitle(f), DEFAULT_ROLE_TITLES[f]]);
+    for (let i = 0; i < titles.length; i++) {
+      for (let j = 0; j < titles[i].length; j++) {
+        const t = String(titles[i][j] || '').trim();
+        if (!t) continue;
+        const escRe = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (new RegExp('^' + escRe + '(\\s*\\d+)?$', 'i').test(s)) return true;
+      }
+    }
+  }
   return false;
 }
 
@@ -8385,7 +8603,7 @@ function loadDemoStore(opts) {
       buildInputTabs();
       buildInputCalendar(activeTab || 'sm');
       updateReadyChecklist();
-      showToast('Demo store loaded — generating schedule…', 'success');
+      showToast('Sample store loaded — generating schedule…', 'success');
       setTimeout(() => {
         generateSchedule();
         dismissWelcome();
@@ -8970,7 +9188,7 @@ function renderAMRows() {
     const val = existing ? existing.value : 'AM' + i;
     html += `<div class="manager-row">
       <span class="role-badge role-am">AM${i}</span>
-      <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
+      <input type="text" id="name-${id}" value="${val}" placeholder="${typeof getRoleTitle === 'function' ? getRoleTitle('am') : 'Assistant Manager'} ${i}" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
     </div>`;
   }
   container.innerHTML = html;
@@ -9004,7 +9222,7 @@ function renderKCRows() {
       : '';
     html += `<div class="manager-row" style="flex-wrap:wrap">
       <span class="role-badge role-kc">KC${idx + 1}</span>
-      <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="Key Carrier ${idx + 1}"
+      <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="${typeof getRoleTitle === 'function' ? getRoleTitle('kc') : 'Key Carrier'} ${idx + 1}"
         oninput="kcList[${idx}].name = this.value; persistManagerNames()" onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
       <label class="kc-toggle-label">
         <input type="checkbox" ${kc.asManager ? 'checked' : ''}
@@ -9037,7 +9255,7 @@ function removeAM() {
 function addKC() {
   // Non-manager KCs do not consume free manager seats
   const num = kcList.length + 1;
-  kcList.push({ id: 'kc' + num, name: 'Key Carrier ' + num, asManager: false, midDows: [] });
+  kcList.push({ id: 'kc' + num, name: defaultRolePersonName('kc', num), asManager: false, midDows: [] });
   renderKCRows();
   rebuildAfterConfigChange();
 }
@@ -9124,7 +9342,7 @@ document.getElementById('pick-period').addEventListener('change', updatePeriodIn
 
 function getManagerNames() {
   const names = {
-    sm: document.getElementById('name-sm').value || 'Store Manager'
+    sm: document.getElementById('name-sm').value || defaultRolePersonName('sm')
   };
   for (let i = 1; i <= amCount; i++) {
     const el = document.getElementById('name-am' + i);
@@ -13817,7 +14035,7 @@ function loadFromStorage() {
     }));
   } else {
     // Legacy
-    kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
+    kcList = [{ id: 'kc1', name: defaultRolePersonName('kc', 1), asManager: false, midDows: [] }];
   }
 
   // Restore store number / name
@@ -13838,7 +14056,7 @@ function loadFromStorage() {
   renderKCRows();
 
   // Restore names
-  document.getElementById('name-sm').value = data.names.sm || 'Store Manager';
+  document.getElementById('name-sm').value = data.names.sm || defaultRolePersonName('sm');
   for (let i = 1; i <= amCount; i++) {
     const el = document.getElementById('name-am' + i);
     if (el && data.names['am' + i]) el.value = data.names['am' + i];
@@ -13859,8 +14077,9 @@ function loadFromStorage() {
   }
   if (data.roleRules) {
     roleRules = data.roleRules;
-    renderRoleRulesUI();
   }
+  try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
+  renderRoleRulesUI();
 
   // Restore inputs
   inputs = {};
@@ -14700,7 +14919,7 @@ function loadSavedSchedule(key) {
   renderAMRows();
   renderKCRows();
 
-  document.getElementById('name-sm').value = (data.names && data.names.sm) || 'Store Manager';
+  document.getElementById('name-sm').value = (data.names && data.names.sm) || defaultRolePersonName('sm');
   for (let i = 1; i <= amCount; i++) {
     const el = document.getElementById('name-am' + i);
     if (el && data.names && data.names['am' + i]) el.value = data.names['am' + i];
@@ -14738,8 +14957,9 @@ function loadSavedSchedule(key) {
   }
   if (data.roleRules) {
     roleRules = data.roleRules;
-    renderRoleRulesUI();
   }
+  try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
+  renderRoleRulesUI();
 
   buildInputTabs();
   buildInputCalendar(activeTab);
@@ -14779,7 +14999,7 @@ function deleteSavedSchedule(key, event) {
 
 function persistManagerNames() {
   const names = {
-    sm: document.getElementById('name-sm').value || 'Store Manager',
+    sm: document.getElementById('name-sm').value || defaultRolePersonName('sm'),
     amCount: amCount,
     kcList: kcList.map((kc, idx) => {
       const el = document.getElementById('name-' + kc.id);
@@ -14898,7 +15118,7 @@ function snapshotCurrentTeamTemplate(name) {
     storeNumber: (document.getElementById('store-number') || {}).value || '',
     amCount: amCount,
     names: {
-      sm: (document.getElementById('name-sm') || {}).value || 'Store Manager',
+      sm: (document.getElementById('name-sm') || {}).value || defaultRolePersonName('sm'),
       ...amNames
     },
     kcList: kcList.map((kc) => ({
@@ -14945,7 +15165,7 @@ function loadTeamTemplate(id) {
     asManager: !!kc.asManager,
     midDows: normalizeKcMidDows(kc.midDows)
   }));
-  if (!kcList.length) kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
+  if (!kcList.length) kcList = [{ id: 'kc1', name: defaultRolePersonName('kc', 1), asManager: false, midDows: [] }];
   renderAMRows();
   renderKCRows();
   const sn = document.getElementById('store-name');
@@ -16218,7 +16438,7 @@ function getCommandPaletteCommands() {
     { id: 'tab-rules', label: 'Switch to Rules', group: 'Nav', run: () => switchTab('rules') },
     { id: 'tab-schedule', label: 'Switch to Schedule', group: 'Nav', run: () => switchTab('schedule') },
     { id: 'generate', label: 'Generate / Build period', group: 'Schedule', run: () => generateSchedule() },
-    { id: 'demo', label: 'Load demo store', group: 'Schedule', run: () => loadDemoStore({ explicit: true }) },
+    { id: 'demo', label: 'Load sample store', group: 'Schedule', run: () => loadDemoStore({ explicit: true }) },
     { id: 'save', label: 'Save schedule', group: 'File', run: () => saveToStorage() },
     { id: 'load', label: 'Load saved schedules', group: 'File', run: () => openSavedSchedulesModal() },
     { id: 'save-team', label: 'Save team template', group: 'Team', run: () => saveTeamTemplate() },
@@ -16587,6 +16807,7 @@ document.addEventListener('click', (e) => {
   });
 });
 
+restoreRoleTitles();
 const _hadRestoredNames = !!restoreManagerNames();
 restoreLastTeamTemplateIfNeeded(_hadRestoredNames);
 restoreStoreMeta();
@@ -16598,6 +16819,7 @@ if (
 ) {
   applyBlankTeam({ persist: true });
 }
+try { applyRoleTitleUI(); } catch (eRtBoot) {}
 restoreWelcomeState();
 renderTeamTemplateUI();
 updateStoreHoursSummary();

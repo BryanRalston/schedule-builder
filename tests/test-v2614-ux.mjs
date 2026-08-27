@@ -124,12 +124,16 @@ async function main() {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
-  if (/id="btn-start-with-team"[^>]*class="btn-demo welcome-primary"[^>]*onclick="startWithMyTeam\(\)"/.test(index)
-    && /id="btn-tour-sample"[^>]*class="btn-outline welcome-secondary-btn"[^>]*onclick="loadDemoStore\(\{explicit:true\}\)"/.test(index)
-    && /welcome-secondary-btn/.test(index)
-    && /Take tour/.test(index)
+  const welcomeHtml = (index.match(/id="welcome-card"[\s\S]*?id="welcome-play"/) || [''])[0];
+  if (/id="btn-start-with-team"/.test(welcomeHtml)
+    && /onclick="startWithMyTeam\(\)"/.test(welcomeHtml)
+    && /class="btn-demo welcome-primary"/.test(welcomeHtml)
+    && /id="btn-tour-sample"/.test(welcomeHtml)
+    && /loadDemoStore\(\{explicit:true\}\)/.test(welcomeHtml)
+    && /class="btn-outline welcome-secondary-btn"/.test(welcomeHtml)
+    && /Take tour/.test(welcomeHtml)
     && !/<button class="btn-primary" onclick="loadDemoStore/.test(index)
-    && (index.match(/id="welcome-card"[\s\S]*?id="welcome-play"/) || [''])[0].split('btn-demo').length === 2) {
+    && welcomeHtml.split('btn-demo').length === 2) {
     pass('welcome-one-primary-door');
   } else fail('welcome-one-primary-door', 'Start is not the only welcome primary');
 
@@ -245,8 +249,32 @@ async function main() {
       localStorage.setItem('msb_active_tab', 'schedule');
       localStorage.setItem('schedule_manager_names', JSON.stringify(payload.names));
       localStorage.setItem('msb_store_meta', JSON.stringify(payload.meta));
+      const n = payload.names;
+      amCount = n.amCount;
+      kcList = (n.kcList || []).map((kc) => ({
+        id: kc.id,
+        name: kc.name,
+        asManager: !!kc.asManager,
+        midDows: kc.midDows || [],
+      }));
+      if (typeof renderAMRows === 'function') renderAMRows();
+      if (typeof renderKCRows === 'function') renderKCRows();
+      const sm = document.getElementById('name-sm');
+      if (sm) sm.value = n.sm;
+      Object.keys(n.ams || {}).forEach((id) => {
+        const el = document.getElementById('name-' + id);
+        if (el) el.value = n.ams[id];
+      });
+      (n.kcList || []).forEach((kc) => {
+        const el = document.getElementById('name-' + kc.id);
+        if (el) el.value = kc.name;
+      });
+      const store = document.getElementById('store-name');
+      const num = document.getElementById('store-number');
+      if (store) store.value = payload.meta.storeName;
+      if (num) num.value = payload.meta.storeNumber;
     }, DEMO_LEFTOVER);
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(800);
     const leftover = await page.evaluate(() => ({
       tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',

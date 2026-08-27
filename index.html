@@ -4665,7 +4665,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
     <div class="welcome-actions">
       <button class="btn-demo" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
-      <button class="btn-primary" onclick="loadDemoStore()">Tour sample store</button>
+      <button class="btn-primary" id="btn-tour-sample-store" onclick="loadDemoStore()">Tour sample store</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="startOnboardingTour(true)">Take tour</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
       <button class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
@@ -4709,7 +4709,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store Manager</label>
             <div class="manager-row">
               <span class="role-badge role-sm">SM</span>
-              <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name" onblur="persistManagerNames()" onchange="persistManagerNames()">
+              <input type="text" id="name-sm" value="" placeholder="Store Manager name" onblur="persistManagerNames()" onchange="persistManagerNames()">
             </div>
           </div>
 
@@ -4717,7 +4717,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           <div>
             <div class="manager-section-header">
               <label>Assistant Managers</label>
-              <span class="count-badge" id="am-count-badge">3</span>
+              <span class="count-badge" id="am-count-badge">2</span>
               <button class="btn-round btn-danger" onclick="removeAM()" title="Remove last AM">-</button>
               <button class="btn-round btn-primary" onclick="addAM()" title="Add assistant manager">+</button>
             </div>
@@ -5016,7 +5016,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.11</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.12</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -5264,7 +5264,7 @@ function restoreAppTab() {
 // ── Dynamic Configuration State ──
 // Free: unlimited managers; limited free schedule builds (see freeGenerateLimit)
 let amCount = 2;
-let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
+let kcList = [{ id: 'kc1', name: '', asManager: false, midDows: [] }];
 
 // Store open/close hours (display/planning metadata — not required by coverage engine)
 const DEFAULT_STORE_HOURS = {
@@ -5297,6 +5297,18 @@ const MSB_GEN_COUNT_KEY = 'msb_free_generate_count';
 const MSB_SESSION_KEY = 'msb_session';
 const MSB_WORKSPACE_KEY = 'msb_workspace';
 const MSB_LOCAL_ACCOUNTS_KEY = 'msb_local_accounts';
+const MSB_ROSTER_ORIGIN_KEY = 'msb_roster_origin';
+/** Tour-only sample. Never the default roster for / or ?source=pwa. */
+const DEMO_STORE = {
+  storeName: 'Harbor East Demo Store',
+  storeNumber: '851',
+  sm: 'Alex Morgan',
+  ams: ['Casey Brooks', 'Riley Quinn', 'Taylor Hayes'],
+  kcs: [
+    { id: 'kc1', name: 'Jordan Lee', asManager: false, midDows: [0, 2, 4, 5] },
+    { id: 'kc2', name: 'Sam Rivera', asManager: false, midDows: [3, 6] }
+  ]
+};
 let monetizationConfig = {
   priceLabel: '$19.99',
   priceNote: 'one-time · lifetime Pro unlock',
@@ -5573,10 +5585,11 @@ function createSessionFromFields(opts) {
     industry: 'retail',
     seats: 1
   });
-  // Seed store name if empty
+  // Seed store name if empty — never hydrate the tour sample as a workspace name
   try {
     const sn = document.getElementById('store-name');
-    if (sn && !sn.value.trim() && orgName && orgName !== 'This device') {
+    const demoName = (typeof DEMO_STORE !== 'undefined' && DEMO_STORE.storeName) || 'Harbor East Demo Store';
+    if (sn && !sn.value.trim() && orgName && orgName !== 'This device' && orgName !== demoName) {
       sn.value = orgName;
       if (typeof persistStoreMeta === 'function') persistStoreMeta();
     }
@@ -7143,7 +7156,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.11';
+const APP_VERSION = '2.6.12';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7213,6 +7226,11 @@ function startWithMyTeam() {
   try {
     if (typeof endOnboardingTour === 'function') endOnboardingTour(true);
     else if (typeof setTourDone === 'function') setTourDone();
+  } catch (e) {}
+  try {
+    if (typeof isDemoSampleRoster === 'function' && isDemoSampleRoster()) {
+      applyBlankTeam({ persist: true });
+    }
   } catch (e) {}
   if (typeof switchTab === 'function') switchTab('setup');
   setTimeout(() => {
@@ -7296,9 +7314,21 @@ function restoreStoreMeta() {
     const d = JSON.parse(raw);
     const sn = document.getElementById('store-name');
     const num = document.getElementById('store-number');
-    if (sn && d.storeName) sn.value = d.storeName;
-    if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
-    if (d.storeHours) applyStoreHoursObject(d.storeHours);
+    const skipDemoStore =
+      typeof isExplicitDemoLaunch === 'function' &&
+      !isExplicitDemoLaunch() &&
+      typeof storedStoreMetaLooksLikeDemo === 'function' &&
+      storedStoreMetaLooksLikeDemo(d);
+    if (skipDemoStore) {
+      if (sn) sn.value = '';
+      if (num) num.value = '';
+      if (d.storeHours) applyStoreHoursObject(d.storeHours);
+      persistStoreMeta();
+    } else {
+      if (sn && d.storeName) sn.value = d.storeName;
+      if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
+      if (d.storeHours) applyStoreHoursObject(d.storeHours);
+    }
   } catch(e) {}
   if (typeof updateStoreHoursSummary === 'function') updateStoreHoursSummary();
 }
@@ -8085,23 +8115,113 @@ function updateReadyChecklist() {
   }
 }
 
+function isExplicitDemoLaunch() {
+  try {
+    return new URLSearchParams(location.search).get('demo') === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
+function getRosterOrigin() {
+  try {
+    return localStorage.getItem(MSB_ROSTER_ORIGIN_KEY) || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function setRosterOrigin(origin) {
+  try {
+    if (origin) localStorage.setItem(MSB_ROSTER_ORIGIN_KEY, String(origin));
+    else localStorage.removeItem(MSB_ROSTER_ORIGIN_KEY);
+  } catch (e) {}
+}
+
+function storedNamesLookLikeDemo(names) {
+  if (!names || typeof names !== 'object') return false;
+  if (String(names.sm || '').trim() !== DEMO_STORE.sm) return false;
+  const ams = names.ams || {};
+  return DEMO_STORE.ams.every((n, i) => String(ams['am' + (i + 1)] || '').trim() === n);
+}
+
+function storedStoreMetaLooksLikeDemo(meta) {
+  if (!meta || typeof meta !== 'object') return false;
+  return String(meta.storeName || '').trim() === DEMO_STORE.storeName;
+}
+
+function teamTemplateLooksLikeDemo(tpl) {
+  if (!tpl || typeof tpl !== 'object') return false;
+  if (String(tpl.storeName || '').trim() === DEMO_STORE.storeName) return true;
+  return !!(tpl.names && storedNamesLookLikeDemo({ sm: tpl.names.sm, ams: tpl.names }));
+}
+
+function liveRosterLooksLikeDemo() {
+  const sm = ((document.getElementById('name-sm') || {}).value || '').trim();
+  const store = ((document.getElementById('store-name') || {}).value || '').trim();
+  const ams = DEMO_STORE.ams.map((_, i) => ((document.getElementById('name-am' + (i + 1)) || {}).value || '').trim());
+  if (store === DEMO_STORE.storeName) return true;
+  return sm === DEMO_STORE.sm && DEMO_STORE.ams.every((n, i) => ams[i] === n);
+}
+
+function isDemoSampleRoster() {
+  return getRosterOrigin() === 'demo' || liveRosterLooksLikeDemo();
+}
+
+function markRosterOriginFromLive() {
+  if (liveRosterLooksLikeDemo() && (isExplicitDemoLaunch() || getRosterOrigin() === 'demo')) {
+    setRosterOrigin('demo');
+  } else {
+    setRosterOrigin('user');
+  }
+}
+
+function applyBlankTeam(opts) {
+  const persist = !opts || opts.persist !== false;
+  amCount = 2;
+  kcList = [{ id: 'kc1', name: '', asManager: false, midDows: [] }];
+  renderAMRows();
+  renderKCRows();
+  const sm = document.getElementById('name-sm');
+  if (sm) sm.value = '';
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    if (el) el.value = '';
+  }
+  const sn = document.getElementById('store-name');
+  const num = document.getElementById('store-number');
+  if (sn && (!sn.value.trim() || sn.value.trim() === DEMO_STORE.storeName)) sn.value = '';
+  if (num && (!num.value.trim() || num.value.trim() === DEMO_STORE.storeNumber)) num.value = '';
+  setRosterOrigin('user');
+  if (persist) {
+    try { persistManagerNames(); } catch (e) {}
+    try { persistStoreMeta(); } catch (e) {}
+  }
+  try { if (typeof updateReadyChecklist === 'function') updateReadyChecklist(); } catch (e) {}
+}
+
 function loadDemoStore() {
   try {
-    // Team
-    amCount = 3;
-    kcList = [
-      { id: 'kc1', name: 'Jordan Lee', asManager: false, midDows: [0, 2, 4, 5] },
-      { id: 'kc2', name: 'Sam Rivera', asManager: false, midDows: [3, 6] }
-    ];
+    // Explicit tour only — callers: Tour button, More → Demo, ?demo=1
+    amCount = DEMO_STORE.ams.length;
+    kcList = DEMO_STORE.kcs.map((kc) => ({
+      id: kc.id,
+      name: kc.name,
+      asManager: !!kc.asManager,
+      midDows: normalizeKcMidDows(kc.midDows)
+    }));
     renderAMRows();
     renderKCRows();
-    document.getElementById('name-sm').value = 'Alex Morgan';
-    document.getElementById('name-am1').value = 'Casey Brooks';
-    document.getElementById('name-am2').value = 'Riley Quinn';
-    document.getElementById('name-am3').value = 'Taylor Hayes';
+    document.getElementById('name-sm').value = DEMO_STORE.sm;
+    DEMO_STORE.ams.forEach((n, i) => {
+      const el = document.getElementById('name-am' + (i + 1));
+      if (el) el.value = n;
+    });
     const sn = document.getElementById('store-name');
-    if (sn) sn.value = 'Harbor East Demo Store';
-    document.getElementById('store-number').value = '851';
+    if (sn) sn.value = DEMO_STORE.storeName;
+    const num = document.getElementById('store-number');
+    if (num) num.value = DEMO_STORE.storeNumber;
+    setRosterOrigin('demo');
     persistManagerNames();
     persistStoreMeta();
 
@@ -8722,7 +8842,7 @@ function renderAMRows() {
   for (let i = 1; i <= amCount; i++) {
     const id = 'am' + i;
     const existing = document.getElementById('name-' + id);
-    const val = existing ? existing.value : 'AM' + i;
+    const val = existing ? existing.value : '';
     html += `<div class="manager-row">
       <span class="role-badge role-am">AM${i}</span>
       <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}" onblur="persistManagerNames()" onchange="persistManagerNames()">
@@ -8792,7 +8912,7 @@ function removeAM() {
 function addKC() {
   // Non-manager KCs do not consume free manager seats
   const num = kcList.length + 1;
-  kcList.push({ id: 'kc' + num, name: 'Key Carrier ' + num, asManager: false, midDows: [] });
+  kcList.push({ id: 'kc' + num, name: '', asManager: false, midDows: [] });
   renderKCRows();
   rebuildAfterConfigChange();
 }
@@ -14534,7 +14654,7 @@ function deleteSavedSchedule(key, event) {
 
 function persistManagerNames() {
   const names = {
-    sm: document.getElementById('name-sm').value || 'Store Manager',
+    sm: (document.getElementById('name-sm') || {}).value || '',
     amCount: amCount,
     kcList: kcList.map((kc, idx) => {
       const el = document.getElementById('name-' + kc.id);
@@ -14549,9 +14669,12 @@ function persistManagerNames() {
   };
   for (let i = 1; i <= amCount; i++) {
     const el = document.getElementById('name-am' + i);
-    names.ams['am' + i] = el ? el.value : ('AM' + i);
+    names.ams['am' + i] = el ? el.value : '';
   }
   localStorage.setItem('schedule_manager_names', JSON.stringify(names));
+  try {
+    if (typeof markRosterOriginFromLive === 'function') markRosterOriginFromLive();
+  } catch (e) {}
 }
 
 function restoreManagerNames() {
@@ -14559,6 +14682,15 @@ function restoreManagerNames() {
     const stored = localStorage.getItem('schedule_manager_names');
     if (!stored) return false;
     const names = JSON.parse(stored);
+    // Tour leftover is not a real roster. / and ?source=pwa must stay blank.
+    if (
+      !isExplicitDemoLaunch() &&
+      (getRosterOrigin() === 'demo' || storedNamesLookLikeDemo(names))
+    ) {
+      try { localStorage.removeItem('schedule_manager_names'); } catch (e) {}
+      if (getRosterOrigin() === 'demo') setRosterOrigin('user');
+      return false;
+    }
 
     if (names.sm) {
       document.getElementById('name-sm').value = names.sm;
@@ -14672,6 +14804,7 @@ function saveTeamTemplate() {
   } catch (e) {}
   persistManagerNames();
   persistStoreMeta();
+  setRosterOrigin('user');
   renderTeamTemplateUI();
   showToast('Team template saved: ' + name, 'success');
 }
@@ -14723,6 +14856,7 @@ function loadTeamTemplate(id) {
   }
   persistManagerNames();
   persistStoreMeta();
+  setRosterOrigin('user');
   try {
     localStorage.setItem(MSB_TEAM_TEMPLATE_LAST, tpl.id);
   } catch (e) {}
@@ -14795,13 +14929,21 @@ function renderTeamTemplateUI() {
 }
 
 function restoreLastTeamTemplateIfNeeded(hadNames) {
-  if (hadNames) return;
+  if (hadNames) return false;
+  if (isExplicitDemoLaunch()) return false;
   try {
     const last = localStorage.getItem(MSB_TEAM_TEMPLATE_LAST);
-    if (!last) return;
+    if (!last) return false;
     const list = listTeamTemplates();
-    if (list.some((t) => t.id === last)) loadTeamTemplate(last);
-  } catch (e) {}
+    const tpl = list.find((t) => t.id === last);
+    if (!tpl) return false;
+    // Auto-restore only a team the user saved. Skip an untouched tour snapshot.
+    if (teamTemplateLooksLikeDemo(tpl) && getRosterOrigin() === 'demo') return false;
+    loadTeamTemplate(last);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 // ════════════════════════════════════════════════════
@@ -16246,6 +16388,7 @@ function handleLaunchQuery() {
     if (params.get('tab') && typeof switchTab === 'function') {
       setTimeout(() => switchTab(params.get('tab')), 50);
     }
+    // Demo is a tour, not default data. Play TWA / PWA (?source=pwa) must never hydrate Harbor East.
     if (params.get('demo') === '1' && typeof loadDemoStore === 'function') {
       setTimeout(() => loadDemoStore(), 200);
     }
@@ -16303,8 +16446,11 @@ document.addEventListener('click', (e) => {
 });
 
 const _hadRestoredNames = !!restoreManagerNames();
-restoreLastTeamTemplateIfNeeded(_hadRestoredNames);
+const _hadRestoredTemplate = !!restoreLastTeamTemplateIfNeeded(_hadRestoredNames);
 restoreStoreMeta();
+if (!_hadRestoredNames && !_hadRestoredTemplate && !isExplicitDemoLaunch()) {
+  applyBlankTeam({ persist: true });
+}
 restoreWelcomeState();
 renderTeamTemplateUI();
 updateStoreHoursSummary();

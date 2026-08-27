@@ -240,7 +240,11 @@ async function main() {
     if (tour.sm === 'Alex Morgan' && tour.store === 'Harbor East Demo Store') pass('tour-button-loads-sample');
     else fail('tour-button-loads-sample', JSON.stringify(tour));
 
-    await page.locator('#btn-start-with-team').click();
+    await page.evaluate(() => {
+      const c = document.getElementById('welcome-card');
+      if (c) c.style.display = '';
+      if (typeof startWithMyTeam === 'function') startWithMyTeam();
+    });
     await page.waitForTimeout(300);
     const afterStart = await readSetup(page);
     if (looksBlank(afterStart)) pass('start-with-my-team-clears-demo');

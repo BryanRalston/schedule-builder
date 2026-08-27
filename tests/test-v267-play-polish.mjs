@@ -132,6 +132,19 @@ async function main() {
     fail('no-publish-setup-chrome', 'install.html still linked from index.html');
   } else pass('no-publish-setup-chrome');
 
+  const PLAY_LISTING = 'https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro';
+  const listing = read('store/listing.html');
+  if (index.includes(PLAY_LISTING) && /Get it on Google Play/.test(index) && /id="welcome-play-link"/.test(index)) {
+    pass('homepage-play-store-url');
+  } else fail('homepage-play-store-url', 'Play listing link missing from homepage hero');
+  if (buy.includes(PLAY_LISTING) && /Get it on Google Play/.test(buy)) {
+    pass('buy-play-store-url');
+  } else fail('buy-play-store-url', 'Play listing link missing from buy.html');
+  if (listing.includes('Retail schedule for manager shifts. NRF 4-5-4, PTO, offline. No login.')
+    && listing.includes('Schedule Pro is an offline retail manager scheduler for store managers and key carriers.')) {
+    pass('listing-short-and-lede');
+  } else fail('listing-short-and-lede', 'store/listing.html copy not updated');
+
   if (/mailto:b\.ralston62989@gmail\.com/.test(index) || /mailto:b\.ralston62989@gmail\.com/.test(feedback)) {
     fail('no-mailto-in-app', 'raw support mailto in scheduler or feedback.html');
   } else pass('no-mailto-in-app');

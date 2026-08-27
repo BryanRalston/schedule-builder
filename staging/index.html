@@ -4542,7 +4542,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="header-menu">
       <button type="button" class="btn-outline header-menu-btn" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false" id="header-more-btn">More ▾</button>
       <div class="header-menu-panel" id="header-menu-panel" hidden>
-        <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore(); closeHeaderMenu()" title="Load sample store & generate">Demo</button>
+        <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore({explicit:true}); closeHeaderMenu()" title="Load sample store & generate">Demo</button>
         <button type="button" class="no-lock-hide" onclick="saveToStorage(); closeHeaderMenu()">Save</button>
         <button type="button" class="no-lock-hide" onclick="openSavedSchedulesModal(); closeHeaderMenu()">Load</button>
         <button type="button" onclick="window.print(); closeHeaderMenu()">Print</button>
@@ -4601,7 +4601,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <h2 id="welcome-title">Build the period. Post with confidence.</h2>
     <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
     <div class="welcome-actions">
-      <button class="btn-demo" onclick="loadDemoStore()">Tour sample store</button>
+      <button class="btn-demo" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
       <button class="btn-primary" onclick="switchTab('setup')">Start with my team</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="startOnboardingTour(true)">Take tour</button>
       <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
@@ -4640,7 +4640,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store Manager</label>
             <div class="manager-row">
               <span class="role-badge role-sm">SM</span>
-              <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name" onblur="persistManagerNames()" onchange="persistManagerNames()">
+              <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
             </div>
           </div>
 
@@ -4671,11 +4671,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store</label>
             <div class="store-name-row">
               <label style="font-weight:600;font-size:0.9rem;white-space:nowrap">Name:</label>
-              <input type="text" id="store-name" value="" placeholder="e.g. Harbor East #851" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+              <input type="text" id="store-name" value="" placeholder="e.g. Harbor East #851" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.65rem">
               <label style="font-weight:600;font-size:0.9rem">Store #:</label>
-              <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+              <input type="text" id="store-number" value="" placeholder="e.g. 851" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div class="store-hours-block no-print" id="store-hours-block" data-tour="store-hours">
               <div class="store-hours-chip">
@@ -4845,7 +4845,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <span class="built-pill" id="built-pill" hidden>Built</span>
         <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()">Build this period</button>
         <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()">Clear board</button>
-        <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore()">Sample store</button>
+        <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})">Sample store</button>
       </div>
       <div class="gen-meta" id="gen-meta">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
     </div>
@@ -4854,7 +4854,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <strong>No schedule yet</strong>
         Load a period, set any requests, then generate. Or try the demo.
         <div style="margin-top:0.85rem">
-          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore()">Try Demo</button>
+          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Try Demo</button>
           <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
@@ -5085,6 +5085,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 function toggleHeaderMenu(e) {
   if (e) e.stopPropagation();
+  try {
+    if (typeof persistSetupDraft === 'function') persistSetupDraft();
+  } catch (err) {}
   const panel = document.getElementById('header-menu-panel');
   const btn = document.getElementById('header-more-btn');
   if (!panel) return;
@@ -7167,6 +7170,11 @@ function showHowItWorks() {
   showToast('Tabs: Setup → Requests → Rules → Schedule. Try Demo for a full walkthrough.', 'info');
 }
 
+function persistSetupDraft() {
+  try { persistManagerNames(); } catch (e) {}
+  try { persistStoreMeta(); } catch (e2) {}
+}
+
 function persistStoreMeta() {
   try {
     localStorage.setItem('msb_stg_store_meta', JSON.stringify({
@@ -7186,9 +7194,21 @@ function restoreStoreMeta() {
     const d = JSON.parse(raw);
     const sn = document.getElementById('store-name');
     const num = document.getElementById('store-number');
-    if (sn && d.storeName) sn.value = d.storeName;
-    if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
-    if (d.storeHours) applyStoreHoursObject(d.storeHours);
+    const skipDemoStore =
+      typeof wantsDemoLaunch === 'function' &&
+      !wantsDemoLaunch() &&
+      typeof storedStoreMetaLooksLikeDemo === 'function' &&
+      storedStoreMetaLooksLikeDemo(d);
+    if (skipDemoStore) {
+      if (sn) sn.value = '';
+      if (num && String(num.value || d.storeNumber || '').trim() === DEMO_STORE_NUMBER) num.value = '';
+      if (d.storeHours) applyStoreHoursObject(d.storeHours);
+      persistStoreMeta();
+    } else {
+      if (sn && d.storeName) sn.value = d.storeName;
+      if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
+      if (d.storeHours) applyStoreHoursObject(d.storeHours);
+    }
   } catch(e) {}
   if (typeof updateStoreHoursSummary === 'function') updateStoreHoursSummary();
 }
@@ -7965,7 +7985,223 @@ function updateReadyChecklist() {
   }
 }
 
-function loadDemoStore() {
+const DEMO_STORE_NAME = 'Harbor East Demo Store';
+const DEMO_STORE_NUMBER = '851';
+
+function isDemoStoreName(name) {
+  return /harbor east/i.test(String(name || '').trim());
+}
+
+function isDemoPersonName(n) {
+  return /^(alex morgan|casey brooks|riley quinn|taylor hayes|jordan lee|sam rivera)$/i.test(
+    String(n || '').trim()
+  );
+}
+
+const DEMO_AM_NAMES = ['Casey Brooks', 'Riley Quinn', 'Taylor Hayes'];
+
+function isExplicitDemoLaunch() {
+  return typeof wantsDemoLaunch === 'function' ? wantsDemoLaunch() : false;
+}
+
+function storedNamesLookLikeDemo(names) {
+  if (!names || typeof names !== 'object') return false;
+  if (!isDemoPersonName(names.sm)) return false;
+  const ams = names.ams || {};
+  return DEMO_AM_NAMES.every((n, i) => String(ams['am' + (i + 1)] || '').trim() === n);
+}
+
+function storedStoreMetaLooksLikeDemo(meta) {
+  return !!(meta && typeof meta === 'object' && isDemoStoreName(meta.storeName));
+}
+
+function liveRosterLooksLikeDemo() {
+  const sm = ((document.getElementById('name-sm') || {}).value || '').trim();
+  const store = ((document.getElementById('store-name') || {}).value || '').trim();
+  if (isDemoStoreName(store)) return true;
+  if (!isDemoPersonName(sm)) return false;
+  return DEMO_AM_NAMES.every((n, i) => {
+    const el = document.getElementById('name-am' + (i + 1));
+    return !!(el && String(el.value || '').trim() === n);
+  });
+}
+
+function applyBlankTeam(opts) {
+  const persist = !opts || opts.persist !== false;
+  amCount = 2;
+  kcList = [{ id: 'kc1', name: '', asManager: false, midDows: [] }];
+  if (typeof renderAMRows === 'function') renderAMRows();
+  if (typeof renderKCRows === 'function') renderKCRows();
+  const sm = document.getElementById('name-sm');
+  if (sm) sm.value = '';
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    if (el) el.value = '';
+  }
+  const sn = document.getElementById('store-name');
+  const num = document.getElementById('store-number');
+  if (sn && (!sn.value.trim() || isDemoStoreName(sn.value))) sn.value = '';
+  if (num && (!num.value.trim() || String(num.value).trim() === DEMO_STORE_NUMBER)) {
+    if (!sn || !sn.value.trim()) num.value = '';
+  }
+  if (persist && typeof persistSetupDraft === 'function') persistSetupDraft();
+  try {
+    if (typeof updateReadyChecklist === 'function') updateReadyChecklist();
+  } catch (e) {}
+}
+
+function collectRosterPeople(names) {
+  const out = [];
+  if (!names || typeof names !== 'object') return out;
+  if (names.sm) out.push(names.sm);
+  if (names.ams && typeof names.ams === 'object') {
+    Object.keys(names.ams).forEach((k) => out.push(names.ams[k]));
+  }
+  Object.keys(names).forEach((k) => {
+    if (/^am\d+$/i.test(k)) out.push(names[k]);
+  });
+  if (Array.isArray(names.kcList)) {
+    names.kcList.forEach((kc) => {
+      if (kc && kc.name) out.push(kc.name);
+    });
+  }
+  return out.map((n) => String(n || '').trim()).filter(Boolean);
+}
+
+function peopleIndicateUserRoster(people) {
+  return (people || []).some((n) => !isPlaceholderManagerName(n) && !isDemoPersonName(n));
+}
+
+function storeIndicatesUserRoster(storeName) {
+  const n = String(storeName || '').trim();
+  return !!(n && !isDemoStoreName(n));
+}
+
+/** True when this device already has a real team/store (not empty, not Harbor East sample). */
+function hasSavedUserRoster() {
+  try {
+    const liveStore = ((document.getElementById('store-name') || {}).value || '').trim();
+    if (storeIndicatesUserRoster(liveStore)) return true;
+    const livePeople = [((document.getElementById('name-sm') || {}).value || '')];
+    const amMax = typeof amCount === 'number' ? amCount : 8;
+    for (let i = 1; i <= amMax; i++) {
+      const el = document.getElementById('name-am' + i);
+      if (el && el.value) livePeople.push(el.value);
+    }
+    if (typeof kcList !== 'undefined' && Array.isArray(kcList)) {
+      kcList.forEach((kc) => {
+        const el = kc && document.getElementById('name-' + kc.id);
+        livePeople.push(el ? el.value : (kc && kc.name) || '');
+      });
+    }
+    if (peopleIndicateUserRoster(livePeople)) return true;
+
+    const rawNames = localStorage.getItem('schedule_manager_names');
+    if (rawNames) {
+      const names = JSON.parse(rawNames);
+      if (peopleIndicateUserRoster(collectRosterPeople(names))) return true;
+    }
+    const rawMeta = localStorage.getItem('msb_stg_store_meta') || localStorage.getItem('msb_store_meta');
+    if (rawMeta) {
+      const meta = JSON.parse(rawMeta);
+      if (meta && storeIndicatesUserRoster(meta.storeName)) return true;
+    }
+    if (typeof listTeamTemplates === 'function') {
+      const list = listTeamTemplates();
+      if (Array.isArray(list) && list.length) {
+        for (let i = 0; i < list.length; i++) {
+          const t = list[i] || {};
+          if (storeIndicatesUserRoster(t.storeName)) return true;
+          const people = collectRosterPeople(t.names || {});
+          if (Array.isArray(t.kcList)) {
+            t.kcList.forEach((kc) => {
+              if (kc && kc.name) people.push(kc.name);
+            });
+          }
+          if (peopleIndicateUserRoster(people)) return true;
+        }
+      }
+    }
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !/^schedule_FY\d+-P\d+$/.test(k)) continue;
+      try {
+        const d = JSON.parse(localStorage.getItem(k) || 'null');
+        if (!d) continue;
+        if (storeIndicatesUserRoster(d.storeName)) return true;
+        if (peopleIndicateUserRoster(collectRosterPeople(d.names || {}))) return true;
+      } catch (e2) {}
+    }
+  } catch (e) {}
+  return false;
+}
+
+function stripDemoQueryParam() {
+  try {
+    const u = new URL(location.href);
+    if (u.searchParams.get('demo') !== '1') return;
+    u.searchParams.delete('demo');
+    const q = u.searchParams.toString();
+    history.replaceState({}, '', u.pathname + (q ? '?' + q : '') + u.hash);
+  } catch (e) {}
+}
+
+function wantsDemoLaunch(params) {
+  params = params || new URLSearchParams(location.search);
+  // Play TWA / PWA start_url is ?source=pwa — never a demo seed.
+  return params.get('demo') === '1';
+}
+
+function confirmReplaceRosterWithDemo() {
+  const sm = ((document.getElementById('name-sm') || {}).value || '').trim();
+  const store = ((document.getElementById('store-name') || {}).value || '').trim();
+  const who =
+    store ||
+    (sm && typeof isPlaceholderManagerName === 'function' && !isPlaceholderManagerName(sm) ? sm : '') ||
+    'your saved team';
+  const msg =
+    'Replace ' + who + ' with the Harbor East sample store? This overwrites names and store on this device.';
+  try {
+    return window.confirm(msg);
+  } catch (e) {
+    return false;
+  }
+}
+
+function loadDemoStore(opts) {
+  opts = opts || {};
+  const explicit = opts.explicit === true;
+  const fromUrl = opts.fromUrl === true;
+  try {
+    if (typeof persistSetupDraft === 'function') persistSetupDraft();
+  } catch (e0) {}
+  const hasRoster = typeof hasSavedUserRoster === 'function' && hasSavedUserRoster();
+  if (hasRoster) {
+    if (!explicit) {
+      if (fromUrl) {
+        try {
+          if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();
+        } catch (e) {}
+        return false;
+      }
+      try {
+        if (typeof showToast === 'function') {
+          showToast('Kept your saved team — sample store was not loaded over it.', 'info');
+        }
+      } catch (e) {}
+      return false;
+    }
+    let allowed = false;
+    if (opts.confirmed === true) allowed = true;
+    else if (opts.confirmed === false) allowed = false;
+    else allowed = typeof confirmReplaceRosterWithDemo === 'function' && confirmReplaceRosterWithDemo();
+    if (!allowed) {
+      try {
+        if (typeof showToast === 'function') showToast('Kept your saved team.', 'info');
+      } catch (e) {}
+      return false;
+    }
+  }
   try {
     // Team
     amCount = 3;
@@ -7980,8 +8216,8 @@ function loadDemoStore() {
     document.getElementById('name-am2').value = 'Riley Quinn';
     document.getElementById('name-am3').value = 'Taylor Hayes';
     const sn = document.getElementById('store-name');
-    if (sn) sn.value = 'Harbor East Demo Store';
-    document.getElementById('store-number').value = '851';
+    if (sn) sn.value = DEMO_STORE_NAME;
+    document.getElementById('store-number').value = DEMO_STORE_NUMBER;
     persistManagerNames();
     persistStoreMeta();
 
@@ -8028,9 +8264,11 @@ function loadDemoStore() {
         dismissWelcome();
       }, 200);
     }, 100);
+    return true;
   } catch (e) {
     console.error(e);
     showToast('Demo failed: ' + e.message, 'error');
+    return false;
   }
 }
 
@@ -8605,7 +8843,7 @@ function renderAMRows() {
     const val = existing ? existing.value : 'AM' + i;
     html += `<div class="manager-row">
       <span class="role-badge role-am">AM${i}</span>
-      <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}" onblur="persistManagerNames()" onchange="persistManagerNames()">
+      <input type="text" id="name-${id}" value="${val}" placeholder="Assistant Manager ${i}" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
     </div>`;
   }
   container.innerHTML = html;
@@ -8640,7 +8878,7 @@ function renderKCRows() {
     html += `<div class="manager-row" style="flex-wrap:wrap">
       <span class="role-badge role-kc">KC${idx + 1}</span>
       <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="Key Carrier ${idx + 1}"
-        onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
+        oninput="kcList[${idx}].name = this.value; persistManagerNames()" onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
       <label class="kc-toggle-label">
         <input type="checkbox" ${kc.asManager ? 'checked' : ''}
           onchange="toggleKcAsManager(${idx}, this)">
@@ -14406,6 +14644,15 @@ function restoreManagerNames() {
     const stored = localStorage.getItem('schedule_manager_names');
     if (!stored) return false;
     const names = JSON.parse(stored);
+    if (
+      typeof wantsDemoLaunch === 'function' &&
+      !wantsDemoLaunch() &&
+      typeof storedNamesLookLikeDemo === 'function' &&
+      storedNamesLookLikeDemo(names)
+    ) {
+      try { localStorage.removeItem('schedule_manager_names'); } catch (e) {}
+      return false;
+    }
 
     if (names.sm) {
       document.getElementById('name-sm').value = names.sm;
@@ -14644,10 +14891,23 @@ function renderTeamTemplateUI() {
 function restoreLastTeamTemplateIfNeeded(hadNames) {
   if (hadNames) return;
   try {
+    if (typeof wantsDemoLaunch === 'function' && wantsDemoLaunch()) return;
     const last = localStorage.getItem(MSB_TEAM_TEMPLATE_LAST);
     if (!last) return;
     const list = listTeamTemplates();
-    if (list.some((t) => t.id === last)) loadTeamTemplate(last);
+    const tpl = list.find((t) => t.id === last);
+    if (!tpl) return;
+    const people = collectRosterPeople(tpl.names || {});
+    if (Array.isArray(tpl.kcList)) {
+      tpl.kcList.forEach((kc) => {
+        if (kc && kc.name) people.push(kc.name);
+      });
+    }
+    const looksLikeDemo =
+      (typeof isDemoStoreName === 'function' && isDemoStoreName(tpl.storeName)) ||
+      (people.length && people.every((n) => isPlaceholderManagerName(n) || isDemoPersonName(n)));
+    if (looksLikeDemo) return;
+    loadTeamTemplate(last);
   } catch (e) {}
 }
 
@@ -15797,7 +16057,7 @@ function getCommandPaletteCommands() {
     { id: 'tab-rules', label: 'Switch to Rules', group: 'Nav', run: () => switchTab('rules') },
     { id: 'tab-schedule', label: 'Switch to Schedule', group: 'Nav', run: () => switchTab('schedule') },
     { id: 'generate', label: 'Generate / Build period', group: 'Schedule', run: () => generateSchedule() },
-    { id: 'demo', label: 'Load demo store', group: 'Schedule', run: () => loadDemoStore() },
+    { id: 'demo', label: 'Load demo store', group: 'Schedule', run: () => loadDemoStore({ explicit: true }) },
     { id: 'save', label: 'Save schedule', group: 'File', run: () => saveToStorage() },
     { id: 'load', label: 'Load saved schedules', group: 'File', run: () => openSavedSchedulesModal() },
     { id: 'save-team', label: 'Save team template', group: 'Team', run: () => saveTeamTemplate() },
@@ -16092,8 +16352,17 @@ function handleLaunchQuery() {
     if (params.get('tab') && typeof switchTab === 'function') {
       setTimeout(() => switchTab(params.get('tab')), 50);
     }
-    if (params.get('demo') === '1' && typeof loadDemoStore === 'function') {
-      setTimeout(() => loadDemoStore(), 200);
+    // Never treat ?source=pwa (Play/PWA start_url) as a demo seed.
+    if (typeof wantsDemoLaunch === 'function' ? wantsDemoLaunch(params) : params.get('demo') === '1') {
+      const saved = typeof hasSavedUserRoster === 'function' && hasSavedUserRoster();
+      if (saved) {
+        if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();
+      } else if (typeof loadDemoStore === 'function') {
+        setTimeout(() => {
+          loadDemoStore({ fromUrl: true });
+          if (typeof stripDemoQueryParam === 'function') stripDemoQueryParam();
+        }, 200);
+      }
     }
     if (typeof applyLaunchMode === 'function') applyLaunchMode(params);
   } catch(e) {}
@@ -16135,6 +16404,14 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(bootUi, 0);
 }
+window.addEventListener('pagehide', () => {
+  try { if (typeof persistSetupDraft === 'function') persistSetupDraft(); } catch (e) {}
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    try { if (typeof persistSetupDraft === 'function') persistSetupDraft(); } catch (e) {}
+  }
+});
 
 // Backdrop click to close account / license / provider modals
 document.addEventListener('click', (e) => {
@@ -16151,6 +16428,14 @@ document.addEventListener('click', (e) => {
 const _hadRestoredNames = !!restoreManagerNames();
 restoreLastTeamTemplateIfNeeded(_hadRestoredNames);
 restoreStoreMeta();
+if (
+  !_hadRestoredNames &&
+  typeof wantsDemoLaunch === 'function' &&
+  !wantsDemoLaunch() &&
+  typeof applyBlankTeam === 'function'
+) {
+  applyBlankTeam({ persist: true });
+}
 restoreWelcomeState();
 renderTeamTemplateUI();
 updateStoreHoursSummary();

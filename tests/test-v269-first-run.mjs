@@ -5,7 +5,7 @@
 import { createServer } from 'http';
 import { readFileSync, existsSync } from 'fs';
 import { join, extname, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -60,7 +60,7 @@ async function loadChromium() {
   ];
   for (const spec of candidates) {
     if (!existsSync(spec)) continue;
-    const mod = await import(spec);
+    const mod = await import(pathToFileURL(spec).href);
     if (mod.chromium) return mod.chromium;
   }
   throw new Error('Playwright not installed');
@@ -70,7 +70,7 @@ async function main() {
   console.log('\n=== v2.6.9 first-run Start with my team ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.11') pass('version.json', version.version);
+  if (version.version === '2.6.12') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const index = read('index.html');

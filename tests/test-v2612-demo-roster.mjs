@@ -83,6 +83,26 @@ function seedRealRosterScript() {
   };
 }
 
+async function clearSession(page) {
+  await page.evaluate(() => {
+    const sm = document.getElementById('name-sm');
+    if (sm) sm.value = 'Store Manager';
+    const store = document.getElementById('store-name');
+    if (store) store.value = '';
+    const num = document.getElementById('store-number');
+    if (num) num.value = '';
+    if (typeof amCount !== 'undefined') {
+      /* keep current AM/KC rows but blank real names */
+    }
+    document.querySelectorAll('input[id^="name-am"], input[id^="name-kc"]').forEach((el) => {
+      if (/^name-am\d+$/.test(el.id)) el.value = el.id.replace('name-', '').toUpperCase();
+      if (/^name-kc/.test(el.id)) el.value = 'Key Carrier 1';
+    });
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+}
+
 async function seedRealRoster(page) {
   await page.evaluate((roster) => {
     localStorage.clear();
@@ -95,6 +115,9 @@ async function seedRealRoster(page) {
       'msb_store_meta',
       JSON.stringify({ storeName: 'Riverside #214', storeNumber: '214' })
     );
+    // Apply to the live form so pagehide persist cannot write a stale demo over the seed.
+    if (typeof restoreManagerNames === 'function') restoreManagerNames();
+    if (typeof restoreStoreMeta === 'function') restoreStoreMeta();
   }, seedRealRosterScript());
 }
 
@@ -183,10 +206,7 @@ async function main() {
 
     // Empty session + ?source=pwa → blank team, no Harbor East
     await page.goto(base + '/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
+    await clearSession(page);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(900);
     const emptyPwa = await readRoster(page);
@@ -206,10 +226,7 @@ async function main() {
     else fail('empty-start-with-my-team', JSON.stringify(welcome));
 
     // Empty session + ?demo=1 → Harbor East sample
-    await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
+    await clearSession(page);
     await page.goto(base + '/index.html?demo=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(1400);
     const emptyDemo = await readRoster(page);
@@ -291,9 +308,8 @@ async function main() {
     } else fail('explicit-demo-confirm-loads', JSON.stringify(accepted));
 
     // Typed SM without blur: persist on input; More → Demo cancel keeps "Bryan Test"
+    await clearSession(page);
     await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
       localStorage.setItem('msb_tour_done', '1');
       localStorage.setItem('msb_welcome_dismissed', '1');
     });
@@ -341,10 +357,7 @@ async function main() {
     else fail('store-name-persists-on-input', JSON.stringify(storeIn));
 
     // Empty session + explicit Demo: no confirm, sample loads
-    await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
+    await clearSession(page);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(400);
     let emptyDialog = false;

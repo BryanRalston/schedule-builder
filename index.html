@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('msb_ui_lang');
+    var lang = (saved === 'en' || saved === 'es') ? saved : '';
+    if (!lang) {
+      var list = [];
+      if (navigator.languages) list = list.concat(navigator.languages);
+      if (navigator.language) list.push(navigator.language);
+      for (var i = 0; i < list.length; i++) {
+        var tag = String(list[i] || '').toLowerCase().replace('_', '-');
+        if (tag === 'es' || tag.indexOf('es-') === 0) { lang = 'es'; break; }
+      }
+    }
+    document.documentElement.lang = lang || 'en';
+  } catch (e) {}
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="Manager Schedule Builder Pro — preference-driven retail scheduling for store managers. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Names, time off, and schedules stay on this device — nothing is uploaded. No account. Always review before you post.">
@@ -3026,6 +3044,59 @@ input[type="radio"] { accent-color: var(--gold); }
   line-height: 1.35;
   font-weight: 500;
 }
+.header-menu-lang {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.35rem 0.45rem 0.55rem;
+  padding: 0.45rem 0.4rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(8, 12, 24, 0.45);
+  border: 1px solid var(--line);
+}
+.header-menu-lang-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  font-family: var(--mono);
+}
+.header-menu-lang select,
+.ap-lang select {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: rgba(8, 12, 24, 0.75);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.4rem 0.5rem;
+}
+.ap-lang {
+  margin: 0 0 0.85rem;
+  padding: 0.55rem 0.6rem 0.6rem;
+  border-radius: 10px;
+  background: rgba(8, 12, 24, 0.55);
+  border: 1px solid var(--line);
+}
+.ap-lang-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  font-family: var(--mono);
+  margin-bottom: 0.35rem;
+}
+.ap-lang-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
 
 /* ========== APP TABS (clean workspace) ========== */
 
@@ -4957,7 +5028,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div>
     <div class="brand-row">
       <h1>Schedule Pro</h1>
-      <button type="button" class="account-chip" id="account-chip" onclick="openAccountPanel()" title="Account">
+      <button type="button" class="account-chip" id="account-chip" onclick="openAccountPanel()" title="Account" data-i18n-title="Account">
         <span class="account-chip-avatar" id="account-chip-avatar">?</span>
         <span class="account-chip-meta">
           <span class="account-chip-name" id="account-chip-name">Account</span>
@@ -4966,55 +5037,62 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </button>
       <span class="brand-status" id="brand-status">
         <span class="pro-badge is-free" id="license-badge" title="License status" hidden>Pro</span>
-        <span class="offline-pill" id="offline-pill" title="Works offline — data on this device"><span class="dot"></span><span class="pill-text"> Offline</span></span>
-        <span class="local-status-pill" id="local-status-pill" title="Last local save"><span class="pill-text">Saved</span></span>
+        <span class="offline-pill" id="offline-pill" title="Works offline — data on this device" data-i18n-title="Works offline — data on this device"><span class="dot"></span><span class="pill-text" data-i18n="Offline"> Offline</span></span>
+        <span class="local-status-pill" id="local-status-pill" title="Last local save" data-i18n-title="Last local save"><span class="pill-text" data-i18n="Saved">Saved</span></span>
       </span>
     </div>
-    <div class="subtitle">Manager shifts · NRF periods · Fair weekends · Review before you post</div>
+    <div class="subtitle" data-i18n="Manager shifts · NRF periods · Fair weekends · Review before you post">Manager shifts · NRF periods · Fair weekends · Review before you post</div>
   </div>
   <div class="header-actions no-print">
     <button type="button" class="btn-outline btn-cmdk" id="btn-cmd-palette" onclick="openCommandPalette()" style="color:#fff;border-color:rgba(255,255,255,0.3)" title="Command palette (Ctrl+K)">⌘K</button>
     <div class="header-menu">
-      <button type="button" class="btn-outline header-menu-btn" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false" id="header-more-btn">More ▾</button>
+      <button type="button" class="btn-outline header-menu-btn" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="toggleHeaderMenu(event)" aria-haspopup="true" aria-expanded="false" id="header-more-btn" data-i18n="More ▾">More ▾</button>
       <div class="header-menu-panel" id="header-menu-panel" hidden>
-        <button type="button" class="no-lock-hide" onclick="saveToStorage(); closeHeaderMenu()">Save</button>
-        <button type="button" class="no-lock-hide" onclick="openSavedSchedulesModal(); closeHeaderMenu()">Load</button>
-        <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore({explicit:true}); closeHeaderMenu()" title="Load sample store & generate">Load sample store</button>
-        <button type="button" onclick="window.print(); closeHeaderMenu()">Print</button>
-        <button type="button" onclick="exportSchedule(); closeHeaderMenu()">Export Word</button>
-        <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()">Export Excel</button>
-        <p class="header-menu-hint">New phone? Export a JSON backup, then Load. No cloud — file stays yours.</p>
-        <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()">Backup JSON — new phone</button>
-        <button type="button" onclick="copySummaryText(); closeHeaderMenu()">Copy summary</button>
-        <button type="button" onclick="setDensityMode('compact'); closeHeaderMenu()">Density: Compact</button>
-        <button type="button" onclick="setDensityMode('comfortable'); closeHeaderMenu()">Density: Comfortable</button>
-        <button type="button" onclick="setDensityMode('board'); closeHeaderMenu()">Density: Board</button>
-        <button type="button" onclick="toggleHighContrast(); closeHeaderMenu()">Toggle high contrast</button>
-        <button type="button" onclick="togglePeakSeasonPref(); closeHeaderMenu()">Toggle peak season</button>
-        <button type="button" onclick="startNextPeriodSameTeam(); closeHeaderMenu()">Next period same team</button>
-        <button type="button" onclick="showHowItWorks(); closeHeaderMenu()">How it works</button>
-        <button type="button" onclick="openFeedbackPage()">Send feedback</button>
-        <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()">Take tour</button>
-        <button type="button" onclick="openAccountPanel(); closeHeaderMenu()">Account &amp; license</button>
-        <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label>Buy Pro — $19.99</button>
+        <label class="header-menu-lang" for="more-lang-select">
+          <span class="header-menu-lang-label" data-i18n="App language">App language</span>
+          <select id="more-lang-select" aria-label="App language" onchange="setUiLang(this.value)">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </label>
+        <button type="button" class="no-lock-hide" onclick="saveToStorage(); closeHeaderMenu()" data-i18n="Save">Save</button>
+        <button type="button" class="no-lock-hide" onclick="openSavedSchedulesModal(); closeHeaderMenu()" data-i18n="Load">Load</button>
+        <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore({explicit:true}); closeHeaderMenu()" title="Load sample store & generate" data-i18n="Load sample store" data-i18n-title="Load sample store & generate">Load sample store</button>
+        <button type="button" onclick="window.print(); closeHeaderMenu()" data-i18n="Print">Print</button>
+        <button type="button" onclick="exportSchedule(); closeHeaderMenu()" data-i18n="Export Word">Export Word</button>
+        <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()" data-i18n="Export Excel">Export Excel</button>
+        <p class="header-menu-hint" data-i18n="New phone? Export a JSON backup, then Load. No cloud — file stays yours.">New phone? Export a JSON backup, then Load. No cloud — file stays yours.</p>
+        <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()" data-i18n="Backup JSON — new phone">Backup JSON — new phone</button>
+        <button type="button" onclick="copySummaryText(); closeHeaderMenu()" data-i18n="Copy summary">Copy summary</button>
+        <button type="button" onclick="setDensityMode('compact'); closeHeaderMenu()" data-i18n="Density: Compact">Density: Compact</button>
+        <button type="button" onclick="setDensityMode('comfortable'); closeHeaderMenu()" data-i18n="Density: Comfortable">Density: Comfortable</button>
+        <button type="button" onclick="setDensityMode('board'); closeHeaderMenu()" data-i18n="Density: Board">Density: Board</button>
+        <button type="button" onclick="toggleHighContrast(); closeHeaderMenu()" data-i18n="Toggle high contrast">Toggle high contrast</button>
+        <button type="button" onclick="togglePeakSeasonPref(); closeHeaderMenu()" data-i18n="Toggle peak season">Toggle peak season</button>
+        <button type="button" onclick="startNextPeriodSameTeam(); closeHeaderMenu()" data-i18n="Next period same team">Next period same team</button>
+        <button type="button" onclick="showHowItWorks(); closeHeaderMenu()" data-i18n="How it works">How it works</button>
+        <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
+        <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()" data-i18n="Take tour">Take tour</button>
+        <button type="button" onclick="openAccountPanel(); closeHeaderMenu()" data-i18n="Account & license">Account &amp; license</button>
+        <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label data-i18n="Buy Pro — $19.99">Buy Pro — $19.99</button>
       </div>
     </div>
   </div>
 </header>
-<div class="view-lock-banner no-print" id="view-lock-banner" role="status">View only — schedule board</div>
+<div class="view-lock-banner no-print" id="view-lock-banner" role="status" data-i18n="View only — schedule board">View only — schedule board</div>
 <div id="post-gen-strip" class="no-print" role="region" aria-label="Post-generate review" hidden>
-  <span class="pgs-title">Review</span>
-  <button type="button" class="pgs-chip" id="pgs-quality" onclick="jumpToReviewChip('quality')">Quality</button>
-  <button type="button" class="pgs-chip" id="pgs-cover" onclick="jumpToReviewChip('cover')">Coverage</button>
-  <button type="button" class="pgs-chip" id="pgs-clopens" onclick="jumpToReviewChip('clopen')">Clopens</button>
-  <button type="button" class="pgs-chip" id="pgs-am-close" onclick="jumpToReviewChip('am-close')">AM closes</button>
-  <button type="button" class="pgs-chip" id="pgs-we" onclick="jumpToReviewChip('we')">WE offs</button>
-  <button type="button" class="pgs-chip" id="pgs-fair" onclick="jumpToReviewChip('fair')">Fairness</button>
+  <span class="pgs-title" data-i18n="Review">Review</span>
+  <button type="button" class="pgs-chip" id="pgs-quality" onclick="jumpToReviewChip('quality')" data-i18n="Quality">Quality</button>
+  <button type="button" class="pgs-chip" id="pgs-cover" onclick="jumpToReviewChip('cover')" data-i18n="Coverage">Coverage</button>
+  <button type="button" class="pgs-chip" id="pgs-clopens" onclick="jumpToReviewChip('clopen')" data-i18n="Clopens">Clopens</button>
+  <button type="button" class="pgs-chip" id="pgs-am-close" onclick="jumpToReviewChip('am-close')" data-i18n="AM closes">AM closes</button>
+  <button type="button" class="pgs-chip" id="pgs-we" onclick="jumpToReviewChip('we')" data-i18n="WE offs">WE offs</button>
+  <button type="button" class="pgs-chip" id="pgs-fair" onclick="jumpToReviewChip('fair')" data-i18n="Fairness">Fairness</button>
   <div class="pgs-actions">
-    <button type="button" class="pgs-primary" id="pgs-primary-cta" onclick="jumpToIssuesPanel()">Review issues</button>
-    <button type="button" class="btn-secondary" onclick="jumpToFairnessStrip()">Fairness</button>
-    <button type="button" class="btn-secondary" onclick="jumpToSmartSuggestions()">Suggestions</button>
-    <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()">Next period</button>
+    <button type="button" class="pgs-primary" id="pgs-primary-cta" onclick="jumpToIssuesPanel()" data-i18n="Review issues">Review issues</button>
+    <button type="button" class="btn-secondary" onclick="jumpToFairnessStrip()" data-i18n="Fairness">Fairness</button>
+    <button type="button" class="btn-secondary" onclick="jumpToSmartSuggestions()" data-i18n="Suggestions">Suggestions</button>
+    <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()" data-i18n="Next period">Next period</button>
   </div>
 </div>
 
@@ -5024,64 +5102,64 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="install-banner no-print" id="install-banner" role="region" aria-label="Install app">
     <div class="ib-icon" aria-hidden="true"></div>
     <div class="ib-text">
-      <strong>Install Schedule Pro</strong>
-      <span>Add to your home screen, or get the Android app on Google Play — $19.99 one-time.</span>
+      <strong data-i18n="Install Schedule Pro">Install Schedule Pro</strong>
+      <span data-i18n="Add to your home screen, or get the Android app on Google Play — $19.99 one-time.">Add to your home screen, or get the Android app on Google Play — $19.99 one-time.</span>
     </div>
     <div class="ib-actions">
-      <button type="button" class="btn-install" id="btn-install-pwa" onclick="promptPwaInstall()">Install</button>
+      <button type="button" class="btn-install" id="btn-install-pwa" onclick="promptPwaInstall()" data-i18n="Install">Install</button>
       <a class="gp-badge" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Get it on Google Play</a>
-      <button type="button" class="btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="dismissInstallBanner()">Not now</button>
+      <button type="button" class="btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="dismissInstallBanner()" data-i18n="Not now">Not now</button>
     </div>
   </div>
 
   <!-- WELCOME / ONBOARDING -->
   <div class="welcome-card no-print compact" id="welcome-card">
-    <h2 id="welcome-title">Build the period. Post with confidence.</h2>
-    <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
-    <p id="welcome-privacy" class="welcome-privacy">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
+    <h2 id="welcome-title" data-i18n="Build the period. Post with confidence.">Build the period. Post with confidence.</h2>
+    <p id="welcome-body" data-i18n="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
+    <p id="welcome-privacy" class="welcome-privacy" data-i18n="Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
     <div class="welcome-actions">
-      <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
+      <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()" data-i18n="Start with my team">Start with my team</button>
       <div class="welcome-secondary">
-        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})">Load sample store</button>
-        <button type="button" class="btn-outline welcome-secondary-btn" onclick="startOnboardingTour(true)">Take tour</button>
-        <button type="button" class="btn-outline welcome-secondary-btn" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
-        <button type="button" class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
+        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})" data-i18n="Load sample store">Load sample store</button>
+        <button type="button" class="btn-outline welcome-secondary-btn" onclick="startOnboardingTour(true)" data-i18n="Take tour">Take tour</button>
+        <button type="button" class="btn-outline welcome-secondary-btn" onclick="location.href='buy.html'" data-price-label data-i18n="Pro · $19.99">Pro · $19.99</button>
+        <button type="button" class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)" data-i18n="Dismiss">Dismiss</button>
       </div>
     </div>
     <div class="welcome-play" id="welcome-play">
       <a class="gp-badge" id="welcome-play-link" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Get it on Google Play</a>
-      <span class="welcome-play-note">Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.</span>
+      <span class="welcome-play-note" data-i18n="Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.">Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.</span>
     </div>
   </div>
 
   <div class="workspace no-print-workspace">
     <nav class="app-tabs no-print" role="tablist" aria-label="Main" data-tour="app-tabs">
-      <button type="button" class="app-tab active" role="tab" id="tabbtn-setup" data-tour="tab-setup" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')">Setup</button>
-      <button type="button" class="app-tab" role="tab" id="tabbtn-requests" data-tour="tab-requests" aria-selected="false" aria-controls="tab-requests" onclick="switchTab('requests')">Requests</button>
-      <button type="button" class="app-tab" role="tab" id="tabbtn-rules" data-tour="tab-rules" aria-selected="false" aria-controls="tab-rules" onclick="switchTab('rules')">Rules</button>
+      <button type="button" class="app-tab active" role="tab" id="tabbtn-setup" data-tour="tab-setup" aria-selected="true" aria-controls="tab-setup" onclick="switchTab('setup')" data-i18n="Setup">Setup</button>
+      <button type="button" class="app-tab" role="tab" id="tabbtn-requests" data-tour="tab-requests" aria-selected="false" aria-controls="tab-requests" onclick="switchTab('requests')" data-i18n="Requests">Requests</button>
+      <button type="button" class="app-tab" role="tab" id="tabbtn-rules" data-tour="tab-rules" aria-selected="false" aria-controls="tab-rules" onclick="switchTab('rules')" data-i18n="Rules">Rules</button>
       <button type="button" class="app-tab" role="tab" id="tabbtn-schedule" data-tour="tab-schedule" aria-selected="false" aria-controls="tab-schedule" onclick="switchTab('schedule')">
-        Schedule <span class="tab-dot" title="Schedule ready"></span>
+        <span data-i18n="Schedule">Schedule</span> <span class="tab-dot" title="Schedule ready" data-i18n-title="Schedule ready"></span>
       </button>
     </nav>
 
     <!-- TAB: SETUP -->
     <div class="tab-panel active" id="tab-setup" role="tabpanel" aria-labelledby="tabbtn-setup">
-      <div class="tab-panel-title" id="setup-panel-title">Store & team</div>
-      <div class="tab-panel-desc" id="setup-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.</div>
+      <div class="tab-panel-title" id="setup-panel-title" data-i18n="Store & team">Store & team</div>
+      <div class="tab-panel-desc" id="setup-panel-desc" data-i18n="Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.">Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.</div>
 <!-- SETUP SECTION -->
   <div class="section no-print" style="border:none">
     <div class="section-body" id="setup-body" style="padding:0" data-tour="setup-team">
       <div class="team-templates-bar no-print setup-more-item" id="team-templates-bar" data-tour="team-templates">
-        <label for="team-template-select">Team templates</label>
+        <label for="team-template-select" data-i18n="Team templates">Team templates</label>
         <select id="team-template-select" aria-label="Saved team templates"></select>
-        <button type="button" class="btn-secondary" onclick="saveTeamTemplate()">Save team</button>
-        <button type="button" class="btn-primary" onclick="loadSelectedTeamTemplate()">Load</button>
-        <button type="button" class="btn-outline" onclick="deleteSelectedTeamTemplate()">Delete</button>
+        <button type="button" class="btn-secondary" onclick="saveTeamTemplate()" data-i18n="Save team">Save team</button>
+        <button type="button" class="btn-primary" onclick="loadSelectedTeamTemplate()" data-i18n="Load">Load</button>
+        <button type="button" class="btn-outline" onclick="deleteSelectedTeamTemplate()" data-i18n="Delete">Delete</button>
       </div>
       <div class="setup-grid">
         <div class="setup-left">
           <div class="role-names-bar setup-more-item" id="role-names-bar">
-            <span class="role-names-label">Role names</span>
+            <span class="role-names-label" data-i18n="Role names">Role names</span>
             <label class="role-title-field">
               <span class="role-sm">SM</span>
               <input type="text" id="role-title-sm" class="role-title-input" value="Store Manager" placeholder="Store Manager" aria-label="Store manager role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
@@ -5129,73 +5207,74 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         </div>
         <div class="setup-right">
           <div class="setup-more-item" id="setup-store-block">
-            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store</label>
+            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem" data-i18n="Store">Store</label>
             <div class="store-name-row">
-              <label style="font-weight:600;font-size:0.9rem;white-space:nowrap">Name:</label>
-              <input type="text" id="store-name" value="" placeholder="e.g. your store name" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+              <label style="font-weight:600;font-size:0.9rem;white-space:nowrap" data-i18n="Name:">Name:</label>
+              <input type="text" id="store-name" value="" placeholder="e.g. your store name" data-i18n-placeholder="e.g. your store name" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.65rem">
-              <label style="font-weight:600;font-size:0.9rem">Store #:</label>
+              <label style="font-weight:600;font-size:0.9rem" data-i18n="Store #:">Store #:</label>
               <input type="text" id="store-number" value="" placeholder="e.g. 100" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div class="store-hours-block no-print" id="store-hours-block" data-tour="store-hours">
               <div class="store-hours-chip">
-                <span style="font-weight:600;color:var(--ink-2)">Hours:</span>
+                <span style="font-weight:600;color:var(--ink-2)" data-i18n="Hours:">Hours:</span>
                 <span class="sh-sum" id="store-hours-summary"></span>
-                <button type="button" class="btn-secondary" style="font-size:0.72rem;padding:0.25rem 0.5rem;min-height:auto" onclick="toggleStoreHoursPanel()">Edit</button>
+                <button type="button" class="btn-secondary" style="font-size:0.72rem;padding:0.25rem 0.5rem;min-height:auto" onclick="toggleStoreHoursPanel()" data-i18n="Edit">Edit</button>
               </div>
               <div class="store-hours-panel" id="store-hours-panel" style="display:none"></div>
             </div>
           </div>
           <div>
-            <label class="setup-more-item" id="label-fiscal-period" style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Fiscal Period</label>
+            <label class="setup-more-item" id="label-fiscal-period" style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem" data-i18n="Fiscal Period">Fiscal Period</label>
+            <p class="text-muted" id="nrf-us-law-note" style="margin:0 0 0.45rem;font-size:0.72rem" data-i18n="NRF 4-5-4 is the U.S. retail fiscal calendar. It does not apply Spain or Mexico labor rules.">NRF 4-5-4 is the U.S. retail fiscal calendar. It does not apply Spain or Mexico labor rules.</p>
             <div class="ease-period-row" id="ease-period-row">
-              <button type="button" class="btn-primary" id="btn-load-this-nrf" onclick="loadThisNrfPeriod()">Load this NRF period</button>
-              <span class="ease-period-status" id="ease-period-status" hidden>Loaded</span>
+              <button type="button" class="btn-primary" id="btn-load-this-nrf" onclick="loadThisNrfPeriod()" data-i18n="Load this NRF period">Load this NRF period</button>
+              <span class="ease-period-status" id="ease-period-status" hidden data-i18n="Loaded">Loaded</span>
             </div>
             <div class="period-picker setup-more-item">
               <label>FY:</label>
               <input type="number" id="pick-year" min="2024" max="2030" value="2026" style="width:80px" onchange="buildPeriodDropdown()">
               <label>Period:</label>
               <select id="pick-period"></select>
-              <button class="btn-primary" onclick="loadPeriod()">Load Period</button>
-              <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()" title="Advance to next period, keep team and hours">Next period</button>
+              <button class="btn-primary" onclick="loadPeriod()" data-i18n="Load Period">Load Period</button>
+              <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()" title="Advance to next period, keep team and hours" data-i18n="Next period" data-i18n-title="Advance to next period, keep team and hours">Next period</button>
             </div>
             <div class="period-info" id="period-info"></div>
 
             <div class="federal-holidays-block no-print setup-more-item" id="federal-holidays-block">
               <div class="fh-head">
-                <span class="fh-title">Federal paid holidays</span>
-                <span class="fh-sub">4-day work week · saved on this device</span>
+                <span class="fh-title" data-i18n="U.S. federal paid holidays">Federal paid holidays</span>
+                <span class="fh-sub" data-i18n="U.S. 4-day work week · saved on this device">4-day work week · saved on this device</span>
               </div>
               <div class="fh-list" id="federal-holidays-list"></div>
-              <div class="fh-note" id="federal-holidays-note">Check holidays your store observes as paid. Matching weeks auto-mark as holiday (4-day) and show on the calendar.</div>
+              <div class="fh-note" id="federal-holidays-note" data-i18n="holiday-note-default">Check holidays your store observes as paid. Matching weeks auto-mark as holiday (4-day) and show on the calendar. U.S. retail dates only — not Spain or Mexico labor holidays.</div>
             </div>
 
           </div>
           <div class="legend mt-1 setup-more-item">
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(61,222,140,0.35)"></span> Open</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(124,92,255,0.4)"></span> Mid</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,92,122,0.35)"></span> Close</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(192,38,211,0.4)"></span> Ext. Close</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(61,220,255,0.35)"></span> PTO</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,200,87,0.35)"></span> RTO</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(45,212,191,0.35)"></span> LOA</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,255,255,0.12)"></span> Off</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,200,87,0.4)"></span> KC Close</div>
-            <div class="legend-item"><span class="legend-swatch" style="background:rgba(167,139,250,0.4)"></span> Custom</div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(61,222,140,0.35)"></span> <span data-i18n="Open">Open</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(124,92,255,0.4)"></span> <span data-i18n="Mid">Mid</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,92,122,0.35)"></span> <span data-i18n="Close">Close</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(192,38,211,0.4)"></span> <span data-i18n="Ext. Close">Ext. Close</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(61,220,255,0.35)"></span> <span data-i18n="PTO">PTO</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,200,87,0.35)"></span> <span data-i18n="RTO">RTO</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(45,212,191,0.35)"></span> <span data-i18n="LOA">LOA</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,255,255,0.12)"></span> <span data-i18n="Off">Off</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,200,87,0.4)"></span> <span data-i18n="KC Close">KC Close</span></div>
+            <div class="legend-item"><span class="legend-swatch" style="background:rgba(167,139,250,0.4)"></span> <span data-i18n="Custom">Custom</span></div>
           </div>
 
           <!-- Shift Times Settings (Feature 3) -->
           <div class="setup-more-item" id="shift-times-block" style="margin-top:0.75rem">
             <div style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none" onclick="toggleShiftTimesPanel()">
-              <span style="font-weight:600;font-size:0.9rem">Shift Times</span>
+              <span style="font-weight:600;font-size:0.9rem" data-i18n="Shift Times">Shift Times</span>
               <span id="shift-times-toggle" style="font-size:0.8rem;color:var(--ink-4);transition:transform 0.2s">&#9660;</span>
             </div>
             <div id="shift-times-panel" style="display:none;margin-top:0.5rem">
               <div class="shift-times-grid" id="shift-times-grid"></div>
-              <div class="shift-times-note">Edit start/end times for each shift type. Changes are saved automatically.</div>
-              <button class="btn-secondary" onclick="resetShiftTimes()" style="margin-top:0.5rem;font-size:0.75rem">Reset to Defaults</button>
+              <div class="shift-times-note" data-i18n="Edit start/end times for each shift type. Changes are saved automatically.">Edit start/end times for each shift type. Changes are saved automatically.</div>
+              <button class="btn-secondary" onclick="resetShiftTimes()" style="margin-top:0.5rem;font-size:0.75rem" data-i18n="Reset to Defaults">Reset to Defaults</button>
             </div>
           </div>
         </div>
@@ -5204,78 +5283,82 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   </div>
       <div id="setup-request-phrase-bar" class="no-print setup-more-item">
         <div class="rpb-row">
-          <label class="rpb-label" for="setup-request-phrase-input">Ask</label>
+          <label class="rpb-label" for="setup-request-phrase-input" data-i18n="Ask">Ask</label>
           <input type="text" id="setup-request-phrase-input" placeholder="Casey off Thu–Fri"
             aria-label="Type a request such as Casey off Thu–Fri"
+            data-i18n-placeholder="Casey off Thu–Fri"
+            data-i18n-aria="Type a request such as Casey off Thu–Fri"
             autocomplete="off" spellcheck="false"
             onkeydown="if(event.key==='Enter'){event.preventDefault();applyRequestPhraseFromBar('setup-request-phrase-input');}">
-          <button type="button" class="btn-primary rpb-apply" id="btn-setup-apply-request-phrase" onclick="applyRequestPhraseFromBar('setup-request-phrase-input')">Apply</button>
+          <button type="button" class="btn-primary rpb-apply" id="btn-setup-apply-request-phrase" onclick="applyRequestPhraseFromBar('setup-request-phrase-input')" data-i18n="Apply">Apply</button>
         </div>
-        <p class="rpb-hint text-muted">Same on-device requests as the Requests tab. Paint stays the fallback.</p>
+        <p class="rpb-hint text-muted" data-i18n="Same on-device requests as the Requests tab. Paint stays the fallback.">Same on-device requests as the Requests tab. Paint stays the fallback.</p>
       </div>
       <div class="setup-more-toggle no-print" id="setup-more-toggle">
-        <button type="button" class="btn-outline" id="btn-more-setup" onclick="toggleMoreSetup()" aria-expanded="false" aria-controls="setup-body">More setup</button>
+        <button type="button" class="btn-outline" id="btn-more-setup" onclick="toggleMoreSetup()" aria-expanded="false" aria-controls="setup-body" data-i18n="More setup">More setup</button>
       </div>
       <div class="tab-footer-nav">
-        <button type="button" class="btn-secondary" onclick="switchTab('requests')">Requests (optional)</button>
-        <button type="button" class="btn-success" id="btn-build-from-setup" onclick="buildFromSetup()">Build this period</button>
+        <button type="button" class="btn-secondary" onclick="switchTab('requests')" data-i18n="Requests (optional)">Requests (optional)</button>
+        <button type="button" class="btn-success" id="btn-build-from-setup" onclick="buildFromSetup()" data-i18n="Build this period">Build this period</button>
       </div>
     </div>
 
     <!-- TAB: REQUESTS -->
     <div class="tab-panel" id="tab-requests" role="tabpanel" aria-labelledby="tabbtn-requests">
-      <div class="tab-panel-title">Shift requests & time off</div>
-      <div class="tab-panel-desc">Lock PTO, RTO, LOA, and preferred shifts. Type a request below, or paint / tap a day. The generator treats these as hard constraints.</div>
+      <div class="tab-panel-title" data-i18n="Shift requests & time off">Shift requests & time off</div>
+      <div class="tab-panel-desc" data-i18n="Lock PTO, RTO, LOA, and preferred shifts. Type a request below, or paint / tap a day. The generator treats these as hard constraints.">Lock PTO, RTO, LOA, and preferred shifts. Type a request below, or paint / tap a day. The generator treats these as hard constraints.</div>
 <!-- INPUT SECTION -->
   <div class="section no-print" id="input-section" style="border:none">
     <div class="section-body" id="input-body" style="padding:0">
       <div id="request-phrase-bar" class="no-print" data-tour="request-phrase">
         <div class="rpb-row">
-          <label class="rpb-label" for="request-phrase-input">Ask</label>
+          <label class="rpb-label" for="request-phrase-input" data-i18n="Ask">Ask</label>
           <input type="text" id="request-phrase-input" placeholder="Casey off Thu–Fri"
             aria-label="Type a request such as Casey off Thu–Fri"
+            data-i18n-placeholder="Casey off Thu–Fri"
+            data-i18n-aria="Type a request such as Casey off Thu–Fri"
             autocomplete="off" spellcheck="false"
             onkeydown="if(event.key==='Enter'){event.preventDefault();applyRequestPhraseFromBar();}">
-          <button type="button" class="btn-primary rpb-apply" id="btn-apply-request-phrase" onclick="applyRequestPhraseFromBar()">Apply</button>
+          <button type="button" class="btn-primary rpb-apply" id="btn-apply-request-phrase" onclick="applyRequestPhraseFromBar()" data-i18n="Apply">Apply</button>
         </div>
-        <p class="rpb-hint text-muted" id="request-phrase-hint">Runs on this device. “Casey off Thu–Fri” or “Alex off Thu 8/6”. Paint still works if this does not read it.</p>
+        <p class="rpb-hint text-muted" id="request-phrase-hint" data-i18n="ask-hint">Runs on this device. “Casey off Thu–Fri” or “Alex off Thu 8/6”. Paint still works if this does not read it.</p>
         <div id="request-phrase-confirm" class="rpb-confirm" hidden>
           <span id="request-phrase-confirm-text"></span>
-          <button type="button" class="rpt-chip" id="btn-undo-request-phrase" onclick="undoRequestPhraseApply()">Undo request</button>
+          <button type="button" class="rpt-chip" id="btn-undo-request-phrase" onclick="undoRequestPhraseApply()" data-i18n="Undo request">Undo request</button>
         </div>
       </div>
       <div id="request-paint-toolbar" class="no-print" role="toolbar" aria-label="Request paint mode" data-tour="request-paint">
-        <span class="rpt-label">Paint</span>
-        <button type="button" class="rpt-chip" data-paint="off" onclick="setRequestPaintMode('off')">Day off</button>
-        <button type="button" class="rpt-chip" data-paint="rto" onclick="setRequestPaintMode('rto')">RTO</button>
-        <button type="button" class="rpt-chip" data-paint="pto" onclick="setRequestPaintMode('pto')">PTO</button>
-        <button type="button" class="rpt-chip" data-paint="loa" onclick="setRequestPaintMode('loa')">LOA</button>
-        <button type="button" class="rpt-chip" data-paint="__clear__" onclick="setRequestPaintMode('__clear__')">Clear</button>
-        <button type="button" class="rpt-chip" data-paint="open-late" onclick="setRequestPaintMode('open-late')">Open</button>
-        <button type="button" class="rpt-chip" data-paint="mid-early" onclick="setRequestPaintMode('mid-early')">Mid</button>
-        <button type="button" class="rpt-chip" data-paint="close" onclick="setRequestPaintMode('close')">Close</button>
-        <span class="text-muted" style="font-size:0.72rem;margin-left:0.25rem" id="rpt-active-label">Tap a mode, then drag. Stop or Esc to exit.</span>
-        <button type="button" class="rpt-stop" id="rpt-stop" onclick="clearRequestPaintMode()" title="Stop painting (Esc)">Stop</button>
+        <span class="rpt-label" data-i18n="Paint">Paint</span>
+        <button type="button" class="rpt-chip" data-paint="off" onclick="setRequestPaintMode('off')" data-i18n="Day off">Day off</button>
+        <button type="button" class="rpt-chip" data-paint="rto" onclick="setRequestPaintMode('rto')" data-i18n="RTO">RTO</button>
+        <button type="button" class="rpt-chip" data-paint="pto" onclick="setRequestPaintMode('pto')" data-i18n="PTO">PTO</button>
+        <button type="button" class="rpt-chip" data-paint="loa" onclick="setRequestPaintMode('loa')" data-i18n="LOA">LOA</button>
+        <button type="button" class="rpt-chip" data-paint="__clear__" onclick="setRequestPaintMode('__clear__')" data-i18n="Clear">Clear</button>
+        <button type="button" class="rpt-chip" data-paint="open-late" onclick="setRequestPaintMode('open-late')" data-i18n="Open">Open</button>
+        <button type="button" class="rpt-chip" data-paint="mid-early" onclick="setRequestPaintMode('mid-early')" data-i18n="Mid">Mid</button>
+        <button type="button" class="rpt-chip" data-paint="close" onclick="setRequestPaintMode('close')" data-i18n="Close">Close</button>
+        <span class="text-muted" style="font-size:0.72rem;margin-left:0.25rem" id="rpt-active-label" data-i18n="Tap a mode, then drag. Stop or Esc to exit.">Tap a mode, then drag. Stop or Esc to exit.</span>
+        <button type="button" class="rpt-stop" id="rpt-stop" onclick="clearRequestPaintMode()" title="Stop painting (Esc)" data-i18n="Stop" data-i18n-title="Stop painting (Esc)">Stop</button>
       </div>
       <div class="input-tabs" id="input-tabs"></div>
       <div id="input-calendars"></div>
-      <p class="text-muted mt-1">Paint mode: drag across days. Or click a day for the full menu.</p>
-      <p id="request-board-hint" class="request-board-hint" hidden>Rebuild to apply — painted requests do not change the board until you Rebuild.</p>
+      <p class="text-muted mt-1" data-i18n="Paint mode: drag across days. Or click a day for the full menu.">Paint mode: drag across days. Or click a day for the full menu.</p>
+      <p id="request-board-hint" class="request-board-hint" hidden data-i18n="Rebuild to apply — painted requests do not change the board until you Rebuild.">Rebuild to apply — painted requests do not change the board until you Rebuild.</p>
     </div>
   </div>
       <div class="tab-footer-nav">
-        <button type="button" class="btn-secondary" onclick="switchTab('setup')">← Setup</button>
-        <button type="button" class="btn-primary" onclick="switchTab('rules')">Next: Rules →</button>
+        <button type="button" class="btn-secondary" onclick="switchTab('setup')" data-i18n="← Setup">← Setup</button>
+        <button type="button" class="btn-primary" onclick="switchTab('rules')" data-i18n="Next: Rules →">Next: Rules →</button>
       </div>
     </div>
 
     <!-- TAB: RULES -->
     <div class="tab-panel" id="tab-rules" role="tabpanel" aria-labelledby="tabbtn-rules">
-      <div class="tab-panel-title">Preferences & role rules</div>
-      <div class="tab-panel-desc">Tune fairness, weekends, clopening, and per-role targets. Soft goals yield to hard coverage rules.</div>
+      <div class="tab-panel-title" data-i18n="Preferences & role rules">Preferences & role rules</div>
+      <div class="tab-panel-desc" data-i18n="Tune fairness, weekends, clopening, and per-role targets. Soft goals yield to hard coverage rules.">Tune fairness, weekends, clopening, and per-role targets. Soft goals yield to hard coverage rules.</div>
       <div class="sub-tabs" role="tablist">
-        <button type="button" class="sub-tab active" id="subbtn-prefs" onclick="switchSubTab('prefs')">Preferences</button>
-        <button type="button" class="sub-tab" id="subbtn-roles" onclick="switchSubTab('roles')">Role rules</button>
+        <button type="button" class="sub-tab active" id="subbtn-prefs" onclick="switchSubTab('prefs')" data-i18n="Preferences">Preferences</button>
+        <button type="button" class="sub-tab" id="subbtn-roles" onclick="switchSubTab('roles')" data-i18n="Role rules">Role rules</button>
       </div>
       <div class="sub-panel active" id="sub-prefs">
 <!-- SCHEDULING PREFERENCES -->
@@ -5285,8 +5368,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <!-- filled by renderPreferencesUI() -->
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;margin-top:0.75rem">
-        <p class="text-muted mt-1" style="margin:0">These preferences guide Generate Schedule. Hard constraints (PTO/RTO/LOA, coverage) always win. Clopen-avoidance is a preference — not a guarantee. Review before you post.</p>
-        <button class="btn-secondary" onclick="resetPreferences()" style="font-size:0.75rem;white-space:nowrap">Reset Preferences</button>
+        <p class="text-muted mt-1" style="margin:0" data-i18n="prefs-footer">These preferences guide Generate Schedule. Hard constraints (PTO/RTO/LOA, coverage) always win. Clopen-avoidance is a preference — not a guarantee. Review before you post.</p>
+        <button class="btn-secondary" onclick="resetPreferences()" style="font-size:0.75rem;white-space:nowrap" data-i18n="Reset Preferences">Reset Preferences</button>
       </div>
     </div>
   </div>
@@ -5305,53 +5388,53 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           <option value="kc">Base: Key Carrier</option>
           <option value="sm">Base: Store Manager</option>
         </select>
-        <button class="btn-primary" onclick="addCustomRoleRule()">Add Role Type</button>
-        <button class="btn-secondary" onclick="resetRoleRules()">Reset Defaults</button>
+        <button class="btn-primary" onclick="addCustomRoleRule()" data-i18n="Add Role Type">Add Role Type</button>
+        <button class="btn-secondary" onclick="resetRoleRules()" data-i18n="Reset Defaults">Reset Defaults</button>
       </div>
       <p class="text-muted mt-1" style="margin-top:0.5rem">Role rules customize weekend targets, preferred shifts, and close expectations. Custom role types are templates you can assign when naming staff; SM / AM / KC defaults apply automatically by role family.</p>
     </div>
   </div>
       </div>
       <div class="tab-footer-nav">
-        <button type="button" class="btn-secondary" onclick="switchTab('requests')">← Requests</button>
-        <button type="button" class="btn-primary" onclick="switchTab('schedule')">Next: Schedule →</button>
+        <button type="button" class="btn-secondary" onclick="switchTab('requests')" data-i18n="← Requests">← Requests</button>
+        <button type="button" class="btn-primary" onclick="switchTab('schedule')" data-i18n="Next: Schedule →">Next: Schedule →</button>
       </div>
     </div>
 
     <!-- TAB: SCHEDULE -->
     <div class="tab-panel" id="tab-schedule" role="tabpanel" aria-labelledby="tabbtn-schedule">
-      <div class="tab-panel-title">Build &amp; post</div>
-      <div class="tab-panel-desc">Create the period schedule, clear must-fix issues, then print a clean posting sheet.</div>
+      <div class="tab-panel-title" data-i18n="Build & post">Build &amp; post</div>
+      <div class="tab-panel-desc" data-i18n="Create the period schedule, clear must-fix issues, then print a clean posting sheet.">Create the period schedule, clear must-fix issues, then print a clean posting sheet.</div>
 <!-- GENERATE -->
   <div class="section no-print" id="generate-section" style="border:none;background:transparent">
     <div class="section-body generate-panel">
       <div id="ops-home" class="no-print" aria-label="Command center">
-        <div class="ops-home-title" id="ops-home-title">Period ready</div>
+        <div class="ops-home-title" id="ops-home-title" data-i18n="Period ready">Period ready</div>
         <div class="ops-home-meta" id="ops-home-meta"></div>
         <div class="ops-home-actions">
-          <button type="button" class="btn-success no-lock-hide" onclick="generateSchedule()">Build</button>
-          <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()">Next period</button>
-          <button type="button" class="btn-outline" onclick="startOnboardingTour(true)">Tour</button>
+          <button type="button" class="btn-success no-lock-hide" onclick="generateSchedule()" data-i18n="Build">Build</button>
+          <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()" data-i18n="Next period">Next period</button>
+          <button type="button" class="btn-outline" onclick="startOnboardingTour(true)" data-i18n="Tour">Tour</button>
           <button type="button" class="btn-outline" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
       <div class="ready-checklist" id="ready-checklist"></div>
       <div id="built-rebuild-slot">
       <div class="generate-actions" id="built-rebuild-row">
-        <span class="built-pill" id="built-pill" hidden>Built</span>
-        <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()">Build this period</button>
-        <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()">Clear board</button>
-        <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})">Load sample store</button>
+        <span class="built-pill" id="built-pill" hidden data-i18n="Built">Built</span>
+        <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()" data-i18n="Build this period">Build this period</button>
+        <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()" data-i18n="Clear board">Clear board</button>
+        <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})" data-i18n="Load sample store">Load sample store</button>
       </div>
       </div>
-      <div class="gen-meta" id="gen-meta">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
+      <div class="gen-meta" id="gen-meta" data-i18n="Tip: set PTO/RTO first — the engine treats them as hard locks.">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
     </div>
   </div>
       <div id="schedule-empty" class="empty-schedule no-print">
-        <strong>No schedule yet</strong>
-        Name two managers on Setup, then Build. Requests and rules can wait.
+        <strong data-i18n="No schedule yet">No schedule yet</strong>
+        <span data-i18n="Name two managers on Setup, then Build. Requests and rules can wait.">Name two managers on Setup, then Build. Requests and rules can wait.</span>
         <div style="margin-top:0.85rem">
-          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Load sample store</button>
+          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})" data-i18n="Load sample store">Load sample store</button>
           <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
@@ -5364,40 +5447,40 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="section-body" id="schedule-body">
       <div class="schedule-toolbar no-print" id="schedule-toolbar">
         <div class="view-mode-seg" id="schedule-view-toggle" role="group" aria-label="Schedule view mode">
-          <span class="view-mode-label">View</span>
-          <button type="button" data-view="month" onclick="setScheduleViewMode('month')">Month</button>
-          <button type="button" data-view="week" onclick="setScheduleViewMode('week')" class="active">Week</button>
-          <button type="button" data-view="day" onclick="setScheduleViewMode('day')">Day</button>
+          <span class="view-mode-label" data-i18n="View">View</span>
+          <button type="button" data-view="month" onclick="setScheduleViewMode('month')" data-i18n="Month">Month</button>
+          <button type="button" data-view="week" onclick="setScheduleViewMode('week')" class="active" data-i18n="Week">Week</button>
+          <button type="button" data-view="day" onclick="setScheduleViewMode('day')" data-i18n="Day">Day</button>
         </div>
         <span class="toolbar-sep" aria-hidden="true"></span>
         <div class="density-seg" id="density-seg" role="group" aria-label="Density">
-          <button type="button" data-density="compact" onclick="setDensityMode('compact')" title="Compact">Compact</button>
-          <button type="button" data-density="comfortable" class="active" onclick="setDensityMode('comfortable')" title="Comfortable">Comfort</button>
-          <button type="button" data-density="board" onclick="setDensityMode('board')" title="Board / wall">Board</button>
+          <button type="button" data-density="compact" onclick="setDensityMode('compact')" title="Compact" data-i18n="Compact" data-i18n-title="Compact">Compact</button>
+          <button type="button" data-density="comfortable" class="active" onclick="setDensityMode('comfortable')" title="Comfortable" data-i18n="Comfort" data-i18n-title="Comfortable">Comfort</button>
+          <button type="button" data-density="board" onclick="setDensityMode('board')" title="Board / wall" data-i18n="Board" data-i18n-title="Board / wall">Board</button>
         </div>
         <span class="toolbar-sep" aria-hidden="true"></span>
-        <button type="button" class="btn-secondary no-lock-hide" id="btn-undo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="undoSchedEdit()" disabled title="Undo (Ctrl+Z)">Undo</button>
-        <button type="button" class="btn-secondary no-lock-hide" id="btn-redo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="redoSchedEdit()" disabled title="Redo">Redo</button>
+        <button type="button" class="btn-secondary no-lock-hide" id="btn-undo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="undoSchedEdit()" disabled title="Undo (Ctrl+Z)" data-i18n="Undo" data-i18n-title="Undo (Ctrl+Z)">Undo</button>
+        <button type="button" class="btn-secondary no-lock-hide" id="btn-redo-edit" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="redoSchedEdit()" disabled title="Redo" data-i18n="Redo" data-i18n-title="Redo">Redo</button>
         <div class="toolbar-menu">
-          <button type="button" class="btn-secondary" id="toolbar-export-btn" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="toggleToolbarExportMenu(event)" aria-haspopup="true" aria-expanded="false">Export ▾</button>
+          <button type="button" class="btn-secondary" id="toolbar-export-btn" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="toggleToolbarExportMenu(event)" aria-haspopup="true" aria-expanded="false" data-i18n="Export ▾">Export ▾</button>
           <div class="toolbar-menu-panel" id="toolbar-export-panel" hidden>
-            <button type="button" onclick="window.print(); closeToolbarExportMenu()">Print posting sheet</button>
-            <button type="button" onclick="exportSchedule(); closeToolbarExportMenu()">Word</button>
-            <button type="button" onclick="exportScheduleExcel(); closeToolbarExportMenu()">Excel</button>
-            <button type="button" onclick="copySummaryText(); closeToolbarExportMenu()">Copy summary</button>
-            <button type="button" onclick="exportBackupJSON(); closeToolbarExportMenu()">Backup JSON — new phone</button>
+            <button type="button" onclick="window.print(); closeToolbarExportMenu()" data-i18n="Print posting sheet">Print posting sheet</button>
+            <button type="button" onclick="exportSchedule(); closeToolbarExportMenu()" data-i18n="Word">Word</button>
+            <button type="button" onclick="exportScheduleExcel(); closeToolbarExportMenu()" data-i18n="Excel">Excel</button>
+            <button type="button" onclick="copySummaryText(); closeToolbarExportMenu()" data-i18n="Copy summary">Copy summary</button>
+            <button type="button" onclick="exportBackupJSON(); closeToolbarExportMenu()" data-i18n="Backup JSON — new phone">Backup JSON — new phone</button>
           </div>
         </div>
         <span class="gen-timestamp" id="gen-timestamp"></span>
       </div>
       <div id="backup-nudge" class="backup-nudge no-print" hidden role="status">
         <div class="bn-text">
-          <strong>Save a backup now</strong>
-          <span>This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.</span>
+          <strong data-i18n="Save a backup now">Save a backup now</strong>
+          <span data-i18n="This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.">This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.</span>
         </div>
         <div class="bn-actions">
-          <button type="button" class="btn-secondary" id="bn-save" onclick="saveBackupFromNudge()">Save backup</button>
-          <button type="button" class="bn-dismiss" id="bn-dismiss" onclick="dismissBackupNudge()">Not now</button>
+          <button type="button" class="btn-secondary" id="bn-save" onclick="saveBackupFromNudge()" data-i18n="Save backup">Save backup</button>
+          <button type="button" class="bn-dismiss" id="bn-dismiss" onclick="dismissBackupNudge()" data-i18n="Not now">Not now</button>
         </div>
       </div>
       <div class="period-print-header" id="print-header"></div>
@@ -5409,7 +5492,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   </div>
       </div>
       <div class="tab-footer-nav">
-        <button type="button" class="btn-secondary" onclick="switchTab('rules')">← Rules</button>
+        <button type="button" class="btn-secondary" onclick="switchTab('rules')" data-i18n="← Rules">← Rules</button>
         <span></span>
       </div>
     </div>
@@ -5421,28 +5504,28 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="review-sheet-backdrop" onclick="closeReviewSheet()"></div>
   <div class="review-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="review-sheet-title">
     <div class="review-sheet-head">
-      <strong id="review-sheet-title">Review</strong>
-      <button type="button" class="review-sheet-close" onpointerdown="event.preventDefault(); event.stopPropagation(); closeReviewSheet();" onclick="event.stopPropagation(); closeReviewSheet();">Close</button>
+      <strong id="review-sheet-title" data-i18n="Review">Review</strong>
+      <button type="button" class="review-sheet-close" onpointerdown="event.preventDefault(); event.stopPropagation(); closeReviewSheet();" onclick="event.stopPropagation(); closeReviewSheet();" data-i18n="Close panel">Close</button>
     </div>
     <div class="review-sheet-body">
       <div id="schedule-diff-panel" class="no-print" hidden>
         <div class="diff-head">
-          <span id="diff-head-label">Cells changed</span>
-          <button type="button" class="btn-secondary" style="font-size:0.72rem;padding:0.25rem 0.5rem;min-height:auto" onclick="dismissScheduleDiff()">Dismiss</button>
+          <span id="diff-head-label" data-i18n="Cells changed">Cells changed</span>
+          <button type="button" class="btn-secondary" style="font-size:0.72rem;padding:0.25rem 0.5rem;min-height:auto" onclick="dismissScheduleDiff()" data-i18n="Dismiss">Dismiss</button>
         </div>
         <div class="diff-list" id="diff-list"></div>
       </div>
       <div id="smart-suggestions" class="no-print" hidden>
-        <div class="sug-head"><span>Smart suggestions</span></div>
+        <div class="sug-head"><span data-i18n="Smart suggestions">Smart suggestions</span></div>
         <div class="sug-list" id="sug-list"></div>
       </div>
       <button type="button" class="mobile-analytics-toggle no-print" id="mobile-analytics-toggle" onclick="toggleMobileAnalytics()">
-        Posting &amp; quality analytics
-        <span class="mat-hint" id="mobile-analytics-hint">Tap to expand labor, weekly breakdown, and score details</span>
+        <span data-i18n="Posting & quality analytics">Posting &amp; quality analytics</span>
+        <span class="mat-hint" id="mobile-analytics-hint" data-i18n="Tap to expand labor, weekly breakdown, and score details">Tap to expand labor, weekly breakdown, and score details</span>
       </button>
       <div class="section analytics-collapsed" id="summary-section">
         <div class="section-header">
-          <h2>Posting &amp; quality</h2>
+          <h2 data-i18n="Posting & quality">Posting &amp; quality</h2>
         </div>
         <div class="section-body" id="summary-body">
           <div id="clopen-radar-host"></div>
@@ -5454,11 +5537,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.24</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.25</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
-    <button type="button" onclick="showHowItWorks()">Help</button>
-    <button type="button" onclick="openFeedbackPage()">Send feedback</button>
-    <button type="button" onclick="location.href='buy.html'">Buy Pro</button>
+    <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
+    <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
+    <button type="button" onclick="location.href='buy.html'" data-i18n="Buy Pro">Buy Pro</button>
     <a href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Google Play</a>
     <button type="button" onclick="location.href='legal/privacy.html'">Privacy</button>
   </div>
@@ -5468,12 +5551,12 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 <div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title" onpointerdown="if (event.target === this) { event.preventDefault(); event.stopPropagation(); closeProGate(); }">
   <div class="pro-gate-card" onpointerdown="event.stopPropagation()">
-    <h3 id="pro-gate-title">Pro feature</h3>
-    <p id="pro-gate-body">Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.</p>
+    <h3 id="pro-gate-title" data-i18n="Pro feature">Pro feature</h3>
+    <p id="pro-gate-body" data-i18n="Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.">Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.</p>
     <div class="pro-gate-actions">
-      <a class="pg-buy" href="buy.html" data-price-label>Buy Pro — $19.99</a>
-      <button type="button" class="pg-secondary" id="btn-pro-gate-license" onpointerdown="event.preventDefault(); event.stopPropagation(); promptLicenseUnlock();" onclick="event.stopPropagation(); promptLicenseUnlock();">Enter license</button>
-      <button type="button" class="pg-secondary" id="btn-pro-gate-not-now" onpointerdown="event.preventDefault(); event.stopPropagation(); closeProGate();" onclick="event.stopPropagation(); closeProGate();">Not now</button>
+      <a class="pg-buy" href="buy.html" data-price-label data-i18n="Buy Pro — $19.99">Buy Pro — $19.99</a>
+      <button type="button" class="pg-secondary" id="btn-pro-gate-license" onpointerdown="event.preventDefault(); event.stopPropagation(); promptLicenseUnlock();" onclick="event.stopPropagation(); promptLicenseUnlock();" data-i18n="Enter license">Enter license</button>
+      <button type="button" class="pg-secondary" id="btn-pro-gate-not-now" onpointerdown="event.preventDefault(); event.stopPropagation(); closeProGate();" onclick="event.stopPropagation(); closeProGate();" data-i18n="Not now">Not now</button>
     </div>
   </div>
 </div>
@@ -5482,7 +5565,15 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title" onclick="if (event.target === this) closeAccountPanel();">
   <div class="account-panel-card" onclick="event.stopPropagation()">
     <h3 id="account-panel-title">This device</h3>
-    <p class="ap-sub">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
+    <p class="ap-sub" data-i18n="Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
+    <div class="ap-lang" id="ap-lang-block">
+      <label class="ap-lang-label" for="ap-lang-select" data-i18n="App language">App language</label>
+      <select id="ap-lang-select" aria-label="App language" onchange="setUiLang(this.value)">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+      <p class="ap-lang-hint" data-i18n="Stays on this phone. Does not translate names you typed.">Stays on this phone. Does not translate names you typed.</p>
+    </div>
     <div hidden>
       <span id="ap-org"></span>
       <span id="ap-name"></span>
@@ -5490,14 +5581,14 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <span id="ap-method">This device</span>
     </div>
     <div class="ap-rows">
-      <div class="ap-row"><span>Store</span><span id="ap-store">This device</span></div>
-      <div class="ap-row"><span>Plan</span><span id="ap-plan">Free</span></div>
+      <div class="ap-row"><span data-i18n="Store">Store</span><span id="ap-store">This device</span></div>
+      <div class="ap-row"><span data-i18n="Plan">Plan</span><span id="ap-plan">Free</span></div>
     </div>
     <div class="ap-actions">
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
-      <button type="button" class="ap-btn-primary" onclick="openLicenseModal()">Activate team license</button>
-      <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center">Manage billing</a>
-      <button type="button" class="ap-btn-secondary" onpointerdown="event.preventDefault(); event.stopPropagation(); closeAccountPanel();" onclick="event.stopPropagation(); closeAccountPanel();">Close</button>
+      <button type="button" class="ap-btn-primary" onclick="openLicenseModal()" data-i18n="Activate team license">Activate team license</button>
+      <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center" data-i18n="Manage billing">Manage billing</a>
+      <button type="button" class="ap-btn-secondary" onpointerdown="event.preventDefault(); event.stopPropagation(); closeAccountPanel();" onclick="event.stopPropagation(); closeAccountPanel();" data-i18n="Close panel">Close</button>
     </div>
     <div id="ap-leftover-session" hidden>
       <label class="ap-signout-opts">
@@ -5514,15 +5605,15 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <!-- License unlock modal (replaces window.prompt) -->
 <div class="license-modal no-print" id="license-modal" hidden role="dialog" aria-modal="true" aria-labelledby="license-modal-title">
   <div class="license-modal-card">
-    <h3 id="license-modal-title">Activate team license</h3>
-    <p>Enter your Gumroad license or an MSB-PRO- unlock code.</p>
+    <h3 id="license-modal-title" data-i18n="Activate team license">Activate team license</h3>
+    <p data-i18n="Enter your Gumroad license or an MSB-PRO- unlock code.">Enter your Gumroad license or an MSB-PRO- unlock code.</p>
     <label>License / unlock code
       <input type="text" id="license-input" autocomplete="off" placeholder="Gumroad license or MSB-PRO-…" />
     </label>
     <div class="license-error" id="license-error" role="alert"></div>
     <div class="license-modal-actions">
-      <button type="button" class="lic-btn-primary" onclick="submitLicenseUnlock()">Unlock Pro</button>
-      <button type="button" class="lic-btn-secondary" onclick="closeLicenseModal()">Cancel</button>
+      <button type="button" class="lic-btn-primary" onclick="submitLicenseUnlock()" data-i18n="Unlock Pro">Unlock Pro</button>
+      <button type="button" class="lic-btn-secondary" onclick="closeLicenseModal()" data-i18n="Cancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -5560,9 +5651,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <h3 id="tour-title">Welcome</h3>
     <p id="tour-body">Build fair manager schedules offline.</p>
     <div class="tour-actions">
-      <button type="button" class="btn-outline" onclick="skipOnboardingTour()">Skip</button>
-      <button type="button" class="btn-secondary" id="tour-back-btn" onclick="tourBack()" style="display:none">Back</button>
-      <button type="button" class="btn-primary" id="tour-next-btn" onclick="tourNext()">Next</button>
+      <button type="button" class="btn-outline" onclick="skipOnboardingTour()" data-i18n="Skip">Skip</button>
+      <button type="button" class="btn-secondary" id="tour-back-btn" onclick="tourBack()" style="display:none" data-i18n="Back">Back</button>
+      <button type="button" class="btn-primary" id="tour-next-btn" onclick="tourNext()" data-i18n="Next">Next</button>
     </div>
   </div>
 </div>
@@ -5581,7 +5672,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="cmd-panel">
     <div class="cmd-input-wrap">
       <span class="cmd-icon" aria-hidden="true">⌕</span>
-      <input type="text" id="cmd-palette-input" placeholder="Type a command…" autocomplete="off" aria-label="Search commands" />
+      <input type="text" id="cmd-palette-input" placeholder="Type a command…" autocomplete="off" aria-label="Search commands" data-i18n-placeholder="Type a command…" data-i18n-aria="Search commands" />
       <span class="cmd-kbd">Esc</span>
     </div>
     <div id="cmd-palette-results" role="listbox"></div>
@@ -6767,7 +6858,7 @@ function getStoreIdentity() {
       }
     }
   } catch (e) {}
-  let label = 'This device';
+  let label = msbT('This device');
   if (name) {
     label = (num && name.indexOf('#') === -1) ? (name + ' #' + num) : name;
   }
@@ -6786,17 +6877,17 @@ function updateAccountChip() {
   const avatar = document.getElementById('account-chip-avatar');
   const nameEl = document.getElementById('account-chip-name');
   const planEl = document.getElementById('account-chip-plan');
-  const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : { label: 'This device' };
+  const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : { label: msbT('This device') };
   const pro = isProUnlocked();
   const planText = pro
-    ? 'Pro'
+    ? msbT('Pro')
     : (function () {
         const left = remainingFreeGenerates();
-        return left === 0 ? 'Free · 0' : 'Free · ' + left;
+        return left === 0 ? msbT('Free · 0') : msbT('Free · {n}', { n: left });
       })();
-  const initial = (id.label || 'This device').trim().charAt(0).toUpperCase() || 'T';
+  const initial = (id.label || msbT('This device')).trim().charAt(0).toUpperCase() || 'T';
   if (avatar) avatar.textContent = initial;
-  if (nameEl) nameEl.textContent = id.label || 'This device';
+  if (nameEl) nameEl.textContent = id.label || msbT('This device');
   if (planEl) {
     planEl.textContent = planText;
     planEl.classList.toggle('is-pro', pro);
@@ -6830,7 +6921,7 @@ function openAccountPanel() {
   set('ap-name', id.label || 'This device');
   set('ap-email', '—');
   set('ap-method', 'This device');
-  set('ap-plan', isProUnlocked() ? 'Pro' : 'Free');
+  set('ap-plan', isProUnlocked() ? msbT('Pro') : msbT('Free'));
   const signInBtn = document.getElementById('ap-signin-btn');
   if (signInBtn) {
     signInBtn.hidden = true;
@@ -6918,8 +7009,8 @@ function personalizeWelcome() {
   const title = document.getElementById('welcome-title');
   if (!title) return;
   const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : { name: '', label: 'This device' };
-  if (id.name) title.textContent = 'Welcome · ' + id.label;
-  else title.textContent = 'Build the period. Post with confidence.';
+  if (id.name) title.textContent = msbT('Welcome · {store}', { store: id.label });
+  else title.textContent = msbT('Build the period. Post with confidence.');
 }
 
 function forceOfflineSession() {
@@ -7443,11 +7534,25 @@ function summarizeWarningsForDisplay(warnings, roles) {
   const rest = [];
   list.forEach((w) => {
     const msg = (w && (w.msg || w.detail)) || '';
-    const isHard = w && (w.type === 'error' || w.severity === 'error');
-    if (isHard || !isExpectedThinDayCoverageNote(msg)) rest.push(w);
-    else cover.push(w);
+    const thinNote = typeof isExpectedThinDayCoverageNote === 'function' && isExpectedThinDayCoverageNote(msg);
+    if (thinNote) {
+      // Same story as posting: leftover 8/12 no-opener/closer is a note, not !! must-fix.
+      const dk = w && (w.day || w.dk);
+      let bothOff = false;
+      if (dk && typeof schedule !== 'undefined' && schedule && typeof isWork === 'function') {
+        const workers = (roles || []).filter((r) => isWork(schedule[r] && schedule[r][dk])).length;
+        bothOff = workers === 0;
+      }
+      if (!bothOff) {
+        cover.push(Object.assign({}, w, { type: 'info', severity: 'info' }));
+        return;
+      }
+    }
+    rest.push(w);
   });
-  if (cover.length < 2) return list;
+  if (cover.length < 2) {
+    return rest.concat(cover);
+  }
   const why = typeof twoPersonOffsCoverageNote === 'function' ? twoPersonOffsCoverageNote(roles) : '';
   rest.unshift({
     type: 'info',
@@ -7577,7 +7682,7 @@ function renderPreferencesUI() {
   const p = preferences;
   el.innerHTML = `
     <div class="pref-card" data-tour="pref-first">
-      <label class="pref-label">Target weekend days off
+      <label class="pref-label">${msbT('Target weekend days off')}
         <input type="number" id="pref-weekend-target" min="0" max="10" value="${p.targetWeekendDaysOff}" onchange="readPreferencesFromUI()">
       </label>
       <div class="pref-desc">Weekend (Sat+Sun) days off per person per period. Default 2 (one full weekend).</div>
@@ -7605,15 +7710,15 @@ function renderPreferencesUI() {
       <label class="toggle-switch">
         <input type="checkbox" id="pref-avoid-clopen" ${p.avoidClopening ? 'checked' : ''} onchange="readPreferencesFromUI()">
         <span class="toggle-track"></span>
-        Avoid clopening
+        ${msbT('Avoid clopening')}
       </label>
-      <div class="pref-desc">Prefer no Close / Ext. Close followed by Open the next day. On by default — a preference, not a guarantee. Coverage still wins.</div>
+      <div class="pref-desc">${msbT('Prefer no Close / Ext. Close followed by Open the next day. On by default — a preference, not a guarantee. Coverage still wins.')}</div>
     </div>
     <div class="pref-card">
       <label class="toggle-switch">
         <input type="checkbox" id="pref-fair-dist" ${p.fairDistribution ? 'checked' : ''} onchange="readPreferencesFromUI()">
         <span class="toggle-track"></span>
-        Fair distribution
+        ${msbT('Fair distribution')}
       </label>
       <div class="pref-desc">Balance Opens, Closes, and weekend offs fairly across the team (respects role preferences).</div>
     </div>
@@ -7808,7 +7913,498 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.24';
+const APP_VERSION = '2.6.25';
+
+// ── UI language (English source + Spanish local dictionary) ──
+const MSB_LANG_KEY = 'msb_ui_lang';
+const MSB_I18N_ES = {
+  'Offline': 'Sin conexión',
+  'Saved': 'Guardado',
+  'Account': 'Cuenta',
+  'Free': 'Gratis',
+  'Pro': 'Pro',
+  'This device': 'Este teléfono',
+  'Names, time off, and the board stay on this device · nothing uploaded': 'Nombres, tiempo libre y el tablero se quedan en este teléfono · nada se sube',
+  'Upgrade to Pro $19.99': 'Pasar a Pro $19.99',
+  'Works offline — data on this device': 'Funciona sin conexión — datos en este teléfono',
+  'Last local save': 'Último guardado en este teléfono',
+  'Manager shifts · NRF periods · Fair weekends · Review before you post': 'Turnos de gerentes · Períodos NRF · Fines de semana justos · Revisa antes de publicar',
+  'More ▾': 'Más ▾',
+  'App language': 'Idioma',
+  'Save': 'Guardar',
+  'Load': 'Cargar',
+  'Load sample store': 'Cargar tienda de ejemplo',
+  'Load sample store & generate': 'Cargar tienda de ejemplo y armar',
+  'Print': 'Imprimir',
+  'Export Word': 'Exportar Word',
+  'Export Excel': 'Exportar Excel',
+  'New phone? Export a JSON backup, then Load. No cloud — file stays yours.': '¿Teléfono nuevo? Exporta un respaldo JSON y luego Cargar. Sin nube — el archivo es tuyo.',
+  'Backup JSON — new phone': 'Respaldo JSON — teléfono nuevo',
+  'Copy summary': 'Copiar resumen',
+  'Density: Compact': 'Densidad: Compacta',
+  'Density: Comfortable': 'Densidad: Cómoda',
+  'Density: Board': 'Densidad: Tablero',
+  'Toggle high contrast': 'Alto contraste',
+  'Toggle peak season': 'Temporada alta',
+  'Next period same team': 'Siguiente período, mismo equipo',
+  'How it works': 'Cómo funciona',
+  'Send feedback': 'Enviar comentarios',
+  'Take tour': 'Ver recorrido',
+  'Account & license': 'Cuenta y licencia',
+  'Buy Pro — $19.99': 'Comprar Pro — $19.99',
+  'View only — schedule board': 'Solo lectura — tablero',
+  'Review': 'Revisar',
+  'Quality': 'Calidad',
+  'Coverage': 'Cobertura',
+  'Clopens': 'Clopens',
+  'AM closes': 'Cierres AM',
+  'WE offs': 'Libres de fin',
+  'Fairness': 'Equidad',
+  'Review issues': 'Revisar problemas',
+  'Suggestions': 'Sugerencias',
+  'Next period': 'Siguiente período',
+  'Install Schedule Pro': 'Instalar Schedule Pro',
+  'Add to your home screen, or get the Android app on Google Play — $19.99 one-time.': 'Agrégala a la pantalla de inicio, o la app Android en Google Play — $19.99 de una vez.',
+  'Install': 'Instalar',
+  'Not now': 'Ahora no',
+  'Build the period. Post with confidence.': 'Arma el período. Publica con confianza.',
+  'welcome-body': 'Horarios de gerentes para retail — períodos NRF de EE. UU., fines de semana justos, evitar clopen es una preferencia. Todo en este teléfono. Gratis: equipo ilimitado, editar celdas y 2 armados. Pro: armados ilimitados + Word/Excel. Siempre revisa antes de publicar.',
+  'Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.': 'Nombres, tiempo libre y el tablero se quedan en este teléfono. Nada se sube. Sin cuenta, sin plantilla en la nube.',
+  'Start with my team': 'Empezar con mi equipo',
+  'Pro · $19.99': 'Pro · $19.99',
+  'Dismiss': 'Cerrar',
+  'Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.': 'Android · $19.99 de una vez en Google Play. El desbloqueo web Pro se queda en este sitio.',
+  'Setup': 'Equipo',
+  'Requests': 'Solicitudes',
+  'Rules': 'Reglas',
+  'Schedule': 'Horario',
+  'Schedule ready': 'Horario listo',
+  'Store & team': 'Tienda y equipo',
+  'Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.': 'Nombres, tienda, período fiscal y horarios. Carga un período antes de armar. ¿Teléfono nuevo? Más → Respaldo JSON, luego Cargar.',
+  'Team templates': 'Plantillas de equipo',
+  'Save team': 'Guardar equipo',
+  'Delete': 'Borrar',
+  'Role names': 'Nombres de puesto',
+  'Store Manager': 'Gerente de tienda',
+  'Assistant Manager': 'Gerente asistente',
+  'Assistant Managers': 'Gerentes asistentes',
+  'Key Carriers': 'Portallaves',
+  'Store': 'Tienda',
+  'Name:': 'Nombre:',
+  'e.g. your store name': 'ej. el nombre de tu tienda',
+  'Store #:': 'Tienda #:',
+  'Hours:': 'Horario:',
+  'Edit': 'Editar',
+  'Fiscal Period': 'Período fiscal',
+  'Load this NRF period': 'Cargar este período NRF',
+  'Loaded': 'Cargado',
+  'Load Period': 'Cargar período',
+  'Advance to next period, keep team and hours': 'Pasar al siguiente período, mismo equipo y horario',
+  'U.S. federal paid holidays': 'Días festivos federales de EE. UU.',
+  'U.S. 4-day work week · saved on this device': 'Semana de 4 días (EE. UU.) · se guarda en este teléfono',
+  'holiday-note-default': 'Marca los festivos que tu tienda paga. Las semanas que coincidan quedan de 4 días y se ven en el calendario. Fechas de EE. UU. solamente — no son reglas laborales de España ni México.',
+  'Open': 'Apertura',
+  'Mid': 'Medio',
+  'Close': 'Cierre',
+  'Ext. Close': 'Cierre ext.',
+  'PTO': 'PTO',
+  'RTO': 'RTO',
+  'LOA': 'LOA',
+  'Off': 'Libre',
+  'KC Close': 'Cierre KC',
+  'Custom': 'Otro',
+  'Shift Times': 'Horarios de turno',
+  'Edit start/end times for each shift type. Changes are saved automatically.': 'Edita hora de inicio/fin de cada turno. Se guarda solo.',
+  'Reset to Defaults': 'Volver a predeterminado',
+  'Ask': 'Pedir',
+  'Casey off Thu–Fri': 'Casey libre jue–vie',
+  'Type a request such as Casey off Thu–Fri': 'Escribe un pedido como Casey libre jue–vie',
+  'Apply': 'Aplicar',
+  'Same on-device requests as the Requests tab. Paint stays the fallback.': 'Los mismos pedidos en este teléfono que en Solicitudes. Pintar el calendario sigue siendo el respaldo.',
+  'More setup': 'Más de equipo',
+  'Requests (optional)': 'Solicitudes (opcional)',
+  'Build this period': 'Armar este período',
+  'Shift requests & time off': 'Pedidos de turno y tiempo libre',
+  'Lock PTO, RTO, LOA, and preferred shifts. Type a request below, or paint / tap a day. The generator treats these as hard constraints.': 'Fija PTO, RTO, LOA y turnos preferidos. Escribe abajo, o pinta / toca un día. El armado los trata como candados.',
+  'ask-hint': 'Corre en este teléfono. “Casey libre jue–vie” o “Alex libre jue 8/6”. Si no lo lee, pinta el calendario.',
+  'Undo request': 'Deshacer pedido',
+  'Paint': 'Pintar',
+  'Day off': 'Día libre',
+  'Clear': 'Borrar',
+  'Tap a mode, then drag. Stop or Esc to exit.': 'Toca un modo y arrastra. Para o Esc para salir.',
+  'Stop': 'Parar',
+  'Stop painting (Esc)': 'Dejar de pintar (Esc)',
+  'Paint mode: drag across days. Or click a day for the full menu.': 'Modo pintar: arrastra por los días. O toca un día para el menú.',
+  'Rebuild to apply — painted requests do not change the board until you Rebuild.': 'Rehacer para aplicar — lo pintado no cambia el tablero hasta que Rehagas.',
+  '← Setup': '← Equipo',
+  'Next: Rules →': 'Siguiente: Reglas →',
+  'Preferences & role rules': 'Preferencias y reglas de puesto',
+  'Tune fairness, weekends, clopening, and per-role targets. Soft goals yield to hard coverage rules.': 'Ajusta equidad, fines de semana, clopen y metas por puesto. Las metas suaves ceden a la cobertura.',
+  'Preferences': 'Preferencias',
+  'Role rules': 'Reglas de puesto',
+  'prefs-footer': 'Estas preferencias guían Armar horario. Los candados (PTO/RTO/LOA, cobertura) siempre ganan. Evitar clopen es una preferencia — no una garantía. Revisa antes de publicar.',
+  'Reset Preferences': 'Restablecer preferencias',
+  'Add Role Type': 'Agregar tipo de puesto',
+  'Reset Defaults': 'Restablecer',
+  '← Requests': '← Solicitudes',
+  'Next: Schedule →': 'Siguiente: Horario →',
+  'Build & post': 'Armar y publicar',
+  'Create the period schedule, clear must-fix issues, then print a clean posting sheet.': 'Arma el período, corrige lo que hay que corregir y luego imprime la hoja limpia.',
+  'Period ready': 'Período listo',
+  'Build': 'Armar',
+  'Tour': 'Recorrido',
+  'Built': 'Armado',
+  'Clear board': 'Limpiar tablero',
+  'Tip: set PTO/RTO first — the engine treats them as hard locks.': 'Tip: pon PTO/RTO primero — el armado los trata como candados.',
+  'No schedule yet': 'Aún no hay horario',
+  'Name two managers on Setup, then Build. Requests and rules can wait.': 'Nombra dos gerentes en Equipo y luego Arma. Solicitudes y reglas pueden esperar.',
+  'View': 'Vista',
+  'Month': 'Mes',
+  'Week': 'Semana',
+  'Day': 'Día',
+  'Compact': 'Compacta',
+  'Comfort': 'Cómoda',
+  'Comfortable': 'Cómoda',
+  'Board': 'Tablero',
+  'Board / wall': 'Tablero / pared',
+  'Undo': 'Deshacer',
+  'Redo': 'Rehacer',
+  'Undo (Ctrl+Z)': 'Deshacer (Ctrl+Z)',
+  'Export ▾': 'Exportar ▾',
+  'Print posting sheet': 'Imprimir hoja',
+  'Word': 'Word',
+  'Excel': 'Excel',
+  'Save a backup now': 'Guarda un respaldo ahora',
+  'This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.': 'Este tablero vive en este teléfono. Un aparato nuevo empieza vacío. Más → Respaldo JSON — no hay copia en la nube.',
+  'Save backup': 'Guardar respaldo',
+  '← Rules': '← Reglas',
+  'Close': 'Cerrar',
+  'Cells changed': 'Celdas cambiadas',
+  'Smart suggestions': 'Sugerencias',
+  'Posting & quality analytics': 'Publicación y calidad',
+  'Tap to expand labor, weekly breakdown, and score details': 'Toca para ver horas, desglose semanal y el puntaje',
+  'Posting & quality': 'Publicación y calidad',
+  'Help': 'Ayuda',
+  'Buy Pro': 'Comprar Pro',
+  'Pro feature': 'Función Pro',
+  'Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.': 'Desbloquea Pro para armados ilimitados y exportar Word/Excel. Gratis incluye gerentes ilimitados, edición completa y 2 armados.',
+  'Enter license': 'Ingresar licencia',
+  'Stays on this phone. Does not translate names you typed.': 'Se queda en este teléfono. No traduce los nombres que escribiste.',
+  'Plan': 'Plan',
+  'Activate team license': 'Activar licencia de equipo',
+  'Manage billing': 'Administrar cobro',
+  'Enter your Gumroad license or an MSB-PRO- unlock code.': 'Ingresa tu licencia de Gumroad o un código MSB-PRO-.',
+  'Unlock Pro': 'Desbloquear Pro',
+  'Cancel': 'Cancelar',
+  'Skip': 'Saltar',
+  'Back': 'Atrás',
+  'Next': 'Siguiente',
+  'Done': 'Listo',
+  'Type a command…': 'Escribe un comando…',
+  'Search commands': 'Buscar comandos',
+  'Rebuild': 'Rehacer',
+  'Welcome · {store}': 'Bienvenido · {store}',
+  'Free · {n}': 'Gratis · {n}',
+  'Free · 0': 'Gratis · 0',
+  'Posting check': 'Revisión para publicar',
+  'Ready to post': 'Listo para publicar',
+  'Not ready': 'No listo',
+  'Review first': 'Revisar primero',
+  'Must': 'Corregir',
+  'Note': 'Nota',
+  'Must-fix': 'Hay que corregir',
+  'Review before posting': 'Revisa antes de publicar',
+  'Preference note — optional to fix.': 'Nota de preferencia — opcional corregir.',
+  'No blocking issues. Print or export when you’re happy with the week.': 'Nada que bloquee. Imprime o exporta cuando te guste la semana.',
+  'Fix must-fix items before you hang this on the board.': 'Corrige lo que hay que corregir antes de colgar esto.',
+  'Schedule is usable — glance at the notes below, then post.': 'El horario se puede usar — mira las notas y publica.',
+  'Looks solid. Score {score}/100 · {grade}.': 'Se ve bien. Puntaje {score}/100 · {grade}.',
+  'No issues flagged — safe to print for the team.': 'Nada marcado — puedes imprimir para el equipo.',
+  'Find →': 'Buscar →',
+  'View →': 'Ver →',
+  'Weekly Breakdown': 'Desglose semanal',
+  'Manager': 'Gerente',
+  'Total': 'Total',
+  'Warnings & Notes': 'Avisos y notas',
+  'All constraints satisfied.': 'Todo en orden.',
+  'Schedule Quality Score': 'Puntaje de calidad',
+  'Hard rules': 'Reglas duras',
+  'Clopen avoidance': 'Evitar clopen',
+  'Weekends': 'Fines de semana',
+  'Work streaks': 'Rachas de trabajo',
+  'Soft prefs': 'Preferencias suaves',
+  'Why this score': 'Por qué este puntaje',
+  'Labor Hours (estimated from shift times)': 'Horas de labor (estimado por turnos)',
+  'Total hours': 'Horas totales',
+  'Shifts': 'Turnos',
+  'Avg / week': 'Prom. / semana',
+  'Avg / manager': 'Prom. / gerente',
+  'Person': 'Persona',
+  'Hours': 'Horas',
+  'Preference Scorecard': 'Tarjeta de preferencias',
+  'Weekend off': 'Libre de fin',
+  'Target': 'Meta',
+  'Opens': 'Aperturas',
+  'Mids': 'Medios',
+  'Closes': 'Cierres',
+  'Max streak': 'Racha máx.',
+  'Weekend Off Tracking (Period)': 'Libres de fin (período)',
+  'Fairness at a glance': 'Equidad de un vistazo',
+  'Name': 'Nombre',
+  'MANAGEMENT SCHEDULE': 'HORARIO DE GERENCIA',
+  'Store #': 'Tienda #',
+  'Period': 'Período',
+  'Week Ending Saturday': 'Semana que termina el sábado',
+  'Company Holiday': 'Festivo de la compañía (EE. UU.)',
+  'VAC/PTO': 'VAC/PTO',
+  'OFF': 'LIBRE',
+  'Couldn’t read that request. Try one name at a time, or paint the calendar.': 'No pude leer ese pedido. Prueba un nombre a la vez, o pinta el calendario.',
+  'Type a request like “Casey off Thu–Fri”, or paint the calendar.': 'Escribe un pedido como “Casey libre jue–vie”, o pinta el calendario.',
+  'Couldn’t read that. Try “Casey off Thu–Fri” or paint the calendar.': 'No pude leer eso. Prueba “Casey libre jue–vie” o pinta el calendario.',
+  'Couldn’t read the date. Try 8/6 or Aug 6, or paint the calendar.': 'No pude leer la fecha. Prueba 8/6 o 6 ago, o pinta el calendario.',
+  'Which day? Try Thu–Fri or Saturday, or paint the calendar.': '¿Qué día? Prueba jue–vie o sábado, o pinta el calendario.',
+  'Name someone on this team, or paint the calendar.': 'Nombra a alguien de este equipo, o pinta el calendario.',
+  'Load a period first, then try again.': 'Carga un período primero y vuelve a intentar.',
+  'Those days are not in this period. Paint the calendar or load a period.': 'Esos días no están en este período. Pinta el calendario o carga un período.',
+  'Already applied: {confirm}': 'Ya aplicado: {confirm}',
+  'Applied: {confirm}': 'Aplicado: {confirm}',
+  'No opener': 'Sin apertura',
+  'No closer': 'Sin cierre',
+  'Must-fix rules look clean': 'Las reglas a corregir se ven bien',
+  'Must-fix rules look clean — openers, closers, and role constraints hold.': 'Las reglas a corregir se ven bien — apertura, cierre y reglas de puesto se cumplen.',
+  'on the board': 'en el tablero',
+  'must-fix rule still open': 'regla a corregir sigue abierta',
+  'must-fix rules still open': 'reglas a corregir siguen abiertas',
+  'Must-fix rules look good — check the posting board before you hang this.': 'Las reglas a corregir se ven bien — mira la revisión antes de colgar esto.',
+  'Must-fix issues remain — review before you post to the team.': 'Aún hay que corregir — revisa antes de publicar al equipo.',
+  'Must-fix rules OK; some preferences not fully met. Review before you post.': 'Reglas a corregir OK; algunas preferencias no se cumplieron del todo. Revisa antes de publicar.',
+  'Welcome to Schedule Pro': 'Bienvenido a Schedule Pro',
+  'Build fair manager schedules fully offline. Use the tabs to set up your team, lock requests, tune rules, then generate. No account required.': 'Arma horarios justos de gerentes, todo en este teléfono. Usa las pestañas para el equipo, candados, reglas y luego arma. Sin cuenta.',
+  'Setup — team & store': 'Equipo — gente y tienda',
+  'Enter SM / AM / KC names, store name & number, and store hours. Save a Team template so next period you load the roster in one tap. Load a fiscal period before generating.': 'Pon nombres de SM / AM / KC, tienda y horario. Guarda una plantilla de equipo para el siguiente período. Carga un período fiscal antes de armar.',
+  'Requests — RTO / PTO / LOA': 'Solicitudes — RTO / PTO / LOA',
+  'Lock time off and preferred shifts here. The generator treats these as hard constraints and builds around them.': 'Fija tiempo libre y turnos preferidos aquí. El armado los trata como candados y trabaja alrededor.',
+  'Rules — preferences': 'Reglas — preferencias',
+  'Tune weekend fairness, clopen avoidance, peak season, and KC close nights. Soft goals yield to hard coverage.': 'Ajusta fines de semana, evitar clopen, temporada alta y noches KC. Las metas suaves ceden a la cobertura.',
+  'Schedule — build & fairness': 'Horario — armar y equidad',
+  'Hit Build this period. A Fairness at a glance card appears under the grid so you can spot uneven WE offs or closes before posting.': 'Toca Armar este período. Debajo del tablero sale Equidad de un vistazo para ver libres de fin o cierres antes de publicar.',
+  'Step {n} of {total}': 'Paso {n} de {total}',
+  'Sunday': 'Domingo', 'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miércoles',
+  'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sábado',
+  'Sun': 'Dom', 'Mon': 'Lun', 'Tue': 'Mar', 'Wed': 'Mié', 'Thu': 'Jue', 'Fri': 'Vie', 'Sat': 'Sáb',
+  'January': 'enero', 'February': 'febrero', 'March': 'marzo', 'April': 'abril', 'May': 'mayo',
+  'June': 'junio', 'July': 'julio', 'August': 'agosto', 'September': 'septiembre',
+  'October': 'octubre', 'November': 'noviembre', 'December': 'diciembre',
+  'Target weekend days off': 'Meta de días libres de fin',
+  'Weekend (Sat+Sun) days off per person per period. Default 2 (one full weekend).': 'Días libres de sábado+domingo por persona por período. Predeterminado 2 (un fin completo).',
+  'Prefer consecutive days off': 'Preferir días libres seguidos',
+  'Avoid clopening': 'Evitar clopen',
+  'Prefer no Close / Ext. Close followed by Open the next day. On by default — a preference, not a guarantee. Coverage still wins.': 'Prefiere que no haya Cierre / Cierre ext. y Apertura al día siguiente. Encendido por defecto — preferencia, no garantía. La cobertura gana.',
+  'Fair distribution': 'Reparto justo',
+  'Max consecutive work days': 'Máximo de días seguidos',
+  'Key carrier close nights': 'Noches de cierre KC',
+  'NRF 4-5-4 is the U.S. retail fiscal calendar. It does not apply Spain or Mexico labor rules.': 'NRF 4-5-4 es el calendario fiscal minorista de EE. UU. No aplica reglas laborales de España ni México.',
+  'in this period': 'en este período',
+  'Coverage, hours, or role constraints — fix before you post.': 'Cobertura, horas o reglas de puesto — corrige antes de publicar.',
+  'Preference: close followed by open the next morning. Review before you post.': 'Preferencia: cierre y apertura a la mañana siguiente. Revisa antes de publicar.',
+  'Thin days are expected on a two-person roster with offs.': 'Días delgados son normales con dos personas y días libres.',
+  'All days open+close ✓': 'Todos los días apertura+cierre ✓',
+  'Open+close ✓': 'Apertura+cierre ✓',
+  'Fairness OK': 'Equidad OK',
+  'Fairness Review': 'Revisar equidad',
+  'Needs work': 'Hay que pulir',
+  'Quality {score} · {grade}': 'Calidad {score} · {grade}',
+  'Clopens {n}': 'Clopens {n}',
+  'No close→open pairs on this board.': 'No hay pares cierre→apertura en este tablero.',
+  'Clopen pairs are a preference to review — not a guarantee.': 'Los pares clopen son una preferencia a revisar — no una garantía.',
+  'Every day has an opener and a closer.': 'Cada día tiene apertura y cierre.',
+  'days missing open or close': 'días sin apertura o cierre',
+  '2 people + offs': '2 personas + libres',
+  'missing': 'faltan',
+  'on team': 'en el equipo',
+  'requests': 'solicitudes',
+  'Peak on': 'Temporada alta sí',
+  'Peak off': 'Temporada alta no',
+  'Load a period to start': 'Carga un período para empezar',
+  'Period loaded': 'Período cargado',
+  'Load a fiscal period': 'Carga un período fiscal',
+  'Team named': 'Equipo nombrado',
+  'Name your managers': 'Nombra a tus gerentes',
+  'Store named': 'Tienda nombrada',
+  'Optional: store name': 'Opcional: nombre de tienda',
+  'Unlimited builds (Pro)': 'Armados ilimitados (Pro)',
+  'free build': 'armado gratis',
+  'free builds': 'armados gratis',
+  'left': 'restantes',
+  'Free builds used — unlock Pro': 'Armados gratis usados — desbloquea Pro',
+  'Ready': 'Listo',
+  'Jump to fix': 'Ir a corregir',
+  'Name two managers on Setup, then Build. Requests and rules are optional.': 'Nombra dos gerentes en Equipo y luego Arma. Solicitudes y reglas son opcionales.',
+  'Load this NRF period on Setup before building.': 'Carga este período NRF en Equipo antes de armar.',
+  'Please load a period first.': 'Carga un período primero.',
+  'Please generate the schedule first before exporting.': 'Arma el horario antes de exportar.',
+  'Wk {n}': 'Sem {n}',
+  '{n} weeks': '{n} semanas',
+  'managers': 'gerentes',
+  'team hours': 'horas del equipo',
+  'period hours': 'horas del período',
+  'optional to fix': 'opcional corregir',
+  'Close panel': 'Cerrar'
+};
+
+const MSB_I18N_EN = {
+  'welcome-body': 'Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.',
+  'ask-hint': 'Runs on this device. “Casey off Thu–Fri” or “Alex off Thu 8/6”. Paint still works if this does not read it.',
+  'prefs-footer': 'These preferences guide Generate Schedule. Hard constraints (PTO/RTO/LOA, coverage) always win. Clopen-avoidance is a preference — not a guarantee. Review before you post.',
+  'holiday-note-default': 'Check holidays your store observes as paid. Matching weeks auto-mark as holiday (4-day) and show on the calendar. U.S. retail dates only — not Spain or Mexico labor holidays.',
+  'Close panel': 'Close'
+};
+
+let currentUiLang = 'en';
+
+function detectDeviceUiLang() {
+  const cands = [];
+  try {
+    if (navigator.languages && navigator.languages.length) {
+      for (let i = 0; i < navigator.languages.length; i++) cands.push(navigator.languages[i]);
+    }
+  } catch (e) {}
+  try { if (navigator.language) cands.push(navigator.language); } catch (e2) {}
+  for (let i = 0; i < cands.length; i++) {
+    const tag = String(cands[i] || '').toLowerCase().replace('_', '-');
+    if (tag === 'es' || tag.indexOf('es-') === 0) return 'es';
+  }
+  return 'en';
+}
+
+function getUiLangOverride() {
+  try {
+    const v = localStorage.getItem(MSB_LANG_KEY);
+    if (v === 'en' || v === 'es') return v;
+  } catch (e) {}
+  return null;
+}
+
+function resolveUiLang() {
+  return getUiLangOverride() || detectDeviceUiLang();
+}
+
+function msbT(en, vars) {
+  const key = en == null ? '' : String(en);
+  let out = key;
+  if (currentUiLang === 'es' && Object.prototype.hasOwnProperty.call(MSB_I18N_ES, key) && MSB_I18N_ES[key] != null) {
+    out = MSB_I18N_ES[key];
+  } else if (MSB_I18N_EN && Object.prototype.hasOwnProperty.call(MSB_I18N_EN, key) && MSB_I18N_EN[key] != null) {
+    out = MSB_I18N_EN[key];
+  }
+  if (vars && typeof vars === 'object') {
+    out = out.replace(/\{(\w+)\}/g, function (_, k) {
+      return vars[k] != null ? String(vars[k]) : '';
+    });
+  }
+  return out;
+}
+
+function applyStaticI18n(root) {
+  const scope = root || document;
+  if (!scope || !scope.querySelectorAll) return;
+  scope.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    if (!key) return;
+    if (el.getAttribute('data-i18n-html') === '1') el.innerHTML = msbT(key);
+    else el.textContent = msbT(key);
+  });
+  scope.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key) el.setAttribute('placeholder', msbT(key));
+  });
+  scope.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-title');
+    if (key) el.setAttribute('title', msbT(key));
+  });
+  scope.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-aria');
+    if (key) el.setAttribute('aria-label', msbT(key));
+  });
+}
+
+function syncLangPickers() {
+  const lang = currentUiLang === 'es' ? 'es' : 'en';
+  ['ap-lang-select', 'more-lang-select'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && el.value !== lang) el.value = lang;
+  });
+}
+
+function refreshUiLangChrome() {
+  applyStaticI18n();
+  syncLangPickers();
+  try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
+  try { if (typeof personalizeWelcome === 'function') personalizeWelcome(); } catch (e0) {}
+  try { if (typeof updateAccountChip === 'function') updateAccountChip(); } catch (e1) {}
+  try { if (typeof updateReadyChecklist === 'function') updateReadyChecklist(); } catch (e2) {}
+  try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e3) {}
+  try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e4) {}
+  try { if (typeof syncAppShell === 'function') syncAppShell(); } catch (e5) {}
+  try { if (typeof renderPreferencesUI === 'function') renderPreferencesUI(); } catch (e6) {}
+  try { if (typeof renderRoleRulesUI === 'function') renderRoleRulesUI(); } catch (e7) {}
+  try { if (typeof renderFederalHolidaysUI === 'function') renderFederalHolidaysUI(); } catch (e8) {}
+  try { if (typeof updateLicenseBadge === 'function') updateLicenseBadge(); } catch (e9) {}
+  if (lastScheduleRenderArgs && schedule && Object.keys(schedule).length) {
+    try {
+      renderSchedule(lastScheduleRenderArgs.warnings, lastScheduleRenderArgs.ROLES, lastScheduleRenderArgs.ALL_KC);
+    } catch (e10) {}
+    try {
+      if (typeof renderSummary === 'function') {
+        renderSummary(
+          lastScheduleRenderArgs.warnings,
+          lastScheduleRenderArgs.ROLES,
+          lastScheduleRenderArgs.ALL_KC,
+          window._lastGenReport || null
+        );
+      }
+    } catch (e11) {}
+    try {
+      if (typeof renderFairnessUnderSchedule === 'function') {
+        renderFairnessUnderSchedule(
+          lastScheduleRenderArgs.ROLES,
+          lastScheduleRenderArgs.ALL_KC,
+          window._lastGenReport || null
+        );
+      }
+    } catch (e12) {}
+  }
+  const tour = document.getElementById('onboarding-tour');
+  if (tour && !tour.hasAttribute('hidden') && typeof applyTourStep === 'function') {
+    try { applyTourStep(tourStepIndex); } catch (e13) {}
+  }
+}
+
+function setUiLang(lang) {
+  const next = lang === 'es' ? 'es' : 'en';
+  currentUiLang = next;
+  try { localStorage.setItem(MSB_LANG_KEY, next); } catch (e) {}
+  try { document.documentElement.lang = next; } catch (e2) {}
+  refreshUiLangChrome();
+  return next;
+}
+
+function bootUiLang() {
+  currentUiLang = resolveUiLang();
+  try { document.documentElement.lang = currentUiLang; } catch (e) {}
+  applyStaticI18n();
+  syncLangPickers();
+  try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
+}
+
+try { currentUiLang = resolveUiLang(); } catch (eLang) { currentUiLang = 'en'; }
+
+function localizeWarningMsg(msg) {
+  let s = String(msg || '');
+  s = s.replace(/:\s*No opener\b/g, ': ' + msbT('No opener'));
+  s = s.replace(/:\s*No closer\b/g, ': ' + msbT('No closer'));
+  return s;
+}
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8117,7 +8713,7 @@ function showHowItWorks() {
     c.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   switchTab('setup');
-  showToast('Name two managers on Setup, then Build. Requests and rules are optional.', 'info');
+  showToast(msbT('Name two managers on Setup, then Build. Requests and rules are optional.'), 'info');
 }
 
 function persistStoreMeta() {
@@ -8812,7 +9408,7 @@ function explainQualityScore(q, genReport, ROLES) {
         : mustFix + ' must-fix issues remain (coverage, hours, or role rules). Fix those first.'
     );
   } else {
-    tips.push('Must-fix rules look clean — openers, closers, and role constraints hold.');
+    tips.push(msbT('Must-fix rules look clean — openers, closers, and role constraints hold.'));
   }
   if ((q.parts.clopen || 0) < 20) {
     const cl = q.cl != null ? q.cl : (genReport && genReport.totalClopens) || 0;
@@ -8870,8 +9466,8 @@ function buildPostingIssues(genReport, ROLES, warnings) {
       const hole = typeof findFirstCoverageHole === 'function' ? findFirstCoverageHole() : null;
       issues.push({
         sev: 'must',
-        title: hard + ' must-fix rule' + (hard === 1 ? '' : 's') + ' still open',
-        meta: 'Coverage, hours, or role constraints — fix before you post.',
+        title: hard + ' ' + msbT('must-fix rule' + (hard === 1 ? '' : 's') + ' still open'),
+        meta: msbT('Coverage, hours, or role constraints — fix before you post.'),
         target: hole ? 'grid' : 'summary',
         role: hole && hole.role,
         dk: hole && hole.dk,
@@ -8890,8 +9486,8 @@ function buildPostingIssues(genReport, ROLES, warnings) {
       } catch (e) {}
       issues.push({
         sev: 'review',
-        title: cl + ' clopen' + (cl === 1 ? '' : 's') + ' on the board',
-        meta: 'Preference: close followed by open the next morning. Review before you post.',
+        title: cl + ' clopen' + (cl === 1 ? '' : 's') + ' ' + msbT('on the board'),
+        meta: msbT('Preference: close followed by open the next morning. Review before you post.'),
         target: 'grid',
         role: clRole,
         dk: clDk,
@@ -8923,7 +9519,7 @@ function buildPostingIssues(genReport, ROLES, warnings) {
         issues.push({
           sev: 'review',
           title: missDays + ' day' + (missDays === 1 ? '' : 's') + ' missing open or close',
-          meta: twoPersonOffsCoverageNote(ROLES) || 'Thin days are expected on a two-person roster with offs.',
+          meta: twoPersonOffsCoverageNote(ROLES) || msbT('Thin days are expected on a two-person roster with offs.'),
           target: hole ? 'grid' : 'summary',
           role: hole && hole.role,
           dk: hole && hole.dk,
@@ -8934,7 +9530,7 @@ function buildPostingIssues(genReport, ROLES, warnings) {
       issues.push({
         sev: 'note',
         title: String(u).slice(0, 120),
-        meta: 'Preference note — optional to fix.',
+        meta: msbT('Preference note — optional to fix.'),
         target: 'summary',
       });
     });
@@ -8952,12 +9548,20 @@ function buildPostingIssues(genReport, ROLES, warnings) {
       if (typeof isExpectedThinDayCoverageNote === 'function'
         && isExpectedThinDayCoverageNote(msg)
         && typeof isThinManagerRoster === 'function'
-        && isThinManagerRoster(ROLES)
-        && issues.some((i) => /missing open or close/i.test(i.title))) return;
+        && isThinManagerRoster(ROLES)) {
+        if (issues.some((i) => /missing open or close/i.test(i.title) || i.sev === 'note')) return;
+        issues.push({
+          sev: 'note',
+          title: localizeWarningMsg(String(msg).slice(0, 140)),
+          meta: msbT('Preference note — optional to fix.'),
+          target: 'grid',
+        });
+        return;
+      }
       issues.push({
         sev: w.type === 'error' ? 'must' : 'review',
-        title: String(msg).slice(0, 140),
-        meta: w.type === 'error' ? 'Must-fix' : 'Review before posting',
+        title: localizeWarningMsg(String(msg).slice(0, 140)),
+        meta: w.type === 'error' ? msbT('Must-fix') : msbT('Review before posting'),
         target: 'grid',
       });
     });
@@ -8978,24 +9582,24 @@ function renderPostingBoard(issues, q) {
   const must = issues.filter((i) => i.sev === 'must').length;
   const review = issues.filter((i) => i.sev === 'review').length;
   let badgeCls = 'ok';
-  let badgeText = 'Ready to post';
-  let blurb = 'No blocking issues. Print or export when you’re happy with the week.';
+  let badgeText = msbT('Ready to post');
+  let blurb = msbT('No blocking issues. Print or export when you’re happy with the week.');
   if (must > 0) {
     badgeCls = 'bad';
-    badgeText = 'Not ready';
-    blurb = 'Fix must-fix items before you hang this on the board.';
+    badgeText = msbT('Not ready');
+    blurb = msbT('Fix must-fix items before you hang this on the board.');
   } else if (review > 0 || (q && q.score < 85)) {
     badgeCls = 'warn';
-    badgeText = 'Review first';
-    blurb = 'Schedule is usable — glance at the notes below, then post.';
+    badgeText = msbT('Review first');
+    blurb = msbT('Schedule is usable — glance at the notes below, then post.');
   }
   if (!issues.length && q && q.score >= 85) {
-    blurb = 'Looks solid. Score ' + q.score + '/100 · ' + (q.grade || '') + '.';
+    blurb = msbT('Looks solid. Score {score}/100 · {grade}.', { score: q.score, grade: q.grade || '' });
   }
 
   let html = '<div class="posting-board no-print" id="posting-board">';
   html += '<div class="posting-board-head">';
-  html += '<div><h3>Posting check</h3><p>' + esc(blurb) + '</p></div>';
+  html += '<div><h3>' + esc(msbT('Posting check')) + '</h3><p>' + esc(blurb) + '</p></div>';
   html += '<span class="posting-badge ' + badgeCls + '">' + esc(badgeText) + '</span>';
   html += '</div>';
 
@@ -9005,16 +9609,16 @@ function renderPostingBoard(issues, q) {
     issues.forEach((iss, idx) => {
       html +=
         '<button type="button" class="posting-issue" onclick="jumpToPostingIssue(' + idx + ')">';
-      html += '<span class="sev ' + iss.sev + '">' + (iss.sev === 'must' ? 'Must' : iss.sev === 'review' ? 'Review' : 'Note') + '</span>';
+      html += '<span class="sev ' + iss.sev + '">' + (iss.sev === 'must' ? msbT('Must') : iss.sev === 'review' ? msbT('Review') : msbT('Note')) + '</span>';
       html += '<span class="issue-body"><span class="issue-title">' + esc(iss.title) + '</span>';
       if (iss.meta) html += '<div class="issue-meta">' + esc(iss.meta) + '</div>';
       html += '</span>';
-      html += '<span class="issue-go">' + (iss.role ? 'Find →' : 'View →') + '</span>';
+      html += '<span class="issue-go">' + (iss.role ? msbT('Find →') : msbT('View →')) + '</span>';
       html += '</button>';
     });
     html += '</div>';
   } else {
-    html += '<p style="margin:0;font-size:0.88rem;color:var(--ok);font-weight:600">No issues flagged — safe to print for the team.</p>';
+    html += '<p style="margin:0;font-size:0.88rem;color:var(--ok);font-weight:600">' + esc(msbT('No issues flagged — safe to print for the team.')) + '</p>';
   }
   html += '</div>';
   return html;
@@ -9081,21 +9685,21 @@ function updateReadyChecklist() {
   const canGen = canGenerateSchedule();
   const left = remainingFreeGenerates();
   const items = [
-    { ok: hasPeriod, label: hasPeriod ? 'Period loaded' : 'Load a fiscal period', go: 'setup' },
-    { ok: named, label: named ? 'Team named' : 'Name your managers', go: 'setup' },
-    { ok: !!storeName, label: storeName ? 'Store named' : 'Optional: store name', go: 'setup' },
+    { ok: hasPeriod, label: hasPeriod ? msbT('Period loaded') : msbT('Load a fiscal period'), go: 'setup' },
+    { ok: named, label: named ? msbT('Team named') : msbT('Name your managers'), go: 'setup' },
+    { ok: !!storeName, label: storeName ? msbT('Store named') : msbT('Optional: store name'), go: 'setup' },
     {
       ok: canGen,
       label: isProUnlocked()
-        ? 'Unlimited builds (Pro)'
+        ? msbT('Unlimited builds (Pro)')
         : canGen
-          ? left + ' free build' + (left === 1 ? '' : 's') + ' left'
-          : 'Free builds used — unlock Pro',
+          ? left + ' ' + (left === 1 ? msbT('free build') : msbT('free builds')) + ' ' + msbT('left')
+          : msbT('Free builds used — unlock Pro'),
       go: 'schedule',
     },
   ];
   el.innerHTML = items.map(i =>
-    `<button type="button" class="ready-item ${i.ok ? 'ok' : 'miss'}" ${i.ok ? '' : `onclick="switchTab('${i.go}')"`} title="${i.ok ? 'Ready' : 'Jump to fix'}">` +
+    `<button type="button" class="ready-item ${i.ok ? 'ok' : 'miss'}" ${i.ok ? '' : `onclick="switchTab('${i.go}')"`} title="${i.ok ? msbT('Ready') : msbT('Jump to fix')}">` +
     `<span class="ready-dot"></span>${i.label}</button>`
   ).join('');
   const btn = document.getElementById('btn-generate');
@@ -9842,7 +10446,7 @@ function formatDate(d) {
 }
 
 function formatDateFull(d) {
-  return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  return `${msbT(MONTH_NAMES[d.getMonth()])} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
 // ── State ──
@@ -10014,7 +10618,7 @@ function renderFederalHolidaysUI() {
       esc(def.name) +
       '</strong><span class="fh-date">' +
       esc(dateLabel) +
-      (inPeriod ? ' · in this period' : '') +
+      (inPeriod ? ' · ' + msbT('in this period') : '') +
       '</span></span></label>';
   });
   host.innerHTML = html;
@@ -10024,8 +10628,9 @@ function renderFederalHolidaysUI() {
     const sel = selectedFederalHolidayIds.length;
     note.textContent =
       sel === 0
-        ? 'Check holidays your store observes as paid. Matching weeks become 4-day and days highlight on the calendar.'
-        : sel + ' selected · ' + n + ' in loaded period' + (n ? ' (auto 4-day weeks)' : ' (load a period to match dates)');
+        ? msbT('holiday-note-default')
+        : sel + ' selected · ' + n + ' in loaded period' + (n ? ' (auto 4-day weeks)' : ' (load a period to match dates)')
+          + ' ' + msbT('NRF 4-5-4 is the U.S. retail fiscal calendar. It does not apply Spain or Mexico labor rules.');
   }
 }
 
@@ -14012,7 +14617,7 @@ function renderDayCardsHtml(weekDates, wIdx, names, ALL_KC) {
     const isWe = dow === 0 || dow === 6;
     let opens = 0, mids = 0, closes = 0;
     html += `<div class="mw-day">`;
-    html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${DAY_NAMES_FULL[dow]}</span><span class="mw-date">${formatDate(wd)}</span></div>`;
+    html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${msbT(DAY_NAMES_FULL[dow])}</span><span class="mw-date">${formatDate(wd)}</span></div>`;
     ALL_KC.forEach((r) => {
       const isKC = r.startsWith('kc');
       const s = schedule[r] && schedule[r][dk];
@@ -14111,7 +14716,7 @@ function renderMonthViewHtml(p, names, ALL_KC) {
   html += '<div class="month-cal-head"><div></div>';
   for (let dow = 0; dow < 7; dow++) {
     const isWe = dow === 0 || dow === 6;
-    html += `<div class="${isWe ? 'weekend' : ''}">${DAY_NAMES[dow]}</div>`;
+    html += `<div class="${isWe ? 'weekend' : ''}">${msbT(DAY_NAMES[dow])}</div>`;
   }
   html += '</div>';
   p.weeks.forEach((week, wIdx) => {
@@ -14123,7 +14728,7 @@ function renderMonthViewHtml(p, names, ALL_KC) {
       const dow = wd.getDay();
       const isWe = dow === 0 || dow === 6;
       html += `<div class="month-day-cell${isWe ? ' weekend' : ''}">`;
-      html += `<div class="md-date">${DAY_NAMES[dow]} ${formatDate(wd)}</div>`;
+      html += `<div class="md-date">${msbT(DAY_NAMES[dow])} ${formatDate(wd)}</div>`;
       ALL_KC.forEach((r) => {
         const isKC = r.startsWith('kc');
         const s = schedule[r] && schedule[r][dk];
@@ -14327,7 +14932,7 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
   });
 
   let html = '<div class="fu-head">';
-  html += '<span class="fu-title">Fairness at a glance</span>';
+  html += '<span class="fu-title">' + esc(msbT('Fairness at a glance')) + '</span>';
   html +=
     '<span class="fu-meta">WE offs ' +
     weMin +
@@ -14345,12 +14950,12 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
     ? twoPersonOffsCoverageNote(ROLES)
     : '';
   html += coverOk
-    ? '<span class="fu-cover ok">All days open+close ✓</span>'
+    ? '<span class="fu-cover ok">' + esc(msbT('All days open+close ✓')) + '</span>'
     : '<span class="fu-cover warn">' + missDays + ' day(s) missing open/close' +
       (thinCoverWhy ? ' — ' + thinCoverWhy : '') + '</span>';
   html += '</div>';
   html +=
-    '<table><thead><tr><th>Name</th><th>WE offs</th><th>Closes</th><th>Opens</th><th>Mids</th><th>Clopens</th><th></th></tr></thead><tbody>';
+    '<table><thead><tr><th>' + esc(msbT('Name')) + '</th><th>' + esc(msbT('WE offs')) + '</th><th>' + esc(msbT('Closes')) + '</th><th>' + esc(msbT('Opens')) + '</th><th>' + esc(msbT('Mids')) + '</th><th>' + esc(msbT('Clopens')) + '</th><th></th></tr></thead><tbody>';
   rows.forEach((row) => {
     html +=
       '<tr class="' +
@@ -14762,6 +15367,8 @@ function jumpToRoleOnGrid(role) {
              2-person opener/closer dump collapses to one chip line; spread closes toward target.
    v2.6.24 — One story: leftover 2-person thin coverage is Review first, not a leftover hard
              constraint next to “Must-fix rules look clean.” Score formula unchanged.
+   v2.6.25 — English + Spanish chrome on this device. Device language default, Account/More
+             override, local dictionary only. Roster names stay as typed. NRF stays U.S. retail.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -15211,12 +15818,12 @@ function renderPrintSchedule(ROLES, ALL_KC) {
 function exportSchedule() {
   if (!requirePro('Word export')) return;
   if (!currentPeriod) {
-    alert('Please load a period first.');
+    alert(msbT('Please load a period first.'));
     return;
   }
   const hasSchedule = Object.keys(schedule).some(r => Object.keys(schedule[r] || {}).length > 0);
   if (!hasSchedule) {
-    alert('Please generate the schedule first before exporting.');
+    alert(msbT('Please generate the schedule first before exporting.'));
     return;
   }
 
@@ -15241,7 +15848,7 @@ function exportSchedule() {
 
   // Title
   body += '<div style="text-align:center;margin-bottom:8px;">';
-  body += '<div style="font-size:16pt;font-weight:700;letter-spacing:0.05em;">MANAGEMENT SCHEDULE</div>';
+  body += '<div style="font-size:16pt;font-weight:700;letter-spacing:0.05em;">' + esc(msbT('MANAGEMENT SCHEDULE')) + '</div>';
   body += '<div style="font-size:11pt;margin-top:4px;">';
   const subParts = [];
   if (storeNum) subParts.push('Store #' + esc(storeNum));
@@ -15254,13 +15861,13 @@ function exportSchedule() {
 
   // Color legend
   const legendItems = [
-    ['#d1fae5', 'Open'],
-    ['#e0e7ff', 'Mid'],
-    ['#fce7f3', 'Close'],
-    ['#f3f4f6', 'OFF'],
-    ['#ffedd5', 'RTO'],
-    ['#dbeafe', 'VAC/PTO'],
-    ['#ccfbf1', 'LOA']
+    ['#d1fae5', msbT('Open')],
+    ['#e0e7ff', msbT('Mid')],
+    ['#fce7f3', msbT('Close')],
+    ['#f3f4f6', msbT('OFF')],
+    ['#ffedd5', msbT('RTO')],
+    ['#dbeafe', msbT('VAC/PTO')],
+    ['#ccfbf1', msbT('LOA')]
   ];
   body += '<div style="text-align:center;font-size:8pt;margin:4px 0 12px;">';
   legendItems.forEach(([bg, label], i) => {
@@ -15279,9 +15886,9 @@ function exportSchedule() {
     }
 
     const sat = weekDates[6];
-    const weLabel = 'Week Ending Saturday ' +
+    const weLabel = msbT('Week Ending Saturday') + ' ' +
       (sat.getMonth() + 1) + '/' + sat.getDate() + '/' + sat.getFullYear() +
-      (holidayWeeks[wIdx] ? ' — Company Holiday' : '');
+      (holidayWeeks[wIdx] ? ' — ' + msbT('Company Holiday') : '');
 
     body += '<table style="border-collapse:collapse;width:100%;table-layout:fixed;margin-bottom:14px;font-family:Arial,sans-serif;">';
 
@@ -15436,12 +16043,12 @@ function buildExcelExportHtml() {
 function exportScheduleExcel() {
   if (!requirePro('Excel export')) return;
   if (!currentPeriod) {
-    alert('Please load a period first.');
+    alert(msbT('Please load a period first.'));
     return;
   }
   const hasSchedule = Object.keys(schedule).some(r => Object.keys(schedule[r] || {}).length > 0);
   if (!hasSchedule) {
-    alert('Please generate the schedule first before exporting.');
+    alert(msbT('Please generate the schedule first before exporting.'));
     return;
   }
 
@@ -15486,10 +16093,10 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
       : unmetRaw;
     const bannerCls = !hardOk ? 'bad' : ((avoidOn && totalClopens > 0) || unmet.length ? 'warn' : 'ok');
     const bannerText = bannerCls === 'ok'
-      ? 'Must-fix rules look good — check the posting board before you hang this.'
+      ? msbT('Must-fix rules look good — check the posting board before you hang this.')
       : (bannerCls === 'bad'
-        ? 'Must-fix issues remain — review before you post to the team.'
-        : 'Must-fix rules OK; some preferences not fully met. Review before you post.');
+        ? msbT('Must-fix issues remain — review before you post to the team.')
+        : msbT('Must-fix rules OK; some preferences not fully met. Review before you post.'));
 
     const q = genReport.quality || computeQualityScore(genReport, ROLES);
     const postingIssues = buildPostingIssues(genReport, ROLES, warnings);
@@ -15503,17 +16110,17 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     html += `<div class="score-hero is-jump" id="quality-score-hero" role="button" tabindex="0" title="Tap to jump to a hole on the board" onclick="jumpToReviewChip('quality')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();jumpToReviewChip('quality');}">
       <div class="score-ring-wrap">${scoreRingSVG(q.score)}<div class="score-num">${q.score}<span class="score-label">${esc(q.grade)}</span></div></div>
       <div class="score-details">
-        <h3>Schedule Quality Score</h3>
+        <h3>${esc(msbT('Schedule Quality Score'))}</h3>
         <p>${bannerText}</p>
         <div class="score-bars">
-          ${bar('Hard rules', q.parts.hard, 40)}
-          ${bar('Clopen avoidance', q.parts.clopen, 20)}
-          ${bar('Weekends', q.parts.weekend, 20)}
-          ${bar('Work streaks', q.parts.streak, 10)}
-          ${bar('Soft prefs', q.parts.soft, 10)}
+          ${bar(msbT('Hard rules'), q.parts.hard, 40)}
+          ${bar(msbT('Clopen avoidance'), q.parts.clopen, 20)}
+          ${bar(msbT('Weekends'), q.parts.weekend, 20)}
+          ${bar(msbT('Work streaks'), q.parts.streak, 10)}
+          ${bar(msbT('Soft prefs'), q.parts.soft, 10)}
         </div>
         <div class="score-why no-print">
-          <div class="score-why-title">Why this score</div>
+          <div class="score-why-title">${esc(msbT('Why this score'))}</div>
           <ul>${explainQualityScore(q, genReport, ROLES).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
         </div>
         <div class="score-actions no-print">
@@ -15526,15 +16133,15 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     </div>`;
 
     // Labor hours
-    html += '<div class="summary-panel"><h3>Labor Hours (estimated from shift times)</h3>';
+    html += '<div class="summary-panel"><h3>' + esc(msbT('Labor Hours (estimated from shift times)')) + '</h3>';
     html += '<div class="labor-grid">';
-    html += `<div class="labor-card"><div class="l-label">Total hours</div><div class="l-val">${labor.totalHours}</div><div class="l-sub">${labor.weeks}-week period</div></div>`;
-    html += `<div class="labor-card"><div class="l-label">Shifts</div><div class="l-val">${labor.totalShifts}</div><div class="l-sub">${labor.managers} managers</div></div>`;
-    html += `<div class="labor-card"><div class="l-label">Avg / week</div><div class="l-val">${labor.avgPerWeek}</div><div class="l-sub">team hours</div></div>`;
+    html += `<div class="labor-card"><div class="l-label">${esc(msbT('Total hours'))}</div><div class="l-val">${labor.totalHours}</div><div class="l-sub">${labor.weeks}-week ${esc(msbT('Period').toLowerCase())}</div></div>`;
+    html += `<div class="labor-card"><div class="l-label">${esc(msbT('Shifts'))}</div><div class="l-val">${labor.totalShifts}</div><div class="l-sub">${labor.managers} ${esc(msbT('managers'))}</div></div>`;
+    html += `<div class="labor-card"><div class="l-label">${esc(msbT('Avg / week'))}</div><div class="l-val">${labor.avgPerWeek}</div><div class="l-sub">${esc(msbT('team hours'))}</div></div>`;
     const perMgr = labor.managers ? Math.round((labor.totalHours / labor.managers) * 10) / 10 : 0;
-    html += `<div class="labor-card"><div class="l-label">Avg / manager</div><div class="l-val">${perMgr}</div><div class="l-sub">period hours</div></div>`;
+    html += `<div class="labor-card"><div class="l-label">${esc(msbT('Avg / manager'))}</div><div class="l-val">${perMgr}</div><div class="l-sub">${esc(msbT('period hours'))}</div></div>`;
     html += '</div>';
-    html += '<table class="dist-table"><thead><tr><th>Person</th><th>Shifts</th><th>Hours</th></tr></thead><tbody>';
+    html += '<table class="dist-table"><thead><tr><th>' + esc(msbT('Person')) + '</th><th>' + esc(msbT('Shifts')) + '</th><th>' + esc(msbT('Hours')) + '</th></tr></thead><tbody>';
     Object.keys(labor.byPerson).forEach(r => {
       const p = labor.byPerson[r];
       if (p.shifts === 0) return;
@@ -15569,7 +16176,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     html += '</div>';
 
     // Per-person weekend + shift distribution
-    html += '<div class="summary-panel"><h3>Preference Scorecard</h3><table class="dist-table"><thead><tr><th>Manager</th><th>Weekend off</th><th>Target</th><th>Opens</th><th>Mids</th><th>Closes</th><th>Clopens</th><th>Max streak</th></tr></thead><tbody>';
+    html += '<div class="summary-panel"><h3>' + esc(msbT('Preference Scorecard')) + '</h3><table class="dist-table"><thead><tr><th>' + esc(msbT('Manager')) + '</th><th>' + esc(msbT('Weekend off')) + '</th><th>' + esc(msbT('Target')) + '</th><th>' + esc(msbT('Opens')) + '</th><th>' + esc(msbT('Mids')) + '</th><th>' + esc(msbT('Closes')) + '</th><th>' + esc(msbT('Clopens')) + '</th><th>' + esc(msbT('Max streak')) + '</th></tr></thead><tbody>';
     ROLES.forEach(r => {
       const t = getWeekendTargetForPerson(r);
       const we = genReport.weekendOffs[r] || 0;
@@ -15581,13 +16188,13 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
   }
 
   // Per-week breakdown
-  html += '<div class="summary-panel"><h3>Weekly Breakdown</h3><table><thead><tr><th>Manager</th>';
+  html += '<div class="summary-panel"><h3>' + esc(msbT('Weekly Breakdown')) + '</h3><table><thead><tr><th>' + esc(msbT('Manager')) + '</th>';
   for (let w = 0; w < numWeeks; w++) {
     const startDate = periodDates[w * 7];
     const endDate = periodDates[w * 7 + 6];
-    html += `<th>Wk ${w + 1}<br><span style="font-weight:400;font-size:0.65rem">${formatDate(startDate)}-${formatDate(endDate)}</span></th>`;
+    html += `<th>${esc(msbT('Wk {n}', { n: w + 1 }))}<br><span style="font-weight:400;font-size:0.65rem">${formatDate(startDate)}-${formatDate(endDate)}</span></th>`;
   }
-  html += '<th>Total</th></tr></thead><tbody>';
+  html += '<th>' + esc(msbT('Total')) + '</th></tr></thead><tbody>';
 
   ROLES.forEach(r => {
     html += `<tr><td style="text-align:left;font-weight:600">${names[r] || r.toUpperCase()}</td>`;
@@ -15597,7 +16204,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
       let work = 0, closes = 0;
       weekDks.forEach(dk => {
         const s = schedule[r][dk];
-        if (isScheduled(s)) work++;
+        if (isWork(s)) work++;
         if (isClose(s)) closes++;
       });
       totalWork += work;
@@ -15646,14 +16253,14 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
   html += '</tbody></table></div>';
 
   // Warnings
-  html += '<div class="summary-panel warnings-panel"><h3>Warnings & Notes</h3>';
+  html += '<div class="summary-panel warnings-panel"><h3>' + esc(msbT('Warnings & Notes')) + '</h3>';
   if (warnings.length === 0) {
-    html += '<p style="color:#059669;font-weight:600;font-size:0.85rem">All constraints satisfied.</p>';
+    html += '<p style="color:#059669;font-weight:600;font-size:0.85rem">' + esc(msbT('All constraints satisfied.')) + '</p>';
   } else {
     warnings.forEach(w => {
       const cls = w.type === 'error' ? 'warning-error' : (w.type === 'warn' ? 'warning-warn' : 'warning-info');
       const icon = w.type === 'error' ? '!!' : (w.type === 'warn' ? '!' : 'i');
-      html += `<div class="warning-item ${cls}"><span class="warning-icon">${icon}</span>${w.msg}</div>`;
+      html += `<div class="warning-item ${cls}"><span class="warning-icon">${icon}</span>${localizeWarningMsg(w.msg)}</div>`;
     });
   }
   html += '</div>';
@@ -16277,13 +16884,13 @@ function playPostGenStripArrival(token) {
       we.className = 'pgs-chip ' + weChip.cls;
     }
     if (fair) {
-      fair.textContent = p > 0.72 ? (st.fairOk ? 'Fairness OK' : 'Fairness Review') : 'Fairness…';
+      fair.textContent = p > 0.72 ? (st.fairOk ? msbT('Fairness OK') : msbT('Fairness Review')) : msbT('Fairness') + '…';
       fair.className = 'pgs-chip ' + (p > 0.72 ? (st.fairOk ? 'ok' : 'warn') : '');
     }
     if (quality) {
       const q = (window._lastGenReport && (window._lastGenReport.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(window._lastGenReport, st.ROLES || []) : null))) || null;
       if (q && q.score != null) {
-        quality.textContent = 'Quality ' + q.score + ' · ' + (q.grade || 'Needs work');
+        quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: q.grade || msbT('Needs work') });
         quality.className = 'pgs-chip ' + (q.score >= 85 ? 'ok' : q.score >= 55 ? 'warn' : 'bad');
       }
     }
@@ -17325,11 +17932,11 @@ function applyTourStep(idx) {
   const num = document.getElementById('tour-step-num');
   const back = document.getElementById('tour-back-btn');
   const next = document.getElementById('tour-next-btn');
-  if (title) title.textContent = step.title;
-  if (body) body.textContent = step.body;
-  if (num) num.textContent = 'Step ' + (idx + 1) + ' of ' + TOUR_STEPS.length;
+  if (title) title.textContent = msbT(step.title);
+  if (body) body.textContent = msbT(step.body);
+  if (num) num.textContent = msbT('Step {n} of {total}', { n: idx + 1, total: TOUR_STEPS.length });
   if (back) back.style.display = idx === 0 ? 'none' : '';
-  if (next) next.textContent = idx >= TOUR_STEPS.length - 1 ? 'Done' : 'Next';
+  if (next) next.textContent = idx >= TOUR_STEPS.length - 1 ? msbT('Done') : msbT('Next');
   if (root) root.removeAttribute('hidden');
   bindTourHoleListeners();
   scheduleTourLayout();
@@ -17642,8 +18249,8 @@ function updateLocalStatusPill() {
   let at = null;
   try { at = localStorage.getItem('msb_last_saved_at'); } catch (e) {}
   if (!at) {
-    el.textContent = 'Saved · local';
-    el.title = 'Schedules save on this device';
+    el.textContent = msbT('Saved') + ' · local';
+    el.title = msbT('Last local save');
     return;
   }
   let label = 'Saved · local';
@@ -17651,7 +18258,7 @@ function updateLocalStatusPill() {
     const d = new Date(at);
     if (!isNaN(d.getTime())) {
       const t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      label = 'Saved · ' + t;
+      label = msbT('Saved') + ' · ' + t;
       el.title = 'Last saved ' + d.toLocaleString() + ' (this device)';
     }
   } catch (e) {}
@@ -17689,8 +18296,8 @@ function updateOpsHome() {
   const title = document.getElementById('ops-home-title');
   if (title) {
     title.textContent = p
-      ? 'FY' + fiscalYear + ' Period ' + p.number + ' · ' + p.approxMonth
-      : 'Load a period to start';
+      ? 'FY' + fiscalYear + ' ' + msbT('Period') + ' ' + p.number + ' · ' + p.approxMonth
+      : msbT('Load a period to start');
   }
   const meta = document.getElementById('ops-home-meta');
   if (meta) {
@@ -17704,10 +18311,10 @@ function updateOpsHome() {
     const reqN = countRequestLocks();
     const peak = !!(preferences && preferences.peakSeasonHours);
     meta.innerHTML =
-      '<span class="ops-chip">' + teamN + ' on team</span>' +
+      '<span class="ops-chip">' + teamN + ' ' + msbT('on team') + '</span>' +
       '<span class="ops-chip">' + esc(hours) + '</span>' +
-      '<span class="ops-chip">' + reqN + ' requests</span>' +
-      '<span class="ops-chip">Peak ' + (peak ? 'on' : 'off') + '</span>';
+      '<span class="ops-chip">' + reqN + ' ' + msbT('requests') + '</span>' +
+      '<span class="ops-chip">' + msbT(peak ? 'Peak on' : 'Peak off') + '</span>';
   }
 }
 
@@ -17826,14 +18433,14 @@ function computeCoverageAndFairnessStats() {
 }
 
 function formatCoverageChip(st) {
-  if (!st) return { text: 'Coverage', cls: '', title: '' };
+  if (!st) return { text: msbT('Coverage'), cls: '', title: '' };
   if (st.coverOk) {
-    return { text: 'Open+close ✓', cls: 'ok', title: 'Every day has an opener and a closer.' };
+    return { text: msbT('Open+close ✓'), cls: 'ok', title: msbT('Every day has an opener and a closer.') };
   }
   const why = st.coverWhy || '';
-  const text = st.missDays + ' missing' + (why ? ' · 2 people + offs' : '');
+  const text = st.missDays + ' ' + msbT('missing') + (why ? ' · ' + msbT('2 people + offs') : '');
   const cls = st.emptyDays > 0 ? 'bad' : (st.thin ? 'warn' : 'bad');
-  return { text, cls, title: why || (st.missDays + ' days missing open or close') };
+  return { text, cls, title: why || (st.missDays + ' ' + msbT('days missing open or close')) };
 }
 
 function formatAmCloseChip(st) {
@@ -17885,10 +18492,10 @@ function updatePostGenStrip() {
   if (quality) {
     const q = (window._lastGenReport && (window._lastGenReport.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(window._lastGenReport, st.ROLES || []) : null))) || null;
     if (q && q.score != null) {
-      quality.textContent = 'Quality ' + q.score + ' · ' + (q.grade || 'Needs work');
+      quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: q.grade || msbT('Needs work') });
       quality.className = 'pgs-chip ' + (q.score >= 85 ? 'ok' : q.score >= 55 ? 'warn' : 'bad');
     } else {
-      quality.textContent = 'Quality';
+      quality.textContent = msbT('Quality');
       quality.className = 'pgs-chip';
     }
   }
@@ -17901,11 +18508,11 @@ function updatePostGenStrip() {
     else cover.removeAttribute('data-cover-why');
   }
   if (cl) {
-    cl.textContent = 'Clopens ' + st.clopens;
+    cl.textContent = msbT('Clopens {n}', { n: st.clopens });
     cl.className = 'pgs-chip ' + (st.clopens === 0 ? 'ok' : 'warn');
     cl.title = st.clopens
-      ? 'Clopen pairs are a preference to review — not a guarantee.'
-      : 'No close→open pairs on this board.';
+      ? msbT('Clopen pairs are a preference to review — not a guarantee.')
+      : msbT('No close→open pairs on this board.');
   }
   if (amc) {
     const amChip = formatAmCloseChip(st);
@@ -17920,7 +18527,7 @@ function updatePostGenStrip() {
     we.title = weChip.title;
   }
   if (fair) {
-    fair.textContent = st.fairOk ? 'Fairness OK' : 'Fairness Review';
+    fair.textContent = st.fairOk ? msbT('Fairness OK') : msbT('Fairness Review');
     fair.className = 'pgs-chip ' + (st.fairOk ? 'ok' : 'warn');
   }
   try { if (typeof syncStickyOffsets === 'function') syncStickyOffsets(); } catch (e) {}
@@ -17993,7 +18600,7 @@ function syncAppShell() {
   try { if (typeof syncMarketingHero === 'function') syncMarketingHero(); } catch (eHero) {}
   const btn = document.getElementById('btn-generate');
   if (btn && btn.getAttribute('aria-busy') !== 'true') {
-    btn.textContent = hasBoard ? 'Rebuild' : 'Build this period';
+    btn.textContent = hasBoard ? msbT('Rebuild') : msbT('Build this period');
   }
   try { if (typeof dockBuiltRebuildRow === 'function') dockBuiltRebuildRow(!!(onSched && hasBoard)); } catch (eDock) {}
   try { if (typeof syncStickyOffsets === 'function') syncStickyOffsets(); } catch (e) {}
@@ -18120,13 +18727,13 @@ function startNextPeriodSameTeam() {
    ==================================================================== */
 
 const REQUEST_PHRASE_DAY_ALIASES = {
-  sun: 0, sunday: 0,
-  mon: 1, monday: 1,
-  tue: 2, tues: 2, tuesday: 2,
-  wed: 3, wednesday: 3,
-  thu: 4, thur: 4, thurs: 4, thursday: 4,
-  fri: 5, friday: 5,
-  sat: 6, saturday: 6
+  sun: 0, sunday: 0, dom: 0, domingo: 0,
+  mon: 1, monday: 1, lun: 1, lunes: 1,
+  tue: 2, tues: 2, tuesday: 2, mar: 2, martes: 2,
+  wed: 3, wednesday: 3, mie: 3, mié: 3, miercoles: 3, miércoles: 3,
+  thu: 4, thur: 4, thurs: 4, thursday: 4, jue: 4, jueves: 4,
+  fri: 5, friday: 5, vie: 5, viernes: 5,
+  sat: 6, saturday: 6, sab: 6, sáb: 6, sabado: 6, sábado: 6
 };
 
 function rosterPeopleForPhrase() {
@@ -18168,18 +18775,18 @@ function expandDowRange(fromDow, toDow) {
 }
 
 const REQUEST_PHRASE_MONTH_ALIASES = {
-  jan: 1, january: 1,
-  feb: 2, february: 2,
-  mar: 3, march: 3,
-  apr: 4, april: 4,
-  may: 5,
-  jun: 6, june: 6,
-  jul: 7, july: 7,
-  aug: 8, august: 8,
-  sep: 9, sept: 9, september: 9,
-  oct: 10, october: 10,
-  nov: 11, november: 11,
-  dec: 12, december: 12
+  jan: 1, january: 1, ene: 1, enero: 1,
+  feb: 2, february: 2, febrero: 2,
+  mar: 3, march: 3, marzo: 3,
+  apr: 4, april: 4, abr: 4, abril: 4,
+  may: 5, mayo: 5,
+  jun: 6, june: 6, junio: 6,
+  jul: 7, july: 7, julio: 7,
+  aug: 8, august: 8, ago: 8, agosto: 8,
+  sep: 9, sept: 9, september: 9, septiembre: 9,
+  oct: 10, october: 10, octubre: 10,
+  nov: 11, november: 11, noviembre: 11,
+  dec: 12, december: 12, dic: 12, diciembre: 12
 };
 
 function daysInCalendarMonth(month, year) {
@@ -18196,7 +18803,7 @@ function daysInCalendarMonth(month, year) {
 function peelTrailingSingleDate(text) {
   const working = String(text || '');
   const numericRe = /(?:^|\s)(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2,4}))?\s*$/i;
-  const namedRe = /(?:^|\s)(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*,?\s*(\d{2,4}))?\s*$/i;
+  const namedRe = /(?:^|\s)(jan(?:uary)?|ene(?:ro)?|feb(?:r(?:uary|ero)?)?|mar(?:ch|zo)?|apr(?:il)?|abr(?:il)?|may(?:o)?|jun(?:e|io)?|jul(?:y|io)?|aug(?:ust)?|ago(?:sto)?|sep(?:t(?:iembre|ember)?)?|oct(?:ober|ubre)?|nov(?:ember|iembre)?|dec(?:ember)?|dic(?:iembre)?)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*,?\s*(\d{2,4}))?\s*$/i;
   let m = working.match(numericRe);
   let month = 0;
   let day = 0;
@@ -18239,7 +18846,7 @@ function dateKeysForCalendarDate(cal, dates) {
 }
 
 function parseRequestPhraseDays(working) {
-  const dayRe = /\b(sun(?:day)?|mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:r(?:s(?:day)?)?)?|fri(?:day)?|sat(?:urday)?)\b/gi;
+  const dayRe = /\b(sun(?:day)?|dom(?:ingo)?|mon(?:day)?|lun(?:es)?|tue(?:s(?:day)?)?|mar(?:tes)?|wed(?:nesday)?|mi[eé](?:rcoles)?|thu(?:r(?:s(?:day)?)?)?|jue(?:ves)?|fri(?:day)?|vie(?:rnes)?|sat(?:urday)?|s[aá]b(?:ado)?)\b/gi;
   const hits = [];
   let m;
   while ((m = dayRe.exec(working))) {
@@ -18305,11 +18912,67 @@ function dateKeysForDows(dows, dates) {
   return out;
 }
 
+function parseTwoPersonRequestPhrase(text, opts) {
+  const raw = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!/\s+(?:and|&|y)\s+/i.test(raw)) return null;
+  const parts = raw.split(/\s+(?:and|&|y)\s+/i);
+  if (parts.length !== 2) return null;
+  const childOpts = Object.assign({}, opts || {}, { _skipMulti: true });
+  const left = parseRequestPhrase(parts[0], childOpts);
+  const right = parseRequestPhrase(parts[1], childOpts);
+  if (left && left.ok && right && right.ok) {
+    return {
+      ok: true,
+      multi: true,
+      items: [left, right],
+      confirm: left.confirm + ' · ' + right.confirm,
+      dateKeys: (left.dateKeys || []).concat(right.dateKeys || []),
+      role: left.role,
+      name: left.name,
+      lock: left.lock
+    };
+  }
+  if (right && right.ok && (!left || !left.ok)) {
+    const people = childOpts.people || rosterPeopleForPhrase();
+    const m = matchRosterPersonForPhrase(parts[0], people);
+    if (m.status === 'ok' && m.person.id !== right.role) {
+      const item1 = Object.assign({}, right, {
+        role: m.person.id,
+        name: m.person.full,
+        first: m.person.first,
+        confirm: (m.person.first || m.person.full) + ' · ' + right.lockLabel + ' ' + right.dayLabel + ' · ' + right.dateKeys.length + (right.dateKeys.length === 1 ? ' day' : ' days')
+      });
+      return {
+        ok: true,
+        multi: true,
+        items: [item1, right],
+        confirm: item1.confirm + ' · ' + right.confirm,
+        dateKeys: (item1.dateKeys || []).concat(right.dateKeys || []),
+        role: item1.role,
+        name: item1.name,
+        lock: item1.lock
+      };
+    }
+  }
+  if (/\boff\b/i.test(parts[0]) && /\boff\b/i.test(parts[1])) {
+    return {
+      ok: false,
+      reason: 'multi-unparsed',
+      message: msbT('Couldn’t read that request. Try one name at a time, or paint the calendar.')
+    };
+  }
+  return null;
+}
+
 function parseRequestPhrase(text, opts) {
   opts = opts || {};
+  if (!opts._skipMulti) {
+    const multi = parseTwoPersonRequestPhrase(text, opts);
+    if (multi) return multi;
+  }
   const raw = String(text || '').replace(/\s+/g, ' ').trim();
   if (!raw) {
-    return { ok: false, reason: 'empty', message: 'Type a request like “Casey off Thu–Fri”, or paint the calendar.' };
+    return { ok: false, reason: 'empty', message: msbT('Type a request like “Casey off Thu–Fri”, or paint the calendar.') };
   }
   const people = opts.people || rosterPeopleForPhrase();
   const dates = opts.dates || (typeof periodDates !== 'undefined' ? periodDates : []);
@@ -18317,19 +18980,19 @@ function parseRequestPhrase(text, opts) {
 
   const action = parseRequestPhraseAction(working);
   if (!action.ok) {
-    return { ok: false, reason: 'action', message: 'Couldn’t read that. Try “Casey off Thu–Fri” or paint the calendar.' };
+    return { ok: false, reason: 'action', message: msbT('Couldn’t read that. Try “Casey off Thu–Fri” or paint the calendar.') };
   }
   working = action.working;
 
   const peeled = peelTrailingSingleDate(working);
   working = peeled.working;
   if (peeled.lookedLikeDate && !peeled.date) {
-    return { ok: false, reason: 'bad-date', message: 'Couldn’t read the date. Try 8/6 or Aug 6, or paint the calendar.' };
+    return { ok: false, reason: 'bad-date', message: msbT('Couldn’t read the date. Try 8/6 or Aug 6, or paint the calendar.') };
   }
 
   const days = parseRequestPhraseDays(working);
   if (!days.ok && !peeled.date) {
-    return { ok: false, reason: 'days', message: 'Which day? Try Thu–Fri or Saturday, or paint the calendar.' };
+    return { ok: false, reason: 'days', message: msbT('Which day? Try Thu–Fri or Saturday, or paint the calendar.') };
   }
   if (days.ok) {
     working = days.working.replace(/\b(this|next|on|for|the|is|a)\b/gi, ' ').replace(/\s+/g, ' ').trim();
@@ -18339,7 +19002,7 @@ function parseRequestPhrase(text, opts) {
 
   const matched = matchRosterPersonForPhrase(working, people);
   if (matched.status === 'missing') {
-    return { ok: false, reason: 'person', message: 'Name someone on this team, or paint the calendar.' };
+    return { ok: false, reason: 'person', message: msbT('Name someone on this team, or paint the calendar.') };
   }
   if (matched.status === 'none') {
     return { ok: false, reason: 'unknown-person', message: 'No one named “' + working + '” on this team. Paint the calendar or tap a day.' };
@@ -18348,7 +19011,7 @@ function parseRequestPhrase(text, opts) {
     return { ok: false, reason: 'ambiguous', message: 'Two people match “' + working + '”. Use a full name or paint the calendar.' };
   }
   if (!dates || !dates.length) {
-    return { ok: false, reason: 'period', message: 'Load a period first, then try again.' };
+    return { ok: false, reason: 'period', message: msbT('Load a period first, then try again.') };
   }
   let dateKeys;
   let dayLabel;
@@ -18360,7 +19023,7 @@ function parseRequestPhrase(text, opts) {
     dayLabel = days.label;
   }
   if (!dateKeys.length) {
-    return { ok: false, reason: 'no-dates', message: 'Those days are not in this period. Paint the calendar or load a period.' };
+    return { ok: false, reason: 'no-dates', message: msbT('Those days are not in this period. Paint the calendar or load a period.') };
   }
   const name = matched.person.first || matched.person.full;
   const confirm = name + ' · ' + action.label + ' ' + dayLabel + ' · ' + dateKeys.length + (dateKeys.length === 1 ? ' day' : ' days');
@@ -18392,7 +19055,7 @@ function showRequestPhraseResult(ok, message, showUndo) {
   box.classList.toggle('is-ok', !!ok);
   box.classList.toggle('is-error', !ok);
   if (undoBtn) {
-    undoBtn.textContent = 'Undo request';
+    undoBtn.textContent = msbT('Undo request');
     undoBtn.hidden = !showUndo;
   }
 }
@@ -18417,14 +19080,18 @@ function applyRequestPhraseFromBar(inputId) {
     showRequestPhraseResult(false, parsed.message, false);
     return parsed;
   }
-  if (requestPhraseAlreadyApplied(parsed)) {
-    showRequestPhraseResult(true, 'Already applied: ' + parsed.confirm, lastUndoIsRequestPhrase());
+  const items = parsed.multi && parsed.items && parsed.items.length ? parsed.items : [parsed];
+  const allApplied = items.every(function (item) { return requestPhraseAlreadyApplied(item); });
+  if (allApplied) {
+    showRequestPhraseResult(true, msbT('Already applied: {confirm}', { confirm: parsed.confirm }), lastUndoIsRequestPhrase());
     return Object.assign({}, parsed, { noop: true, alreadyApplied: true });
   }
   try { if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot('request phrase'); } catch (err) {}
-  if (!inputs[parsed.role]) inputs[parsed.role] = {};
-  parsed.dateKeys.forEach((dk) => {
-    inputs[parsed.role][dk] = parsed.lock;
+  items.forEach(function (item) {
+    if (!inputs[item.role]) inputs[item.role] = {};
+    (item.dateKeys || []).forEach((dk) => {
+      inputs[item.role][dk] = item.lock;
+    });
   });
   window._requestPhraseUndoReady = true;
   activeTab = parsed.role;
@@ -18433,7 +19100,7 @@ function applyRequestPhraseFromBar(inputId) {
   if (typeof currentAppTab !== 'undefined' && currentAppTab !== 'requests' && typeof switchTab === 'function') {
     switchTab('requests');
   }
-  showRequestPhraseResult(true, 'Applied: ' + parsed.confirm, true);
+  showRequestPhraseResult(true, msbT('Applied: {confirm}', { confirm: parsed.confirm }), true);
   try { if (typeof refreshRequestBoardHint === 'function') refreshRequestBoardHint(); } catch (eHint) {}
   return parsed;
 }
@@ -19061,6 +19728,7 @@ loadMonetizationConfig().then(() => {
 applyPriceLabels();
 // After DOM boot
 function bootUi() {
+  try { if (typeof bootUiLang === 'function') bootUiLang(); } catch (eLangBoot) {}
   try { if (typeof initDensityAndContrast === 'function') initDensityAndContrast(); } catch (e) {}
   handleLaunchQuery();
   ensureAuthOnBoot();

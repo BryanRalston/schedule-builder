@@ -4582,9 +4582,65 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 @media print {
   #post-gen-strip, #cmd-palette, #ops-home, #request-paint-toolbar,
   #schedule-diff-panel, #smart-suggestions, .view-lock-banner,
-  .local-status-pill, .btn-cmdk { display: none !important; }
+  .local-status-pill, .btn-cmdk, #backup-nudge, .cell-clopen-mark { display: none !important; }
   .day-hours { color: #333 !important; }
 }
+
+/* One-time backup nudge after first successful generate — not a modal, does not block posting */
+.backup-nudge {
+  display: none;
+  align-items: flex-start;
+  gap: 0.65rem 0.85rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 200, 87, 0.38);
+  background: linear-gradient(180deg, rgba(255, 200, 87, 0.12), var(--surface));
+  box-shadow: var(--shadow-sm);
+}
+.backup-nudge.show { display: flex; }
+.backup-nudge .bn-text { flex: 1; min-width: 180px; }
+.backup-nudge .bn-text strong { display: block; font-size: 0.9rem; margin-bottom: 0.15rem; }
+.backup-nudge .bn-text span { font-size: 0.78rem; color: var(--ink-3); line-height: 1.35; }
+.backup-nudge .bn-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+.backup-nudge .bn-actions button { font-size: 0.78rem; padding: 0.35rem 0.7rem; min-height: auto; }
+.backup-nudge .bn-dismiss {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* Clopen pairs on the editing board — same detection as clopen radar */
+.cell-clopen {
+  box-shadow: inset 0 0 0 2px rgba(255, 200, 87, 0.85) !important;
+  outline: 2px dashed rgba(255, 200, 87, 0.7);
+  outline-offset: -3px;
+}
+.week-table tbody td.cell-clopen,
+.mw-person.cell-clopen,
+.month-chip.cell-clopen { position: relative; }
+.cell-clopen-mark {
+  position: absolute;
+  left: 2px;
+  bottom: 1px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffd78a;
+  background: rgba(8, 14, 28, 0.78);
+  padding: 0 0.25rem;
+  border-radius: 3px;
+  pointer-events: none;
+  line-height: 1.25;
+  z-index: 1;
+}
+.mw-person.cell-clopen .cell-clopen-mark { left: auto; right: 0.55rem; bottom: 0.2rem; }
+.month-chip.cell-clopen .cell-clopen-mark { left: 2px; bottom: 0; font-size: 0.52rem; }
 
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -5071,6 +5127,16 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         </div>
         <span class="gen-timestamp" id="gen-timestamp"></span>
       </div>
+      <div id="backup-nudge" class="backup-nudge no-print" hidden role="status">
+        <div class="bn-text">
+          <strong>Save a backup now</strong>
+          <span>This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.</span>
+        </div>
+        <div class="bn-actions">
+          <button type="button" class="btn-secondary" id="bn-save" onclick="saveBackupFromNudge()">Save backup</button>
+          <button type="button" class="bn-dismiss" id="bn-dismiss" onclick="dismissBackupNudge()">Not now</button>
+        </div>
+      </div>
       <div class="period-print-header" id="print-header"></div>
       <div class="schedule-hours-line no-print" id="schedule-hours-line"></div>
       <div id="schedule-grid"></div>
@@ -5125,7 +5191,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.14</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.15</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -5471,6 +5537,7 @@ const MSB_GEN_COUNT_KEY = 'msb_free_generate_count';
 const MSB_SESSION_KEY = 'msb_session';
 const MSB_WORKSPACE_KEY = 'msb_workspace';
 const MSB_LOCAL_ACCOUNTS_KEY = 'msb_local_accounts';
+const MSB_BACKUP_NUDGE_KEY = 'msb_backup_nudge_done';
 let monetizationConfig = {
   priceLabel: '$19.99',
   priceNote: 'one-time · lifetime Pro unlock',
@@ -7291,7 +7358,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.14';
+const APP_VERSION = '2.6.15';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8729,6 +8796,46 @@ function buildSnapshotData() {
   };
 }
 
+function backupNudgeIsDone() {
+  try {
+    return localStorage.getItem(MSB_BACKUP_NUDGE_KEY) === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
+function hideBackupNudge() {
+  const el = document.getElementById('backup-nudge');
+  if (!el) return;
+  el.hidden = true;
+  el.classList.remove('show');
+}
+
+function markBackupNudgeDone() {
+  try { localStorage.setItem(MSB_BACKUP_NUDGE_KEY, '1'); } catch (e) {}
+  hideBackupNudge();
+}
+
+function maybeShowBackupNudge() {
+  if (backupNudgeIsDone()) {
+    hideBackupNudge();
+    return;
+  }
+  const el = document.getElementById('backup-nudge');
+  if (!el) return;
+  el.hidden = false;
+  el.classList.add('show');
+}
+
+function dismissBackupNudge() {
+  markBackupNudgeDone();
+}
+
+function saveBackupFromNudge() {
+  markBackupNudgeDone();
+  if (typeof exportBackupJSON === 'function') exportBackupJSON();
+}
+
 function exportBackupJSON() {
   if (!currentPeriod) {
     showToast('Load a period first.', 'warn');
@@ -8742,6 +8849,7 @@ function exportBackupJSON() {
   a.download = `schedule-backup_FY${fiscalYear}-P${currentPeriod.number}_${store}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
+  try { if (typeof markBackupNudgeDone === 'function') markBackupNudgeDone(); } catch (e) {}
   showToast('Backup JSON downloaded. New phone? Load that file there.', 'success');
 }
 
@@ -11999,6 +12107,7 @@ function _generateScheduleInner() {
     toastMsg += ' · review leftover clopens';
   }
   showToast(toastMsg, hasErrors ? 'warn' : 'success');
+  try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
   try {
     if (typeof computeScheduleDiff === 'function') {
       window._lastScheduleDiff = computeScheduleDiff(window._prevScheduleSnap || {}, schedule);
@@ -12945,6 +13054,7 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
   if (gridEl) {
     gridEl.innerHTML = html;
     try { if (typeof setupCellPointerHandlers === 'function') setupCellPointerHandlers(); } catch (e) {}
+    try { if (typeof applyClopenMarksOnBoard === 'function') applyClopenMarksOnBoard(ROLES); } catch (e) {}
     if (window._scheduleEnterMotion) {
       gridEl.classList.remove('schedule-grid-enter');
       void gridEl.offsetWidth;
@@ -13119,6 +13229,45 @@ function isCellLocked(role, dk) {
 }
 
 /** List every close → next-day open (clopen) for managers, with fix options. */
+const CLOPEN_CELL_TITLE = 'Clopen pair — preference to review before you post';
+
+/** Mark close→open pair cells on the editing board using findClopens (same radar detection). */
+function applyClopenMarksOnBoard(ROLES) {
+  const grid = document.getElementById('schedule-grid');
+  if (!grid) return;
+  grid.querySelectorAll('.cell-clopen-mark').forEach((el) => el.remove());
+  grid.querySelectorAll('.cell-clopen').forEach((el) => {
+    el.classList.remove('cell-clopen');
+    el.removeAttribute('data-clopen');
+    const t = el.getAttribute('title') || '';
+    if (t === CLOPEN_CELL_TITLE) el.removeAttribute('title');
+    else if (t.indexOf(CLOPEN_CELL_TITLE) !== -1) {
+      el.setAttribute('title', t.replace(' · ' + CLOPEN_CELL_TITLE, '').replace(CLOPEN_CELL_TITLE, '').trim());
+    }
+  });
+  if (!schedule || !ROLES || !ROLES.length) return;
+  const list = typeof findClopens === 'function' ? findClopens(ROLES) : [];
+  list.forEach((c) => {
+    [c.closeDk, c.openDk].forEach((dk) => {
+      const nodes = grid.querySelectorAll('[data-role="' + c.role + '"][data-dk="' + dk + '"]');
+      nodes.forEach((el) => {
+        el.classList.add('cell-clopen');
+        el.setAttribute('data-clopen', '1');
+        const prev = el.getAttribute('title') || '';
+        if (prev.indexOf(CLOPEN_CELL_TITLE) === -1) {
+          el.setAttribute('title', prev ? prev + ' · ' + CLOPEN_CELL_TITLE : CLOPEN_CELL_TITLE);
+        }
+        if (!el.querySelector('.cell-clopen-mark')) {
+          const mark = document.createElement('span');
+          mark.className = 'cell-clopen-mark no-print';
+          mark.textContent = 'Clopen';
+          el.appendChild(mark);
+        }
+      });
+    });
+  });
+}
+
 function findClopens(ROLES) {
   if (!schedule || !periodDates || !periodDates.length) return [];
   const names = getManagerNames();
@@ -14038,6 +14187,7 @@ function clearSchedule() {
   updateReadyChecklist();
   try { if (typeof closeReviewSheet === 'function') closeReviewSheet(); } catch (e) {}
   try { if (typeof syncAppShell === 'function') syncAppShell(); } catch (e) {}
+  try { if (typeof hideBackupNudge === 'function') hideBackupNudge(); } catch (e) {}
   showToast('Generated schedule cleared.', 'info');
 }
 

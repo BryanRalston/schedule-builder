@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Manager Schedule Builder Pro — preference-driven retail scheduling for store managers. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Works offline. Always review before you post.">
+<meta name="description" content="Manager Schedule Builder Pro — preference-driven retail scheduling for store managers. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Names, time off, and schedules stay on this device — nothing is uploaded. No account. Always review before you post.">
 <meta name="theme-color" content="#070b14">
 <meta name="application-name" content="Schedule Pro">
 <meta name="mobile-web-app-capable" content="yes">
@@ -3155,6 +3155,19 @@ input[type="radio"] { accent-color: var(--gold); }
 .welcome-card.compact .welcome-steps { display: none; }
 .welcome-card.compact .feature-pills { display: none; }
 .welcome-card.compact p { margin-bottom: 0.65rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.welcome-privacy {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.8);
+  margin: 0 0 0.7rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.welcome-card.compact .welcome-privacy {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  margin-bottom: 0.7rem;
+}
 .welcome-card h2 { font-size: 1.05rem; }
 
 /* Generate bar inside schedule tab — less boxy */
@@ -4607,8 +4620,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <h1 id="auth-title">Schedule Pro</h1>
     </div>
     <p class="auth-subtitle">Workforce scheduling for retail operations</p>
-    <div id="google-btn-host" class="google-btn-host" aria-hidden="true"></div>
-    <div class="auth-actions">
+    <div id="google-btn-host" class="google-btn-host" hidden aria-hidden="true"></div>
+    <div class="auth-actions" hidden>
       <button type="button" class="auth-btn" id="auth-google-btn" onclick="startProviderSignIn('google')">
         <span class="auth-provider-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.9-.1-1.2H12z"/><path fill="#4285F4" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-2.4 0-4.4-1.6-5.1-3.8l-3.4 2.6C5.1 19.1 8.3 20.7 12 20.7c3.5 0 6.4-1.2 8.1-3.2 2-2.2 2.5-5.3 2.5-7.3 0-.5 0-.9-.1-1.2H12z" opacity=".01"/><path fill="#FBBC05" d="M6.9 14.1c-.2-.7-.4-1.4-.4-2.1s.1-1.4.4-2.1L3.5 7.3C2.7 8.6 2.3 10 2.3 11.5s.4 2.9 1.2 4.2l3.4-1.6z"/><path fill="#34A853" d="M12 20.7c3.2 0 5.9-1.1 7.9-2.9l-3.4-2.6c-.9.6-2.1 1.1-3.5 1.1-2.7 0-5-1.8-5.8-4.3L3.8 14c1.4 2.8 4.3 4.7 8.2 4.7z"/><path fill="#4285F4" d="M21.5 11.2c0-.5 0-.9-.1-1.2H12v3.9h5.5c-.3 1.3-1.1 2.3-2.1 3l3.4 2.6c2-1.8 3.2-4.5 3.2-8.3z"/></svg>
@@ -4741,6 +4754,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="welcome-card no-print compact" id="welcome-card">
     <h2 id="welcome-title">Build the period. Post with confidence.</h2>
     <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
+    <p id="welcome-privacy" class="welcome-privacy">Names, time off, and the board stay on this phone. Nothing is uploaded. No account.</p>
     <div class="welcome-actions">
       <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
       <div class="welcome-secondary">
@@ -5111,7 +5125,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.14</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.14</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -5139,29 +5153,31 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title">
   <div class="account-panel-card">
     <h3 id="account-panel-title">This device</h3>
-    <p class="ap-sub">Roster and schedules stay on this device</p>
+    <p class="ap-sub">Names, time off, and the board stay on this phone. Nothing is uploaded. No account.</p>
     <div hidden>
       <span id="ap-org"></span>
       <span id="ap-name"></span>
       <span id="ap-email"></span>
+      <span id="ap-method">This device</span>
     </div>
     <div class="ap-rows">
       <div class="ap-row"><span>Store</span><span id="ap-store">This device</span></div>
-      <div class="ap-row ap-secondary"><span>Sign-in</span><span id="ap-method">—</span></div>
       <div class="ap-row"><span>Plan</span><span id="ap-plan">Free</span></div>
     </div>
     <div class="ap-actions">
-      <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" style="display:none">Sign in / switch account</button>
+      <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()">Activate team license</button>
       <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center">Manage billing</a>
       <button type="button" class="ap-btn-secondary" onclick="closeAccountPanel()">Close</button>
     </div>
-    <label class="ap-signout-opts">
-      <input type="checkbox" id="ap-wipe-schedules" />
-      <span>Also clear schedules &amp; roster data on this device when signing out</span>
-    </label>
-    <div class="ap-actions">
-      <button type="button" class="ap-btn-danger" onclick="signOutSession()">Sign out</button>
+    <div id="ap-leftover-session" hidden>
+      <label class="ap-signout-opts">
+        <input type="checkbox" id="ap-wipe-schedules" />
+        <span>Also clear schedules &amp; roster data on this device when signing out</span>
+      </label>
+      <div class="ap-actions">
+        <button type="button" class="ap-btn-danger" onclick="signOutSession()">Sign out</button>
+      </div>
     </div>
   </div>
 </div>
@@ -6368,45 +6384,23 @@ async function signInWithMicrosoftOAuth() {
 }
 
 function updateAuthProviderButtons() {
-  const gLabel = document.getElementById('auth-google-label');
-  const mLabel = document.getElementById('auth-microsoft-label');
-  if (gLabel) {
-    gLabel.textContent = hasGoogleOAuth() ? 'Continue with Google' : 'Connect Google (preview)';
-  }
-  if (mLabel) {
-    mLabel.textContent = hasMicrosoftOAuth()
-      ? 'Continue with Microsoft'
-      : 'Connect Microsoft (preview)';
+  const actions = document.querySelector('#auth-shell .auth-actions');
+  if (actions) actions.setAttribute('hidden', '');
+  const host = document.getElementById('google-btn-host');
+  if (host) {
+    host.setAttribute('hidden', '');
+    host.setAttribute('aria-hidden', 'true');
+    host.innerHTML = '';
   }
   const gBtn = document.getElementById('auth-google-btn');
   const mBtn = document.getElementById('auth-microsoft-btn');
-  if (gBtn) {
-    gBtn.title = hasGoogleOAuth()
-      ? 'Sign in with Google OAuth'
-      : 'Device workspace setup (Google OAuth not configured)';
-  }
-  if (mBtn) {
-    mBtn.title = hasMicrosoftOAuth()
-      ? 'Sign in with Microsoft'
-      : 'Device workspace setup (Microsoft OAuth not configured)';
-  }
-  setupGoogleOneTapHost();
+  if (gBtn) gBtn.setAttribute('hidden', '');
+  if (mBtn) mBtn.setAttribute('hidden', '');
 }
 
 function updateAuthSupportNote() {
   const el = document.getElementById('auth-sso-note');
-  if (!el) return;
-  const g = hasGoogleOAuth();
-  const m = hasMicrosoftOAuth();
-  if (g && m) {
-    el.textContent = 'SSO ready · Google & Microsoft OAuth';
-  } else if (g) {
-    el.textContent = 'SSO · Google OAuth on · Microsoft preview';
-  } else if (m) {
-    el.textContent = 'SSO · Microsoft OAuth on · Google preview';
-  } else {
-    el.textContent = 'SSO preview mode · set client IDs in monetization.json';
-  }
+  if (el) el.textContent = 'Names, time off, and the board stay on this device. Nothing is uploaded.';
   updateAuthProviderButtons();
 }
 
@@ -6502,14 +6496,16 @@ function openAccountPanel() {
   set('ap-store', id.label || 'This device');
   set('ap-org', id.label || 'This device');
   set('ap-name', id.label || 'This device');
-  set('ap-email', s && s.email ? s.email : '—');
-  set('ap-method', formatSignInRow(s));
+  set('ap-email', '—');
+  set('ap-method', 'This device');
   set('ap-plan', isProUnlocked() ? 'Pro' : 'Free');
   const signInBtn = document.getElementById('ap-signin-btn');
   if (signInBtn) {
-    // Offer sign-in when offline or unsigned — never required
-    signInBtn.style.display = !s || s.method === 'offline' ? '' : 'none';
+    signInBtn.hidden = true;
+    signInBtn.style.display = 'none';
   }
+  const leftover = document.getElementById('ap-leftover-session');
+  if (leftover) leftover.hidden = !(s && s.method && s.method !== 'offline');
   const wipe = document.getElementById('ap-wipe-schedules');
   if (wipe) wipe.checked = false;
   const modal = document.getElementById('account-modal');
@@ -6594,61 +6590,33 @@ function personalizeWelcome() {
   else title.textContent = 'Build the period. Post with confidence.';
 }
 
-function ensureAuthOnBoot() {
-  updateAuthSupportNote();
-  hideAuthShell(); // never trap closed testers / first launch
-  let s = getSession();
-  // Silent offline session so Play testers land in the app with zero clicks
-  if (!s) {
-    createSessionFromFields({
-      method: 'offline',
-      email: '',
-      name: 'Device user',
-      orgName: 'This device'
-    });
-    personalizeWelcome();
-    updateAccountChip();
-    return;
-  }
-  if (s.method === 'offline') {
-    personalizeWelcome();
-    updateAccountChip();
-    return;
-  }
-  // Signed-in accounts: integrity check async; fall back offline if broken (still not blocking)
-  validateSessionIntegrity(s).then((ok) => {
-    if (!ok) {
-      clearSession();
-      createSessionFromFields({
-        method: 'offline',
-        email: '',
-        name: 'Device user',
-        orgName: 'This device'
-      });
-      personalizeWelcome();
-      updateAccountChip();
-      if (typeof showToast === 'function') {
-        showToast('Signed-in session expired — continuing offline. Use Account → Sign in anytime.', 'info');
-      }
-      return;
-    }
-    saveSession(s);
-    personalizeWelcome();
-    updateAccountChip();
-  }).catch(() => {
-    saveSession(s);
-    personalizeWelcome();
-    updateAccountChip();
+function forceOfflineSession() {
+  const s = getSession();
+  if (s && s.method === 'offline') return s;
+  createSessionFromFields({
+    method: 'offline',
+    email: '',
+    name: 'Device user',
+    orgName: 'This device'
   });
+  return getSession();
+}
+
+function ensureAuthOnBoot() {
+  hideAuthShell(); // never trap closed testers / first launch
+  // Leftover Google / org preview is not whose store this is — drop it, keep the roster.
+  forceOfflineSession();
+  updateAuthSupportNote();
   personalizeWelcome();
   updateAccountChip();
 }
 
-/** Optional sign-in from Account — does not clear schedules. */
+/** Sign-in preview is stripped. Keep the hook so leftover Account clicks stay offline. */
 function openSignInFromApp() {
   closeAccountPanel();
-  showAuthShell();
-  updateAuthSupportNote();
+  hideAuthShell();
+  forceOfflineSession();
+  updateAccountChip();
 }
 
 function validLicenseKey(k) {

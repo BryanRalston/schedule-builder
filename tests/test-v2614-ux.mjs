@@ -147,10 +147,12 @@ async function main() {
   } else fail('launch-tab-fns', 'missing launch-tab helpers or boot call');
 
   if (/id="ap-store"/.test(index)
-    && /Roster and schedules stay on this device/.test(index)
-    && /function formatSignInRow\(/.test(index)
+    && /Names, time off, and the board stay on this phone/.test(index)
+    && /id="welcome-privacy"/.test(index)
+    && /function forceOfflineSession\(/.test(index)
     && /never seed it from Google/.test(index)
-    && !/Workspace session on this device/.test(index)) {
+    && !/Workspace session on this device/.test(index)
+    && /auth-actions" hidden/.test(index)) {
     pass('account-store-identity-markup');
   } else fail('account-store-identity-markup', 'Account still leads with workspace/Google');
 
@@ -171,6 +173,13 @@ async function main() {
 
   if (!/TJX|Marshalls|HomeGoods|Winners/i.test(index)) pass('no-employer-names');
   else fail('no-employer-names', 'employer name leaked into copy');
+
+  const buy = read('buy.html');
+  if (/Names, time off, and the board stay on this phone/.test(buy)
+    && /Nothing is uploaded/.test(buy)
+    && /no cloud roster/i.test(buy)) {
+    pass('buy-privacy-pitch');
+  } else fail('buy-privacy-pitch', 'buy.html missing floor-manager privacy copy');
 
   const chromium = await loadChromium();
   const { server, base } = await startStaticServer();
@@ -210,11 +219,15 @@ async function main() {
         sampleSecondary: !!(sample && sample.classList.contains('welcome-secondary-btn')),
         sampleOnclick: sample ? sample.getAttribute('onclick') : '',
         setupActive: !!(document.getElementById('tab-setup') || {}).classList?.contains('active'),
+        privacy: ((document.getElementById('welcome-privacy') || {}).textContent || ''),
       };
     });
     if (firstOpen.welcome && firstOpen.tab === 'setup' && firstOpen.setupActive) {
       pass('first-run-lands-setup');
     } else fail('first-run-lands-setup', JSON.stringify(firstOpen));
+    if (/Nothing is uploaded/.test(firstOpen.privacy) && /No account/.test(firstOpen.privacy)) {
+      pass('welcome-privacy-pitch');
+    } else fail('welcome-privacy-pitch', firstOpen.privacy);
     if (firstOpen.startPrimary && firstOpen.sampleSecondary
       && firstOpen.startH > firstOpen.sampleH
       && firstOpen.startFs > firstOpen.sampleFs
@@ -320,37 +333,48 @@ async function main() {
       const modal = document.getElementById('account-modal');
       const title = (document.getElementById('account-panel-title') || {}).textContent || '';
       const store = (document.getElementById('ap-store') || {}).textContent || '';
-      const method = (document.getElementById('ap-method') || {}).textContent || '';
       const chip = (document.getElementById('account-chip-name') || {}).textContent || '';
-      const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : null;
-      const visibleRows = [...document.querySelectorAll('#account-modal .ap-row')].map((row) => ({
+      const sub = ((modal && modal.querySelector('.ap-sub')) || {}).textContent || '';
+      const leftover = document.getElementById('ap-leftover-session');
+      const signIn = document.getElementById('ap-signin-btn');
+      const visibleText = modal ? modal.innerText : '';
+      const visibleRows = [...document.querySelectorAll('#account-modal .ap-rows .ap-row')].map((row) => ({
         label: (row.querySelector('span:first-child') || {}).textContent || '',
         value: (row.querySelector('span:last-child') || {}).textContent || '',
       }));
+      let session = null;
+      try { session = JSON.parse(localStorage.getItem('msb_session') || 'null'); } catch (e) {}
       return {
         title,
         store,
-        method,
         chip,
-        id,
+        sub,
         modalOpen: !!(modal && !modal.hasAttribute('hidden')),
         visibleRows,
-        wipeLabel: ((document.querySelector('.ap-signout-opts') || {}).innerText || ''),
+        visibleText,
+        leftoverHidden: !leftover || leftover.hasAttribute('hidden'),
+        signInHidden: !signIn || signIn.hidden || signIn.style.display === 'none',
+        sessionMethod: session && session.method,
+        googleBtnHidden: !!(document.getElementById('auth-google-btn') || {}).hidden
+          || !!(document.querySelector('#auth-shell .auth-actions') || {}).hidden,
       };
     });
-    const googleAsOwner = /Alex Work|Work Google Org/i.test(identity.title + identity.store + identity.chip);
+    const googleAsOwner = /Alex Work|Work Google Org|alex\.work@example\.com/i.test(
+      identity.title + identity.store + identity.chip + identity.visibleText
+    );
     if (identity.modalOpen && /Riverside/.test(identity.title) && /214/.test(identity.store)
-      && /Riverside/.test(identity.chip) && !googleAsOwner
-      && /Google/i.test(identity.method) && /alex\.work@example\.com/i.test(identity.method)) {
+      && /Riverside/.test(identity.chip) && !googleAsOwner && identity.sessionMethod === 'offline') {
       pass('account-leads-with-store', identity.title);
     } else fail('account-leads-with-store', JSON.stringify(identity));
     if (identity.visibleRows.some((r) => /Store/i.test(r.label))
-      && !identity.visibleRows.some((r) => /Organization|Name|Email/i.test(r.label) && /Alex Work|Work Google/i.test(r.value))) {
-      pass('account-google-is-signin-row');
-    } else fail('account-google-is-signin-row', JSON.stringify(identity.visibleRows));
-    if (/clear schedules/i.test(identity.wipeLabel) && /signing out/i.test(identity.wipeLabel)) {
-      pass('signout-clear-stays-optional');
-    } else fail('signout-clear-stays-optional', identity.wipeLabel);
+      && !identity.visibleRows.some((r) => /Sign-in|Organization|Name|Email/i.test(r.label))
+      && identity.leftoverHidden && identity.signInHidden && !googleAsOwner) {
+      pass('google-signin-stripped');
+    } else fail('google-signin-stripped', JSON.stringify(identity));
+    if (/Nothing is uploaded/.test(identity.sub) && /No account/.test(identity.sub)
+      && /this phone/.test(identity.sub)) {
+      pass('account-privacy-pitch');
+    } else fail('account-privacy-pitch', identity.sub);
 
     await page.evaluate(() => {
       const sn = document.getElementById('store-name');

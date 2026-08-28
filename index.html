@@ -14413,6 +14413,10 @@ function _generateScheduleInner(opts) {
   if (typeof confineNamedKcToReservedCloseNights === 'function') {
     confineNamedKcToReservedCloseNights(schedule, allDks, isKcCloseNight, isInputLocked);
   }
+  ensureHardDailyCoverage();
+  if (typeof confineNamedKcToReservedCloseNights === 'function') {
+    confineNamedKcToReservedCloseNights(schedule, allDks, isKcCloseNight, isInputLocked);
+  }
 
   const enforceFiveDayThin = () => {
     if (!thinRoster) return;

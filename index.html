@@ -7911,7 +7911,7 @@ function renderPreferencesUI() {
       <label class="pref-label">${esc(typeof getRoleTitle === 'function' ? getRoleTitle('am') : 'Assistant Manager')} closes / week
         <input type="number" id="pref-am-closes" min="0" max="7" placeholder="auto" value="${p.amClosesPerWeek == null || p.amClosesPerWeek === '' ? '' : p.amClosesPerWeek}" onchange="readPreferencesFromUI()">
       </label>
-      <div class="pref-desc">Per named AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — on a 3+ AM bench, SM and AMs share manager-close nights evenly. One named AM is still not three. Set a number to lock a weekly target. Coverage still wins if totals don’t match nights available.</div>
+      <div class="pref-desc">Per named AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — on a 3+ AM bench, SM and AMs share manager-close nights evenly (1 AM is not 3). Set a number to lock a weekly target. Coverage still wins if totals don’t match nights available.</div>
     </div>
     <div class="pref-card">
       <label class="toggle-switch">

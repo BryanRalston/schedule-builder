@@ -6921,7 +6921,7 @@ function openAccountPanel() {
   set('ap-name', id.label || 'This device');
   set('ap-email', '—');
   set('ap-method', 'This device');
-  set('ap-plan', isProUnlocked() ? 'Pro' : 'Free');
+  set('ap-plan', isProUnlocked() ? msbT('Pro') : msbT('Free'));
   const signInBtn = document.getElementById('ap-signin-btn');
   if (signInBtn) {
     signInBtn.hidden = true;
@@ -18249,8 +18249,8 @@ function updateLocalStatusPill() {
   let at = null;
   try { at = localStorage.getItem('msb_last_saved_at'); } catch (e) {}
   if (!at) {
-    el.textContent = 'Saved · local';
-    el.title = 'Schedules save on this device';
+    el.textContent = msbT('Saved') + ' · local';
+    el.title = msbT('Last local save');
     return;
   }
   let label = 'Saved · local';
@@ -18258,7 +18258,7 @@ function updateLocalStatusPill() {
     const d = new Date(at);
     if (!isNaN(d.getTime())) {
       const t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      label = 'Saved · ' + t;
+      label = msbT('Saved') + ' · ' + t;
       el.title = 'Last saved ' + d.toLocaleString() + ' (this device)';
     }
   } catch (e) {}

@@ -5604,7 +5604,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.32</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.33</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -8100,7 +8100,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.32';
+const APP_VERSION = '2.6.33';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -8825,6 +8825,8 @@ function bootUiLang() {
   syncLangPickers();
   try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
   try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEase) {}
+  // Static i18n resets review chips to label-only — paint numbers from the board.
+  try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (eStrip) {}
 }
 
 try { currentUiLang = resolveUiLang(); } catch (eLang) { currentUiLang = 'en'; }
@@ -16118,7 +16120,10 @@ function revalidateAfterManualEdit(ROLES, ALL_KC) {
     type: v.severity === 'error' ? 'error' : v.severity === 'warning' ? 'warn' : 'info',
     msg: v.detail,
   })), ROLES);
-  if (window._lastGenReport) {
+  // Always rebuild from the live board so restore / cell edit can paint
+  // Quality · Coverage · WE numbers. Does not generate or consume a free build.
+  if (typeof buildGenerationReport === 'function') {
+    ROLES.forEach((r) => { if (!schedule[r]) schedule[r] = {}; });
     window._lastGenReport = buildGenerationReport(
       schedule,
       allDks,
@@ -16267,6 +16272,11 @@ function jumpToRoleOnGrid(role) {
              no named team stays clean (2.6.29). Quality does not ding
              SM for fewer weekend offs when that pref is on. Close-even
              2.6.30 and icon 2.6.31 stay. SW cache 2.6.32.
+   v2.6.33 — After reload, recompute review chips from the restored board
+             (Quality score, Coverage, WE offs, clopens). No Rebuild tap,
+             no free generate. First visit with no named team stays clean.
+             Close-even, KC-C, SM fewer-WE skip, and Play/TWA icons stay.
+             SW cache 2.6.33.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -17390,12 +17400,16 @@ function loadFromStorage() {
   buildInputCalendar(activeTab);
 
   if (Object.keys(schedule).length > 0 && Object.keys(schedule.sm || {}).length > 0) {
-    const ROLES = getRoles();
-    const ALL_KC = getAllWithKC();
     setScheduleResultsVisible(true);
-    renderSchedule([], ROLES, ALL_KC);
-    renderSummary([], ROLES, ALL_KC);
-    renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
+    if (typeof refreshReviewFromBoard === 'function') {
+      refreshReviewFromBoard();
+    } else {
+      const ROLES = getRoles();
+      const ALL_KC = getAllWithKC();
+      renderSchedule([], ROLES, ALL_KC);
+      renderSummary([], ROLES, ALL_KC, window._lastGenReport || null);
+      renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
+    }
     switchTab('schedule');
   }
 
@@ -18322,12 +18336,16 @@ function loadSavedSchedule(key) {
   buildInputCalendar(activeTab);
 
   if (Object.keys(schedule).length > 0 && Object.keys(schedule.sm || {}).length > 0) {
-    const ROLES = getRoles();
-    const ALL_KC = getAllWithKC();
     setScheduleResultsVisible(true);
-    renderSchedule([], ROLES, ALL_KC);
-    renderSummary([], ROLES, ALL_KC, window._lastGenReport || null);
-    renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
+    if (typeof refreshReviewFromBoard === 'function') {
+      refreshReviewFromBoard();
+    } else {
+      const ROLES = getRoles();
+      const ALL_KC = getAllWithKC();
+      renderSchedule([], ROLES, ALL_KC);
+      renderSummary([], ROLES, ALL_KC, window._lastGenReport || null);
+      renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
+    }
     switchTab('schedule');
   }
 
@@ -19444,6 +19462,28 @@ function formatWeOffChip(st) {
     })
     : msbT('Weekend days off this period: {range}', { range: range });
   return { text, cls, title };
+}
+
+/** Recompute Quality / Coverage / WE chips from the live board. No Build, no free generate. */
+function refreshReviewFromBoard() {
+  try {
+    if (!periodDates || !periodDates.length || !schedule) return false;
+    const hasCells = Object.keys(schedule).some((r) => schedule[r] && Object.keys(schedule[r]).length > 0);
+    if (!hasCells) return false;
+    const ROLES = typeof getRoles === 'function' ? getRoles() : [];
+    const ALL_KC = typeof getAllWithKC === 'function' ? getAllWithKC() : ROLES;
+    if (!ROLES.length) return false;
+    if (typeof revalidateAfterManualEdit === 'function') {
+      revalidateAfterManualEdit(ROLES, ALL_KC);
+    }
+    if (typeof renderFairnessUnderSchedule === 'function') {
+      renderFairnessUnderSchedule(ROLES, ALL_KC, window._lastGenReport || null);
+    }
+    if (typeof updatePostGenStrip === 'function') updatePostGenStrip();
+    return !!(window._lastGenReport && window._lastGenReport.quality);
+  } catch (e) {
+    return false;
+  }
 }
 
 function updatePostGenStrip() {
@@ -20705,6 +20745,7 @@ applyPriceLabels();
 // After DOM boot
 function bootUi() {
   try { if (typeof bootUiLang === 'function') bootUiLang(); } catch (eLangBoot) {}
+  try { if (typeof refreshReviewFromBoard === 'function') refreshReviewFromBoard(); } catch (eRevBoot) {}
   try { if (typeof initDensityAndContrast === 'function') initDensityAndContrast(); } catch (e) {}
   handleLaunchQuery();
   ensureAuthOnBoot();

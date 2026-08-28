@@ -321,7 +321,7 @@ async function main() {
           const weekHeads = headers.filter((t) => /^Semana \d/.test(t) || /^Week \d/.test(t));
           const dateSpans = [...document.querySelectorAll('.week-dates')]
             .map((el) => (el.textContent || '').trim());
-          const offCells = [...document.querySelectorAll('#schedule-grid td.shift-editable')]
+          const offCells = [...document.querySelectorAll('#schedule-grid td.shift-editable .cell-shift-txt')]
             .map((el) => (el.textContent || '').trim())
             .filter((t) => /^(OFF|Libre|LIBRE)$/i.test(t));
           const sheet = document.getElementById('review-sheet');
@@ -421,6 +421,16 @@ async function main() {
       custom: built.custom, am: built.amDef,
     }));
 
+    try {
+      const shotDir = '/opt/cursor/artifacts/screenshots';
+      mkdirSync(shotDir, { recursive: true });
+      const shotPath = join(shotDir, 'v2627-es-warnings-toast.png');
+      await esPage.screenshot({ path: shotPath, fullPage: false });
+      pass('screenshot', shotPath);
+    } catch (shotErr) {
+      fail('screenshot', shotErr.message || shotErr);
+    }
+
     const afterSwitch = await esPage.evaluate(() => {
       const cells = document.querySelectorAll('#schedule-grid td.shift-editable').length;
       const before = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
@@ -445,16 +455,6 @@ async function main() {
       && afterSwitch.custom === 'Floor Boss') {
       pass('lang-switch-keeps-board', afterSwitch.afterCells + ' cells');
     } else fail('lang-switch-keeps-board', JSON.stringify(afterSwitch));
-
-    try {
-      const shotDir = '/opt/cursor/artifacts/screenshots';
-      mkdirSync(shotDir, { recursive: true });
-      const shotPath = join(shotDir, 'v2627-es-warnings-toast.png');
-      await esPage.screenshot({ path: shotPath, fullPage: false });
-      pass('screenshot', shotPath);
-    } catch (shotErr) {
-      fail('screenshot', shotErr.message || shotErr);
-    }
 
     await esPage.close();
   } catch (e) {

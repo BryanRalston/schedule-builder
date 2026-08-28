@@ -15049,7 +15049,7 @@ function renderDayCardsHtml(weekDates, wIdx, names, ALL_KC) {
       if (isOpen(s)) opens++;
       if (isMid(s)) mids++;
       if (isClose(s) || s === 'kc-close') closes++;
-      const label = s ? getShiftShortLabel(s) : (isKC ? '—' : 'Off');
+      const label = s ? getShiftShortLabel(s) : (isKC ? '—' : msbT('Off'));
       const cls = s ? getShiftCssClass(s) : 'shift-off';
       html += `<div class="mw-person" data-role="${r}" data-dk="${dk}" data-week="${wIdx}" data-is-kc="${isKC}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})">`;
       html += `<span class="mw-name">${esc(names[r] || r)}</span>`;

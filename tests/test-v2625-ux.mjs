@@ -6,7 +6,7 @@
  * NRF 4-5-4 stays U.S. retail — no Spain/Mexico labor-law claim.
  * Language switch does not burn a free build or wipe the board.
  * 2.6.24 one-story must-fix vs leftover still holds.
- * Keeps 2.6.12–2.6.24 behavior; version lock 2.6.27.
+ * Keeps 2.6.12–2.6.24 behavior; version lock 2.6.28.
  * Run: node tests/test-v2625-ux.mjs
  */
 import { createServer } from 'http';
@@ -77,15 +77,15 @@ async function main() {
   console.log('\n=== v2.6.25 English + Spanish chrome on this device ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.27') pass('version.json', version.version);
+  if (version.version === '2.6.28') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.27'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.28'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.27'") && index.includes('id="app-version-label">v2.6.27')) {
+  if (index.includes("const APP_VERSION = '2.6.28'") && index.includes('id="app-version-label">v2.6.28')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

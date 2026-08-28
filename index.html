@@ -5015,7 +5015,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="auth-error" id="auth-error" role="alert"></div>
     <button type="button" class="auth-offline-link" onclick="continueOffline()">Continue offline on this device</button>
     <div class="auth-footer">
-      <a href="legal/privacy.html">Privacy</a> · <a href="legal/terms.html">Terms</a>
+      <a href="legal/privacy.html" data-i18n="Privacy">Privacy</a> · <a href="legal/terms.html">Terms</a>
       <span class="auth-sso" id="auth-sso-note">SSO for enterprise: contact support</span>
     </div>
   </div>
@@ -5188,8 +5188,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <div class="manager-section-header setup-more-item">
               <label id="label-role-am">Assistant Managers</label>
               <span class="count-badge" id="am-count-badge">3</span>
-              <button class="btn-round btn-danger" onclick="removeAM()" title="Remove last AM">-</button>
-              <button class="btn-round btn-primary" id="btn-add-am" onclick="addAM()" title="Add assistant manager">+</button>
+              <button class="btn-round btn-danger" onclick="removeAM()" title="Remove last AM" aria-label="Remove last AM" data-i18n-title="Remove last AM" data-i18n-aria="Remove last AM">-</button>
+              <button class="btn-round btn-primary" id="btn-add-am" onclick="addAM()" title="Add assistant manager" aria-label="Add assistant manager" data-i18n-title="Add assistant manager" data-i18n-aria="Add assistant manager">+</button>
             </div>
             <div id="am-rows"></div>
           </div>
@@ -5199,8 +5199,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <div class="manager-section-header">
               <label id="label-role-kc">Key Carriers</label>
               <span class="count-badge" id="kc-count-badge">1</span>
-              <button class="btn-round btn-danger" onclick="removeKC()" title="Remove last KC">-</button>
-              <button class="btn-round btn-primary" id="btn-add-kc" onclick="addKC()" title="Add key carrier">+</button>
+              <button class="btn-round btn-danger" onclick="removeKC()" title="Remove last KC" aria-label="Remove last KC" data-i18n-title="Remove last KC" data-i18n-aria="Remove last KC">-</button>
+              <button class="btn-round btn-primary" id="btn-add-kc" onclick="addKC()" title="Add key carrier" aria-label="Add key carrier" data-i18n-title="Add key carrier" data-i18n-aria="Add key carrier">+</button>
             </div>
             <div id="kc-rows"></div>
           </div>
@@ -5214,7 +5214,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             </div>
             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.65rem">
               <label style="font-weight:600;font-size:0.9rem" data-i18n="Store #:">Store #:</label>
-              <input type="text" id="store-number" value="" placeholder="e.g. 100" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
+              <input type="text" id="store-number" value="" placeholder="e.g. 100" data-i18n-placeholder="e.g. 100" style="width:100px;padding:0.4rem 0.6rem;border-radius:6px;font-size:0.9rem" oninput="persistStoreMeta()" onchange="persistStoreMeta()" onblur="persistStoreMeta()">
             </div>
             <div class="store-hours-block no-print" id="store-hours-block" data-tour="store-hours">
               <div class="store-hours-chip">
@@ -5233,9 +5233,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
               <span class="ease-period-status" id="ease-period-status" hidden data-i18n="Loaded">Loaded</span>
             </div>
             <div class="period-picker setup-more-item">
-              <label>FY:</label>
+              <label data-i18n="FY:">FY:</label>
               <input type="number" id="pick-year" min="2024" max="2030" value="2026" style="width:80px" onchange="buildPeriodDropdown()">
-              <label>Period:</label>
+              <label data-i18n="Period:">Period:</label>
               <select id="pick-period"></select>
               <button class="btn-primary" onclick="loadPeriod()" data-i18n="Load Period">Load Period</button>
               <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()" title="Advance to next period, keep team and hours" data-i18n="Next period" data-i18n-title="Advance to next period, keep team and hours">Next period</button>
@@ -5537,13 +5537,13 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.27</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.28</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
     <button type="button" onclick="location.href='buy.html'" data-i18n="Buy Pro">Buy Pro</button>
     <a href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Google Play</a>
-    <button type="button" onclick="location.href='legal/privacy.html'">Privacy</button>
+    <button type="button" onclick="location.href='legal/privacy.html'" data-i18n="Privacy">Privacy</button>
   </div>
 </footer>
 
@@ -7912,7 +7912,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.27';
+const APP_VERSION = '2.6.28';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -8422,7 +8422,25 @@ const MSB_I18N_ES = {
   'close {d0} → open {d1}': 'cierre {d0} → apertura {d1}',
   '{date}: No opener': '{date}: Sin apertura',
   '{date}: No closer': '{date}: Sin cierre',
-  '{n} more…': '+{n} más…'
+  '{n} more…': '+{n} más…',
+  'FY{year} Period {n}': 'AF{year} Período {n}',
+  'FY{year} Period {n} - {month}': 'AF{year} Período {n} - {month}',
+  'FY:': 'AF:',
+  'Period:': 'Período:',
+  'No saved teams yet': 'Aún no hay equipos guardados',
+  'Remove last AM': 'Quitar último AM',
+  'Add assistant manager': 'Agregar gerente asistente',
+  'Remove last KC': 'Quitar último KC',
+  'Add key carrier': 'Agregar portallaves',
+  'Build optimized schedule for this period': 'Armar horario optimizado para este período',
+  'Load a fiscal period first': 'Carga un período fiscal primero',
+  'Free builds used — unlock Pro for more': 'Armados gratis usados — desbloquea Pro para más',
+  'Privacy': 'Privacidad',
+  'e.g. 100': 'ej. 100',
+  'Reload FY{year} Period {n}': 'Recargar AF{year} Período {n}',
+  'Load the NRF period that contains today': 'Cargar el período NRF que incluye hoy',
+  '{start} to {end}': '{start} a {end}',
+  '{n} days': '{n} días'
 };
 
 const MSB_I18N_EN = {
@@ -8551,6 +8569,9 @@ function refreshUiLangChrome() {
   try { if (typeof renderRoleRulesUI === 'function') renderRoleRulesUI(); } catch (e7) {}
   try { if (typeof renderFederalHolidaysUI === 'function') renderFederalHolidaysUI(); } catch (e8) {}
   try { if (typeof updateLicenseBadge === 'function') updateLicenseBadge(); } catch (e9) {}
+  try { if (typeof updateStoreHoursSummary === 'function') updateStoreHoursSummary(); } catch (eHours) {}
+  try { if (typeof renderTeamTemplateUI === 'function') renderTeamTemplateUI(); } catch (eTpl) {}
+  try { if (typeof refreshPeriodPickerI18n === 'function') refreshPeriodPickerI18n(); } catch (ePer) {}
   if (lastScheduleRenderArgs && schedule && Object.keys(schedule).length) {
     try {
       renderSchedule(lastScheduleRenderArgs.warnings, lastScheduleRenderArgs.ROLES, lastScheduleRenderArgs.ALL_KC);
@@ -8627,6 +8648,23 @@ function formatWeekDateRange(d0, d1) {
 
 function formatClopenPairWhen(d0, d1) {
   return msbT('close {d0} → open {d1}', { d0: formatDate(d0), d1: formatDate(d1) });
+}
+
+function localizeMonthName(en) {
+  return msbT(en || '');
+}
+
+function formatFyPeriodShort(year, number) {
+  return msbT('FY{year} Period {n}', { year: year, n: number });
+}
+
+function formatFyPeriodLabel(year, p) {
+  if (!p) return formatFyPeriodShort(year, '');
+  return msbT('FY{year} Period {n} - {month}', {
+    year: year,
+    n: p.number,
+    month: localizeMonthName(p.approxMonth)
+  });
 }
 
 function formatScheduleReadyToast(q, left, leftoverClopens, isPro) {
@@ -8940,12 +8978,12 @@ function updateLoadThisNrfButton() {
   btn.setAttribute('aria-pressed', loaded ? 'true' : 'false');
   if (status) {
     status.hidden = !loaded;
-    status.textContent = loaded ? 'Loaded' : '';
+    status.textContent = loaded ? msbT('Loaded') : '';
   }
   if (loaded && currentPeriod) {
-    btn.title = 'Reload FY' + fiscalYear + ' Period ' + currentPeriod.number;
+    btn.title = msbT('Reload FY{year} Period {n}', { year: fiscalYear, n: currentPeriod.number });
   } else {
-    btn.title = 'Load the NRF period that contains today';
+    btn.title = msbT('Load the NRF period that contains today');
   }
 }
 
@@ -9454,11 +9492,11 @@ function summarizeStoreHours() {
   const sat = fmt(6);
   const sun = fmt(0);
   const parts = [];
-  if (monThuSame) parts.push('Mon–Thu ' + mon);
-  else parts.push('Mon ' + mon + ' · Tue ' + fmt(2) + ' · Wed ' + fmt(3) + ' · Thu ' + fmt(4));
-  if (fri === sat) parts.push('Fri–Sat ' + fri);
-  else parts.push('Fri ' + fri + ' · Sat ' + sat);
-  parts.push('Sun ' + sun);
+  if (monThuSame) parts.push(msbT('Mon') + '–' + msbT('Thu') + ' ' + mon);
+  else parts.push(msbT('Mon') + ' ' + mon + ' · ' + msbT('Tue') + ' ' + fmt(2) + ' · ' + msbT('Wed') + ' ' + fmt(3) + ' · ' + msbT('Thu') + ' ' + fmt(4));
+  if (fri === sat) parts.push(msbT('Fri') + '–' + msbT('Sat') + ' ' + fri);
+  else parts.push(msbT('Fri') + ' ' + fri + ' · ' + msbT('Sat') + ' ' + sat);
+  parts.push(msbT('Sun') + ' ' + sun);
   const rangeN = (storeHours.ranges || []).length;
   const singles = Object.keys(storeHours.overrides || {}).filter((k) => {
     const o = storeHours.overrides[k];
@@ -10135,14 +10173,16 @@ function updateReadyChecklist() {
     const ready = hasPeriod && canGen;
     btn.disabled = !ready;
     btn.style.opacity = ready ? '1' : '0.55';
-    if (!hasPeriod) btn.title = 'Load a fiscal period first';
-    else if (!canGen) btn.title = 'Free builds used — unlock Pro for more';
-    else btn.title = 'Build optimized schedule for this period';
+    if (!hasPeriod) btn.title = msbT('Load a fiscal period first');
+    else if (!canGen) btn.title = msbT('Free builds used — unlock Pro for more');
+    else btn.title = msbT('Build optimized schedule for this period');
   }
   const meta = document.getElementById('gen-meta');
   if (meta && hasPeriod && currentPeriod) {
     let line =
-      `Ready · FY${fiscalYear} Period ${currentPeriod.number} · ${currentPeriod.numWeeks} weeks · ${getRoles().length} managers`;
+      msbT('Ready') + ' · ' + formatFyPeriodShort(fiscalYear, currentPeriod.number) +
+      ' · ' + msbT('{n} weeks', { n: currentPeriod.numWeeks }) +
+      ' · ' + getRoles().length + ' ' + msbT('managers');
     if (!isProUnlocked()) {
       line +=
         left === 0
@@ -11237,7 +11277,7 @@ function buildPeriodDropdown() {
   allPeriods.forEach((p, i) => {
     const o = document.createElement('option');
     o.value = i;
-    o.textContent = `P${p.number} - ${p.approxMonth} (${formatDate(p.start)} - ${formatDate(p.end)}) - ${p.numWeeks} weeks [Q${p.quarter}]`;
+    o.textContent = `P${p.number} - ${localizeMonthName(p.approxMonth)} (${formatDate(p.start)} - ${formatDate(p.end)}) - ${msbT('{n} weeks', { n: p.numWeeks })} [Q${p.quarter}]`;
     sel.appendChild(o);
   });
 
@@ -11246,14 +11286,25 @@ function buildPeriodDropdown() {
   updatePeriodInfo();
 }
 
+function refreshPeriodPickerI18n() {
+  const sel = document.getElementById('pick-period');
+  if (!sel || !allPeriods || !allPeriods.length) return;
+  for (let i = 0; i < sel.options.length && i < allPeriods.length; i++) {
+    const p = allPeriods[i];
+    sel.options[i].textContent =
+      `P${p.number} - ${localizeMonthName(p.approxMonth)} (${formatDate(p.start)} - ${formatDate(p.end)}) - ${msbT('{n} weeks', { n: p.numWeeks })} [Q${p.quarter}]`;
+  }
+  if (typeof updatePeriodInfo === 'function') updatePeriodInfo();
+}
+
 function updatePeriodInfo() {
   setTimeout(updateReadyChecklist, 0);
   const idx = parseInt(document.getElementById('pick-period').value);
   const p = allPeriods[idx];
   if (!p) return;
   const infoEl = document.getElementById('period-info');
-  infoEl.innerHTML = `<strong>FY${fiscalYear} Period ${p.number}</strong> (Q${p.quarter}.${p.periodInQuarter}) &mdash; ` +
-    `${formatDateFull(p.start)} to ${formatDateFull(p.end)} &mdash; <strong>${p.numWeeks} weeks</strong>, ${p.numWeeks * 7} days`;
+  infoEl.innerHTML = `<strong>${esc(formatFyPeriodShort(fiscalYear, p.number))}</strong> (Q${p.quarter}.${p.periodInQuarter}) &mdash; ` +
+    `${msbT('{start} to {end}', { start: formatDateFull(p.start), end: formatDateFull(p.end) })} &mdash; <strong>${msbT('{n} weeks', { n: p.numWeeks })}</strong>, ${msbT('{n} days', { n: p.numWeeks * 7 })}`;
 }
 
 document.getElementById('pick-period').addEventListener('change', updatePeriodInfo);
@@ -15182,7 +15233,7 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
   const storeName = (document.getElementById('store-name') || {}).value || '';
   const storeNum = (document.getElementById('store-number') || {}).value || '';
   const storeBit = [storeName, storeNum ? '#' + storeNum : ''].filter(Boolean).join(' ');
-  const periodLabel = `${storeBit ? storeBit + ' · ' : ''}FY${fiscalYear} Period ${p.number} - ${p.approxMonth} (${formatDate(p.start)} - ${formatDate(p.end)})`;
+  const periodLabel = `${storeBit ? storeBit + ' · ' : ''}${formatFyPeriodLabel(fiscalYear, p)} (${formatDate(p.start)} - ${formatDate(p.end)})`;
   document.getElementById('schedule-title').textContent = periodLabel;
   document.getElementById('print-header').textContent = periodLabel;
 
@@ -15807,6 +15858,9 @@ function jumpToRoleOnGrid(role) {
    v2.6.27 — Finish leftover Spanish generated notes / toast / week layer. Local dictionary
              only. Default role titles translate; custom titles stay as typed. Person names
              in issue lines stay as typed.
+   v2.6.28 — Cheap leftover Spanish: Setup hours day abbrevs, FY/Period/month names,
+             “No saved teams yet”, and aria/tooltips (Remove last AM, Build, Privacy, e.g. 100).
+             US holiday names stay English. Custom titles and roster names stay typed.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -18102,7 +18156,7 @@ function renderTeamTemplateUI() {
   if (!list.length) {
     const o = document.createElement('option');
     o.value = '';
-    o.textContent = 'No saved teams yet';
+    o.textContent = msbT('No saved teams yet');
     sel.appendChild(o);
     return;
   }
@@ -18746,7 +18800,7 @@ function updateOpsHome() {
   const title = document.getElementById('ops-home-title');
   if (title) {
     title.textContent = p
-      ? 'FY' + fiscalYear + ' ' + msbT('Period') + ' ' + p.number + ' · ' + p.approxMonth
+      ? formatFyPeriodLabel(fiscalYear, p)
       : msbT('Load a period to start');
   }
   const meta = document.getElementById('ops-home-meta');

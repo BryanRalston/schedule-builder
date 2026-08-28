@@ -148,6 +148,42 @@ function main() {
     pass('header-wordmark-only');
   } else fail('header-wordmark-only', 'header grew a graphical logo');
 
+  // Live in-app mark is the Install banner (header / account / welcome / Pro are text-only).
+  const liveMarkImgs = [...index.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]);
+  const leftoverArt = liveMarkImgs.filter((tag) =>
+    /src="(?!icons\/icon-(?:192|512)(?:-maskable)?\.png)[^"]+"/i.test(tag)
+    && /icon|logo|mark|favicon/i.test(tag)
+  );
+  if (!leftoverArt.length) pass('live-mark-paths', liveMarkImgs.length + ' img tags');
+  else fail('live-mark-paths', leftoverArt.join(' | '));
+
+  function sliceBetween(src, startRe, endRe) {
+    const s = src.search(startRe);
+    if (s < 0) return '';
+    const rest = src.slice(s);
+    const e = rest.search(endRe);
+    return e < 0 ? rest : rest.slice(0, e);
+  }
+  const accountHtml = sliceBetween(index, /id="account-modal"/, /id="license-modal"/);
+  const welcomeHtml = sliceBetween(index, /id="welcome-card"/, /class="workspace /);
+  const proHtml = sliceBetween(index, /id="pro-gate-modal"/, /id="account-modal"/);
+  if (accountHtml && !/<img\b/i.test(accountHtml)) pass('account-text-only');
+  else fail('account-text-only', 'account chrome has an img or is missing');
+  if (welcomeHtml && !/<img\b/i.test(welcomeHtml)) pass('welcome-text-only');
+  else fail('welcome-text-only', 'welcome chrome has an img or is missing');
+  if (proHtml && !/<img\b/i.test(proHtml)) pass('pro-gate-text-only');
+  else fail('pro-gate-text-only', 'Pro modal has an img or is missing');
+
+  const buy = read('buy.html');
+  if (/<img src="icons\/icon-192\.png" alt="" width="36" height="36">/.test(buy)) {
+    pass('buy-brand-icon');
+  } else fail('buy-brand-icon', 'buy.html brand img is not icons/icon-192.png');
+
+  const playHi = createHash('sha256').update(readBin('store/play-assets/hi-res-icon-512.png')).digest('hex');
+  const icon512Hash = createHash('sha256').update(icon512).digest('hex');
+  if (playHi === icon512Hash) pass('play-hi-res-matches-icon-512');
+  else fail('play-hi-res-matches-icon-512', 'Play 512 copy drifted from icons/icon-512.png');
+
   const failed = results.filter((r) => !r.ok);
   console.log('\n' + results.length + ' checks, ' + failed.length + ' failed');
   if (failed.length) process.exitCode = 1;

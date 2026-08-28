@@ -1693,12 +1693,12 @@ input[type="radio"] { accent-color: var(--gold); }
 .sched-edit-overlay {
   position: absolute;
   inset: 0;
-  z-index: 200;
+  z-index: 1;
   pointer-events: auto;
 }
 .sched-edit-menu {
   position: absolute;
-  z-index: 210;
+  z-index: 2;
   pointer-events: auto;
   background: rgba(12, 18, 32, 0.97);
   border: 1px solid var(--line-strong);
@@ -2901,6 +2901,11 @@ input[type="radio"] { accent-color: var(--gold); }
   padding: 0.4rem;
   z-index: 200;
   backdrop-filter: blur(16px);
+  max-height: min(70vh, calc(100dvh - 4.5rem));
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .header-menu-panel[hidden] { display: none !important; }
 .header-menu-panel button {
@@ -3606,6 +3611,9 @@ html.auth-locked .toast-host { z-index: 20050; }
 .account-panel-card,
 .license-modal-card,
 .provider-modal-card {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
   background: rgba(12, 18, 32, 0.97);
   color: var(--ink);
   border: 1px solid var(--line-strong);
@@ -4250,13 +4258,22 @@ body.msb-board-live .app-footer { display: none !important; }
 .built-pill[hidden] { display: none !important; }
 
 .review-sheet { display: none; }
-.review-sheet.open { display: block; }
+.review-sheet.open,
+#review-sheet.open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 20080; /* above sticky header (100); below Account (20100) */
+  pointer-events: auto;
+}
+#review-sheet[hidden] { display: none !important; }
 .review-sheet-backdrop {
-  position: fixed; inset: 0; z-index: 240;
+  position: absolute; inset: 0; z-index: 0;
   background: rgba(3, 6, 14, 0.62);
+  pointer-events: auto;
 }
 .review-sheet-panel {
-  position: fixed; z-index: 241;
+  position: absolute; z-index: 1;
   background: rgba(10, 16, 30, 0.98);
   border: 1px solid rgba(61, 220, 255, 0.28);
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
@@ -4270,8 +4287,11 @@ body.msb-board-live .app-footer { display: none !important; }
 }
 .review-sheet-head strong { font-size: 0.95rem; }
 .review-sheet-close {
+  position: relative; z-index: 2;
   background: transparent; border: none; color: var(--ink-3);
-  font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 0.25rem 0.4rem;
+  font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  padding: 0.45rem 0.7rem; min-height: 44px; min-width: 44px;
+  pointer-events: auto;
 }
 .review-sheet-body {
   overflow: auto; padding: 0.65rem 0.85rem 1rem;
@@ -4287,6 +4307,7 @@ body.msb-board-live .app-footer { display: none !important; }
     width: min(440px, 92vw);
     border-radius: 0;
     border-right: none; border-top: none; border-bottom: none;
+    pointer-events: auto;
   }
 }
 @media (max-width: 720px) {
@@ -4582,9 +4603,65 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 @media print {
   #post-gen-strip, #cmd-palette, #ops-home, #request-paint-toolbar,
   #schedule-diff-panel, #smart-suggestions, .view-lock-banner,
-  .local-status-pill, .btn-cmdk { display: none !important; }
+  .local-status-pill, .btn-cmdk, #backup-nudge, .cell-clopen-mark { display: none !important; }
   .day-hours { color: #333 !important; }
 }
+
+/* One-time backup nudge after first successful generate — not a modal, does not block posting */
+.backup-nudge {
+  display: none;
+  align-items: flex-start;
+  gap: 0.65rem 0.85rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 200, 87, 0.38);
+  background: linear-gradient(180deg, rgba(255, 200, 87, 0.12), var(--surface));
+  box-shadow: var(--shadow-sm);
+}
+.backup-nudge.show { display: flex; }
+.backup-nudge .bn-text { flex: 1; min-width: 180px; }
+.backup-nudge .bn-text strong { display: block; font-size: 0.9rem; margin-bottom: 0.15rem; }
+.backup-nudge .bn-text span { font-size: 0.78rem; color: var(--ink-3); line-height: 1.35; }
+.backup-nudge .bn-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+.backup-nudge .bn-actions button { font-size: 0.78rem; padding: 0.35rem 0.7rem; min-height: auto; }
+.backup-nudge .bn-dismiss {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* Clopen pairs on the editing board — same detection as clopen radar */
+.cell-clopen {
+  box-shadow: inset 0 0 0 2px rgba(255, 200, 87, 0.85) !important;
+  outline: 2px dashed rgba(255, 200, 87, 0.7);
+  outline-offset: -3px;
+}
+.week-table tbody td.cell-clopen,
+.mw-person.cell-clopen,
+.month-chip.cell-clopen { position: relative; }
+.cell-clopen-mark {
+  position: absolute;
+  left: 2px;
+  bottom: 1px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffd78a;
+  background: rgba(8, 14, 28, 0.78);
+  padding: 0 0.25rem;
+  border-radius: 3px;
+  pointer-events: none;
+  line-height: 1.25;
+  z-index: 1;
+}
+.mw-person.cell-clopen .cell-clopen-mark { left: auto; right: 0.55rem; bottom: 0.2rem; }
+.month-chip.cell-clopen .cell-clopen-mark { left: 2px; bottom: 0; font-size: 0.52rem; }
 
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -4758,7 +4835,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="welcome-actions">
       <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
       <div class="welcome-secondary">
-        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
+        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})">Load sample store</button>
         <button type="button" class="btn-outline welcome-secondary-btn" onclick="startOnboardingTour(true)">Take tour</button>
         <button type="button" class="btn-outline welcome-secondary-btn" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
         <button type="button" class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
@@ -5032,7 +5109,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <strong>No schedule yet</strong>
         Name two managers on Setup, then Build. Requests and rules can wait.
         <div style="margin-top:0.85rem">
-          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
+          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Load sample store</button>
           <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
@@ -5071,6 +5148,16 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         </div>
         <span class="gen-timestamp" id="gen-timestamp"></span>
       </div>
+      <div id="backup-nudge" class="backup-nudge no-print" hidden role="status">
+        <div class="bn-text">
+          <strong>Save a backup now</strong>
+          <span>This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.</span>
+        </div>
+        <div class="bn-actions">
+          <button type="button" class="btn-secondary" id="bn-save" onclick="saveBackupFromNudge()">Save backup</button>
+          <button type="button" class="bn-dismiss" id="bn-dismiss" onclick="dismissBackupNudge()">Not now</button>
+        </div>
+      </div>
       <div class="period-print-header" id="print-header"></div>
       <div class="schedule-hours-line no-print" id="schedule-hours-line"></div>
       <div id="schedule-grid"></div>
@@ -5093,7 +5180,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="review-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="review-sheet-title">
     <div class="review-sheet-head">
       <strong id="review-sheet-title">Review</strong>
-      <button type="button" class="review-sheet-close" onclick="closeReviewSheet()">Close</button>
+      <button type="button" class="review-sheet-close" onpointerdown="event.preventDefault(); event.stopPropagation(); closeReviewSheet();" onclick="event.stopPropagation(); closeReviewSheet();">Close</button>
     </div>
     <div class="review-sheet-body">
       <div id="schedule-diff-panel" class="no-print" hidden>
@@ -5125,7 +5212,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.14</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.15</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -5150,8 +5237,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <!-- Account panel -->
-<div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title">
-  <div class="account-panel-card">
+<div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title" onclick="if (event.target === this) closeAccountPanel();">
+  <div class="account-panel-card" onclick="event.stopPropagation()">
     <h3 id="account-panel-title">This device</h3>
     <p class="ap-sub">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
     <div hidden>
@@ -5168,7 +5255,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()">Activate team license</button>
       <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center">Manage billing</a>
-      <button type="button" class="ap-btn-secondary" onclick="closeAccountPanel()">Close</button>
+      <button type="button" class="ap-btn-secondary" onpointerdown="event.preventDefault(); event.stopPropagation(); closeAccountPanel();" onclick="event.stopPropagation(); closeAccountPanel();">Close</button>
     </div>
     <div id="ap-leftover-session" hidden>
       <label class="ap-signout-opts">
@@ -5186,9 +5273,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="license-modal no-print" id="license-modal" hidden role="dialog" aria-modal="true" aria-labelledby="license-modal-title">
   <div class="license-modal-card">
     <h3 id="license-modal-title">Activate team license</h3>
-    <p>Enter your Gumroad license or unlock code (MSB-PRO-… or any key 6+ characters).</p>
+    <p>Enter your Gumroad license or an MSB-PRO- unlock code.</p>
     <label>License / unlock code
-      <input type="text" id="license-input" autocomplete="off" placeholder="Paste license key" />
+      <input type="text" id="license-input" autocomplete="off" placeholder="Gumroad license or MSB-PRO-…" />
     </label>
     <div class="license-error" id="license-error" role="alert"></div>
     <div class="license-modal-actions">
@@ -5471,6 +5558,7 @@ const MSB_GEN_COUNT_KEY = 'msb_free_generate_count';
 const MSB_SESSION_KEY = 'msb_session';
 const MSB_WORKSPACE_KEY = 'msb_workspace';
 const MSB_LOCAL_ACCOUNTS_KEY = 'msb_local_accounts';
+const MSB_BACKUP_NUDGE_KEY = 'msb_backup_nudge_done';
 let monetizationConfig = {
   priceLabel: '$19.99',
   priceNote: 'one-time · lifetime Pro unlock',
@@ -6539,7 +6627,7 @@ function submitLicenseUnlock() {
   const key = (input && input.value) || '';
   if (!validLicenseKey(key)) {
     if (err) {
-      err.textContent = 'Code too short — use 6+ characters or MSB-PRO-…';
+      err.textContent = 'Enter a Gumroad license or an MSB-PRO- unlock code.';
       err.classList.add('show');
     }
     return;
@@ -6621,8 +6709,11 @@ function openSignInFromApp() {
 
 function validLicenseKey(k) {
   const s = String(k || '').trim();
-  if (s.length >= 6) return true;
-  if (/^MSB-PRO-/i.test(s)) return true;
+  if (!s) return false;
+  // Issued unlock codes (friend/tester and Play review). Bare "MSB-PRO-" is not enough.
+  if (/^MSB-PRO-[A-Z0-9]+(?:-[A-Z0-9]+)*$/i.test(s) && s.length >= 12) return true;
+  // Gumroad-issued keys stay on-device — no server verify. Typical 4 groups of 6–8.
+  if (/^[A-Z0-9]{6,8}(?:-[A-Z0-9]{6,8}){3}$/i.test(s)) return true;
   return false;
 }
 
@@ -6797,11 +6888,19 @@ function canAddManagerSeat() {
 }
 
 // ── Computed Role Arrays ──
+function isNamedKeyCarrier(kc) {
+  if (!kc) return false;
+  const el = document.getElementById('name-' + kc.id);
+  const n = el ? el.value : (kc.name || '');
+  if (typeof isPlaceholderManagerName === 'function') return !isPlaceholderManagerName(n);
+  return !!(String(n || '').trim());
+}
+
 function getRoles() {
-  // Returns ['sm', 'am1', ..., 'amN'] plus any KCs with manager-mode on
+  // Returns ['sm', 'am1', ..., 'amN'] plus named KCs with manager-mode on
   const roles = ['sm'];
   for (let i = 1; i <= amCount; i++) roles.push('am' + i);
-  kcList.forEach(kc => { if (kc.asManager) roles.push(kc.id); });
+  kcList.forEach(kc => { if (kc.asManager && isNamedKeyCarrier(kc)) roles.push(kc.id); });
   return roles;
 }
 
@@ -6813,19 +6912,19 @@ function getAMs() {
 }
 
 function getNonManagerKCs() {
-  // KCs that are NOT in manager mode
-  return kcList.filter(kc => !kc.asManager);
+  // Named KCs that are NOT in manager mode
+  return kcList.filter(kc => !kc.asManager && isNamedKeyCarrier(kc));
 }
 
 function getManagerKCs() {
-  // KCs that ARE in manager mode
-  return kcList.filter(kc => kc.asManager);
+  // Named KCs that ARE in manager mode
+  return kcList.filter(kc => kc.asManager && isNamedKeyCarrier(kc));
 }
 
 function getAllWithKC() {
-  // All roles that appear in the schedule grid: managers + non-manager KCs
+  // Board rows: managers + named non-manager KCs. Unnamed KC1 stays off the board.
   const roles = getRoles();
-  kcList.forEach(kc => { if (!kc.asManager) roles.push(kc.id); });
+  kcList.forEach(kc => { if (!kc.asManager && isNamedKeyCarrier(kc)) roles.push(kc.id); });
   return roles;
 }
 
@@ -7291,7 +7390,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.14';
+const APP_VERSION = '2.6.15';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8682,7 +8781,7 @@ function loadDemoStore(opts) {
       updateReadyChecklist();
       showToast('Sample store loaded — generating schedule…', 'success');
       setTimeout(() => {
-        generateSchedule();
+        generateSchedule({ skipFreeCount: true });
         dismissWelcome();
       }, 200);
     }, 100);
@@ -8729,6 +8828,46 @@ function buildSnapshotData() {
   };
 }
 
+function backupNudgeIsDone() {
+  try {
+    return localStorage.getItem(MSB_BACKUP_NUDGE_KEY) === '1';
+  } catch (e) {
+    return false;
+  }
+}
+
+function hideBackupNudge() {
+  const el = document.getElementById('backup-nudge');
+  if (!el) return;
+  el.hidden = true;
+  el.classList.remove('show');
+}
+
+function markBackupNudgeDone() {
+  try { localStorage.setItem(MSB_BACKUP_NUDGE_KEY, '1'); } catch (e) {}
+  hideBackupNudge();
+}
+
+function maybeShowBackupNudge() {
+  if (backupNudgeIsDone()) {
+    hideBackupNudge();
+    return;
+  }
+  const el = document.getElementById('backup-nudge');
+  if (!el) return;
+  el.hidden = false;
+  el.classList.add('show');
+}
+
+function dismissBackupNudge() {
+  markBackupNudgeDone();
+}
+
+function saveBackupFromNudge() {
+  markBackupNudgeDone();
+  if (typeof exportBackupJSON === 'function') exportBackupJSON();
+}
+
 function exportBackupJSON() {
   if (!currentPeriod) {
     showToast('Load a period first.', 'warn');
@@ -8742,6 +8881,7 @@ function exportBackupJSON() {
   a.download = `schedule-backup_FY${fiscalYear}-P${currentPeriod.number}_${store}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
+  try { if (typeof markBackupNudgeDone === 'function') markBackupNudgeDone(); } catch (e) {}
   showToast('Backup JSON downloaded. New phone? Load that file there.', 'success');
 }
 
@@ -8997,6 +9137,26 @@ function getExportCellColors(s) {
   if (s === 'off') return { bg: '#f3f4f6', color: '#6b7280' };
   if (isCustomShift(s)) return { bg: '#fdf4ff', color: '#7e22ce' };
   return { bg: '#ffffff', color: '#000000' };
+}
+
+/** Live cell paint for Word/Excel — always read schedule now, never a generate-time snapshot. */
+function liveExportCell(role, dk, opts) {
+  const s = schedule && schedule[role] ? schedule[role][dk] : '';
+  let used = s;
+  if (opts && opts.kcBlankIfIdle) {
+    if (!(s && (isWork(s) || s === 'pto' || s === 'rto' || s === 'loa' || s === 'kc-close'))) used = null;
+  }
+  const paint = getExportCellColors(used);
+  return {
+    shift: used || '',
+    label: used ? getPrintShiftLabel(used) : '',
+    bg: paint.bg,
+    color: paint.color
+  };
+}
+
+function exportPaintForCell(role, dk) {
+  return liveExportCell(role, dk);
 }
 
 // ── NRF 4-5-4 Fiscal Calendar ──
@@ -9831,7 +9991,8 @@ function prevDateKey(dk) {
 
 // ── GENERATE SCHEDULE ──
 let _generateBusy = false;
-function generateSchedule() {
+function generateSchedule(opts) {
+  opts = opts || {};
   if (_generateBusy) return;
   if (window._viewLocked) {
     showToast('View only - cannot generate.', 'warn');
@@ -9847,7 +10008,7 @@ function generateSchedule() {
     switchTab('setup');
     return;
   }
-  if (!requireGenerateAllowance()) return;
+  if (!opts.skipFreeCount && !requireGenerateAllowance()) return;
   try { if (typeof cancelGenerateArrival === 'function') cancelGenerateArrival(); } catch (e) {}
   const btn = document.getElementById('btn-generate');
   const prevLabel = btn ? btn.textContent : '';
@@ -9873,7 +10034,7 @@ function generateSchedule() {
   // Yield so the button state paints before heavy work
   setTimeout(() => {
     try {
-      _generateScheduleInner();
+      _generateScheduleInner(opts);
       try { if (typeof notifyTourGenerateComplete === 'function') notifyTourGenerateComplete(); } catch (e2) {}
     } catch (e) {
       console.error(e);
@@ -9893,7 +10054,8 @@ function generateSchedule() {
     }
   }, 30);
 }
-function _generateScheduleInner() {
+function _generateScheduleInner(opts) {
+  opts = opts || {};
   schedule = {};
   const names = getManagerNames();
   readPreferencesFromUI();
@@ -11985,8 +12147,8 @@ function _generateScheduleInner() {
   const ts = document.getElementById('gen-timestamp');
   if (ts) ts.textContent = 'Generated ' + new Date().toLocaleString();
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
-  // Successful build only — free allowance decrements after a real schedule lands
-  recordFreeGenerate();
+  // Successful user Build only — sample / tour generate does not burn a free build
+  if (!opts.skipFreeCount) recordFreeGenerate();
   const left = remainingFreeGenerates();
   let toastMsg = `Schedule ready · Quality ${q.score}/100 (${q.grade})`;
   if (!isProUnlocked()) {
@@ -11999,6 +12161,7 @@ function _generateScheduleInner() {
     toastMsg += ' · review leftover clopens';
   }
   showToast(toastMsg, hasErrors ? 'warn' : 'success');
+  try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
   try {
     if (typeof computeScheduleDiff === 'function') {
       window._lastScheduleDiff = computeScheduleDiff(window._prevScheduleSnap || {}, schedule);
@@ -12945,6 +13108,7 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
   if (gridEl) {
     gridEl.innerHTML = html;
     try { if (typeof setupCellPointerHandlers === 'function') setupCellPointerHandlers(); } catch (e) {}
+    try { if (typeof applyClopenMarksOnBoard === 'function') applyClopenMarksOnBoard(ROLES); } catch (e) {}
     if (window._scheduleEnterMotion) {
       gridEl.classList.remove('schedule-grid-enter');
       void gridEl.offsetWidth;
@@ -13119,6 +13283,45 @@ function isCellLocked(role, dk) {
 }
 
 /** List every close → next-day open (clopen) for managers, with fix options. */
+const CLOPEN_CELL_TITLE = 'Clopen pair — preference to review before you post';
+
+/** Mark close→open pair cells on the editing board using findClopens (same radar detection). */
+function applyClopenMarksOnBoard(ROLES) {
+  const grid = document.getElementById('schedule-grid');
+  if (!grid) return;
+  grid.querySelectorAll('.cell-clopen-mark').forEach((el) => el.remove());
+  grid.querySelectorAll('.cell-clopen').forEach((el) => {
+    el.classList.remove('cell-clopen');
+    el.removeAttribute('data-clopen');
+    const t = el.getAttribute('title') || '';
+    if (t === CLOPEN_CELL_TITLE) el.removeAttribute('title');
+    else if (t.indexOf(CLOPEN_CELL_TITLE) !== -1) {
+      el.setAttribute('title', t.replace(' · ' + CLOPEN_CELL_TITLE, '').replace(CLOPEN_CELL_TITLE, '').trim());
+    }
+  });
+  if (!schedule || !ROLES || !ROLES.length) return;
+  const list = typeof findClopens === 'function' ? findClopens(ROLES) : [];
+  list.forEach((c) => {
+    [c.closeDk, c.openDk].forEach((dk) => {
+      const nodes = grid.querySelectorAll('[data-role="' + c.role + '"][data-dk="' + dk + '"]');
+      nodes.forEach((el) => {
+        el.classList.add('cell-clopen');
+        el.setAttribute('data-clopen', '1');
+        const prev = el.getAttribute('title') || '';
+        if (prev.indexOf(CLOPEN_CELL_TITLE) === -1) {
+          el.setAttribute('title', prev ? prev + ' · ' + CLOPEN_CELL_TITLE : CLOPEN_CELL_TITLE);
+        }
+        if (!el.querySelector('.cell-clopen-mark')) {
+          const mark = document.createElement('span');
+          mark.className = 'cell-clopen-mark no-print';
+          mark.textContent = 'Clopen';
+          el.appendChild(mark);
+        }
+      });
+    });
+  });
+}
+
 function findClopens(ROLES) {
   if (!schedule || !periodDates || !periodDates.length) return [];
   const names = getManagerNames();
@@ -13685,11 +13888,10 @@ function exportSchedule() {
       body += '<tr>';
       body += '<td style="' + nameStyle + '">' + esc(names[r] || r.toUpperCase()) + '</td>';
       weekDates.forEach(wd => {
-        const s = schedule[r] && schedule[r][dateKey(wd)];
-        const label = s ? getPrintShiftLabel(s) : '';
-        const c = getExportCellColors(s);
-        body += '<td style="' + tdBase + 'background:' + c.bg + ';color:' + c.color +
-          ';font-weight:600;">' + esc(label) + '</td>';
+        const cell = liveExportCell(r, dateKey(wd));
+        body += '<td bgcolor="' + cell.bg + '" style="' + tdBase + 'background:' + cell.bg +
+          ';color:' + cell.color + ';mso-shading:' + cell.bg + ';font-weight:600;">' +
+          esc(cell.label) + '</td>';
       });
       body += '</tr>';
     });
@@ -13699,16 +13901,10 @@ function exportSchedule() {
       body += '<tr>';
       body += '<td style="' + nameStyle + '">' + esc(names[kc.id] || kc.name) + '</td>';
       weekDates.forEach(wd => {
-        const s = schedule[kc.id] && schedule[kc.id][dateKey(wd)];
-        let label = '';
-        let cellShift = null;
-        if (s && (isWork(s) || s === 'pto' || s === 'rto' || s === 'loa' || s === 'kc-close')) {
-          label = getPrintShiftLabel(s);
-          cellShift = s;
-        }
-        const c = getExportCellColors(cellShift);
-        body += '<td style="' + tdBase + 'background:' + c.bg + ';color:' + c.color +
-          ';font-weight:600;">' + esc(label) + '</td>';
+        const cell = liveExportCell(kc.id, dateKey(wd), { kcBlankIfIdle: true });
+        body += '<td bgcolor="' + cell.bg + '" style="' + tdBase + 'background:' + cell.bg +
+          ';color:' + cell.color + ';mso-shading:' + cell.bg + ';font-weight:600;">' +
+          esc(cell.label) + '</td>';
       });
       body += '</tr>';
     });
@@ -13728,7 +13924,7 @@ function exportSchedule() {
     '  @page { size: landscape; margin: 0.5in; }\n' +
     '  body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #111; }\n' +
     '  table { border-collapse: collapse; }\n' +
-    '  td, th { -webkit-print-color-adjust: exact; print-color-adjust: exact; mso-shading: auto; }\n' +
+    '  td, th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }\n' +
     '</style>\n' +
     '</head>\n' +
     '<body>\n' + body + '\n</body>\n</html>';
@@ -13744,7 +13940,78 @@ function exportSchedule() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// ── Export plain Excel (.xlsx via SheetJS) ──
+// ── Export Excel (.xls HTML) painted from live cells — same palette as the board ──
+function buildExcelExportHtml() {
+  const names = getManagerNames();
+  const p = currentPeriod;
+  const storeNum = (document.getElementById('store-number') || {}).value || '';
+  const ROLES = getRoles();
+  const nonMgrKCs = getNonManagerKCs();
+  const DAY_HDR = ['SUN', 'MON', 'TUES', 'WED', 'THURS', 'FRI', 'SAT'];
+  const tdBase = 'border:1px solid #333;padding:4px 6px;text-align:center;vertical-align:middle;font-size:9pt;';
+  const nameStyle = 'border:1px solid #333;padding:4px 6px;text-align:left;font-weight:700;background:#f8f9fb;';
+  const thStyle = 'border:1px solid #333;padding:4px 6px;text-align:center;font-weight:700;background:#f3f4f6;';
+
+  let body = '<table style="border-collapse:collapse;font-family:Arial,sans-serif">';
+  body += '<tr><td colspan="8" style="font-size:16pt;font-weight:700">MANAGEMENT SCHEDULE</td></tr>';
+  let subtitle = 'Period ' + p.number + '  FY' + fiscalYear + '  Month: ' + esc(p.approxMonth);
+  if (storeNum) subtitle = 'Store: ' + esc(storeNum) + '     ' + subtitle;
+  body += '<tr><td colspan="8">' + subtitle + '</td></tr>';
+  body += '<tr><td colspan="8"></td></tr>';
+
+  p.weeks.forEach((week, wIdx) => {
+    const weekDates = [];
+    const d = new Date(week.start);
+    for (let i = 0; i < 7; i++) { weekDates.push(new Date(d)); d.setDate(d.getDate() + 1); }
+    const sat = weekDates[6];
+    const weLabel = 'W/E ' + (sat.getMonth() + 1) + '/' + sat.getDate() + (holidayWeeks[wIdx] ? '  Hol' : '');
+
+    body += '<tr><td colspan="8" style="font-weight:700;background:#1a1a2e;color:#fff">' + esc(weLabel) + '</td></tr>';
+    body += '<tr><td style="' + thStyle + '"></td>';
+    DAY_HDR.forEach((dn) => { body += '<td style="' + thStyle + '">' + dn + '</td>'; });
+    body += '</tr><tr><td style="' + thStyle + '"></td>';
+    weekDates.forEach((wd) => { body += '<td style="' + thStyle + '">' + wd.getDate() + '</td>'; });
+    body += '</tr>';
+
+    ROLES.forEach((r) => {
+      body += '<tr><td style="' + nameStyle + '">' + esc(names[r] || r.toUpperCase()) + '</td>';
+      weekDates.forEach((wd) => {
+        const cell = liveExportCell(r, dateKey(wd));
+        body += '<td bgcolor="' + cell.bg + '" style="' + tdBase + 'background:' + cell.bg +
+          ';color:' + cell.color + ';mso-shading:' + cell.bg + ';font-weight:600">' +
+          esc(cell.label) + '</td>';
+      });
+      body += '</tr>';
+    });
+
+    nonMgrKCs.forEach((kc) => {
+      body += '<tr><td style="' + nameStyle + '">' + esc(names[kc.id] || kc.name) + '</td>';
+      weekDates.forEach((wd) => {
+        const cell = liveExportCell(kc.id, dateKey(wd), { kcBlankIfIdle: true });
+        body += '<td bgcolor="' + cell.bg + '" style="' + tdBase + 'background:' + cell.bg +
+          ';color:' + cell.color + ';mso-shading:' + cell.bg + ';font-weight:600">' +
+          esc(cell.label) + '</td>';
+      });
+      body += '</tr>';
+    });
+
+    body += '<tr><td colspan="8"></td></tr>';
+  });
+  body += '</table>';
+
+  return (
+    '<html xmlns:o="urn:schemas-microsoft-com:office:office"\n' +
+    '      xmlns:x="urn:schemas-microsoft-com:office:excel"\n' +
+    '      xmlns="http://www.w3.org/TR/REC-html40">\n' +
+    '<head><meta charset="utf-8">\n' +
+    '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>\n' +
+    '<x:Name>Schedule</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>\n' +
+    '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->\n' +
+    '<style>td,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style>\n' +
+    '</head><body>\n' + body + '\n</body></html>'
+  );
+}
+
 function exportScheduleExcel() {
   if (!requirePro('Excel export')) return;
   if (!currentPeriod) {
@@ -13756,73 +14023,22 @@ function exportScheduleExcel() {
     alert('Please generate the schedule first before exporting.');
     return;
   }
-  if (typeof XLSX === 'undefined') {
-    alert('Excel library not loaded. Check your internet connection and try again.');
-    return;
-  }
 
-  const names = getManagerNames();
-  const p = currentPeriod;
-  const storeNum = document.getElementById('store-number').value || '';
-  const ROLES = getRoles();
-  const nonMgrKCs = getNonManagerKCs();
-  const DAY_HDR = ['SUN', 'MON', 'TUES', 'WED', 'THURS', 'FRI', 'SAT'];
-
+  const storeNum = (document.getElementById('store-number') || {}).value || '';
   let filename = 'Manager_Schedule';
   if (storeNum) filename += '_Store' + storeNum;
-  filename += '_P' + String(p.number).padStart(2, '0') + '_' + fiscalYear + '.xlsx';
+  filename += '_P' + String(currentPeriod.number).padStart(2, '0') + '_' + fiscalYear + '.xls';
 
-  const rows = [];
-
-  // Title block
-  rows.push(['MANAGEMENT SCHEDULE']);
-  let subtitle = 'Period ' + p.number + '  FY' + fiscalYear + '  Month: ' + p.approxMonth;
-  if (storeNum) subtitle = 'Store: ' + storeNum + '     ' + subtitle;
-  rows.push([subtitle]);
-  rows.push([]);
-
-  p.weeks.forEach((week, wIdx) => {
-    const weekDates = [];
-    const d = new Date(week.start);
-    for (let i = 0; i < 7; i++) { weekDates.push(new Date(d)); d.setDate(d.getDate() + 1); }
-
-    const sat = weekDates[6];
-    const weLabel = 'W/E ' + (sat.getMonth() + 1) + '/' + sat.getDate() + (holidayWeeks[wIdx] ? ' 🏖' : '');
-
-    rows.push([weLabel, ...DAY_HDR]);
-    rows.push(['', ...weekDates.map(wd => wd.getDate())]);
-
-    ROLES.forEach(r => {
-      rows.push([
-        names[r] || r.toUpperCase(),
-        ...weekDates.map(wd => {
-          const s = schedule[r] && schedule[r][dateKey(wd)];
-          return s ? getPrintShiftLabel(s) : '';
-        })
-      ]);
-    });
-
-    nonMgrKCs.forEach(kc => {
-      rows.push([
-        names[kc.id] || kc.name,
-        ...weekDates.map(wd => {
-          const s = schedule[kc.id] && schedule[kc.id][dateKey(wd)];
-          return (s && (isWork(s) || s === 'pto' || s === 'rto' || s === 'loa')) ? getPrintShiftLabel(s) : '';
-        })
-      ]);
-    });
-
-    rows.push([]);
-  });
-
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-
-  // Column widths: name col wide, 7 day cols medium
-  ws['!cols'] = [{ wch: 24 }, ...Array(7).fill({ wch: 13 })];
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
-  XLSX.writeFile(wb, filename);
+  const html = buildExcelExportHtml();
+  const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ── Render Summary ──
@@ -14038,6 +14254,7 @@ function clearSchedule() {
   updateReadyChecklist();
   try { if (typeof closeReviewSheet === 'function') closeReviewSheet(); } catch (e) {}
   try { if (typeof syncAppShell === 'function') syncAppShell(); } catch (e) {}
+  try { if (typeof hideBackupNudge === 'function') hideBackupNudge(); } catch (e) {}
   showToast('Generated schedule cleared.', 'info');
 }
 
@@ -14228,13 +14445,23 @@ function getKCEditOptions() {
 
 let schedEditOpen = false;
 
+function schedEditStop(e) {
+  if (!e) return;
+  try { e.preventDefault(); } catch (err) {}
+  try { e.stopPropagation(); } catch (err2) {}
+  if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+}
+
 function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
-  e.stopPropagation();
+  if (e) {
+    e.stopPropagation();
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+  }
   if (window._viewLocked) return;
   closeSchedEditMenu();
 
-  const cell = e.currentTarget;
-  const rect = cell.getBoundingClientRect();
+  const cell = e && e.currentTarget ? e.currentTarget : null;
+  const rect = cell && cell.getBoundingClientRect ? cell.getBoundingClientRect() : { left: 8, top: 8, bottom: 40, width: 40, height: 32 };
   if (window._msbSuppressCellClick) {
     window._msbSuppressCellClick = false;
     return;
@@ -14243,15 +14470,15 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
 
   const portal = document.getElementById('sched-edit-portal');
   const layer = layerRectFromClient(rect);
-  let html = '<div class="sched-edit-overlay" onclick="closeSchedEditMenu()"></div>';
-  html += `<div class="sched-edit-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px">`;
-  html += `<button type="button" onclick="event.stopPropagation(); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});">`;
+  let html = '<div class="sched-edit-overlay" onpointerdown="schedEditStop(event); closeSchedEditMenu();"></div>';
+  html += `<div class="sched-edit-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px" onpointerdown="event.stopPropagation();">`;
+  html += `<button type="button" onpointerdown="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});" onclick="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});">`;
   html += `<span class="swatch" style="background:rgba(61,220,255,0.45)"></span>Swap with…</button>`;
   html += `<div class="menu-divider"></div>`;
 
-  options.forEach((o, i) => {
+  options.forEach((o) => {
     if (o.value === '__custom__') {
-      html += `<button onclick="showSchedCustomInput('${role}','${dk}',${weekIdx}); event.stopPropagation();" style="color:#7e22ce;font-weight:600">`;
+      html += `<button type="button" onpointerdown="schedEditStop(event); showSchedCustomInput('${role}','${dk}',${weekIdx});" onclick="schedEditStop(event); showSchedCustomInput('${role}','${dk}',${weekIdx});" style="color:#7e22ce;font-weight:600">`;
       html += `<span class="swatch" style="background:${o.color}"></span>`;
       html += o.label;
       html += `</button>`;
@@ -14260,11 +14487,11 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
       html += `<input type="text" id="sched-custom-start-${role}-${dk}" placeholder="10a">`;
       html += `<span class="ci-dash">-</span>`;
       html += `<input type="text" id="sched-custom-end-${role}-${dk}" placeholder="6p">`;
-      html += `<button class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onclick="applySchedCustom('${role}','${dk}',${weekIdx}); event.stopPropagation();">OK</button>`;
+      html += `<button type="button" class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onpointerdown="schedEditStop(event); applySchedCustom('${role}','${dk}',${weekIdx});" onclick="schedEditStop(event); applySchedCustom('${role}','${dk}',${weekIdx});">OK</button>`;
       html += `</div></div>`;
     } else {
       const valArg = o.value === null ? 'null' : "'" + o.value + "'";
-      html += `<button onclick="applySchedEdit('${role}','${dk}',${weekIdx},${valArg}); event.stopPropagation();">`;
+      html += `<button type="button" onpointerdown="schedEditStop(event); applySchedEdit('${role}','${dk}',${weekIdx},${valArg});" onclick="schedEditStop(event); applySchedEdit('${role}','${dk}',${weekIdx},${valArg});">`;
       html += `<span class="swatch" style="background:${o.color}"></span>`;
       html += o.label;
       html += `</button>`;
@@ -14275,9 +14502,15 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
   portal.classList.add('is-open');
   portal.innerHTML = html;
   schedEditOpen = true;
+  window._msbSuppressCellClick = true;
+  setTimeout(function () { window._msbSuppressCellClick = false; }, 350);
 
   requestAnimationFrame(() => {
     placePortaledMenu(portal.querySelector('.sched-edit-menu'), rect);
+    const firstBtn = portal.querySelector('.sched-edit-menu button');
+    if (firstBtn && typeof firstBtn.focus === 'function') {
+      try { firstBtn.focus({ preventScroll: true }); } catch (err) { try { firstBtn.focus(); } catch (err2) {} }
+    }
   });
 }
 
@@ -14406,10 +14639,17 @@ function redoSchedEdit() {
 function applySchedEdit(role, dk, weekIdx, value) {
   if (window._viewLocked) return;
   if (!schedule[role]) schedule[role] = {};
+  const cur = schedule[role][dk];
+  if ((value === null && (cur == null || cur === '')) || cur === value) {
+    closeSchedEditMenu();
+    return;
+  }
   pushUndoSnapshot('cell edit');
   if (value === null) delete schedule[role][dk];
   else schedule[role][dk] = value;
   closeSchedEditMenu();
+  window._msbSuppressCellClick = true;
+  setTimeout(function () { window._msbSuppressCellClick = false; }, 350);
   const ROLES = getRoles();
   const ALL_KC = getAllWithKC();
   try { revalidateAfterManualEdit(ROLES, ALL_KC); }
@@ -14454,11 +14694,12 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Close schedule edit menu on outside click
-document.addEventListener('click', (e) => {
-  if (schedEditOpen && !e.target.closest('.sched-edit-menu') && !e.target.closest('.cell-inspector')) {
-    closeSchedEditMenu();
-  }
+// Overlay + pointerdown on options apply the edit. Do not close on a
+// bubbling click after the menu node is removed — that was a desktop no-op.
+document.addEventListener('pointerdown', (e) => {
+  if (!schedEditOpen) return;
+  if (e.target && e.target.closest && e.target.closest('.sched-edit-menu, .sched-edit-overlay, #sched-edit-portal, .cell-inspector')) return;
+  closeSchedEditMenu();
 });
 
 // ── v2.6.2 generate arrival + cell inspector / swap ──

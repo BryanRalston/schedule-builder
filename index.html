@@ -291,6 +291,48 @@ input[type="radio"] { accent-color: var(--gold); }
 }
 .setup-left, .setup-right { display: flex; flex-direction: column; gap: 1rem; }
 
+.ease-period-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+#btn-load-this-nrf {
+  min-height: 2.6rem;
+  font-weight: 700;
+}
+#btn-load-this-nrf.is-loaded {
+  box-shadow: inset 0 0 0 1px rgba(61, 222, 140, 0.35);
+}
+.ease-period-status {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ok);
+}
+.setup-more-toggle {
+  margin-top: 1rem;
+}
+.setup-more-toggle .btn-outline {
+  min-height: 2.4rem;
+}
+#tab-setup.first-run-ease .setup-grid {
+  grid-template-columns: 1fr;
+  max-width: 26rem;
+}
+#tab-setup.first-run-ease .setup-more-item {
+  display: none !important;
+}
+#tab-setup.first-run-ease .first-run-ease-only {
+  display: block !important;
+}
+#tab-setup:not(.first-run-ease) .first-run-ease-only {
+  display: none !important;
+}
+#tab-setup.first-run-ease .tab-footer-nav .btn-success {
+  min-height: 3rem;
+  font-size: 1.05rem;
+}
+
 .manager-section-header {
   display: flex;
   align-items: center;
@@ -374,6 +416,7 @@ input[type="radio"] { accent-color: var(--gold); }
   gap: 0.75rem;
   padding: 0.5rem 0;
 }
+.manager-row.kc-row-placeholder { display: none; }
 .manager-row .role-badge {
   font-size: 0.7rem;
   font-weight: 700;
@@ -563,7 +606,12 @@ input[type="radio"] { accent-color: var(--gold); }
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--ink-2);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
+.cell-menu button > * { pointer-events: none; }
 .cell-menu button:hover { background: rgba(61,220,255,0.1); color: var(--ink); }
 
 /* ========== WEEKLY SCHEDULE OUTPUT ========== */
@@ -1683,7 +1731,7 @@ input[type="radio"] { accent-color: var(--gold); }
 #cell-inspector-portal.is-open {
   position: fixed;
   inset: 0;
-  pointer-events: none;
+  pointer-events: auto;
 }
 #cell-menu-portal.is-open { z-index: 100; }
 #sched-edit-portal.is-open { z-index: 210; }
@@ -1698,7 +1746,8 @@ input[type="radio"] { accent-color: var(--gold); }
 }
 .sched-edit-menu {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
+  isolation: isolate;
   pointer-events: auto;
   background: rgba(12, 18, 32, 0.97);
   border: 1px solid var(--line-strong);
@@ -1724,8 +1773,15 @@ input[type="radio"] { accent-color: var(--gold); }
   color: var(--ink-2);
   min-height: 36px;
   white-space: nowrap;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 .sched-edit-menu button:hover { background: rgba(61,220,255,0.1); color: var(--ink); }
+.sched-edit-menu button > * {
+  pointer-events: none;
+}
 .sched-edit-menu button .swatch {
   display: inline-block;
   width: 12px;
@@ -4107,6 +4163,7 @@ html[data-density="board"] .week-table thead th .day-hours { font-size: 0.68rem;
   font-family: inherit;
 }
 .week-table tbody td.shift-editable { position: relative; }
+.week-table tbody td.shift-editable .cell-shift-txt { pointer-events: none; }
 .week-table tbody td.shift-editable:hover .cell-swap-btn,
 .week-table tbody td.shift-editable:focus-within .cell-swap-btn {
   opacity: 1;
@@ -4861,12 +4918,12 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
     <!-- TAB: SETUP -->
     <div class="tab-panel active" id="tab-setup" role="tabpanel" aria-labelledby="tabbtn-setup">
-      <div class="tab-panel-title">Store & team</div>
-      <div class="tab-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.</div>
+      <div class="tab-panel-title" id="setup-panel-title">Store & team</div>
+      <div class="tab-panel-desc" id="setup-panel-desc">Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.</div>
 <!-- SETUP SECTION -->
   <div class="section no-print" style="border:none">
     <div class="section-body" id="setup-body" style="padding:0" data-tour="setup-team">
-      <div class="team-templates-bar no-print" id="team-templates-bar" data-tour="team-templates">
+      <div class="team-templates-bar no-print setup-more-item" id="team-templates-bar" data-tour="team-templates">
         <label for="team-template-select">Team templates</label>
         <select id="team-template-select" aria-label="Saved team templates"></select>
         <button type="button" class="btn-secondary" onclick="saveTeamTemplate()">Save team</button>
@@ -4875,7 +4932,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </div>
       <div class="setup-grid">
         <div class="setup-left">
-          <div class="role-names-bar" id="role-names-bar">
+          <div class="role-names-bar setup-more-item" id="role-names-bar">
             <span class="role-names-label">Role names</span>
             <label class="role-title-field">
               <span class="role-sm">SM</span>
@@ -4901,7 +4958,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
           <!-- AMs (dynamic) -->
           <div>
-            <div class="manager-section-header">
+            <label id="label-role-am-ease" class="role-section-label first-run-ease-only" style="display:none;margin-bottom:0.5rem">Assistant Manager</label>
+            <div class="manager-section-header setup-more-item">
               <label id="label-role-am">Assistant Managers</label>
               <span class="count-badge" id="am-count-badge">3</span>
               <button class="btn-round btn-danger" onclick="removeAM()" title="Remove last AM">-</button>
@@ -4911,7 +4969,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           </div>
 
           <!-- KCs (dynamic) -->
-          <div>
+          <div class="setup-more-item" id="kc-section">
             <div class="manager-section-header">
               <label id="label-role-kc">Key Carriers</label>
               <span class="count-badge" id="kc-count-badge">1</span>
@@ -4922,7 +4980,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           </div>
         </div>
         <div class="setup-right">
-          <div>
+          <div class="setup-more-item" id="setup-store-block">
             <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Store</label>
             <div class="store-name-row">
               <label style="font-weight:600;font-size:0.9rem;white-space:nowrap">Name:</label>
@@ -4942,8 +5000,12 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             </div>
           </div>
           <div>
-            <label style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Fiscal Period</label>
-            <div class="period-picker">
+            <label class="setup-more-item" id="label-fiscal-period" style="font-weight:600;font-size:0.9rem;display:block;margin-bottom:0.5rem">Fiscal Period</label>
+            <div class="ease-period-row" id="ease-period-row">
+              <button type="button" class="btn-primary" id="btn-load-this-nrf" onclick="loadThisNrfPeriod()">Load this NRF period</button>
+              <span class="ease-period-status" id="ease-period-status" hidden>Loaded</span>
+            </div>
+            <div class="period-picker setup-more-item">
               <label>FY:</label>
               <input type="number" id="pick-year" min="2024" max="2030" value="2026" style="width:80px" onchange="buildPeriodDropdown()">
               <label>Period:</label>
@@ -4953,7 +5015,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             </div>
             <div class="period-info" id="period-info"></div>
 
-            <div class="federal-holidays-block no-print" id="federal-holidays-block">
+            <div class="federal-holidays-block no-print setup-more-item" id="federal-holidays-block">
               <div class="fh-head">
                 <span class="fh-title">Federal paid holidays</span>
                 <span class="fh-sub">4-day work week · saved on this device</span>
@@ -4963,7 +5025,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             </div>
 
           </div>
-          <div class="legend mt-1">
+          <div class="legend mt-1 setup-more-item">
             <div class="legend-item"><span class="legend-swatch" style="background:rgba(61,222,140,0.35)"></span> Open</div>
             <div class="legend-item"><span class="legend-swatch" style="background:rgba(124,92,255,0.4)"></span> Mid</div>
             <div class="legend-item"><span class="legend-swatch" style="background:rgba(255,92,122,0.35)"></span> Close</div>
@@ -4977,7 +5039,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           </div>
 
           <!-- Shift Times Settings (Feature 3) -->
-          <div style="margin-top:0.75rem">
+          <div class="setup-more-item" id="shift-times-block" style="margin-top:0.75rem">
             <div style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none" onclick="toggleShiftTimesPanel()">
               <span style="font-weight:600;font-size:0.9rem">Shift Times</span>
               <span id="shift-times-toggle" style="font-size:0.8rem;color:var(--ink-4);transition:transform 0.2s">&#9660;</span>
@@ -4992,6 +5054,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </div>
     </div>
   </div>
+      <div class="setup-more-toggle no-print" id="setup-more-toggle">
+        <button type="button" class="btn-outline" id="btn-more-setup" onclick="toggleMoreSetup()" aria-expanded="false" aria-controls="setup-body">More setup</button>
+      </div>
       <div class="tab-footer-nav">
         <button type="button" class="btn-secondary" onclick="switchTab('requests')">Requests (optional)</button>
         <button type="button" class="btn-success" id="btn-build-from-setup" onclick="buildFromSetup()">Build this period</button>
@@ -5212,7 +5277,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.15</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.16</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -5526,6 +5591,7 @@ function restoreAppTab() {
 // Free: unlimited managers; limited free schedule builds (see freeGenerateLimit)
 let amCount = 2;
 let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
+let kcRowsUnlocked = false;
 
 // Store open/close hours (display/planning metadata — not required by coverage engine)
 const DEFAULT_STORE_HOURS = {
@@ -7390,7 +7456,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.15';
+const APP_VERSION = '2.6.16';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7455,6 +7521,121 @@ function dismissWelcome() {
   try { localStorage.setItem('msb_welcome_dismissed', '1'); } catch(e) {}
 }
 
+const MSB_SETUP_MORE_KEY = 'msb_setup_more_open';
+
+function findNrfPeriodForDate(date) {
+  const d = date instanceof Date ? date : new Date();
+  const years = [d.getFullYear(), d.getFullYear() - 1, d.getFullYear() + 1];
+  for (let yi = 0; yi < years.length; yi++) {
+    const fy = years[yi];
+    const periods = typeof getFiscalPeriods === 'function' ? getFiscalPeriods(fy) : [];
+    for (let i = 0; i < periods.length; i++) {
+      if (d >= periods[i].start && d <= periods[i].end) {
+        return { fiscalYear: fy, index: i, period: periods[i] };
+      }
+    }
+  }
+  return null;
+}
+
+function isThisNrfPeriodLoaded() {
+  if (!currentPeriod || !periodDates || !periodDates.length) return false;
+  const found = findNrfPeriodForDate(new Date());
+  if (!found) return true;
+  return fiscalYear === found.fiscalYear && currentPeriodIndex === found.index;
+}
+
+function updateLoadThisNrfButton() {
+  const btn = document.getElementById('btn-load-this-nrf');
+  const status = document.getElementById('ease-period-status');
+  if (!btn) return;
+  const loaded = isThisNrfPeriodLoaded();
+  btn.classList.toggle('is-loaded', loaded);
+  btn.setAttribute('aria-pressed', loaded ? 'true' : 'false');
+  if (status) {
+    status.hidden = !loaded;
+    status.textContent = loaded ? 'Loaded' : '';
+  }
+  if (loaded && currentPeriod) {
+    btn.title = 'Reload FY' + fiscalYear + ' Period ' + currentPeriod.number;
+  } else {
+    btn.title = 'Load the NRF period that contains today';
+  }
+}
+
+function loadThisNrfPeriod(opts) {
+  opts = opts || {};
+  const found = findNrfPeriodForDate(new Date());
+  if (found) {
+    fiscalYear = found.fiscalYear;
+    currentPeriodIndex = found.index;
+    const yEl = document.getElementById('pick-year');
+    if (yEl) yEl.value = fiscalYear;
+    if (typeof buildPeriodDropdown === 'function') buildPeriodDropdown();
+    const pEl = document.getElementById('pick-period');
+    if (pEl) pEl.value = String(currentPeriodIndex);
+  }
+  if (typeof loadPeriod === 'function') loadPeriod();
+  updateLoadThisNrfButton();
+  if (opts.quiet) return !!currentPeriod;
+  if (currentPeriod) {
+    showToast('This NRF period is loaded — FY' + fiscalYear + ' P' + currentPeriod.number + '.', 'success');
+    return true;
+  }
+  showToast('Could not load this NRF period.', 'error');
+  return false;
+}
+
+function shouldUseFirstRunEase() {
+  try {
+    const pref = localStorage.getItem(MSB_SETUP_MORE_KEY);
+    if (pref === '1') return false;
+    if (pref === '0') return true;
+    if (typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule()) return false;
+    if (typeof hasSavedUserRoster === 'function' && hasSavedUserRoster()) return false;
+  } catch (e) {}
+  return true;
+}
+
+function syncFirstRunEase() {
+  const tab = document.getElementById('tab-setup');
+  if (!tab) return;
+  const ease = shouldUseFirstRunEase();
+  tab.classList.toggle('first-run-ease', ease);
+  const btn = document.getElementById('btn-more-setup');
+  const wrap = document.getElementById('setup-more-toggle');
+  let pref = null;
+  try { pref = localStorage.getItem(MSB_SETUP_MORE_KEY); } catch (e) {}
+  const returningFull = !ease && pref !== '1';
+  if (wrap) wrap.hidden = returningFull;
+  if (btn) {
+    btn.setAttribute('aria-expanded', ease ? 'false' : 'true');
+    btn.textContent = ease ? 'More setup' : 'Hide extra setup';
+  }
+  const title = document.getElementById('setup-panel-title');
+  const desc = document.getElementById('setup-panel-desc');
+  if (title) title.textContent = ease ? 'Your team' : 'Store & team';
+  if (desc) {
+    desc.textContent = ease
+      ? 'Name two managers, load this NRF period, then Build. Requests and rules can wait. New phone? More → Backup JSON, then Load.'
+      : 'Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.';
+  }
+  updateLoadThisNrfButton();
+}
+
+function setMoreSetupOpen(open) {
+  try {
+    localStorage.setItem(MSB_SETUP_MORE_KEY, open ? '1' : '0');
+  } catch (e) {}
+  syncFirstRunEase();
+}
+
+function toggleMoreSetup() {
+  const tab = document.getElementById('tab-setup');
+  const collapsed = !!(tab && tab.classList.contains('first-run-ease'));
+  setMoreSetupOpen(collapsed);
+}
+
 function startWithMyTeam() {
   try { dismissWelcome(); } catch (e) {}
   try {
@@ -7466,7 +7647,13 @@ function startWithMyTeam() {
       applyBlankTeam({ persist: true });
     }
   } catch (e) {}
+  try {
+    if (typeof hasPersistedBuiltSchedule !== 'function' || !hasPersistedBuiltSchedule()) {
+      localStorage.removeItem(MSB_SETUP_MORE_KEY);
+    }
+  } catch (e5) {}
   if (typeof switchTab === 'function') switchTab('setup');
+  try { syncFirstRunEase(); } catch (e6) {}
   setTimeout(() => {
     const sm = document.getElementById('name-sm');
     if (sm) {
@@ -7480,7 +7667,7 @@ function startWithMyTeam() {
       team.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, 50);
-  showToast('Name two managers, then Build this period. Requests can wait.', 'info');
+  showToast('Name two managers, load this NRF period, then Build. Requests can wait.', 'info');
 }
 
 function buildFromSetup() {
@@ -7496,6 +7683,18 @@ function buildFromSetup() {
       }
     }
     showToast('Name your managers on Setup before building.', 'warn');
+    return;
+  }
+  if (!periodDates || !periodDates.length || !currentPeriod) {
+    try { loadThisNrfPeriod({ quiet: true }); } catch (e4) {}
+  }
+  if (!periodDates || !periodDates.length || !currentPeriod) {
+    if (typeof switchTab === 'function') switchTab('setup');
+    const loadBtn = document.getElementById('btn-load-this-nrf');
+    if (loadBtn) {
+      try { loadBtn.focus({ preventScroll: true }); } catch (e5) { try { loadBtn.focus(); } catch (e6) {} }
+    }
+    showToast('Load this NRF period on Setup before building.', 'warn');
     return;
   }
   if (typeof switchTab === 'function') switchTab('schedule');
@@ -7628,6 +7827,8 @@ function applyRoleTitleUI() {
   if (smLab) smLab.textContent = smT;
   if (amLab) amLab.textContent = pluralRoleTitle('am');
   if (kcLab) kcLab.textContent = pluralRoleTitle('kc');
+  const amEase = document.getElementById('label-role-am-ease');
+  if (amEase) amEase.textContent = amT;
   const smName = document.getElementById('name-sm');
   if (smName) smName.placeholder = smT + ' name';
   const amMax = typeof amCount === 'number' ? amCount : 8;
@@ -8549,6 +8750,7 @@ function applyBlankTeam(opts) {
   const persist = !opts || opts.persist !== false;
   amCount = 2;
   kcList = [{ id: 'kc1', name: '', asManager: false, midDows: [] }];
+  kcRowsUnlocked = false;
   if (typeof renderAMRows === 'function') renderAMRows();
   if (typeof renderKCRows === 'function') renderKCRows();
   const sm = document.getElementById('name-sm');
@@ -8741,6 +8943,7 @@ function loadDemoStore(opts) {
     document.getElementById('store-number').value = DEMO_STORE_NUMBER;
     persistManagerNames();
     persistStoreMeta();
+    try { if (typeof setMoreSetupOpen === 'function') setMoreSetupOpen(true); } catch (eMore) {}
 
     // Period — current FY / period already in dropdown
     if (!periodDates || !periodDates.length) {
@@ -9423,7 +9626,7 @@ function renderAMRows() {
     const id = 'am' + i;
     const existing = document.getElementById('name-' + id);
     const val = existing ? existing.value : 'AM' + i;
-    html += `<div class="manager-row">
+    html += `<div class="manager-row${i > 1 ? ' setup-more-item am-row-extra' : ' am-row-primary'}">
       <span class="role-badge role-am">AM${i}</span>
       <input type="text" id="name-${id}" value="${val}" placeholder="${typeof getRoleTitle === 'function' ? getRoleTitle('am') : 'Assistant Manager'} ${i}" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
     </div>`;
@@ -9449,15 +9652,21 @@ function toggleKcMidDow(idx, dow, checked) {
 function renderKCRows() {
   const container = document.getElementById('kc-rows');
   let html = '';
+  const anyNamed = kcList.some((kc) => typeof isPlaceholderManagerName === 'function' && !isPlaceholderManagerName(kc && kc.name));
+  const showPlaceholders = kcRowsUnlocked || anyNamed || kcList.length > 1;
+  let visibleCount = 0;
   kcList.forEach((kc, idx) => {
     if (!Array.isArray(kc.midDows)) kc.midDows = [];
+    const named = typeof isPlaceholderManagerName === 'function' && !isPlaceholderManagerName(kc && kc.name);
+    const hide = !named && !showPlaceholders;
+    if (!hide) visibleCount++;
     const midSet = new Set(normalizeKcMidDows(kc.midDows));
     const midChecks = !kc.asManager
       ? `<div class="kc-mid-days"><span class="kc-mid-label">Mid days</span>${DAY_NAMES.map((dn, d) =>
           `<label><input type="checkbox" ${midSet.has(d) ? 'checked' : ''} onchange="toggleKcMidDow(${idx}, ${d}, this.checked)"> ${dn}</label>`
         ).join('')}</div>`
       : '';
-    html += `<div class="manager-row" style="flex-wrap:wrap">
+    html += `<div class="manager-row${hide ? ' kc-row-placeholder' : ''}" style="flex-wrap:wrap">
       <span class="role-badge role-kc">KC${idx + 1}</span>
       <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="${typeof getRoleTitle === 'function' ? getRoleTitle('kc') : 'Key Carrier'} ${idx + 1}"
         oninput="kcList[${idx}].name = this.value; persistManagerNames()" onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
@@ -9470,7 +9679,7 @@ function renderKCRows() {
     </div>`;
   });
   container.innerHTML = html;
-  document.getElementById('kc-count-badge').textContent = kcList.length;
+  document.getElementById('kc-count-badge').textContent = visibleCount;
 }
 
 function addAM() {
@@ -9490,9 +9699,21 @@ function removeAM() {
 }
 
 function addKC() {
-  // Non-manager KCs do not consume free manager seats
+  const soleUnnamed = kcList.length === 1 && kcList[0] && typeof isNamedKeyCarrier === 'function' && !isNamedKeyCarrier(kcList[0]);
+  if (soleUnnamed && !kcRowsUnlocked) {
+    kcRowsUnlocked = true;
+    if (kcList[0]) kcList[0].name = '';
+    renderKCRows();
+    const el = document.getElementById('name-' + (kcList[0] && kcList[0].id));
+    if (el) {
+      el.value = '';
+      try { el.focus({ preventScroll: true }); } catch (e) { try { el.focus(); } catch (e2) {} }
+    }
+    return;
+  }
+  kcRowsUnlocked = true;
   const num = kcList.length + 1;
-  kcList.push({ id: 'kc' + num, name: defaultRolePersonName('kc', num), asManager: false, midDows: [] });
+  kcList.push({ id: 'kc' + num, name: '', asManager: false, midDows: [] });
   renderKCRows();
   rebuildAfterConfigChange();
 }
@@ -9620,6 +9841,7 @@ function loadPeriod() {
   updatePeriodInfo();
   document.getElementById('schedule-section').style.display = 'none';
   document.getElementById('summary-section').style.display = 'none';
+  try { if (typeof updateLoadThisNrfButton === 'function') updateLoadThisNrfButton(); } catch (eNrf) {}
 }
 
 // ── Input Tabs ──
@@ -9731,15 +9953,17 @@ function viewportSize() {
 function placePortaledMenu(menu, anchorRect) {
   if (!menu || !anchorRect) return;
   if (window.innerWidth <= 640) return;
-  const a = layerRectFromClient(anchorRect);
-  const view = viewportSize();
-  let top = a.bottom + 4;
-  let left = a.left;
+  // Client rects match elementFromPoint / tap targets. Do not subtract
+  // visualViewport offset — that painted labels away from the hit box.
+  const viewW = window.innerWidth;
+  const viewH = window.innerHeight;
+  let top = anchorRect.bottom + 4;
+  let left = anchorRect.left;
   menu.style.top = top + 'px';
   menu.style.left = left + 'px';
-  const m = layerRectFromClient(menu.getBoundingClientRect());
-  if (m.bottom > view.h - 4) top = Math.max(4, a.top - m.height - 4);
-  if (m.right > view.w - 4) left = Math.max(4, view.w - m.width - 8);
+  const m = menu.getBoundingClientRect();
+  if (m.bottom > viewH - 4) top = Math.max(4, anchorRect.top - m.height - 4);
+  if (m.right > viewW - 4) left = Math.max(4, viewW - m.width - 8);
   if (left < 4) left = 4;
   if (top < 4) top = 4;
   menu.style.top = top + 'px';
@@ -9801,9 +10025,8 @@ function openCellMenu(e, role, dk) {
   ];
 
   const portal = document.getElementById('cell-menu-portal');
-  const layer = layerRectFromClient(rect);
   let html = '<div class="overlay" onclick="closeCellMenu()"></div>';
-  html += `<div class="cell-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px">`;
+  html += `<div class="cell-menu" style="top:${rect.bottom + 4}px;left:${rect.left}px">`;
 
   groups.forEach((group, gi) => {
     if (gi > 0) html += '<div class="cell-menu-divider"></div>';
@@ -9999,7 +10222,7 @@ function generateSchedule(opts) {
     return;
   }
   if (!periodDates || !periodDates.length || !currentPeriod) {
-    showToast('Load a fiscal period first (Setup → Load Period).', 'warn');
+    showToast('Load this NRF period on Setup first.', 'warn');
     switchTab('setup');
     return;
   }
@@ -10069,7 +10292,7 @@ function _generateScheduleInner(opts) {
   const nonMgrKCs = getNonManagerKCs(); // KCs not in manager mode
 
   if (!periodDates || periodDates.length === 0) {
-    showToast('Load a fiscal period first (Setup → Load Period).', 'warn');
+    showToast('Load this NRF period on Setup first.', 'warn');
     switchTab('setup');
     return;
   }
@@ -14469,18 +14692,17 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
   const options = isKCRole ? getKCEditOptions() : getManagerEditOptions();
 
   const portal = document.getElementById('sched-edit-portal');
-  const layer = layerRectFromClient(rect);
   let html = '<div class="sched-edit-overlay" onpointerdown="schedEditStop(event); closeSchedEditMenu();"></div>';
-  html += `<div class="sched-edit-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px" onpointerdown="event.stopPropagation();">`;
+  html += `<div class="sched-edit-menu" style="top:${rect.bottom + 4}px;left:${rect.left}px" onpointerdown="event.stopPropagation();">`;
   html += `<button type="button" onpointerdown="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});" onclick="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});">`;
-  html += `<span class="swatch" style="background:rgba(61,220,255,0.45)"></span>Swap with…</button>`;
+  html += `<span class="swatch" style="background:rgba(61,220,255,0.45)"></span><span class="sched-edit-label">Swap with…</span></button>`;
   html += `<div class="menu-divider"></div>`;
 
   options.forEach((o) => {
     if (o.value === '__custom__') {
       html += `<button type="button" onpointerdown="schedEditStop(event); showSchedCustomInput('${role}','${dk}',${weekIdx});" onclick="schedEditStop(event); showSchedCustomInput('${role}','${dk}',${weekIdx});" style="color:#7e22ce;font-weight:600">`;
       html += `<span class="swatch" style="background:${o.color}"></span>`;
-      html += o.label;
+      html += `<span class="sched-edit-label">${o.label}</span>`;
       html += `</button>`;
       html += `<div id="sched-custom-input-${role}-${dk}" style="display:none">`;
       html += `<div class="custom-input-row">`;
@@ -14493,7 +14715,7 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
       const valArg = o.value === null ? 'null' : "'" + o.value + "'";
       html += `<button type="button" onpointerdown="schedEditStop(event); applySchedEdit('${role}','${dk}',${weekIdx},${valArg});" onclick="schedEditStop(event); applySchedEdit('${role}','${dk}',${weekIdx},${valArg});">`;
       html += `<span class="swatch" style="background:${o.color}"></span>`;
-      html += o.label;
+      html += `<span class="sched-edit-label">${o.label}</span>`;
       html += `</button>`;
     }
   });
@@ -15868,6 +16090,7 @@ function startOnboardingTour(force) {
   try {
     if (typeof dismissWelcome === 'function') dismissWelcome();
   } catch (e) {}
+  try { if (typeof setMoreSetupOpen === 'function') setMoreSetupOpen(true); } catch (eMore) {}
   applyTourStep(0);
 }
 
@@ -17140,6 +17363,7 @@ if (
 try { applyRoleTitleUI(); } catch (eRtBoot) {}
 restoreWelcomeState();
 try { if (typeof restoreAppTab === 'function') restoreAppTab(); } catch (eTabBoot) {}
+try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEaseBoot) {}
 renderTeamTemplateUI();
 updateStoreHoursSummary();
 renderPreferencesUI();

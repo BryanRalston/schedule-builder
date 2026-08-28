@@ -1,7 +1,7 @@
 /**
  * v2.6.21: two-manager first Build is a hangable period (offs, mixed
  * shifts, weekend offs), marketing hero hides after a live board.
- * Keeps 2.6.12–2.6.20 behavior; version lock follows 2.6.25.
+ * Keeps 2.6.12–2.6.20 behavior; version lock follows 2.6.26.
  * Run: node tests/test-v2621-ux.mjs
  */
 import { createServer } from 'http';
@@ -72,15 +72,15 @@ async function main() {
   console.log('\n=== v2.6.21 two-manager hangable board + hero hide ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.25') pass('version.json', version.version);
+  if (version.version === '2.6.26') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.25'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.26'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.25'") && index.includes('id="app-version-label">v2.6.25')) {
+  if (index.includes("const APP_VERSION = '2.6.26'") && index.includes('id="app-version-label">v2.6.26')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -115,7 +115,7 @@ async function main() {
   if (!/TJX|Marshalls|HomeGoods|Winners/i.test(index)) pass('no-employer-names');
   else fail('no-employer-names', 'employer name leaked into copy');
 
-  // 2.6.25 ships EN/ES on-device. Prior suites only lock version + prior behavior.
+  // 2.6.26 ships EN/ES on-device. Prior suites only lock version + prior behavior.
   pass('no-language-picker');
 
   const paintChunk = (index.match(/function paintRequestCell\([\s\S]*?\n\}/) || [''])[0];

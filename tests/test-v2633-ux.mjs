@@ -1,10 +1,12 @@
 /**
- * v2.6.32: auto-save the built period on this device after Generate
- * and cell edits. Quality does not ding SM for fewer weekend offs
- * when that default pref is on. First visit with no named team stays
- * clean (2.6.29). Close-even 2.6.30 and icon 2.6.31 stay.
- * Keeps 2.6.12–2.6.31 suites; version lock 2.6.33.
- * Run: node tests/test-v2632-ux.mjs
+ * v2.6.33: after Build, a hard reload must restore the board AND
+ * numbered review chips (Quality score, Coverage, WE offs, clopens).
+ * Recompute from the restored board — no Rebuild tap, no free generate.
+ * First visit with no named team stays clean (2.6.29). Cell edit still
+ * persists (2.6.32). SM fewer-WE Quality skip (2.6.32) and close-even
+ * (2.6.30) stay. Play/TWA icons and KC-C rules stay.
+ * Keeps 2.6.12–2.6.32 suites; version lock 2.6.33.
+ * Run: node tests/test-v2633-ux.mjs
  */
 import { createServer } from 'http';
 import { readFileSync, existsSync } from 'fs';
@@ -94,8 +96,21 @@ function seedDirtyTesterChrome() {
 const OLD_ICON_512_SHA256 =
   '036e40a2b4326d3e0748d690d0de632520cc53be829ae07464e9d9fe1e45f95a';
 
+function chipsNumbered(ch) {
+  if (!ch) return false;
+  const q = String(ch.quality || '').trim();
+  const cover = String(ch.cover || '').trim();
+  const we = String(ch.we || '').trim();
+  const cl = String(ch.clopens || '').trim();
+  const qOk = /Quality/i.test(q) && /\d/.test(q) && !/^Quality\.?$/.test(q);
+  const coverOk = !!cover && !/^Coverage\.?$/.test(cover) && cover !== 'Coverage…';
+  const weOk = /WE/i.test(we) && /\d/.test(we) && !/^WE offs\.?$/.test(we);
+  const clOk = /Clopen/i.test(cl) && /\d/.test(cl);
+  return !!(qOk && coverOk && weOk && clOk);
+}
+
 async function main() {
-  console.log('\n=== v2.6.32 auto-save board + SM fewer-WE Quality ===');
+  console.log('\n=== v2.6.33 restore review chips from the built board ===');
 
   const version = JSON.parse(read('version.json'));
   if (version.version === '2.6.33') pass('version.json', version.version);
@@ -110,14 +125,14 @@ async function main() {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
-  if (/function persistLiveSchedule\(/.test(index)
+  if (/function refreshReviewFromBoard\(/.test(index)
+    && /function persistLiveSchedule\(/.test(index)
     && /function weekendFairnessRoles\(/.test(index)
     && /function smFewerWeekendOffsPrefOn\(/.test(index)
-    && /saveToStorage\(\{ quiet: true \}\)/.test(index)
-    && /maybeShowBackupNudge/.test(index)
-    && /function exportBackupJSON\(/.test(index)) {
-    pass('v2632-fns');
-  } else fail('v2632-fns', 'auto-save / weekend-fairness helpers missing');
+    && /Always rebuild from the live board/.test(index)
+    && /Static i18n resets review chips/.test(index)) {
+    pass('v2633-fns');
+  } else fail('v2633-fns', 'restore-review helpers missing');
 
   if (/function shouldEvenSmAmCloses\(/.test(index)
     && /function getEvenCloseShare\(/.test(index)
@@ -126,9 +141,10 @@ async function main() {
     && /function hasSavedUserPeople\(/.test(index)
     && /function isFirstVisitOpen\(/.test(index)
     && /function applyFirstVisitReset\(/.test(index)
-    && /function generateScheduleFromButton\(/.test(index)) {
-    pass('v2612-v2631-kept');
-  } else fail('v2612-v2631-kept', '2.6.12–2.6.31 markers missing');
+    && /function generateScheduleFromButton\(/.test(index)
+    && /function persistLiveSchedule\(/.test(index)) {
+    pass('v2612-v2632-kept');
+  } else fail('v2612-v2632-kept', '2.6.12–2.6.32 markers missing');
 
   if (!/TJX|Marshalls|HomeGoods|Winners/i.test(index)) pass('no-employer-names');
   else fail('no-employer-names', 'employer name leaked into copy');
@@ -162,6 +178,10 @@ async function main() {
     const firstVisit = await dirty.evaluate(() => {
       const resultsEl = document.getElementById('schedule-results');
       const grid = document.getElementById('schedule-grid');
+      const strip = document.getElementById('post-gen-strip');
+      const q = document.getElementById('pgs-quality');
+      const cover = document.getElementById('pgs-cover');
+      const we = document.getElementById('pgs-we');
       return {
         first: typeof isFirstVisitOpen === 'function' ? isFirstVisitOpen() : null,
         people: typeof hasSavedUserPeople === 'function' ? hasSavedUserPeople() : null,
@@ -169,15 +189,20 @@ async function main() {
         live: typeof hasLiveBuiltBoard === 'function' ? hasLiveBuiltBoard() : null,
         cells: grid ? grid.querySelectorAll('td.shift-editable').length : 0,
         resultsShown: !!(resultsEl && resultsEl.style.display !== 'none' && resultsEl.offsetParent),
+        stripShown: !!(strip && !strip.hidden && strip.classList.contains('show')),
+        quality: q ? (q.textContent || '').trim() : '',
+        cover: cover ? (cover.textContent || '').trim() : '',
+        we: we ? (we.textContent || '').trim() : '',
         sm: ((document.getElementById('name-sm') || {}).value || ''),
         store: ((document.getElementById('store-name') || {}).value || ''),
       };
     });
     if (firstVisit.first === true && firstVisit.people === false && firstVisit.built === false
       && firstVisit.live === false && firstVisit.cells === 0
+      && firstVisit.stripShown === false
       && !/playtest/i.test(firstVisit.store)) {
-      pass('first-visit-no-leftover-board', firstVisit.sm || '(blank SM)');
-    } else fail('first-visit-no-leftover-board', JSON.stringify(firstVisit));
+      pass('first-visit-no-leftover-chips', firstVisit.sm || '(blank SM)');
+    } else fail('first-visit-no-leftover-chips', JSON.stringify(firstVisit));
     await dirty.close();
 
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
@@ -187,7 +212,6 @@ async function main() {
       sessionStorage.clear();
       localStorage.setItem('msb_tour_done', '1');
       localStorage.setItem('msb_welcome_dismissed', '1');
-      localStorage.setItem('msb_pro_license', JSON.stringify({ key: 'TEST-PRO-KEY-999', unlockedAt: Date.now() }));
     });
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(700);
@@ -274,77 +298,99 @@ async function main() {
       if (typeof persistStoreMeta === 'function') persistStoreMeta();
       if (typeof loadThisNrfPeriod === 'function') loadThisNrfPeriod({ quiet: true });
       else if (typeof loadPeriod === 'function') loadPeriod();
-      if (typeof generateSchedule === 'function') generateSchedule({ skipFreeCount: true });
+      const freeBefore = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
+      if (typeof generateSchedule === 'function') generateSchedule();
       return new Promise((resolve) => {
         setTimeout(() => {
-          const dks = (periodDates || []).map((d) => dateKey(d));
+          const q = document.getElementById('pgs-quality');
+          const cover = document.getElementById('pgs-cover');
+          const we = document.getElementById('pgs-we');
+          const cl = document.getElementById('pgs-clopens');
+          const strip = document.getElementById('post-gen-strip');
           const report = window._lastGenReport || {};
-          const snap = JSON.parse(JSON.stringify(schedule || {}));
-          let edit = null;
-          dks.some((dk) => {
-            const s = schedule.sm && schedule.sm[dk];
-            if (s && s !== 'off' && s !== 'pto' && s !== 'rto' && s !== 'loa') {
-              edit = { role: 'sm', dk, from: s, to: 'off' };
-              return true;
-            }
-            return false;
-          });
           const lastKey = localStorage.getItem('schedule_last');
           let saved = null;
           try { saved = lastKey ? JSON.parse(localStorage.getItem(lastKey) || 'null') : null; } catch (e) {}
-          const issues = typeof buildPostingIssues === 'function'
-            ? buildPostingIssues(report, getRoles(), [])
-            : [];
-          const fu = document.getElementById('fairness-under-schedule');
-          const smRow = fu
-            ? [...fu.querySelectorAll('tbody tr')].find((tr) => /Bryan Test/i.test(tr.textContent || ''))
-            : null;
-          const glanceSmLow = !!(smRow && /low WE offs/i.test(smRow.textContent || ''));
-          const smWe = (report.weekendOffs && report.weekendOffs.sm) || 0;
-          const amWes = ['am1', 'am2', 'am3'].map((r) => (report.weekendOffs && report.weekendOffs[r]) || 0);
           resolve({
-            days: dks.length,
             cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
             live: typeof hasLiveBuiltBoard === 'function' ? hasLiveBuiltBoard() : null,
             lastKey,
             savedHasBoard: !!(saved && saved.schedule && saved.schedule.sm && Object.keys(saved.schedule.sm).length),
             savedSm: saved && saved.names ? saved.names.sm : '',
-            savedAm: saved && saved.names ? saved.names.am1 : '',
-            smWe,
-            amWes,
-            smShortIssue: issues.some((i) => /Bryan Test/i.test(i.title || '') && /weekend/i.test(i.title || '')),
-            glanceSmLow,
+            freeBefore,
+            freeAfter: typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null,
             evenPeers: !!(report.closeTargets && report.closeTargets.evenPeers),
-            edit,
-            snapCells: Object.keys(snap.sm || {}).length,
+            quality: q ? (q.textContent || '').trim() : '',
+            cover: cover ? (cover.textContent || '').trim() : '',
+            we: we ? (we.textContent || '').trim() : '',
+            clopens: cl ? (cl.textContent || '').trim() : '',
+            stripShown: !!(strip && !strip.hidden && strip.classList.contains('show')),
+            score: report.quality && report.quality.score,
           });
         }, 2800);
       });
     });
 
-    if (built.days >= 28 && built.live && built.cells > 10 && built.savedHasBoard
-      && built.lastKey && built.savedSm === 'Bryan Test' && built.savedAm === 'Dana Cruz') {
-      pass('generate-autosaves-board', built.lastKey + ' · ' + built.cells + ' cells');
-    } else fail('generate-autosaves-board', JSON.stringify({
-      days: built.days, live: built.live, cells: built.cells,
-      lastKey: built.lastKey, savedHasBoard: built.savedHasBoard,
-      savedSm: built.savedSm, savedAm: built.savedAm,
-    }));
+    if (built.live && built.cells > 10 && built.savedHasBoard
+      && built.lastKey && built.savedSm === 'Bryan Test' && chipsNumbered(built)) {
+      pass('build-paints-numbered-chips', built.quality + ' · ' + built.cover + ' · ' + built.we);
+    } else fail('build-paints-numbered-chips', JSON.stringify(built));
 
     if (built.evenPeers) pass('close-even-2630-stays', 'evenPeers');
     else fail('close-even-2630-stays', 'evenPeers missing after generate');
 
-    if (built.smShortIssue === false && built.glanceSmLow === false) {
-      pass('live-sm-not-shamed-for-fewer-we', 'SM WE=' + built.smWe + ' AMs=' + (built.amWes || []).join(','));
-    } else fail('live-sm-not-shamed-for-fewer-we', JSON.stringify({
-      smWe: built.smWe, amWes: built.amWes,
-      smShortIssue: built.smShortIssue, glanceSmLow: built.glanceSmLow,
+    if (built.freeBefore === 0 && built.freeAfter === 1) {
+      pass('first-build-consumes-one-free', String(built.freeAfter));
+    } else fail('first-build-consumes-one-free', JSON.stringify({
+      freeBefore: built.freeBefore, freeAfter: built.freeAfter,
     }));
+
+    const reread = await page.evaluate(() => {
+      const beforeWipe = {
+        quality: ((document.getElementById('pgs-quality') || {}).textContent || '').trim(),
+        cover: ((document.getElementById('pgs-cover') || {}).textContent || '').trim(),
+        we: ((document.getElementById('pgs-we') || {}).textContent || '').trim(),
+        clopens: ((document.getElementById('pgs-clopens') || {}).textContent || '').trim(),
+        score: window._lastGenReport && window._lastGenReport.quality
+          ? window._lastGenReport.quality.score
+          : null,
+      };
+      window._lastGenReport = null;
+      if (typeof applyStaticI18n === 'function') applyStaticI18n();
+      const wiped = {
+        quality: ((document.getElementById('pgs-quality') || {}).textContent || '').trim(),
+        cover: ((document.getElementById('pgs-cover') || {}).textContent || '').trim(),
+        we: ((document.getElementById('pgs-we') || {}).textContent || '').trim(),
+      };
+      const ok = typeof refreshReviewFromBoard === 'function' ? refreshReviewFromBoard() : false;
+      const after = {
+        quality: ((document.getElementById('pgs-quality') || {}).textContent || '').trim(),
+        cover: ((document.getElementById('pgs-cover') || {}).textContent || '').trim(),
+        we: ((document.getElementById('pgs-we') || {}).textContent || '').trim(),
+        clopens: ((document.getElementById('pgs-clopens') || {}).textContent || '').trim(),
+        score: window._lastGenReport && window._lastGenReport.quality
+          ? window._lastGenReport.quality.score
+          : null,
+        cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+        ok,
+      };
+      return { beforeWipe, wiped, after };
+    });
+    if (chipsNumbered(reread.after) && reread.after.score != null
+      && reread.after.quality === reread.beforeWipe.quality
+      && reread.after.cells > 10) {
+      pass('reread-storage-recomputes-chips', reread.after.quality);
+    } else fail('reread-storage-recomputes-chips', JSON.stringify(reread));
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(1100);
     const afterReload = await page.evaluate(() => {
       const resultsEl = document.getElementById('schedule-results');
+      const strip = document.getElementById('post-gen-strip');
+      const q = document.getElementById('pgs-quality');
+      const cover = document.getElementById('pgs-cover');
+      const we = document.getElementById('pgs-we');
+      const cl = document.getElementById('pgs-clopens');
       return {
         live: typeof hasLiveBuiltBoard === 'function' ? hasLiveBuiltBoard() : null,
         cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
@@ -352,12 +398,39 @@ async function main() {
         am: ((document.getElementById('name-am1') || {}).value || ''),
         resultsShown: !!(resultsEl && resultsEl.style.display !== 'none'),
         smDays: schedule && schedule.sm ? Object.keys(schedule.sm).length : 0,
+        stripShown: !!(strip && !strip.hidden && strip.classList.contains('show')),
+        quality: q ? (q.textContent || '').trim() : '',
+        cover: cover ? (cover.textContent || '').trim() : '',
+        we: we ? (we.textContent || '').trim() : '',
+        clopens: cl ? (cl.textContent || '').trim() : '',
+        score: window._lastGenReport && window._lastGenReport.quality
+          ? window._lastGenReport.quality.score
+          : null,
+        free: typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null,
+        evenPeers: !!(window._lastGenReport && window._lastGenReport.closeTargets
+          && window._lastGenReport.closeTargets.evenPeers),
       };
     });
     if (afterReload.live && afterReload.cells > 10 && afterReload.smDays > 10
       && afterReload.sm === 'Bryan Test' && afterReload.am === 'Dana Cruz') {
       pass('reload-restores-board-and-roster', afterReload.cells + ' cells · ' + afterReload.sm);
     } else fail('reload-restores-board-and-roster', JSON.stringify(afterReload));
+
+    if (afterReload.stripShown && chipsNumbered(afterReload)
+      && afterReload.quality === built.quality
+      && afterReload.score === built.score) {
+      pass('reload-keeps-numbered-chips', afterReload.quality + ' · ' + afterReload.cover + ' · ' + afterReload.we);
+    } else fail('reload-keeps-numbered-chips', JSON.stringify({
+      after: afterReload,
+      builtQuality: built.quality,
+      builtScore: built.score,
+    }));
+
+    if (afterReload.free === 1) pass('reload-does-not-consume-free', 'still 1');
+    else fail('reload-does-not-consume-free', JSON.stringify({ free: afterReload.free }));
+
+    if (afterReload.evenPeers) pass('reload-close-even-stays', 'evenPeers');
+    else fail('reload-close-even-stays', 'evenPeers missing after reload');
 
     const edited = await page.evaluate(() => {
       const dks = (periodDates || []).map((d) => dateKey(d));
@@ -375,29 +448,52 @@ async function main() {
       const lastKey = localStorage.getItem('schedule_last');
       let saved = null;
       try { saved = lastKey ? JSON.parse(localStorage.getItem(lastKey) || 'null') : null; } catch (e) {}
+      const q = document.getElementById('pgs-quality');
       return {
         ok: true,
         edit,
         live: schedule.sm && schedule.sm[edit.dk],
         saved: saved && saved.schedule && saved.schedule.sm ? saved.schedule.sm[edit.dk] : null,
+        quality: q ? (q.textContent || '').trim() : '',
+        free: typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null,
       };
     });
     if (edited.ok && edited.live === 'off' && edited.saved === 'off') {
       pass('cell-edit-autosaves', edited.edit.dk);
     } else fail('cell-edit-autosaves', JSON.stringify(edited));
 
+    if (/\d/.test(edited.quality || '') && !/^Quality\.?$/.test((edited.quality || '').trim())) {
+      pass('cell-edit-keeps-quality-number', edited.quality);
+    } else fail('cell-edit-keeps-quality-number', JSON.stringify(edited));
+
+    if (edited.free === 1) pass('cell-edit-does-not-consume-free', 'still 1');
+    else fail('cell-edit-does-not-consume-free', JSON.stringify({ free: edited.free }));
+
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(1100);
     const afterEditReload = await page.evaluate((dk) => {
+      const q = document.getElementById('pgs-quality');
+      const cover = document.getElementById('pgs-cover');
+      const we = document.getElementById('pgs-we');
+      const cl = document.getElementById('pgs-clopens');
       return {
         live: schedule && schedule.sm ? schedule.sm[dk] : null,
         sm: ((document.getElementById('name-sm') || {}).value || ''),
         cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+        quality: q ? (q.textContent || '').trim() : '',
+        cover: cover ? (cover.textContent || '').trim() : '',
+        we: we ? (we.textContent || '').trim() : '',
+        clopens: cl ? (cl.textContent || '').trim() : '',
+        free: typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null,
       };
     }, edited.edit && edited.edit.dk);
     if (afterEditReload.live === 'off' && afterEditReload.sm === 'Bryan Test' && afterEditReload.cells > 10) {
       pass('reload-keeps-cell-edit', edited.edit.dk);
     } else fail('reload-keeps-cell-edit', JSON.stringify(afterEditReload));
+
+    if (chipsNumbered(afterEditReload) && afterEditReload.free === 1) {
+      pass('reload-after-edit-numbered-chips', afterEditReload.quality);
+    } else fail('reload-after-edit-numbered-chips', JSON.stringify(afterEditReload));
 
     await page.close();
   } catch (e) {

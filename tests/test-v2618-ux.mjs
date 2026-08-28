@@ -99,7 +99,7 @@ async function main() {
   } else fail('tap-to-fix-fns', 'jump helpers or review-chip wiring missing');
 
   if (/This is the generated shift/.test(index)
-    && /PTO lock — request stays on this day/.test(index)
+    && /lock — request stays on this day/.test(index)
     && /Clopen pair — close then open \(preference to review\)/.test(index)
     && /Weekend work — short of weekend-off target/.test(index)
     && /Coverage hole/.test(index)

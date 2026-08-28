@@ -5175,7 +5175,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           </div>
           <!-- SM (always 1) -->
           <div>
-            <label id="label-role-sm" class="role-section-label" style="display:block;margin-bottom:0.5rem" data-i18n="Store Manager">Store Manager</label>
+            <label id="label-role-sm" class="role-section-label" style="display:block;margin-bottom:0.5rem">Store Manager</label>
             <div class="manager-row">
               <span class="role-badge role-sm">SM</span>
               <input type="text" id="name-sm" value="Store Manager" placeholder="Store Manager name" oninput="persistManagerNames()" onblur="persistManagerNames()" onchange="persistManagerNames()">
@@ -5184,9 +5184,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
           <!-- AMs (dynamic) -->
           <div>
-            <label id="label-role-am-ease" class="role-section-label first-run-ease-only" style="display:none;margin-bottom:0.5rem" data-i18n="Assistant Manager">Assistant Manager</label>
+            <label id="label-role-am-ease" class="role-section-label first-run-ease-only" style="display:none;margin-bottom:0.5rem">Assistant Manager</label>
             <div class="manager-section-header setup-more-item">
-              <label id="label-role-am" data-i18n="Assistant Managers">Assistant Managers</label>
+              <label id="label-role-am">Assistant Managers</label>
               <span class="count-badge" id="am-count-badge">3</span>
               <button class="btn-round btn-danger" onclick="removeAM()" title="Remove last AM">-</button>
               <button class="btn-round btn-primary" id="btn-add-am" onclick="addAM()" title="Add assistant manager">+</button>
@@ -5197,7 +5197,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           <!-- KCs (dynamic) -->
           <div class="setup-more-item" id="kc-section">
             <div class="manager-section-header">
-              <label id="label-role-kc" data-i18n="Key Carriers">Key Carriers</label>
+              <label id="label-role-kc">Key Carriers</label>
               <span class="count-badge" id="kc-count-badge">1</span>
               <button class="btn-round btn-danger" onclick="removeKC()" title="Remove last KC">-</button>
               <button class="btn-round btn-primary" id="btn-add-kc" onclick="addKC()" title="Add key carrier">+</button>
@@ -5505,7 +5505,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="review-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="review-sheet-title">
     <div class="review-sheet-head">
       <strong id="review-sheet-title" data-i18n="Review">Review</strong>
-      <button type="button" class="review-sheet-close" onpointerdown="event.preventDefault(); event.stopPropagation(); closeReviewSheet();" onclick="event.stopPropagation(); closeReviewSheet();" data-i18n="Dismiss">Close</button>
+      <button type="button" class="review-sheet-close" onpointerdown="event.preventDefault(); event.stopPropagation(); closeReviewSheet();" onclick="event.stopPropagation(); closeReviewSheet();" data-i18n="Close panel">Close</button>
     </div>
     <div class="review-sheet-body">
       <div id="schedule-diff-panel" class="no-print" hidden>
@@ -5588,7 +5588,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()" data-i18n="Activate team license">Activate team license</button>
       <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center" data-i18n="Manage billing">Manage billing</a>
-      <button type="button" class="ap-btn-secondary" onpointerdown="event.preventDefault(); event.stopPropagation(); closeAccountPanel();" onclick="event.stopPropagation(); closeAccountPanel();" data-i18n="Dismiss">Close</button>
+      <button type="button" class="ap-btn-secondary" onpointerdown="event.preventDefault(); event.stopPropagation(); closeAccountPanel();" onclick="event.stopPropagation(); closeAccountPanel();" data-i18n="Close panel">Close</button>
     </div>
     <div id="ap-leftover-session" hidden>
       <label class="ap-signout-opts">
@@ -8248,14 +8248,16 @@ const MSB_I18N_ES = {
   'managers': 'gerentes',
   'team hours': 'horas del equipo',
   'period hours': 'horas del período',
-  'optional to fix': 'opcional corregir'
+  'optional to fix': 'opcional corregir',
+  'Close panel': 'Cerrar'
 };
 
 const MSB_I18N_EN = {
   'welcome-body': 'Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.',
   'ask-hint': 'Runs on this device. “Casey off Thu–Fri” or “Alex off Thu 8/6”. Paint still works if this does not read it.',
   'prefs-footer': 'These preferences guide Generate Schedule. Hard constraints (PTO/RTO/LOA, coverage) always win. Clopen-avoidance is a preference — not a guarantee. Review before you post.',
-  'holiday-note-default': 'Check holidays your store observes as paid. Matching weeks auto-mark as holiday (4-day) and show on the calendar. U.S. retail dates only — not Spain or Mexico labor holidays.'
+  'holiday-note-default': 'Check holidays your store observes as paid. Matching weeks auto-mark as holiday (4-day) and show on the calendar. U.S. retail dates only — not Spain or Mexico labor holidays.',
+  'Close panel': 'Close'
 };
 
 let currentUiLang = 'en';
@@ -8337,6 +8339,7 @@ function syncLangPickers() {
 function refreshUiLangChrome() {
   applyStaticI18n();
   syncLangPickers();
+  try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
   try { if (typeof personalizeWelcome === 'function') personalizeWelcome(); } catch (e0) {}
   try { if (typeof updateAccountChip === 'function') updateAccountChip(); } catch (e1) {}
   try { if (typeof updateReadyChecklist === 'function') updateReadyChecklist(); } catch (e2) {}
@@ -8391,6 +8394,7 @@ function bootUiLang() {
   try { document.documentElement.lang = currentUiLang; } catch (e) {}
   applyStaticI18n();
   syncLangPickers();
+  try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
 }
 
 try { currentUiLang = resolveUiLang(); } catch (eLang) { currentUiLang = 'en'; }

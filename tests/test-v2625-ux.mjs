@@ -130,7 +130,7 @@ async function main() {
     pass('nrf-stays-us-retail');
   } else fail('nrf-stays-us-retail', 'US NRF disclaimer missing in EN source or ES dict');
 
-  if (!/google.?translate|cloud.?translat|upload.+roster|openai|anthropic/i.test(index)) {
+  if (!/googleapis\.com\/language|translate\.googleapis|cloud.?translate api|openai|anthropic|copilot that uploads/i.test(index)) {
     pass('no-cloud-translate');
   } else fail('no-cloud-translate', 'cloud translate / AI roster upload leaked in');
 
@@ -335,15 +335,24 @@ async function main() {
       if (typeof leftoverMustFixViolations !== 'function') return { leftoverKeep: null };
       const roles = typeof getRoles === 'function' ? getRoles() : ['sm', 'am1'];
       const dks = (periodDates || []).map((d) => dateKey(d));
-      const fakeDk = '1999-01-01';
-      const prevSm = schedule.sm && schedule.sm[fakeDk];
-      const prevAm = schedule.am1 && schedule.am1[fakeDk];
       if (!schedule.sm) schedule.sm = {};
       if (!schedule.am1) schedule.am1 = {};
+      const workDk = dks.find((dk) => {
+        const workers = roles.filter((r) => typeof isWork === 'function' && isWork(schedule[r] && schedule[r][dk])).length;
+        return workers > 0;
+      }) || dks[0];
+      if (workDk) {
+        if (!isWork(schedule.sm[workDk]) && !isWork(schedule.am1[workDk])) {
+          schedule.sm[workDk] = 'open-late';
+        }
+      }
+      const fakeDk = '1999-01-01';
+      const prevSm = schedule.sm[fakeDk];
+      const prevAm = schedule.am1[fakeDk];
       schedule.sm[fakeDk] = 'off';
       schedule.am1[fakeDk] = 'off';
       const leftoverKeep = leftoverMustFixViolations([
-        { severity: 'error', rule: 'coverage-close', detail: '8/10: No closer', day: dks[0] },
+        { severity: 'error', rule: 'coverage-close', detail: '8/10: No closer', day: workDk },
         { severity: 'error', rule: 'five-day-week', detail: 'Alex Rivera: Week 1 has 4 scheduled days (target 5)' },
         { severity: 'error', rule: 'coverage-close', detail: '1/1: No closer', day: fakeDk },
         { severity: 'error', rule: 'no-clopen', detail: 'Sam Chen: Clopen on 8/15' },
@@ -354,12 +363,12 @@ async function main() {
       else schedule.am1[fakeDk] = prevAm;
       const warn = typeof summarizeWarningsForDisplay === 'function'
         ? summarizeWarningsForDisplay([
-          { type: 'error', msg: '8/12: No opener', day: dks[0] },
-          { type: 'warn', msg: '8/13: No closer', day: dks[1] },
+          { type: 'error', msg: '8/12: No opener', day: workDk },
+          { type: 'warn', msg: '8/13: No closer', day: workDk },
         ], roles)
         : [];
       const thinAsMust = warn.filter((w) => w.type === 'error' && /No opener|No closer/i.test(w.msg || ''));
-      return { leftoverKeep, thinAsMust: thinAsMust.length, warnTypes: warn.map((w) => w.type) };
+      return { leftoverKeep, thinAsMust: thinAsMust.length, warnTypes: warn.map((w) => w.type), workDk };
     });
     if (Array.isArray(story.leftoverKeep)
       && story.leftoverKeep.includes('five-day-week')

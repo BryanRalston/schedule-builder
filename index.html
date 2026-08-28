@@ -5604,7 +5604,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.31</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.32</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -5862,6 +5862,9 @@ function persistedScheduleLooksBuilt(data) {
   if (!data || !data.schedule || typeof data.schedule !== 'object') return false;
   if (typeof isDemoStoreName === 'function' && isDemoStoreName(data.storeName)) return false;
   if (typeof storedNamesLookLikeDemo === 'function' && storedNamesLookLikeDemo(data.names)) return false;
+  if (typeof peopleIndicateUserRoster === 'function' && typeof collectRosterPeople === 'function') {
+    if (!peopleIndicateUserRoster(collectRosterPeople(data.names || {}))) return false;
+  }
   return Object.keys(data.schedule).some((r) => data.schedule[r] && Object.keys(data.schedule[r]).length > 0);
 }
 
@@ -7813,6 +7816,21 @@ function getWeekendTargetForPerson(personId) {
   return Number(preferences.targetWeekendDaysOff) || 2;
 }
 
+/** Default ON: SM may take fewer weekend offs than AMs. That is the pref, not a miss. */
+function smFewerWeekendOffsPrefOn(prefs) {
+  const p = prefs || (typeof preferences !== 'undefined' ? preferences : null) || DEFAULT_PREFERENCES;
+  return !p || p.smFewerWeekendOffs !== false;
+}
+
+/** Weekend-off Quality / glance pool. SM is out when the fewer-WE pref is on and AMs exist. */
+function weekendFairnessRoles(roles, prefs) {
+  const list = (roles || []).filter(Boolean);
+  if (smFewerWeekendOffsPrefOn(prefs) && list.some((r) => r !== 'sm')) {
+    return list.filter((r) => r !== 'sm');
+  }
+  return list;
+}
+
 function readPreferencesFromUI() {
   const g = (id) => document.getElementById(id);
   if (!g('pref-weekend-target')) return preferences;
@@ -8082,7 +8100,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.31';
+const APP_VERSION = '2.6.32';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -10031,9 +10049,12 @@ function computeQualityScore(genReport, ROLES) {
   const avoidOn = genReport.prefs && genReport.prefs.avoidClopening;
   const cl = genReport.totalClopens || 0;
   parts.clopen = (!avoidOn || cl === 0) ? 20 : Math.max(0, 20 - cl * 10);
-  // Weekend targets: 20 pts
-  const met = ROLES.filter(r => (genReport.weekendOffs[r] || 0) >= getWeekendTargetForPerson(r)).length;
-  parts.weekend = ROLES.length ? Math.round(20 * (met / ROLES.length)) : 20;
+  // Weekend targets: 20 pts. SM fewer-WE pref is not a Quality miss.
+  const weRoles = typeof weekendFairnessRoles === 'function'
+    ? weekendFairnessRoles(ROLES, genReport.prefs)
+    : ROLES;
+  const met = weRoles.filter(r => (genReport.weekendOffs[r] || 0) >= getWeekendTargetForPerson(r)).length;
+  parts.weekend = weRoles.length ? Math.round(20 * (met / weRoles.length)) : 20;
   // Streak compliance: 10 pts
   const maxLim = (genReport.prefs && genReport.prefs.maxConsecutiveWorkDays) || 6;
   const over = ROLES.filter(r => (genReport.maxStreak[r] || 0) > maxLim).length;
@@ -10078,8 +10099,11 @@ function explainQualityScore(q, genReport, ROLES) {
   }
   if ((q.parts.weekend || 0) < 20 && n) {
     const met = q.met != null ? q.met : 0;
+    const weN = (typeof weekendFairnessRoles === 'function')
+      ? weekendFairnessRoles(ROLES, genReport && genReport.prefs).length
+      : n;
     tips.push(
-      msbT('Weekend fairness: {met}/{n} managers hit their weekend-off goal.', { met: met, n: n })
+      msbT('Weekend fairness: {met}/{n} managers hit their weekend-off goal.', { met: met, n: weN || n })
     );
   }
   if ((q.parts.streak || 0) < 10) {
@@ -10149,7 +10173,10 @@ function buildPostingIssues(genReport, ROLES, warnings) {
         dk: clDk,
       });
     }
-    ROLES.forEach((r) => {
+    const weScoreRoles = typeof weekendFairnessRoles === 'function'
+      ? weekendFairnessRoles(ROLES, genReport.prefs)
+      : ROLES;
+    weScoreRoles.forEach((r) => {
       const target = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(r) : 2;
       const got = (genReport.weekendOffs && genReport.weekendOffs[r]) || 0;
       if (got < target) {
@@ -14593,6 +14620,7 @@ function _generateScheduleInner(opts) {
     if (typeof jumpToReviewChip === 'function') jumpToReviewChip('quality');
   });
   try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
+  try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
   try {
     if (typeof computeScheduleDiff === 'function') {
       window._lastScheduleDiff = computeScheduleDiff(window._prevScheduleSnap || {}, schedule);
@@ -14640,8 +14668,11 @@ function buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, vi
       if (i > 0 && isClose(schedule[r][allDks[i-1]]) && isOpen(schedule[r][allDks[i]])) clopens[r]++;
     }
     maxStreak[r] = best;
+    const wePool = typeof weekendFairnessRoles === 'function'
+      ? weekendFairnessRoles(ROLES, PREFS)
+      : ROLES;
     const target = getWeekendTargetForPerson(r);
-    if (weekendOffs[r] < target) {
+    if (wePool.indexOf(r) >= 0 && weekendOffs[r] < target) {
       unmet.push(`${names[r] || r}: weekend days off ${weekendOffs[r]}/${target}`);
     }
     if (PREFS.maxConsecutiveWorkDays && best > PREFS.maxConsecutiveWorkDays) {
@@ -14657,7 +14688,10 @@ function buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, vi
   // Fairness variance (among same-family roles; SM open preference is expected)
   if (PREFS.fairDistribution && ROLES.length > 1) {
     const spread = (arr) => arr.length ? Math.max(...arr) - Math.min(...arr) : 0;
-    const weVals = ROLES.map(r => weekendOffs[r]);
+    const wePool = typeof weekendFairnessRoles === 'function'
+      ? weekendFairnessRoles(ROLES, PREFS)
+      : ROLES;
+    const weVals = wePool.map(r => weekendOffs[r]);
     if (spread(weVals) > 2) unmet.push(`Weekend off spread is ${spread(weVals)} (fairness target ≤ 2)`);
     // Open/close fairness among AMs only (SM/KC often have intentional bias)
     const ams = ROLES.filter(r => r.startsWith('am'));
@@ -15687,7 +15721,7 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
     return { role: r, name: names[r] || r, we, opens, mids, closes, clopens };
   });
 
-  // Weekend range is every named manager (same story as the WE chip / weekend tile).
+  // Weekend range: AMs when SM fewer-WE pref is on; else every named manager.
   // Close min/max: AM-peer on a leftover SM-1 bench; SM+AM when 3+ AM even-share.
   const nightsForPeers = typeof getManagerNightsPerWeek === 'function'
     ? getManagerNightsPerWeek(preferences)
@@ -15698,7 +15732,11 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
   const evenPeersGlance = !!(closeTargetsEarly && closeTargetsEarly.evenPeers);
   const peers = evenPeersGlance ? rows : rows.filter((row) => row.role !== 'sm');
   const peerPool = peers.length ? peers : rows;
-  const weVals = rows.map((r) => r.we);
+  const wePoolRoles = typeof weekendFairnessRoles === 'function'
+    ? weekendFairnessRoles(rows.map((row) => row.role), (report && report.prefs) || preferences)
+    : rows.map((row) => row.role);
+  const weRows = rows.filter((row) => wePoolRoles.indexOf(row.role) >= 0);
+  const weVals = weRows.map((r) => r.we);
   const closeVals = peerPool.map((r) => r.closes);
   const weMin = weVals.length ? Math.min(...weVals) : 0;
   const weMax = weVals.length ? Math.max(...weVals) : 0;
@@ -15706,7 +15744,7 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
   const cMax = closeVals.length ? Math.max(...closeVals) : 0;
   const weSpread = weMax - weMin;
   const cSpread = cMax - cMin;
-  const weMetN = rows.filter((row) => {
+  const weMetN = weRows.filter((row) => {
     const t = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(row.role) : 2;
     return row.we >= t;
   }).length;
@@ -15744,7 +15782,8 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
   rows.forEach((row) => {
     const notes = [];
     const inPeer = peerPool.some((p) => p.role === row.role);
-    if (inPeer && weSpread >= 2 && (row.we === weMin || row.we === weMax) && weMin !== weMax) {
+    const inWePool = wePoolRoles.indexOf(row.role) >= 0;
+    if (inWePool && weSpread >= 2 && (row.we === weMin || row.we === weMax) && weMin !== weMax) {
       notes.push(row.we === weMin ? msbT('low WE offs') : msbT('high WE offs'));
     }
     if (inPeer && cSpread >= 3 && (row.closes === cMin || row.closes === cMax) && cMin !== cMax) {
@@ -15763,7 +15802,7 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
       min: weMin,
       max: weMax,
       met: weMetN,
-      n: rows.length
+      n: weRows.length || rows.length
     })) +
     (amPeriodGoal
       ? ' · ' + esc(msbT('AM closes {range} / {goal}', {
@@ -16222,6 +16261,12 @@ function jumpToRoleOnGrid(role) {
              close crescent left, gold open arc right, small gold MSP,
              navy #070b14). Generate / close / first-visit unchanged.
              SW cache 2.6.31 so installed PWAs pick up the new icons.
+   v2.6.32 — Auto-save the built period after Generate and cell edits
+             (quiet persistLiveSchedule — not the JSON backup nudge).
+             Named team + built board survive reload; first visit with
+             no named team stays clean (2.6.29). Quality does not ding
+             SM for fewer weekend offs when that pref is on. Close-even
+             2.6.30 and icon 2.6.31 stay. SW cache 2.6.32.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -17041,13 +17086,16 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
 
     // Stat cards
     const weTarget = (genReport.prefs && genReport.prefs.targetWeekendDaysOff) || 2;
-    const weVals = ROLES.map(r => genReport.weekendOffs[r] || 0);
+    const weTileRoles = typeof weekendFairnessRoles === 'function'
+      ? weekendFairnessRoles(ROLES, genReport.prefs)
+      : ROLES;
+    const weVals = weTileRoles.map(r => genReport.weekendOffs[r] || 0);
     const avgWe = weVals.length ? (weVals.reduce((a,b)=>a+b,0) / weVals.length) : 0;
-    const metWe = ROLES.filter(r => (genReport.weekendOffs[r] || 0) >= getWeekendTargetForPerson(r)).length;
+    const metWe = weTileRoles.filter(r => (genReport.weekendOffs[r] || 0) >= getWeekendTargetForPerson(r)).length;
     html += '<div class="gen-summary">';
     const weMinTile = weVals.length ? Math.min(...weVals) : 0;
     const weMaxTile = weVals.length ? Math.max(...weVals) : 0;
-    html += `<div class="gen-stat-card"><h4>${esc(msbT('Weekend days off'))}</h4><div class="stat-value ${metWe === ROLES.length ? 'ok' : 'warn'}">${metWe}/${ROLES.length}</div><div class="stat-sub">${esc(msbT('met target (avg {avg}, range {min}-{max}, goal {goal})', { avg: avgWe.toFixed(1), min: weMinTile, max: weMaxTile, goal: weTarget }))}</div></div>`;
+    html += `<div class="gen-stat-card"><h4>${esc(msbT('Weekend days off'))}</h4><div class="stat-value ${metWe === weTileRoles.length ? 'ok' : 'warn'}">${metWe}/${weTileRoles.length}</div><div class="stat-sub">${esc(msbT('met target (avg {avg}, range {min}-{max}, goal {goal})', { avg: avgWe.toFixed(1), min: weMinTile, max: weMaxTile, goal: weTarget }))}</div></div>`;
     html += `<div class="gen-stat-card"><h4>${esc(msbT('Clopens'))}</h4><div class="stat-value ${clopenOk ? 'ok' : 'warn'}">${totalClopens}</div><div class="stat-sub">${esc(avoidOn ? msbT('Avoid-clopen preference ON') : msbT('Avoid-clopen preference OFF'))}</div></div>`;
     const totalOpens = ROLES.reduce((s,r)=>s+(genReport.opens[r]||0),0);
     const totalCloses = ROLES.reduce((s,r)=>s+(genReport.closes[r]||0),0);
@@ -17063,7 +17111,8 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     ROLES.forEach(r => {
       const t = getWeekendTargetForPerson(r);
       const we = genReport.weekendOffs[r] || 0;
-      const badge = we >= t ? '<span class="badge-pill badge-ok">' + esc(msbT('OK')) + '</span>' : '<span class="badge-pill badge-miss">' + esc(msbT('Low')) + '</span>';
+      const weScored = weTileRoles.indexOf(r) >= 0;
+      const badge = (!weScored || we >= t) ? '<span class="badge-pill badge-ok">' + esc(msbT('OK')) + '</span>' : '<span class="badge-pill badge-miss">' + esc(msbT('Low')) + '</span>';
       const cp = genReport.clopens[r] || 0;
       html += `<tr><td style="text-align:left;font-weight:600">${esc(names[r] || r)}</td><td>${we} ${badge}</td><td>${t}</td><td>${genReport.opens[r]||0}</td><td>${genReport.mids[r]||0}</td><td>${genReport.closes[r]||0}</td><td style="${cp ? 'color:#dc2626;font-weight:700' : ''}">${cp}</td><td>${genReport.maxStreak[r]||0}</td></tr>`;
     });
@@ -17178,7 +17227,8 @@ function clearSchedule() {
 }
 
 // ── Save / Load ──
-function saveToStorage() {
+function saveToStorage(opts) {
+  opts = opts || {};
   const p = currentPeriod;
   // Gather AM names from DOM
   const amNames = {};
@@ -17218,7 +17268,27 @@ function saveToStorage() {
   localStorage.setItem('schedule_last', key);
   try { localStorage.setItem('msb_last_saved_at', data._savedAt || new Date().toISOString()); } catch (e) {}
   try { if (typeof updateLocalStatusPill === 'function') updateLocalStatusPill(); } catch (e) {}
-  showToast(`Saved FY${fiscalYear} Period ${p.number} (${p.approxMonth})`, 'success');
+  if (!opts.quiet) {
+    showToast(`Saved FY${fiscalYear} Period ${p.number} (${p.approxMonth})`, 'success');
+  }
+}
+
+/** Quiet persist after Build / cell edits. Not the first-build JSON backup nudge. */
+function persistLiveSchedule() {
+  try {
+    if (!currentPeriod || !periodDates || !periodDates.length) return false;
+    if (!schedule || !Object.keys(schedule).some((r) => schedule[r] && Object.keys(schedule[r]).length > 0)) {
+      return false;
+    }
+    if (typeof managersAreNamed === 'function' && !managersAreNamed()) return false;
+    const store = ((document.getElementById('store-name') || {}).value || '');
+    if (typeof isDemoStoreName === 'function' && isDemoStoreName(store)) return false;
+    if (typeof liveRosterLooksLikeDemo === 'function' && liveRosterLooksLikeDemo()) return false;
+    saveToStorage({ quiet: true });
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 function loadFromStorage() {
@@ -17548,6 +17618,7 @@ function restoreUndoSnapshot(snap) {
   }
   try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
   try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
+  try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
 }
 
 function undoSchedEdit() {
@@ -17601,6 +17672,7 @@ function applySchedEdit(role, dk, weekIdx, value) {
     renderSummary([], ROLES, ALL_KC);
   }
   try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
+  try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
 }
 
 // Escape + undo/redo + command palette
@@ -17996,6 +18068,7 @@ function applyCellSwap(fromRole, dk, toRole, weekIdx) {
     try { renderSchedule([], ROLES, ALL_KC); } catch (e2) {}
   }
   try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
+  try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
   const names = getManagerNames();
   const lab = typeof getShiftShortLabel === 'function' ? getShiftShortLabel(moving) : moving;
   showToast('Moved ' + lab + ' → ' + (names[toRole] || toRole), 'success');

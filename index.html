@@ -5162,15 +5162,15 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <span class="role-names-label" data-i18n="Role names">Role names</span>
             <label class="role-title-field">
               <span class="role-sm">SM</span>
-              <input type="text" id="role-title-sm" class="role-title-input" value="Store Manager" placeholder="Store Manager" aria-label="Store manager role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
+              <input type="text" id="role-title-sm" class="role-title-input" value="Store Manager" placeholder="Store Manager" aria-label="Store manager role title" data-i18n-placeholder="Store Manager" data-i18n-aria="Store manager role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
             </label>
             <label class="role-title-field">
               <span class="role-am">AM</span>
-              <input type="text" id="role-title-am" class="role-title-input" value="Assistant Manager" placeholder="Assistant Manager" aria-label="Assistant manager role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
+              <input type="text" id="role-title-am" class="role-title-input" value="Assistant Manager" placeholder="Assistant Manager" aria-label="Assistant manager role title" data-i18n-placeholder="Assistant Manager" data-i18n-aria="Assistant manager role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
             </label>
             <label class="role-title-field">
               <span class="role-kc">KC</span>
-              <input type="text" id="role-title-kc" class="role-title-input" value="Key Carrier" placeholder="Key Carrier" aria-label="Key carrier role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
+              <input type="text" id="role-title-kc" class="role-title-input" value="Key Carrier" placeholder="Key Carrier" aria-label="Key carrier role title" data-i18n-placeholder="Key Carrier" data-i18n-aria="Key carrier role title" oninput="onRoleTitleChange()" onblur="onRoleTitleChange(true)" onchange="onRoleTitleChange(true)">
             </label>
           </div>
           <!-- SM (always 1) -->
@@ -5537,7 +5537,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.26</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.27</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -7912,7 +7912,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.26';
+const APP_VERSION = '2.6.27';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -7987,7 +7987,16 @@ const MSB_I18N_ES = {
   'Store Manager': 'Gerente de tienda',
   'Assistant Manager': 'Gerente asistente',
   'Assistant Managers': 'Gerentes asistentes',
+  'Key Carrier': 'Portallaves',
   'Key Carriers': 'Portallaves',
+  '{title} name': 'Nombre de {title}',
+  'Base: {title}': 'Base: {title}',
+  'Add {title}': 'Agregar {title}',
+  'Store manager role title': 'Nombre del puesto de gerente de tienda',
+  'Assistant manager role title': 'Nombre del puesto de gerente asistente',
+  'Key carrier role title': 'Nombre del puesto de portallaves',
+  'open (hours)': 'abre',
+  'close (hours)': 'cierra',
   'Store': 'Tienda',
   'Name:': 'Nombre:',
   'e.g. your store name': 'ej. el nombre de tu tienda',
@@ -8358,7 +8367,62 @@ const MSB_I18N_ES = {
   'WE offs {min}–{max} · {met}/{n}': 'Libres de fin {min}–{max} · {met}/{n}',
   'AM closes {range} / {goal}': 'Cierres AM {range} / {goal}',
   'AM closes {range}': 'Cierres AM {range}',
-  'Close panel': 'Cerrar'
+  'Close panel': 'Cerrar',
+  'Week {n}': 'Semana {n}',
+  'Week {n}: {range}': 'Semana {n}: {range}',
+  'Holiday (4-day)': 'Festivo (4 días)',
+  'Company Holiday': 'Festivo de la compañía (EE. UU.)',
+  'Undo ({n})': 'Deshacer ({n})',
+  'Redo ({n})': 'Rehacer ({n})',
+  'Undo: {label}': 'Deshacer: {label}',
+  'Redo: {label}': 'Rehacer: {label}',
+  'Nothing to undo': 'Nada que deshacer',
+  'Nothing to redo': 'Nada que rehacer',
+  'generate': 'armar',
+  'edit': 'editar',
+  'cell': 'celda',
+  'cell edit': 'editar celda',
+  'Schedule ready · Quality {score}/100 ({grade})': 'Horario listo · Calidad {score}/100 ({grade})',
+  'Free builds used (edits still free)': 'Armados gratis usados (editar sigue gratis)',
+  '{n} free build left': '{n} armado gratis restante',
+  '{n} free builds left': '{n} armados gratis restantes',
+  'review leftover clopens': 'revisa clopens restantes',
+  '{n} clopen(s) remain (avoid-clopen preference is ON — not a guarantee)': 'Quedan {n} clopen(s) (la preferencia evitar clopen está SÍ — no es garantía)',
+  'All hard constraints satisfied. ({n} repair pass)': 'Todas las reglas duras se cumplen. ({n} pase de reparación)',
+  'All hard constraints satisfied. ({n} repair passes)': 'Todas las reglas duras se cumplen. ({n} pases de reparación)',
+  '{n} hard constraint(s) remain after {pass} repair passes.': 'Quedan {n} regla(s) dura(s) después de {pass} pases de reparación.',
+  '{name}: Week {n} has {sched} scheduled days (target {target})': '{name}: La semana {n} tiene {sched} días programados (meta {target})',
+  '{name}: Week {n} has {sched} scheduled days (target {target}, holiday week)': '{name}: La semana {n} tiene {sched} días programados (meta {target}, semana festiva)',
+  '{name}: Week {n} has {sched} scheduled days (target {target}, LOA {loa})': '{name}: La semana {n} tiene {sched} días programados (meta {target}, LOA {loa})',
+  '{name}: Week {n} has {sched} scheduled days (target {target}, holiday week, LOA {loa})': '{name}: La semana {n} tiene {sched} días programados (meta {target}, semana festiva, LOA {loa})',
+  '{name}: Week {n} has no closes (goal {goal} — close share is a preference on a two-person roster)': '{name}: La semana {n} no tiene cierres (meta {goal} — el reparto de cierres es una preferencia con dos personas)',
+  '{name}: Week {n} has {closes} closes (sole manager — need {need} for full coverage)': '{name}: La semana {n} tiene {closes} cierres (único gerente — se necesitan {need} para cubrir)',
+  '{name}: Week {n} has {closes} closes (goal {goal} — two-person boards often share closes)': '{name}: La semana {n} tiene {closes} cierres (meta {goal} — con dos personas a menudo se reparten los cierres)',
+  '{name}: Week {n} has {closes} closes (need exactly {need})': '{name}: La semana {n} tiene {closes} cierres (se necesitan exactamente {need})',
+  '{name}: Week {n} has {closes} closes (need at least {need})': '{name}: La semana {n} tiene {closes} cierres (se necesitan al menos {need})',
+  '{name}: Week {n} has {closes} closes (need at least {need} — auto share for {count} named AM)': '{name}: La semana {n} tiene {closes} cierres (se necesitan al menos {need} — reparto automático para {count} AM nombrado)',
+  '{name}: Week {n} has {closes} closes (need at least {need} — auto share for {count} named AMs)': '{name}: La semana {n} tiene {closes} cierres (se necesitan al menos {need} — reparto automático para {count} AM nombrados)',
+  '{name}: Week {n} has {closes} closes (target {target})': '{name}: La semana {n} tiene {closes} cierres (meta {target})',
+  '{name}: Week {n} has {closes} closes (target {target} — extra closes are expected on a two-person roster)': '{name}: La semana {n} tiene {closes} cierres (meta {target} — con dos personas se esperan cierres de más)',
+  '{name}: Week {n} has {closes} closes (target {target}; extra may be needed for coverage)': '{name}: La semana {n} tiene {closes} cierres (meta {target}; puede hacer falta uno extra para cubrir)',
+  'Week {n}: Only {have} of {need} manager close nights have closers': 'Semana {n}: Solo {have} de {need} noches de cierre de gerente tienen cierre',
+  'Week {n}: Coverage imbalance ({min}-{max} managers/day, spread > 2)': 'Semana {n}: Desequilibrio de cobertura ({min}-{max} gerentes/día, diferencia > 2)',
+  '{name}: Not working on KC-close night {day} {date}': '{name}: No trabaja en noche de cierre KC {day} {date}',
+  '{name}: Closing on {day} {date} (KC handles this close night)': '{name}: Cierra el {day} {date} (el KC cubre esta noche de cierre)',
+  '{name}: Clopen on {date} (closed {prev})': '{name}: Clopen el {date} (cerró {prev})',
+  '{name}: {n} consecutive work days (max {max}) ending {date}': '{name}: {n} días seguidos de trabajo (máx. {max}) terminando {date}',
+  '{name}: No consecutive Sat+Sun off (two-person roster — a full weekend package is a preference)': '{name}: Sin sábado+domingo libres seguidos (con dos personas, un fin completo es preferencia)',
+  '{name}: No consecutive Sat+Sun off in the period': '{name}: Sin sábado+domingo libres seguidos en el período',
+  '{name}: weekend days off {got}/{target}': '{name}: libres de fin {got}/{target}',
+  '{name}: max work streak {best} (limit {lim})': '{name}: racha máx. de trabajo {best} (límite {lim})',
+  '{name}: mid coverage {date} (KC mid gap-fill)': '{name}: cobertura medio {date} (KC medio para hueco)',
+  'Weekend off spread is {n} (fairness target ≤ 2)': 'La diferencia de libres de fin es {n} (meta de equidad ≤ 2)',
+  'AM open-shift spread is {n} (fairness)': 'La diferencia de aperturas AM es {n} (equidad)',
+  'AM close-shift spread is {n} (fairness)': 'La diferencia de cierres AM es {n} (equidad)',
+  'close {d0} → open {d1}': 'cierre {d0} → apertura {d1}',
+  '{date}: No opener': '{date}: Sin apertura',
+  '{date}: No closer': '{date}: Sin cierre',
+  '{n} more…': '+{n} más…'
 };
 
 const MSB_I18N_EN = {
@@ -8466,6 +8530,17 @@ function refreshUiLangChrome() {
     }
   } catch (eTs) {}
   try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
+  try { if (typeof updateUndoRedoButtons === 'function') updateUndoRedoButtons(); } catch (eUndo) {}
+  try {
+    if (typeof buildInputCalendar === 'function' && typeof currentPeriod !== 'undefined' && currentPeriod) {
+      buildInputCalendar(typeof activeTab !== 'undefined' ? activeTab : 'sm');
+    }
+  } catch (eCal) {}
+  try {
+    if (typeof storeHoursPanelOpen !== 'undefined' && storeHoursPanelOpen && typeof renderStoreHoursPanel === 'function') {
+      renderStoreHoursPanel();
+    }
+  } catch (eSh) {}
   try { if (typeof personalizeWelcome === 'function') personalizeWelcome(); } catch (e0) {}
   try { if (typeof updateAccountChip === 'function') updateAccountChip(); } catch (e1) {}
   try { if (typeof updateReadyChecklist === 'function') updateReadyChecklist(); } catch (e2) {}
@@ -8526,14 +8601,192 @@ function bootUiLang() {
 
 try { currentUiLang = resolveUiLang(); } catch (eLang) { currentUiLang = 'en'; }
 
+function defaultRoleTitleText(family) {
+  const key = family === 'sm' || family === 'am' || family === 'kc' ? family : 'am';
+  return msbT(DEFAULT_ROLE_TITLES[key] || '');
+}
+
+function isDefaultRoleTitleValue(family, raw) {
+  const t = String(raw || '').trim();
+  if (!t) return true;
+  const en = DEFAULT_ROLE_TITLES[family] || '';
+  if (en && t.toLowerCase() === en.toLowerCase()) return true;
+  const es = (typeof MSB_I18N_ES !== 'undefined' && MSB_I18N_ES[en]) || '';
+  if (es && t.toLowerCase() === es.toLowerCase()) return true;
+  return false;
+}
+
+function formatWeekHeading(n) {
+  return msbT('Week {n}', { n: n });
+}
+
+function formatWeekDateRange(d0, d1) {
+  return msbT(DAY_NAMES_FULL[d0.getDay()]) + ' ' + formatDate(d0) + ' – ' +
+    msbT(DAY_NAMES_FULL[d1.getDay()]) + ' ' + formatDate(d1);
+}
+
+function formatClopenPairWhen(d0, d1) {
+  return msbT('close {d0} → open {d1}', { d0: formatDate(d0), d1: formatDate(d1) });
+}
+
+function formatScheduleReadyToast(q, left, leftoverClopens, isPro) {
+  let toastMsg = msbT('Schedule ready · Quality {score}/100 ({grade})', {
+    score: q && q.score,
+    grade: localizeQualityGrade(q && q.grade)
+  });
+  if (!isPro) {
+    toastMsg += left === 0
+      ? ' · ' + msbT('Free builds used (edits still free)')
+      : ' · ' + (left === 1
+        ? msbT('{n} free build left', { n: left })
+        : msbT('{n} free builds left', { n: left }));
+  }
+  if (leftoverClopens) toastMsg += ' · ' + msbT('review leftover clopens');
+  return toastMsg;
+}
+
 function localizeWarningMsg(msg) {
   let s = String(msg || '');
+  if (!s) return s;
+  if (currentUiLang === 'es' && Object.prototype.hasOwnProperty.call(MSB_I18N_ES, s) && MSB_I18N_ES[s] != null) {
+    return MSB_I18N_ES[s];
+  }
   s = s.replace(/:\s*No opener\b/g, ': ' + msbT('No opener'));
   s = s.replace(/:\s*No closer\b/g, ': ' + msbT('No closer'));
   const twoEn = 'Two people with days off cannot cover Open+Close every day.';
   const seeEn = 'See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.';
   if (s.indexOf(twoEn) !== -1) s = s.replace(twoEn, msbT(twoEn));
   if (s.indexOf(seeEn) !== -1) s = s.replace(seeEn, msbT(seeEn));
+
+  let m;
+  m = s.match(/^All hard constraints satisfied\. \((\d+) repair pass(es)?\)$/);
+  if (m) {
+    return Number(m[1]) === 1
+      ? msbT('All hard constraints satisfied. ({n} repair pass)', { n: m[1] })
+      : msbT('All hard constraints satisfied. ({n} repair passes)', { n: m[1] });
+  }
+  m = s.match(/^(\d+) hard constraint\(s\) remain after (\d+) repair passes\.$/);
+  if (m) return msbT('{n} hard constraint(s) remain after {pass} repair passes.', { n: m[1], pass: m[2] });
+  m = s.match(/^(\d+) clopen\(s\) remain \(avoid-clopen preference is ON — not a guarantee\)$/);
+  if (m) return msbT('{n} clopen(s) remain (avoid-clopen preference is ON — not a guarantee)', { n: m[1] });
+  m = s.match(/^Weekend off spread is (\d+) \(fairness target ≤ 2\)$/);
+  if (m) return msbT('Weekend off spread is {n} (fairness target ≤ 2)', { n: m[1] });
+  m = s.match(/^AM open-shift spread is (\d+) \(fairness\)$/);
+  if (m) return msbT('AM open-shift spread is {n} (fairness)', { n: m[1] });
+  m = s.match(/^AM close-shift spread is (\d+) \(fairness\)$/);
+  if (m) return msbT('AM close-shift spread is {n} (fairness)', { n: m[1] });
+  m = s.match(/^Week (\d+): Only (\d+) of (\d+) manager close nights have closers$/);
+  if (m) return msbT('Week {n}: Only {have} of {need} manager close nights have closers', { n: m[1], have: m[2], need: m[3] });
+  m = s.match(/^Week (\d+): Coverage imbalance \((\d+)-(\d+) managers\/day, spread > 2\)$/);
+  if (m) return msbT('Week {n}: Coverage imbalance ({min}-{max} managers/day, spread > 2)', { n: m[1], min: m[2], max: m[3] });
+  m = s.match(/^(?:(.+): )?close (\d+\/\d+) → open (\d+\/\d+)$/);
+  if (m) {
+    const when = msbT('close {d0} → open {d1}', { d0: m[2], d1: m[3] });
+    return m[1] ? (m[1] + ': ' + when) : when;
+  }
+  m = s.match(/^(\d+\/\d+): No opener$/);
+  if (m) return msbT('{date}: No opener', { date: m[1] });
+  m = s.match(/^(\d+\/\d+): No closer$/);
+  if (m) return msbT('{date}: No closer', { date: m[1] });
+
+  m = s.match(/^(.+): Week (\d+) has no closes \(goal (\d+) — close share is a preference on a two-person roster\)$/);
+  if (m) {
+    return msbT('{name}: Week {n} has no closes (goal {goal} — close share is a preference on a two-person roster)', {
+      name: m[1], n: m[2], goal: m[3]
+    });
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) scheduled days \(target (\d+)(?:, holiday week)?(?:, LOA (\d+))?\)$/);
+  if (m) {
+    const holiday = /holiday week/.test(s);
+    const loa = m[5];
+    const vars = { name: m[1], n: m[2], sched: m[3], target: m[4], loa: loa };
+    if (holiday && loa) return msbT('{name}: Week {n} has {sched} scheduled days (target {target}, holiday week, LOA {loa})', vars);
+    if (holiday) return msbT('{name}: Week {n} has {sched} scheduled days (target {target}, holiday week)', vars);
+    if (loa) return msbT('{name}: Week {n} has {sched} scheduled days (target {target}, LOA {loa})', vars);
+    return msbT('{name}: Week {n} has {sched} scheduled days (target {target})', vars);
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) closes \(sole manager — need (\d+) for full coverage\)$/);
+  if (m) {
+    return msbT('{name}: Week {n} has {closes} closes (sole manager — need {need} for full coverage)', {
+      name: m[1], n: m[2], closes: m[3], need: m[4]
+    });
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) closes \(goal (\d+) — two-person boards often share closes\)$/);
+  if (m) {
+    return msbT('{name}: Week {n} has {closes} closes (goal {goal} — two-person boards often share closes)', {
+      name: m[1], n: m[2], closes: m[3], goal: m[4]
+    });
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) closes \(need exactly (\d+)\)$/);
+  if (m) {
+    return msbT('{name}: Week {n} has {closes} closes (need exactly {need})', {
+      name: m[1], n: m[2], closes: m[3], need: m[4]
+    });
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) closes \(need at least (\d+) — auto share for (\d+) named AM(s)?\)$/);
+  if (m) {
+    const key = m[6]
+      ? '{name}: Week {n} has {closes} closes (need at least {need} — auto share for {count} named AMs)'
+      : '{name}: Week {n} has {closes} closes (need at least {need} — auto share for {count} named AM)';
+    return msbT(key, { name: m[1], n: m[2], closes: m[3], need: m[4], count: m[5] });
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) closes \(need at least (\d+)\)$/);
+  if (m) {
+    return msbT('{name}: Week {n} has {closes} closes (need at least {need})', {
+      name: m[1], n: m[2], closes: m[3], need: m[4]
+    });
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) closes \(target (\d+) — extra closes are expected on a two-person roster\)$/);
+  if (m) {
+    return msbT('{name}: Week {n} has {closes} closes (target {target} — extra closes are expected on a two-person roster)', {
+      name: m[1], n: m[2], closes: m[3], target: m[4]
+    });
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) closes \(target (\d+); extra may be needed for coverage\)$/);
+  if (m) {
+    return msbT('{name}: Week {n} has {closes} closes (target {target}; extra may be needed for coverage)', {
+      name: m[1], n: m[2], closes: m[3], target: m[4]
+    });
+  }
+  m = s.match(/^(.+): Week (\d+) has (\d+) closes \(target (\d+)\)$/);
+  if (m) {
+    return msbT('{name}: Week {n} has {closes} closes (target {target})', {
+      name: m[1], n: m[2], closes: m[3], target: m[4]
+    });
+  }
+  m = s.match(/^(.+): Not working on KC-close night (\S+) (\d+\/\d+)$/);
+  if (m) {
+    return msbT('{name}: Not working on KC-close night {day} {date}', {
+      name: m[1], day: msbT(m[2]), date: m[3]
+    });
+  }
+  m = s.match(/^(.+): Closing on (\S+) (\d+\/\d+) \(KC handles this close night\)$/);
+  if (m) {
+    return msbT('{name}: Closing on {day} {date} (KC handles this close night)', {
+      name: m[1], day: msbT(m[2]), date: m[3]
+    });
+  }
+  m = s.match(/^(.+): Clopen on (\d+\/\d+) \(closed (\d+\/\d+)\)$/);
+  if (m) return msbT('{name}: Clopen on {date} (closed {prev})', { name: m[1], date: m[2], prev: m[3] });
+  m = s.match(/^(.+): (\d+) consecutive work days \(max (\d+)\) ending (\d+\/\d+)$/);
+  if (m) {
+    return msbT('{name}: {n} consecutive work days (max {max}) ending {date}', {
+      name: m[1], n: m[2], max: m[3], date: m[4]
+    });
+  }
+  m = s.match(/^(.+): No consecutive Sat\+Sun off \(two-person roster — a full weekend package is a preference\)$/);
+  if (m) {
+    return msbT('{name}: No consecutive Sat+Sun off (two-person roster — a full weekend package is a preference)', { name: m[1] });
+  }
+  m = s.match(/^(.+): No consecutive Sat\+Sun off in the period$/);
+  if (m) return msbT('{name}: No consecutive Sat+Sun off in the period', { name: m[1] });
+  m = s.match(/^(.+): weekend days off (\d+)\/(\d+)$/);
+  if (m) return msbT('{name}: weekend days off {got}/{target}', { name: m[1], got: m[2], target: m[3] });
+  m = s.match(/^(.+): max work streak (\d+) \(limit (\d+)\)$/);
+  if (m) return msbT('{name}: max work streak {best} (limit {lim})', { name: m[1], best: m[2], lim: m[3] });
+  m = s.match(/^(.+): mid coverage (\d+\/\d+) \(KC mid gap-fill\)$/);
+  if (m) return msbT('{name}: mid coverage {date} (KC mid gap-fill)', { name: m[1], date: m[2] });
+
   return s;
 }
 
@@ -8884,15 +9137,20 @@ function persistSetupDraft() {
 function getRoleTitle(family) {
   const key = family === 'sm' || family === 'am' || family === 'kc' ? family : 'am';
   const typed = roleTitles && String(roleTitles[key] || '').trim();
-  if (typed) return typed;
-  return DEFAULT_ROLE_TITLES[key];
+  if (typed && !isDefaultRoleTitleValue(key, typed)) return typed;
+  return defaultRoleTitleText(key);
 }
 
 function pluralRoleTitle(family) {
-  const t = getRoleTitle(family);
-  if (!t) return t;
-  if (/s$/i.test(t)) return t;
-  return t + 's';
+  const key = family === 'sm' || family === 'am' || family === 'kc' ? family : 'am';
+  const typed = roleTitles && String(roleTitles[key] || '').trim();
+  if (typed && !isDefaultRoleTitleValue(key, typed)) {
+    if (/s$/i.test(typed)) return typed;
+    return typed + 's';
+  }
+  if (key === 'am') return msbT('Assistant Managers');
+  if (key === 'kc') return msbT('Key Carriers');
+  return defaultRoleTitleText(key);
 }
 
 function defaultRolePersonName(family, n) {
@@ -8904,6 +9162,7 @@ function defaultRolePersonName(family, n) {
 function normalizeStoredRoleTitle(family, raw) {
   const t = String(raw || '').trim();
   if (!t) return '';
+  if (typeof isDefaultRoleTitleValue === 'function' && isDefaultRoleTitleValue(family, t)) return '';
   const def = DEFAULT_ROLE_TITLES[family] || '';
   if (def && t.toLowerCase() === def.toLowerCase()) return '';
   return t;
@@ -8948,13 +9207,28 @@ function applyRoleTitleUI() {
   const smT = getRoleTitle('sm');
   const amT = getRoleTitle('am');
   const kcT = getRoleTitle('kc');
+  const smDef = defaultRoleTitleText('sm');
+  const amDef = defaultRoleTitleText('am');
+  const kcDef = defaultRoleTitleText('kc');
   const active = document.activeElement;
   const smIn = document.getElementById('role-title-sm');
   const amIn = document.getElementById('role-title-am');
   const kcIn = document.getElementById('role-title-kc');
-  if (smIn && active !== smIn) smIn.value = roleTitles.sm || smT;
-  if (amIn && active !== amIn) amIn.value = roleTitles.am || amT;
-  if (kcIn && active !== kcIn) kcIn.value = roleTitles.kc || kcT;
+  if (smIn && active !== smIn) {
+    smIn.value = (roleTitles.sm && !isDefaultRoleTitleValue('sm', roleTitles.sm)) ? roleTitles.sm : smDef;
+    smIn.placeholder = smDef;
+    smIn.setAttribute('aria-label', msbT('Store manager role title'));
+  }
+  if (amIn && active !== amIn) {
+    amIn.value = (roleTitles.am && !isDefaultRoleTitleValue('am', roleTitles.am)) ? roleTitles.am : amDef;
+    amIn.placeholder = amDef;
+    amIn.setAttribute('aria-label', msbT('Assistant manager role title'));
+  }
+  if (kcIn && active !== kcIn) {
+    kcIn.value = (roleTitles.kc && !isDefaultRoleTitleValue('kc', roleTitles.kc)) ? roleTitles.kc : kcDef;
+    kcIn.placeholder = kcDef;
+    kcIn.setAttribute('aria-label', msbT('Key carrier role title'));
+  }
   const smLab = document.getElementById('label-role-sm');
   const amLab = document.getElementById('label-role-am');
   const kcLab = document.getElementById('label-role-kc');
@@ -8964,7 +9238,7 @@ function applyRoleTitleUI() {
   const amEase = document.getElementById('label-role-am-ease');
   if (amEase) amEase.textContent = amT;
   const smName = document.getElementById('name-sm');
-  if (smName) smName.placeholder = smT + ' name';
+  if (smName) smName.placeholder = msbT('{title} name', { title: smT });
   const amMax = typeof amCount === 'number' ? amCount : 8;
   for (let i = 1; i <= amMax; i++) {
     const el = document.getElementById('name-am' + i);
@@ -8978,15 +9252,15 @@ function applyRoleTitleUI() {
   }
   const addAm = document.getElementById('btn-add-am');
   const addKc = document.getElementById('btn-add-kc');
-  if (addAm) addAm.title = 'Add ' + amT.toLowerCase();
-  if (addKc) addKc.title = 'Add ' + kcT.toLowerCase();
+  if (addAm) addAm.title = msbT('Add {title}', { title: amT });
+  if (addKc) addKc.title = msbT('Add {title}', { title: kcT });
   const base = document.getElementById('new-role-base');
   if (base && base.options) {
     for (let i = 0; i < base.options.length; i++) {
       const opt = base.options[i];
-      if (opt.value === 'sm') opt.textContent = 'Base: ' + smT;
-      if (opt.value === 'am') opt.textContent = 'Base: ' + amT;
-      if (opt.value === 'kc') opt.textContent = 'Base: ' + kcT;
+      if (opt.value === 'sm') opt.textContent = msbT('Base: {title}', { title: smT });
+      if (opt.value === 'am') opt.textContent = msbT('Base: {title}', { title: amT });
+      if (opt.value === 'kc') opt.textContent = msbT('Base: {title}', { title: kcT });
     }
   }
   if (typeof roleRules !== 'undefined' && roleRules) {
@@ -9237,7 +9511,7 @@ function periodDateOptionsHtml(selectedDk) {
     periodDates.forEach((d) => {
       const dk = dateKey(d);
       const sel = selectedDk && selectedDk === dk ? ' selected' : '';
-      dateOpts += '<option value="' + dk + '"' + sel + '>' + dk + ' (' + DAY_NAMES[d.getDay()] + ')</option>';
+      dateOpts += '<option value="' + dk + '"' + sel + '>' + dk + ' (' + msbT(DAY_NAMES[d.getDay()]) + ')</option>';
     });
   }
   return dateOpts;
@@ -9256,9 +9530,9 @@ function renderStoreHoursPanel() {
   html += '<div style="font-weight:600;font-size:0.78rem;margin-bottom:0.25rem">Weekly defaults (by day of week)</div>';
   for (let d = 0; d <= 6; d++) {
     html += '<div class="sh-row">';
-    html += '<label>' + DAY_NAMES[d] + '</label>';
-    html += '<input type="text" id="sh-open-' + d + '" value="' + esc(by[d].open) + '" placeholder="open" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
-    html += '<input type="text" id="sh-close-' + d + '" value="' + esc(by[d].close) + '" placeholder="close" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
+    html += '<label>' + msbT(DAY_NAMES[d]) + '</label>';
+    html += '<input type="text" id="sh-open-' + d + '" value="' + esc(by[d].open) + '" placeholder="' + esc(msbT('open (hours)')) + '" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
+    html += '<input type="text" id="sh-close-' + d + '" value="' + esc(by[d].close) + '" placeholder="' + esc(msbT('close (hours)')) + '" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
     html += '</div>';
   }
   html += '<div class="sh-actions">';
@@ -9288,8 +9562,8 @@ function renderStoreHoursPanel() {
     }
     html += '</div>';
     html += '<div class="sh-row" style="grid-template-columns:1fr 1fr auto;margin-top:0.35rem">';
-    html += '<input type="text" id="sh-ov-open" placeholder="open" value="' + openDef + '">';
-    html += '<input type="text" id="sh-ov-close" placeholder="close" value="' + closeDef + '">';
+    html += '<input type="text" id="sh-ov-open" placeholder="' + esc(msbT('open (hours)')) + '" value="' + openDef + '">';
+    html += '<input type="text" id="sh-ov-close" placeholder="' + esc(msbT('close (hours)')) + '" value="' + closeDef + '">';
     html += '<button type="button" class="btn-primary" style="font-size:0.7rem;padding:0.25rem 0.45rem;min-height:auto" onclick="addStoreHoursDateRange()">Apply range</button>';
     html += '</div>';
     html += '<div class="sh-note">Applies the same open–close to every calendar day in the range (e.g. holiday week 12/20–12/26).</div>';
@@ -9300,8 +9574,8 @@ function renderStoreHoursPanel() {
     } else {
       html += '<input type="text" id="sh-ov-date" placeholder="YYYY-MM-DD">';
     }
-    html += '<input type="text" id="sh-ov-open" placeholder="open" value="' + openDef + '">';
-    html += '<input type="text" id="sh-ov-close" placeholder="close" value="' + closeDef + '">';
+    html += '<input type="text" id="sh-ov-open" placeholder="' + esc(msbT('open (hours)')) + '" value="' + openDef + '">';
+    html += '<input type="text" id="sh-ov-close" placeholder="' + esc(msbT('close (hours)')) + '" value="' + closeDef + '">';
     html += '<button type="button" class="btn-primary" style="font-size:0.7rem;padding:0.25rem 0.45rem;min-height:auto" onclick="addStoreHoursOverride()">Apply day</button>';
     html += '</div>';
     html += '<div class="sh-note">One calendar day only (e.g. Christmas Eve). Use Date range for multi-day stretches.</div>';
@@ -9676,7 +9950,7 @@ function buildPostingIssues(genReport, ROLES, warnings) {
     (genReport.unmet || []).slice(0, 6).forEach((u) => {
       issues.push({
         sev: 'note',
-        title: String(u).slice(0, 120),
+        title: localizeWarningMsg(String(u).slice(0, 120)),
         meta: msbT('Preference note — optional to fix.'),
         target: 'summary',
       });
@@ -9807,7 +10081,11 @@ function isPlaceholderManagerName(n) {
   if (/^assistant manager(\s*\d+)?$/i.test(s)) return true;
   if (/^key carrier(\s*\d+)?$/i.test(s)) return true;
   if (typeof getRoleTitle === 'function' && typeof DEFAULT_ROLE_TITLES !== 'undefined') {
-    const titles = ['sm', 'am', 'kc'].map((f) => [getRoleTitle(f), DEFAULT_ROLE_TITLES[f]]);
+    const titles = ['sm', 'am', 'kc'].map((f) => {
+      const en = DEFAULT_ROLE_TITLES[f];
+      const es = (typeof MSB_I18N_ES !== 'undefined' && MSB_I18N_ES[en]) || '';
+      return [getRoleTitle(f), en, es];
+    });
     for (let i = 0; i < titles.length; i++) {
       for (let j = 0; j < titles[i].length; j++) {
         const t = String(titles[i][j] || '').trim();
@@ -10294,7 +10572,7 @@ function copySummaryText() {
   if (report.unmet && report.unmet.length) {
     lines.push('');
     lines.push(msbT('UNMET / NOTES'));
-    report.unmet.forEach(u => lines.push('  - ' + u));
+    report.unmet.forEach(u => lines.push('  - ' + localizeWarningMsg(u)));
   }
   lines.push('');
   lines.push(msbT('Generated with Manager Schedule Builder Pro'));
@@ -10409,8 +10687,8 @@ function getShiftLabels() {
     'mid-late':'M ' + getShiftTimeStr('mid-late'),
     'close':'C ' + getShiftTimeStr('close'),
     'close-ext':'C ' + getShiftTimeStr('close-ext'),
-    'pto':'PTO', 'rto':'RTO', 'loa':'LOA', 'off':'OFF',
-    'kc-close':'KC Close'
+    'pto':'PTO', 'rto':'RTO', 'loa':'LOA', 'off': msbT('Off'),
+    'kc-close': msbT('KC Close')
   };
 }
 
@@ -10422,7 +10700,7 @@ function getShiftShort() {
     'mid-late':'M ' + getShiftTimeStr('mid-late'),
     'close':'C',
     'close-ext':'C-EXT',
-    'pto':'PTO', 'rto':'RTO', 'loa':'LOA', 'off':'OFF',
+    'pto':'PTO', 'rto':'RTO', 'loa':'LOA', 'off': msbT('Off'),
     'kc-close':'KC-C'
   };
 }
@@ -10435,7 +10713,7 @@ function getPrintShift() {
     'mid-late': getShiftTimeStr('mid-late'),
     'close': getShiftTimeStr('close'),
     'close-ext': getShiftTimeStr('close-ext'),
-    'off': 'OFF',
+    'off': msbT('OFF'),
     'pto': 'VAC',
     'rto': 'OFF(RTO)',
     'loa': 'LOA',
@@ -11061,15 +11339,15 @@ function buildInputCalendar(role) {
     }
     const fedWeek = !!fedName;
     html += `<div class="input-week-label${isHoliday ? ' is-holiday-week' : ''}${fedWeek ? ' is-federal-holiday-week' : ''}">`;
-    html += `<span>Week ${wIdx + 1}: ${formatDate(week.start)} - ${formatDate(week.end)}${isHoliday ? ' · Holiday (4-day)' : ''}${fedName ? ' · ' + esc(fedName) : ''}</span>`;
-    html += `<label class="holiday-week-toggle"><input type="checkbox" onchange="toggleHolidayWeek(${wIdx}, this.checked)"${isHoliday ? ' checked' : ''}> Company Holiday</label>`;
+    html += `<span>${formatWeekHeading(wIdx + 1)}: ${formatDate(week.start)} - ${formatDate(week.end)}${isHoliday ? ' · ' + msbT('Holiday (4-day)') : ''}${fedName ? ' · ' + esc(fedName) : ''}</span>`;
+    html += `<label class="holiday-week-toggle"><input type="checkbox" onchange="toggleHolidayWeek(${wIdx}, this.checked)"${isHoliday ? ' checked' : ''}> ${esc(msbT('Company Holiday'))}</label>`;
     html += `</div>`;
     html += '<div class="input-calendar">';
 
     // Headers
     DAY_NAMES.forEach((d, i) => {
       const cls = (i === 0 || i === 6) ? ' weekend' : '';
-      html += `<div class="cal-header${cls}">${d}</div>`;
+      html += `<div class="cal-header${cls}">${msbT(d)}</div>`;
     });
 
     // Day cells for this week (always 7 days, Sun-Sat)
@@ -13940,16 +14218,8 @@ function _generateScheduleInner(opts) {
     recordFreeGenerate();
   }
   const left = remainingFreeGenerates();
-  let toastMsg = `Schedule ready · Quality ${q.score}/100 (${q.grade})`;
-  if (!isProUnlocked()) {
-    toastMsg +=
-      left === 0
-        ? ' · Free builds used (edits still free)'
-        : ' · ' + left + ' free build' + (left === 1 ? '' : 's') + ' left';
-  }
-  if (lastGenReport && lastGenReport.prefs && lastGenReport.prefs.avoidClopening && lastGenReport.totalClopens > 0) {
-    toastMsg += ' · review leftover clopens';
-  }
+  const leftoverClopens = !!(lastGenReport && lastGenReport.prefs && lastGenReport.prefs.avoidClopening && lastGenReport.totalClopens > 0);
+  const toastMsg = formatScheduleReadyToast(q, left, leftoverClopens, isProUnlocked());
   showToast(toastMsg, hasErrors ? 'warn' : 'success', function () {
     if (typeof jumpToReviewChip === 'function') jumpToReviewChip('quality');
   });
@@ -14930,8 +15200,8 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
       const weekDates = getWeekDatesForIndex(week, wIdx);
       html += '<div class="week-table-wrapper" id="week-wrap-' + wIdx + '">';
       html += `<div class="week-header">`;
-      html += `<span>Week ${wIdx + 1}</span>`;
-      html += `<span class="week-dates">${DAY_NAMES_FULL[weekDates[0].getDay()]} ${formatDate(weekDates[0])} – ${DAY_NAMES_FULL[weekDates[6].getDay()]} ${formatDate(weekDates[6])}</span>`;
+      html += `<span>${formatWeekHeading(wIdx + 1)}</span>`;
+      html += `<span class="week-dates">${formatWeekDateRange(weekDates[0], weekDates[6])}</span>`;
       html += `</div>`;
       if (mode === 'day') {
         html += renderDayCardsHtml(weekDates, wIdx, names, ALL_KC);
@@ -15212,10 +15482,8 @@ function findClopens(ROLES) {
           openIdx: i + 1,
           label:
             (names[r] || r) +
-            ': close ' +
-            formatDate(d0) +
-            ' → open ' +
-            formatDate(d1),
+            ': ' +
+            formatClopenPairWhen(d0, d1),
           weekIdx: Math.floor(i / 7),
           fix: fix,
         });
@@ -15536,6 +15804,9 @@ function jumpToRoleOnGrid(role) {
    v2.6.26 — Finish leftover Spanish review / board / export / backup chrome. Tour keeps the
              active-locale Setup heading. detectDeviceUiLang accepts an injected tag for tests;
              a real Spanish-locale phone is still required.
+   v2.6.27 — Finish leftover Spanish generated notes / toast / week layer. Local dictionary
+             only. Default role titles translate; custom titles stay as typed. Person names
+             in issue lines stay as typed.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -16325,8 +16596,8 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
 
     html += `<div class="quality-banner ${bannerCls} is-jump" id="quality-banner" role="button" tabindex="0" title="Tap to jump to a hole on the board" onclick="jumpToReviewChip('quality')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();jumpToReviewChip('quality');}"><span>${bannerCls === 'ok' ? '✓' : (bannerCls === 'bad' ? '!!' : '!')}</span><div><div>${bannerText}</div>`;
     if (unmet.length) {
-      html += '<ul class="unmet-list">' + unmet.slice(0, 12).map(u => `<li>${esc(u)}</li>`).join('') + '</ul>';
-      if (unmet.length > 12) html += `<div style="margin-top:0.35rem;font-size:0.8rem">+${unmet.length - 12} more…</div>`;
+      html += '<ul class="unmet-list">' + unmet.slice(0, 12).map(u => `<li>${esc(localizeWarningMsg(u))}</li>`).join('') + '</ul>';
+      if (unmet.length > 12) html += `<div style="margin-top:0.35rem;font-size:0.8rem">${esc(msbT('{n} more…', { n: unmet.length - 12 }))}</div>`;
     }
     html += '</div></div>';
 
@@ -16782,13 +17053,17 @@ function updateUndoRedoButtons() {
   const r = document.getElementById('btn-redo-edit');
   if (u) {
     u.disabled = !undoStack.length || !!window._viewLocked;
-    u.textContent = undoStack.length ? 'Undo (' + undoStack.length + ')' : 'Undo';
-    u.title = undoStack.length ? 'Undo: ' + (undoStack[undoStack.length - 1].label || 'edit') : 'Nothing to undo';
+    u.textContent = undoStack.length ? msbT('Undo ({n})', { n: undoStack.length }) : msbT('Undo');
+    u.title = undoStack.length
+      ? msbT('Undo: {label}', { label: msbT(undoStack[undoStack.length - 1].label || 'edit') })
+      : msbT('Nothing to undo');
   }
   if (r) {
     r.disabled = !redoStack.length || !!window._viewLocked;
-    r.textContent = redoStack.length ? 'Redo (' + redoStack.length + ')' : 'Redo';
-    r.title = redoStack.length ? 'Redo: ' + (redoStack[redoStack.length - 1].label || 'edit') : 'Nothing to redo';
+    r.textContent = redoStack.length ? msbT('Redo ({n})', { n: redoStack.length }) : msbT('Redo');
+    r.title = redoStack.length
+      ? msbT('Redo: {label}', { label: msbT(redoStack[redoStack.length - 1].label || 'edit') })
+      : msbT('Nothing to redo');
   }
 }
 

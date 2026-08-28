@@ -315,6 +315,7 @@ input[type="radio"] { accent-color: var(--gold); }
 .setup-more-toggle .btn-outline {
   min-height: 2.4rem;
 }
+.kc-row-placeholder { display: none; }
 #tab-setup.first-run-ease .setup-grid {
   grid-template-columns: 1fr;
   max-width: 26rem;
@@ -605,7 +606,12 @@ input[type="radio"] { accent-color: var(--gold); }
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--ink-2);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
+.cell-menu button > * { pointer-events: none; }
 .cell-menu button:hover { background: rgba(61,220,255,0.1); color: var(--ink); }
 
 /* ========== WEEKLY SCHEDULE OUTPUT ========== */
@@ -1725,7 +1731,7 @@ input[type="radio"] { accent-color: var(--gold); }
 #cell-inspector-portal.is-open {
   position: fixed;
   inset: 0;
-  pointer-events: none;
+  pointer-events: auto;
 }
 #cell-menu-portal.is-open { z-index: 100; }
 #sched-edit-portal.is-open { z-index: 210; }
@@ -1740,7 +1746,8 @@ input[type="radio"] { accent-color: var(--gold); }
 }
 .sched-edit-menu {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
+  isolation: isolate;
   pointer-events: auto;
   background: rgba(12, 18, 32, 0.97);
   border: 1px solid var(--line-strong);
@@ -1766,8 +1773,15 @@ input[type="radio"] { accent-color: var(--gold); }
   color: var(--ink-2);
   min-height: 36px;
   white-space: nowrap;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 .sched-edit-menu button:hover { background: rgba(61,220,255,0.1); color: var(--ink); }
+.sched-edit-menu button > * {
+  pointer-events: none;
+}
 .sched-edit-menu button .swatch {
   display: inline-block;
   width: 12px;
@@ -4149,6 +4163,7 @@ html[data-density="board"] .week-table thead th .day-hours { font-size: 0.68rem;
   font-family: inherit;
 }
 .week-table tbody td.shift-editable { position: relative; }
+.week-table tbody td.shift-editable .cell-shift-txt { pointer-events: none; }
 .week-table tbody td.shift-editable:hover .cell-swap-btn,
 .week-table tbody td.shift-editable:focus-within .cell-swap-btn {
   opacity: 1;
@@ -5576,6 +5591,7 @@ function restoreAppTab() {
 // Free: unlimited managers; limited free schedule builds (see freeGenerateLimit)
 let amCount = 2;
 let kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
+let kcRowsUnlocked = false;
 
 // Store open/close hours (display/planning metadata — not required by coverage engine)
 const DEFAULT_STORE_HOURS = {
@@ -8734,6 +8750,7 @@ function applyBlankTeam(opts) {
   const persist = !opts || opts.persist !== false;
   amCount = 2;
   kcList = [{ id: 'kc1', name: '', asManager: false, midDows: [] }];
+  kcRowsUnlocked = false;
   if (typeof renderAMRows === 'function') renderAMRows();
   if (typeof renderKCRows === 'function') renderKCRows();
   const sm = document.getElementById('name-sm');
@@ -9635,15 +9652,21 @@ function toggleKcMidDow(idx, dow, checked) {
 function renderKCRows() {
   const container = document.getElementById('kc-rows');
   let html = '';
+  const anyNamed = kcList.some((kc) => typeof isPlaceholderManagerName === 'function' && !isPlaceholderManagerName(kc && kc.name));
+  const showPlaceholders = kcRowsUnlocked || anyNamed || kcList.length > 1;
+  let visibleCount = 0;
   kcList.forEach((kc, idx) => {
     if (!Array.isArray(kc.midDows)) kc.midDows = [];
+    const named = typeof isPlaceholderManagerName === 'function' && !isPlaceholderManagerName(kc && kc.name);
+    const hide = !named && !showPlaceholders;
+    if (!hide) visibleCount++;
     const midSet = new Set(normalizeKcMidDows(kc.midDows));
     const midChecks = !kc.asManager
       ? `<div class="kc-mid-days"><span class="kc-mid-label">Mid days</span>${DAY_NAMES.map((dn, d) =>
           `<label><input type="checkbox" ${midSet.has(d) ? 'checked' : ''} onchange="toggleKcMidDow(${idx}, ${d}, this.checked)"> ${dn}</label>`
         ).join('')}</div>`
       : '';
-    html += `<div class="manager-row" style="flex-wrap:wrap">
+    html += `<div class="manager-row${hide ? ' kc-row-placeholder' : ''}" style="flex-wrap:wrap">
       <span class="role-badge role-kc">KC${idx + 1}</span>
       <input type="text" id="name-${kc.id}" value="${kc.name}" placeholder="${typeof getRoleTitle === 'function' ? getRoleTitle('kc') : 'Key Carrier'} ${idx + 1}"
         oninput="kcList[${idx}].name = this.value; persistManagerNames()" onchange="kcList[${idx}].name = this.value; persistManagerNames()" onblur="persistManagerNames()">
@@ -9656,7 +9679,7 @@ function renderKCRows() {
     </div>`;
   });
   container.innerHTML = html;
-  document.getElementById('kc-count-badge').textContent = kcList.length;
+  document.getElementById('kc-count-badge').textContent = visibleCount;
 }
 
 function addAM() {
@@ -9676,9 +9699,21 @@ function removeAM() {
 }
 
 function addKC() {
-  // Non-manager KCs do not consume free manager seats
+  const soleUnnamed = kcList.length === 1 && kcList[0] && typeof isNamedKeyCarrier === 'function' && !isNamedKeyCarrier(kcList[0]);
+  if (soleUnnamed && !kcRowsUnlocked) {
+    kcRowsUnlocked = true;
+    if (kcList[0]) kcList[0].name = '';
+    renderKCRows();
+    const el = document.getElementById('name-' + (kcList[0] && kcList[0].id));
+    if (el) {
+      el.value = '';
+      try { el.focus({ preventScroll: true }); } catch (e) { try { el.focus(); } catch (e2) {} }
+    }
+    return;
+  }
+  kcRowsUnlocked = true;
   const num = kcList.length + 1;
-  kcList.push({ id: 'kc' + num, name: defaultRolePersonName('kc', num), asManager: false, midDows: [] });
+  kcList.push({ id: 'kc' + num, name: '', asManager: false, midDows: [] });
   renderKCRows();
   rebuildAfterConfigChange();
 }
@@ -9918,15 +9953,17 @@ function viewportSize() {
 function placePortaledMenu(menu, anchorRect) {
   if (!menu || !anchorRect) return;
   if (window.innerWidth <= 640) return;
-  const a = layerRectFromClient(anchorRect);
-  const view = viewportSize();
-  let top = a.bottom + 4;
-  let left = a.left;
+  // Client rects match elementFromPoint / tap targets. Do not subtract
+  // visualViewport offset — that painted labels away from the hit box.
+  const viewW = window.innerWidth;
+  const viewH = window.innerHeight;
+  let top = anchorRect.bottom + 4;
+  let left = anchorRect.left;
   menu.style.top = top + 'px';
   menu.style.left = left + 'px';
-  const m = layerRectFromClient(menu.getBoundingClientRect());
-  if (m.bottom > view.h - 4) top = Math.max(4, a.top - m.height - 4);
-  if (m.right > view.w - 4) left = Math.max(4, view.w - m.width - 8);
+  const m = menu.getBoundingClientRect();
+  if (m.bottom > viewH - 4) top = Math.max(4, anchorRect.top - m.height - 4);
+  if (m.right > viewW - 4) left = Math.max(4, viewW - m.width - 8);
   if (left < 4) left = 4;
   if (top < 4) top = 4;
   menu.style.top = top + 'px';
@@ -9988,9 +10025,8 @@ function openCellMenu(e, role, dk) {
   ];
 
   const portal = document.getElementById('cell-menu-portal');
-  const layer = layerRectFromClient(rect);
   let html = '<div class="overlay" onclick="closeCellMenu()"></div>';
-  html += `<div class="cell-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px">`;
+  html += `<div class="cell-menu" style="top:${rect.bottom + 4}px;left:${rect.left}px">`;
 
   groups.forEach((group, gi) => {
     if (gi > 0) html += '<div class="cell-menu-divider"></div>';
@@ -14656,18 +14692,17 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
   const options = isKCRole ? getKCEditOptions() : getManagerEditOptions();
 
   const portal = document.getElementById('sched-edit-portal');
-  const layer = layerRectFromClient(rect);
   let html = '<div class="sched-edit-overlay" onpointerdown="schedEditStop(event); closeSchedEditMenu();"></div>';
-  html += `<div class="sched-edit-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px" onpointerdown="event.stopPropagation();">`;
+  html += `<div class="sched-edit-menu" style="top:${rect.bottom + 4}px;left:${rect.left}px" onpointerdown="event.stopPropagation();">`;
   html += `<button type="button" onpointerdown="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});" onclick="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});">`;
-  html += `<span class="swatch" style="background:rgba(61,220,255,0.45)"></span>Swap with…</button>`;
+  html += `<span class="swatch" style="background:rgba(61,220,255,0.45)"></span><span class="sched-edit-label">Swap with…</span></button>`;
   html += `<div class="menu-divider"></div>`;
 
   options.forEach((o) => {
     if (o.value === '__custom__') {
       html += `<button type="button" onpointerdown="schedEditStop(event); showSchedCustomInput('${role}','${dk}',${weekIdx});" onclick="schedEditStop(event); showSchedCustomInput('${role}','${dk}',${weekIdx});" style="color:#7e22ce;font-weight:600">`;
       html += `<span class="swatch" style="background:${o.color}"></span>`;
-      html += o.label;
+      html += `<span class="sched-edit-label">${o.label}</span>`;
       html += `</button>`;
       html += `<div id="sched-custom-input-${role}-${dk}" style="display:none">`;
       html += `<div class="custom-input-row">`;
@@ -14680,7 +14715,7 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
       const valArg = o.value === null ? 'null' : "'" + o.value + "'";
       html += `<button type="button" onpointerdown="schedEditStop(event); applySchedEdit('${role}','${dk}',${weekIdx},${valArg});" onclick="schedEditStop(event); applySchedEdit('${role}','${dk}',${weekIdx},${valArg});">`;
       html += `<span class="swatch" style="background:${o.color}"></span>`;
-      html += o.label;
+      html += `<span class="sched-edit-label">${o.label}</span>`;
       html += `</button>`;
     }
   });

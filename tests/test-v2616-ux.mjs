@@ -81,6 +81,43 @@ const DEMO_LEFTOVER = {
   meta: { storeName: 'Harbor East Demo Store', storeNumber: '851' },
 };
 
+async function hitCloseOnPaintedLabel(page) {
+  return page.evaluate(async () => {
+    window._msbSuppressCellClick = false;
+    const cells = [...document.querySelectorAll('#schedule-grid td.shift-editable')];
+    const work = cells.find((c) => {
+      const s = schedule[c.getAttribute('data-role')] && schedule[c.getAttribute('data-role')][c.getAttribute('data-dk')];
+      return typeof isOpen === 'function' && isOpen(s);
+    });
+    if (!work) return { error: 'no-open-cell' };
+    work.scrollIntoView({ block: 'center' });
+    work.click();
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const menu = document.querySelector('.sched-edit-menu');
+    const closeBtn = menu && [...menu.querySelectorAll('button')].find((b) => /^Close$/i.test((b.textContent || '').trim()));
+    if (!closeBtn) return { error: 'no-close-btn', portalOpen: !!menu };
+    const label = closeBtn.querySelector('.sched-edit-label') || closeBtn;
+    const r = label.getBoundingClientRect();
+    const x = r.left + Math.min(10, Math.max(3, r.width * 0.2));
+    const y = r.top + r.height / 2;
+    const el = document.elementFromPoint(x, y);
+    const hitBtn = !!(el && (el === closeBtn || (el.closest && el.closest('button') === closeBtn)));
+    const role = work.getAttribute('data-role');
+    const dk = work.getAttribute('data-dk');
+    if (el) {
+      el.dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, clientX: x, clientY: y,
+      }));
+    }
+    await new Promise((res) => setTimeout(res, 220));
+    return {
+      hitBtn,
+      hitTag: el ? el.tagName : '',
+      stored: schedule[role] && schedule[role][dk],
+    };
+  });
+}
+
 function snapshotSetup(page) {
   return page.evaluate(() => {
     const vis = (el) => {
@@ -188,6 +225,14 @@ async function main() {
     fail('extras-not-deleted', 'Requests, Rules, or setup extras were removed');
   } else pass('extras-not-deleted');
 
+  if (/sched-edit-label/.test(index)
+    && /\.sched-edit-menu button > \* \{\s*pointer-events: none/.test(index)
+    && /Do not subtract/.test(index)
+    && /kc-row-placeholder/.test(index)
+    && /kcRowsUnlocked/.test(index)) {
+    pass('playtest-extras-markup');
+  } else fail('playtest-extras-markup', 'label hit-target or KC hide markup missing');
+
   const chromium = await loadChromium();
   const { server, base } = await startStaticServer();
   const browser = await chromium.launch({
@@ -268,6 +313,37 @@ async function main() {
       pass('build-after-two-names-and-period', built.cells + ' cells');
     } else fail('build-after-two-names-and-period', JSON.stringify(built));
 
+    const phoneClose = await hitCloseOnPaintedLabel(page);
+    if (!phoneClose.error && phoneClose.hitBtn && phoneClose.stored === 'close') {
+      pass('phone-close-label-applies');
+    } else fail('phone-close-label-applies', JSON.stringify(phoneClose));
+
+    const desk = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await desk.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await desk.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('msb_tour_done', '1');
+      localStorage.setItem('msb_welcome_dismissed', '1');
+    });
+    await desk.reload({ waitUntil: 'domcontentloaded' });
+    await desk.waitForTimeout(500);
+    await desk.evaluate(() => {
+      const sm = document.getElementById('name-sm');
+      const am1 = document.getElementById('name-am1');
+      if (sm) sm.value = 'Pat Nguyen';
+      if (am1) am1.value = 'Chris Ortiz';
+      persistManagerNames();
+      if (typeof loadThisNrfPeriod === 'function') loadThisNrfPeriod({ quiet: true });
+      buildFromSetup();
+    });
+    await desk.waitForTimeout(1800);
+    const deskClose = await hitCloseOnPaintedLabel(desk);
+    if (!deskClose.error && deskClose.hitBtn && deskClose.stored === 'close') {
+      pass('desktop-close-label-applies');
+    } else fail('desktop-close-label-applies', JSON.stringify(deskClose));
+    await desk.close();
+
     const fresh = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await fresh.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await fresh.evaluate(() => {
@@ -286,6 +362,43 @@ async function main() {
       && moreOpen.moreText === 'Hide extra setup') {
       pass('more-setup-one-tap-shift-times');
     } else fail('more-setup-one-tap-shift-times', JSON.stringify(moreOpen));
+
+    const kcHidden = await fresh.evaluate(() => {
+      const vis = (el) => {
+        if (!el) return false;
+        if (el.hidden || el.hasAttribute('hidden')) return false;
+        const cs = getComputedStyle(el);
+        if (!cs || cs.display === 'none' || cs.visibility === 'hidden') return false;
+        return el.getBoundingClientRect().height > 2;
+      };
+      const input = document.getElementById('name-kc1');
+      const row = input && input.closest('.manager-row');
+      return {
+        inputInDom: !!input,
+        rowHidden: !vis(row),
+        placeholderClass: !!(row && row.classList.contains('kc-row-placeholder')),
+        named: typeof isNamedKeyCarrier === 'function' && kcList[0] ? isNamedKeyCarrier(kcList[0]) : null,
+      };
+    });
+    if (kcHidden.inputInDom && kcHidden.rowHidden && kcHidden.placeholderClass && kcHidden.named === false) {
+      pass('unnamed-kc-hidden-on-setup');
+    } else fail('unnamed-kc-hidden-on-setup', JSON.stringify(kcHidden));
+
+    await fresh.locator('#btn-add-kc').click();
+    await fresh.waitForTimeout(150);
+    const kcRevealed = await fresh.evaluate(() => {
+      const vis = (el) => {
+        if (!el) return false;
+        const cs = getComputedStyle(el);
+        if (!cs || cs.display === 'none') return false;
+        return el.getBoundingClientRect().height > 2;
+      };
+      const input = document.getElementById('name-kc1');
+      const row = input && input.closest('.manager-row');
+      return { visible: vis(row), focused: document.activeElement && document.activeElement.id };
+    });
+    if (kcRevealed.visible) pass('add-kc-reveals-row', kcRevealed.focused);
+    else fail('add-kc-reveals-row', JSON.stringify(kcRevealed));
 
     await fresh.locator('#tabbtn-rules').click();
     await fresh.waitForTimeout(200);

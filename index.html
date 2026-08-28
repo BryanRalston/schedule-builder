@@ -12686,33 +12686,46 @@ function _generateScheduleInner(opts) {
   ensureHardDailyCoverage();
   applyPeakSeasonVariants();
 
-  // Two named managers: put the missing weekday offs back if coverage/repair
-  // ate them. Only on days the other person already works.
-  if (thinRoster) {
+  const enforceFiveDayThin = () => {
+    if (!thinRoster) return;
     for (let w = 0; w < numWeeks; w++) {
       const weekDks = getWeekDks(w);
       const targetDays = holidayWeeks[w] ? 4 : 5;
       ROLES.forEach((r) => {
         const schedNow = () => weekDks.filter((dk) => isWork(schedule[r][dk]) || isPto(schedule[r][dk])).length;
-        if (schedNow() <= targetDays) return;
-        const cands = weekDks.filter((dk) => {
-          if (isKcCloseNight(dk) || isInputLocked(r, dk)) return false;
-          if (!isWork(schedule[r][dk])) return false;
-          return ROLES.some((rx) => rx !== r && isWork(schedule[rx][dk]));
-        }).sort((a, b) => {
-          const aClose = isClose(schedule[r][a]) ? 1 : 0;
-          const bClose = isClose(schedule[r][b]) ? 1 : 0;
-          if (aClose !== bClose) return aClose - bClose;
-          return 0;
-        });
-        for (const dk of cands) {
-          if (schedNow() <= targetDays) break;
-          schedule[r][dk] = 'off';
+        if (schedNow() > targetDays) {
+          const cands = weekDks.filter((dk) => {
+            if (isKcCloseNight(dk) || isInputLocked(r, dk)) return false;
+            if (!isWork(schedule[r][dk])) return false;
+            return ROLES.some((rx) => rx !== r && isWork(schedule[rx][dk]));
+          }).sort((a, b) => {
+            const aClose = isClose(schedule[r][a]) ? 1 : 0;
+            const bClose = isClose(schedule[r][b]) ? 1 : 0;
+            return aClose - bClose;
+          });
+          for (const dk of cands) {
+            if (schedNow() <= targetDays) break;
+            schedule[r][dk] = 'off';
+          }
+        } else if (schedNow() < targetDays) {
+          const add = weekDks.filter((dk) => {
+            if (isInputLocked(r, dk)) return false;
+            return schedule[r][dk] === 'off';
+          }).sort((a, b) => (isDkWeekend(a) ? 1 : 0) - (isDkWeekend(b) ? 1 : 0));
+          for (const dk of add) {
+            if (schedNow() >= targetDays) break;
+            const pdk = prevDkOf(dk);
+            const closedYest = pdk && isClose(schedule[r][pdk]);
+            const dayOpens = ROLES.filter((rx) => isOpen(schedule[rx][dk])).length;
+            if (dayOpens === 0 && !closedYest) schedule[r][dk] = pickOpen();
+            else schedule[r][dk] = closedYest ? 'mid-late' : 'mid-early';
+          }
         }
       });
     }
     ensureHardDailyCoverage();
-  }
+  };
+  enforceFiveDayThin();
 
   // Slide an existing off into a long work streak. Does not add or remove
   // scheduled days — only moves an off so max consecutive work stays at the limit.
@@ -12741,6 +12754,7 @@ function _generateScheduleInner(opts) {
           if (idx >= found.start && idx <= found.end) tryIdx.push(idx);
         }
         const offIdx = [];
+        const streakWeek = Math.floor(found.start / 7);
         for (let i = 0; i < allDks.length; i++) {
           if (i >= found.start && i <= found.end) continue;
           const dk = allDks[i];
@@ -12749,6 +12763,11 @@ function _generateScheduleInner(opts) {
           if (isKcCloseNight(dk)) continue;
           offIdx.push(i);
         }
+        offIdx.sort((a, b) => {
+          const aSame = Math.floor(a / 7) === streakWeek ? 0 : 1;
+          const bSame = Math.floor(b / 7) === streakWeek ? 0 : 1;
+          return aSame - bSame;
+        });
         let moved = false;
         for (const si of tryIdx) {
           const sdk = allDks[si];
@@ -12775,6 +12794,7 @@ function _generateScheduleInner(opts) {
     });
   };
   breakLongWorkStreaks();
+  enforceFiveDayThin();
   ensureHardDailyCoverage();
 
   // ════════════════════════════════════════════════════

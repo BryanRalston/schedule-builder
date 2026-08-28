@@ -71,15 +71,15 @@ async function main() {
   console.log('\n=== v2.6.15 backup nudge + board clopens ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.22') pass('version.json', version.version);
+  if (version.version === '2.6.23') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.22'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.23'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.22'") && index.includes('id="app-version-label">v2.6.22')) {
+  if (index.includes("const APP_VERSION = '2.6.23'") && index.includes('id="app-version-label">v2.6.23')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

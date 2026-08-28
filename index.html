@@ -7553,11 +7553,10 @@ function summarizeWarningsForDisplay(warnings, roles) {
   if (cover.length < 2) {
     return rest.concat(cover);
   }
-  const why = typeof twoPersonOffsCoverageNote === 'function' ? twoPersonOffsCoverageNote(roles) : '';
   rest.unshift({
     type: 'info',
-    msg: (why || 'Two people with days off cannot cover Open+Close every day.')
-      + ' See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.'
+    msg: msbT('Two people with days off cannot cover Open+Close every day.')
+      + ' ' + msbT('See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.')
   });
   return rest;
 }
@@ -8270,6 +8269,7 @@ const MSB_I18N_ES = {
   '{n} day missing open or close': '{n} día sin apertura o cierre',
   '{n} days missing open or close': '{n} días sin apertura o cierre',
   'Two people with days off cannot cover Open+Close every day.': 'Dos personas con días libres no cubren Apertura+Cierre todos los días.',
+  'See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.': 'Mira el chip de cobertura — los días delgados son el trueque de dos personas + libres, no un Armado fallido.',
   'New phone? Export a JSON backup, then Load on the new device.': '¿Teléfono nuevo? Exporta un respaldo JSON y luego Cargar en el aparato nuevo.',
   'Store hours': 'Horario de tienda',
   'Hours override': 'Horario especial',
@@ -8459,6 +8459,12 @@ function refreshUiLangChrome() {
   applyStaticI18n();
   syncLangPickers();
   try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEase) {}
+  try {
+    const ts = document.getElementById('gen-timestamp');
+    if (ts && window._lastGeneratedAt) {
+      ts.textContent = msbT('Generated {when}', { when: window._lastGeneratedAt.toLocaleString() });
+    }
+  } catch (eTs) {}
   try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
   try { if (typeof personalizeWelcome === 'function') personalizeWelcome(); } catch (e0) {}
   try { if (typeof updateAccountChip === 'function') updateAccountChip(); } catch (e1) {}
@@ -8524,6 +8530,10 @@ function localizeWarningMsg(msg) {
   let s = String(msg || '');
   s = s.replace(/:\s*No opener\b/g, ': ' + msbT('No opener'));
   s = s.replace(/:\s*No closer\b/g, ': ' + msbT('No closer'));
+  const twoEn = 'Two people with days off cannot cover Open+Close every day.';
+  const seeEn = 'See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.';
+  if (s.indexOf(twoEn) !== -1) s = s.replace(twoEn, msbT(twoEn));
+  if (s.indexOf(seeEn) !== -1) s = s.replace(seeEn, msbT(seeEn));
   return s;
 }
 
@@ -13922,7 +13932,8 @@ function _generateScheduleInner(opts) {
   renderSummary(warnings, ROLES, ALL_KC, lastGenReport);
   renderFairnessUnderSchedule(ROLES, ALL_KC, lastGenReport);
   const ts = document.getElementById('gen-timestamp');
-  if (ts) ts.textContent = msbT('Generated {when}', { when: new Date().toLocaleString() });
+  window._lastGeneratedAt = new Date();
+  if (ts) ts.textContent = msbT('Generated {when}', { when: window._lastGeneratedAt.toLocaleString() });
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
   // Successful user Build only — sample / tour generate does not burn a free build
   if (opts._consumeFree || (typeof shouldRecordFreeGenerate === 'function' && shouldRecordFreeGenerate(opts))) {

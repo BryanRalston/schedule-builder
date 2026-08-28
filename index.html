@@ -2540,17 +2540,22 @@ input[type="radio"] { accent-color: var(--gold); }
   line-height: 1.4;
 }
 .gp-badge {
-  display: inline-block;
-  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   background: #fff;
+  color: #111;
   border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  line-height: 1.2;
 }
-.gp-badge img {
-  display: block;
-  height: 60px;
-  width: auto;
-}
+.gp-badge img { display: none; }
+.install-banner .gp-badge { color: #111; }
 .feature-pills {
   display: flex;
   flex-wrap: wrap;
@@ -4346,6 +4351,33 @@ body.msb-board-live .app-footer { display: none !important; }
 }
 .built-pill[hidden] { display: none !important; }
 
+/* v2.6.19 — Rebuild next to Built must stay tappable above the sticky review bar.
+   .container is z-index 1, so a child z-index cannot beat #post-gen-strip (95/96). */
+body.msb-board-live .container {
+  z-index: auto;
+}
+#tab-schedule.board-live #generate-section {
+  position: relative;
+  z-index: 97;
+  pointer-events: auto;
+}
+#tab-schedule.board-live .generate-actions {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+#tab-schedule.board-live #btn-generate,
+#tab-schedule.board-live #built-pill,
+#tab-schedule.board-live #btn-clear-board {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+#schedule-grid {
+  scroll-margin-top: 8.5rem;
+}
+
 .review-sheet { display: none; }
 .review-sheet.open,
 #review-sheet.open {
@@ -4961,9 +4993,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     </div>
     <div class="ib-actions">
       <button type="button" class="btn-install" id="btn-install-pwa" onclick="promptPwaInstall()">Install</button>
-      <a class="gp-badge" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">
-        <img src="store/en_badge_web_generic.png" alt="Get it on Google Play" width="124" height="48">
-      </a>
+      <a class="gp-badge" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Get it on Google Play</a>
       <button type="button" class="btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.3)" onclick="dismissInstallBanner()">Not now</button>
     </div>
   </div>
@@ -4983,9 +5013,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </div>
     </div>
     <div class="welcome-play" id="welcome-play">
-      <a class="gp-badge" id="welcome-play-link" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">
-        <img src="store/en_badge_web_generic.png" alt="Get it on Google Play" width="155" height="60">
-      </a>
+      <a class="gp-badge" id="welcome-play-link" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Get it on Google Play</a>
       <span class="welcome-play-note">Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.</span>
     </div>
   </div>
@@ -5174,7 +5202,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             onkeydown="if(event.key==='Enter'){event.preventDefault();applyRequestPhraseFromBar();}">
           <button type="button" class="btn-primary rpb-apply" id="btn-apply-request-phrase" onclick="applyRequestPhraseFromBar()">Apply</button>
         </div>
-        <p class="rpb-hint text-muted" id="request-phrase-hint">Runs on this device. Paint and the cell menu still work if this does not read it.</p>
+        <p class="rpb-hint text-muted" id="request-phrase-hint">Runs on this device. “Casey off Thu–Fri” or “Alex off Thu 8/6”. Paint still works if this does not read it.</p>
         <div id="request-phrase-confirm" class="rpb-confirm" hidden>
           <span id="request-phrase-confirm-text"></span>
           <button type="button" class="rpt-chip" id="btn-undo-request-phrase" onclick="undoRequestPhraseApply()">Undo</button>
@@ -5272,7 +5300,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         </div>
       </div>
       <div class="ready-checklist" id="ready-checklist"></div>
-      <div class="generate-actions">
+      <div class="generate-actions" id="built-rebuild-row">
         <span class="built-pill" id="built-pill" hidden>Built</span>
         <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()">Build this period</button>
         <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()">Clear board</button>
@@ -5388,7 +5416,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.18</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.19</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -5400,14 +5428,14 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 </div><!-- /#app-root -->
 
-<div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title">
-  <div class="pro-gate-card">
+<div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title" onpointerdown="if (event.target === this) { event.preventDefault(); event.stopPropagation(); closeProGate(); }">
+  <div class="pro-gate-card" onpointerdown="event.stopPropagation()">
     <h3 id="pro-gate-title">Pro feature</h3>
     <p id="pro-gate-body">Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.</p>
     <div class="pro-gate-actions">
       <a class="pg-buy" href="buy.html" data-price-label>Buy Pro — $19.99</a>
-      <button type="button" class="pg-secondary" onclick="promptLicenseUnlock()">Enter license</button>
-      <button type="button" class="pg-secondary" onclick="closeProGate()">Not now</button>
+      <button type="button" class="pg-secondary" id="btn-pro-gate-license" onpointerdown="event.preventDefault(); event.stopPropagation(); promptLicenseUnlock();" onclick="event.stopPropagation(); promptLicenseUnlock();">Enter license</button>
+      <button type="button" class="pg-secondary" id="btn-pro-gate-not-now" onpointerdown="event.preventDefault(); event.stopPropagation(); closeProGate();" onclick="event.stopPropagation(); closeProGate();">Not now</button>
     </div>
   </div>
 </div>
@@ -7589,7 +7617,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.18';
+const APP_VERSION = '2.6.19';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -17047,6 +17075,7 @@ function startNextPeriodSameTeam() {
 
 /* ====================================================================
    v2.6.17 — on-device request phrase bar (no network, no invented people)
+   v2.6.19 — peel a trailing single date off the name (8/6, Aug 6). No “Alex 8/6”.
    ==================================================================== */
 
 const REQUEST_PHRASE_DAY_ALIASES = {
@@ -17094,6 +17123,77 @@ function expandDowRange(fromDow, toDow) {
     out.push(d);
     guard++;
   }
+  return out;
+}
+
+const REQUEST_PHRASE_MONTH_ALIASES = {
+  jan: 1, january: 1,
+  feb: 2, february: 2,
+  mar: 3, march: 3,
+  apr: 4, april: 4,
+  may: 5,
+  jun: 6, june: 6,
+  jul: 7, july: 7,
+  aug: 8, august: 8,
+  sep: 9, sept: 9, september: 9,
+  oct: 10, october: 10,
+  nov: 11, november: 11,
+  dec: 12, december: 12
+};
+
+function daysInCalendarMonth(month, year) {
+  if (year != null && !isNaN(year)) {
+    let y = year;
+    if (y < 100) y += 2000;
+    return new Date(y, month, 0).getDate();
+  }
+  if (month === 2) return 29;
+  return [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month] || 0;
+}
+
+/** Peel a trailing single date (8/6, 8-6, Aug 6, August 6) so it is never part of the person name. */
+function peelTrailingSingleDate(text) {
+  const working = String(text || '');
+  const numericRe = /(?:^|\s)(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2,4}))?\s*$/i;
+  const namedRe = /(?:^|\s)(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*,?\s*(\d{2,4}))?\s*$/i;
+  let m = working.match(numericRe);
+  let month = 0;
+  let day = 0;
+  let year = null;
+  let raw = '';
+  if (m) {
+    month = parseInt(m[1], 10);
+    day = parseInt(m[2], 10);
+    if (m[3]) year = parseInt(m[3], 10);
+    raw = String(m[0] || '').replace(/^\s+/, '').trim();
+  } else {
+    m = working.match(namedRe);
+    if (!m) return { working: working, date: null, lookedLikeDate: false, raw: '' };
+    month = REQUEST_PHRASE_MONTH_ALIASES[String(m[1] || '').toLowerCase()] || 0;
+    day = parseInt(m[2], 10);
+    if (m[3]) year = parseInt(m[3], 10);
+    raw = String(m[0] || '').replace(/^\s+/, '').trim();
+  }
+  const stripped = working.slice(0, m.index).replace(/\s+/g, ' ').trim();
+  const maxDay = daysInCalendarMonth(month, year);
+  if (month < 1 || month > 12 || day < 1 || !maxDay || day > maxDay) {
+    return { working: stripped, date: null, lookedLikeDate: true, raw: raw };
+  }
+  if (year != null && year < 100) year += 2000;
+  return { working: stripped, date: { month: month, day: day, year: year }, lookedLikeDate: true, raw: raw };
+}
+
+function dateKeysForCalendarDate(cal, dates) {
+  const out = [];
+  if (!cal) return out;
+  (dates || []).forEach((d) => {
+    const dt = d instanceof Date ? d : new Date(d);
+    if (isNaN(dt.getTime())) return;
+    if ((dt.getMonth() + 1) !== cal.month || dt.getDate() !== cal.day) return;
+    if (cal.year != null && dt.getFullYear() !== cal.year) return;
+    const dk = typeof dateKey === 'function' ? dateKey(dt) : dt.toISOString().slice(0, 10);
+    if (out.indexOf(dk) === -1) out.push(dk);
+  });
   return out;
 }
 
@@ -17180,11 +17280,21 @@ function parseRequestPhrase(text, opts) {
   }
   working = action.working;
 
+  const peeled = peelTrailingSingleDate(working);
+  working = peeled.working;
+  if (peeled.lookedLikeDate && !peeled.date) {
+    return { ok: false, reason: 'bad-date', message: 'Couldn’t read the date. Try 8/6 or Aug 6, or paint the calendar.' };
+  }
+
   const days = parseRequestPhraseDays(working);
-  if (!days.ok) {
+  if (!days.ok && !peeled.date) {
     return { ok: false, reason: 'days', message: 'Which day? Try Thu–Fri or Saturday, or paint the calendar.' };
   }
-  working = days.working.replace(/\b(this|next|on|for|the|is|a)\b/gi, ' ').replace(/\s+/g, ' ').trim();
+  if (days.ok) {
+    working = days.working.replace(/\b(this|next|on|for|the|is|a)\b/gi, ' ').replace(/\s+/g, ' ').trim();
+  } else {
+    working = working.replace(/\b(this|next|on|for|the|is|a)\b/gi, ' ').replace(/\s+/g, ' ').trim();
+  }
 
   const matched = matchRosterPersonForPhrase(working, people);
   if (matched.status === 'missing') {
@@ -17199,12 +17309,20 @@ function parseRequestPhrase(text, opts) {
   if (!dates || !dates.length) {
     return { ok: false, reason: 'period', message: 'Load a period first, then try again.' };
   }
-  const dateKeys = dateKeysForDows(days.dows, dates);
+  let dateKeys;
+  let dayLabel;
+  if (peeled.date) {
+    dateKeys = dateKeysForCalendarDate(peeled.date, dates);
+    dayLabel = days.ok ? (days.label + ' ' + peeled.raw) : peeled.raw;
+  } else {
+    dateKeys = dateKeysForDows(days.dows, dates);
+    dayLabel = days.label;
+  }
   if (!dateKeys.length) {
     return { ok: false, reason: 'no-dates', message: 'Those days are not in this period. Paint the calendar or load a period.' };
   }
   const name = matched.person.first || matched.person.full;
-  const confirm = name + ' · ' + action.label + ' ' + days.label + ' · ' + dateKeys.length + (dateKeys.length === 1 ? ' day' : ' days');
+  const confirm = name + ' · ' + action.label + ' ' + dayLabel + ' · ' + dateKeys.length + (dateKeys.length === 1 ? ' day' : ' days');
   return {
     ok: true,
     role: matched.person.id,
@@ -17213,8 +17331,8 @@ function parseRequestPhrase(text, opts) {
     lock: action.lock,
     kind: action.kind,
     lockLabel: action.label,
-    dayLabel: days.label,
-    dows: days.dows,
+    dayLabel: dayLabel,
+    dows: days.ok ? days.dows : [],
     dateKeys: dateKeys,
     confirm: confirm
   };

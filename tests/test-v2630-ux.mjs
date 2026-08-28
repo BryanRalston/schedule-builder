@@ -1,7 +1,9 @@
 /**
  * v2.6.30: default Build evens closing-shift counts among named SM+AMs
  * on a 4–5 person bench (1 SM + 3 AMs + named KC). No Rules retune.
- * KC-C nights stay on the named key carrier. Unnamed KC stays hidden.
+ * Named KC may have KC-C only on reserved nights — never regular C,
+ * never extra KC-C, never a spare closer for AM/SM balance.
+ * Unnamed KC stays hidden.
  * Thin 2-person 2.6.22 scale and 2.6.29 first-visit still hold.
  * Clopen stays a preference — no zero-clopen guarantee.
  * Keeps 2.6.12–2.6.29 behavior; version lock 2.6.30.
@@ -101,10 +103,12 @@ async function main() {
   if (/function shouldEvenSmAmCloses\(/.test(index)
     && /function getEvenCloseShare\(/.test(index)
     && /function getCloseTargetForRole\(/.test(index)
+    && /function confineNamedKcToReservedCloseNights\(/.test(index)
     && /evenSmAmCloses/.test(index)
     && /evenPeers/.test(index)
     && /SM\+AM close share is a preference/.test(index)
-    && /3\+ AM team/.test(index)) {
+    && /3\+ AM team/.test(index)
+    && /Reserved-night KC-C only/.test(index)) {
     pass('v2630-fns');
   } else fail('v2630-fns', '2.6.30 even-close helpers missing');
 
@@ -306,16 +310,22 @@ async function main() {
           let kcCloses = 0;
           let kcCNights = 0;
           let amCloseOnKcNight = 0;
+          let kcRegularClose = 0;
+          let kcExtraKcC = 0;
           dks.forEach((dk) => {
-            if (!isKcNight(dk)) return;
-            kcCNights++;
             const ks = schedule.kc1 && schedule.kc1[dk];
-            if (ks === 'kc-close' || ks === 'close' || ks === 'close-ext') kcCloses++;
-            managers.forEach((r) => {
-              if (r === 'sm') return;
-              const s = schedule[r] && schedule[r][dk];
-              if (s === 'close' || s === 'close-ext' || s === 'kc-close') amCloseOnKcNight++;
-            });
+            if (ks === 'close' || ks === 'close-ext') kcRegularClose++;
+            if (isKcNight(dk)) {
+              kcCNights++;
+              if (ks === 'kc-close' || ks === 'close' || ks === 'close-ext') kcCloses++;
+              managers.forEach((r) => {
+                if (r === 'sm') return;
+                const s = schedule[r] && schedule[r][dk];
+                if (s === 'close' || s === 'close-ext' || s === 'kc-close') amCloseOnKcNight++;
+              });
+            } else if (ks === 'kc-close') {
+              kcExtraKcC++;
+            }
           });
           const weekPile = [];
           const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : Math.ceil(dks.length / 7);
@@ -355,6 +365,8 @@ async function main() {
             kcCloses,
             kcCNights,
             amCloseOnKcNight,
+            kcRegularClose,
+            kcExtraKcC,
             people,
             phantomAm: roles.includes('am4') || allKc.includes('am4'),
             namedOnBoard: /elizabeth/i.test(gridText) && /Bryan Test/i.test(gridText),
@@ -415,6 +427,18 @@ async function main() {
         kcCloses: built.kcCloses,
         kcCNights: built.kcCNights,
         amCloseOnKcNight: built.amCloseOnKcNight,
+      }));
+    }
+
+    if (built.kcRegularClose === 0 && built.kcExtraKcC === 0) {
+      pass('kc-no-regular-or-extra-close',
+        'regular C=' + built.kcRegularClose + ' extra KC-C=' + built.kcExtraKcC);
+    } else {
+      fail('kc-no-regular-or-extra-close', JSON.stringify({
+        kcRegularClose: built.kcRegularClose,
+        kcExtraKcC: built.kcExtraKcC,
+        kcCloses: built.kcCloses,
+        kcCNights: built.kcCNights,
       }));
     }
 

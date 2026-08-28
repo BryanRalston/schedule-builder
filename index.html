@@ -7472,6 +7472,31 @@ function getEvenCloseShare(nights, peerCount, peerIdx, weekIdx) {
   return base + ((idx + w) % peerCount < extra ? 1 : 0);
 }
 
+/**
+ * Named non-manager KC may close only on reserved KC-C nights (default Monday).
+ * Regular Close / extra KC-C are leftover spare-closer residue — strip them.
+ */
+function confineNamedKcToReservedCloseNights(board, allDks, isReservedNight, isLocked) {
+  const kcs = typeof getNonManagerKCs === 'function' ? getNonManagerKCs() : [];
+  if (!board || !allDks || !kcs.length) return;
+  kcs.forEach((kc) => {
+    if (!kc || !kc.id || !board[kc.id]) return;
+    allDks.forEach((dk) => {
+      if (typeof isLocked === 'function' && isLocked(kc.id, dk)) return;
+      const s = board[kc.id][dk];
+      if (s === 'close' || s === 'close-ext') {
+        board[kc.id][dk] = (typeof isReservedNight === 'function' && isReservedNight(dk))
+          ? 'kc-close'
+          : 'off';
+        return;
+      }
+      if (s === 'kc-close' && typeof isReservedNight === 'function' && !isReservedNight(dk)) {
+        board[kc.id][dk] = 'off';
+      }
+    });
+  });
+}
+
 /** Weekly close seat for SM or a named AM / manager-mode KC. */
 function getCloseTargetForRole(prefs, roles, nights, role, weekIdx) {
   const list = roles || [];
@@ -13163,12 +13188,14 @@ function _generateScheduleInner(opts) {
   // ════════════════════════════════════════════════════
   // STEP 5d: HARD DAILY COVERAGE (cannot be soft-optimized away)
   // After weekend balance swaps, every day must have ≥1 open + ≥1 close.
-  // Understaffed days: sole manager must open; non-mgr KCs take emergency kc-close when needed.
+  // Understaffed days: sole manager must open. Named KC is not a spare closer —
+  // KC-C stays on reserved nights only (default Monday, or the nights set in Rules).
   // ════════════════════════════════════════════════════
   const ensureHardDailyCoverage = () => {
-    /** Non-mgr KC emergency close (configured nights or understaffed). Prefer free/off, then mid. */
+    /** Reserved-night KC-C only. Never park leftover manager closes on the named KC. */
     const assignEmergencyKcClose = (dk) => {
       if (!nonMgrKCs.length) return false;
+      if (!isKcCloseNight(dk)) return false;
       if (nonMgrKCs.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close')) return true;
       const lockedOff = (kc) => {
         if (!isInputLocked(kc.id, dk)) return false;
@@ -13203,10 +13230,12 @@ function _generateScheduleInner(opts) {
           // Manager close only (kc-close is non-mgr)
           if (s === 'close' || s === 'close-ext') closes++;
         });
-        // Count non-mgr KC closes on any night (configured + emergency)
-        nonMgrKCs.forEach((kc) => {
-          if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
-        });
+        // Count non-mgr KC closes on reserved nights only
+        if (isKcCloseNight(dk)) {
+          nonMgrKCs.forEach((kc) => {
+            if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
+          });
+        }
         return { opens, closes };
       };
 
@@ -14192,6 +14221,9 @@ function _generateScheduleInner(opts) {
     ensureHardDailyCoverage();
     lightClopenCleanup();
     ensureHardDailyCoverage();
+    if (typeof confineNamedKcToReservedCloseNights === 'function') {
+      confineNamedKcToReservedCloseNights(schedule, allDks, isKcCloseNight, isInputLocked);
+    }
   }
 
   // ════════════════════════════════════════════════════
@@ -14378,6 +14410,9 @@ function _generateScheduleInner(opts) {
   applyPeakSeasonVariants();
   ensureHardDailyCoverage();
   applyPeakSeasonVariants();
+  if (typeof confineNamedKcToReservedCloseNights === 'function') {
+    confineNamedKcToReservedCloseNights(schedule, allDks, isKcCloseNight, isInputLocked);
+  }
 
   const enforceFiveDayThin = () => {
     if (!thinRoster) return;
@@ -15279,6 +15314,7 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
   const nonMgrKCsRepair = typeof getNonManagerKCs === 'function' ? getNonManagerKCs() : [];
   const emergencyKcCloseRepair = (dk) => {
     if (!nonMgrKCsRepair.length) return false;
+    if (!isKcCloseNight(dk)) return false;
     if (nonMgrKCsRepair.some((kc) => schedule[kc.id] && schedule[kc.id][dk] === 'kc-close')) return true;
     const lockedOff = (kc) => {
       if (!isInputLocked(kc.id, dk)) return false;
@@ -16170,9 +16206,9 @@ function jumpToRoleOnGrid(role) {
              Rebuild-to-apply after a board exists does not spend a free seat.
    v2.6.30 — Default Build evens closing-shift counts among named SM+AMs on a 4–5
              person bench (1 SM + 3 AMs + named KC). Leftover SM-exactly-1 + AM leftover
-             pool no longer piles AM closes. KC-C nights stay on the named key carrier.
-             Thin 2-person 2.6.22 scale and week-4 AM pile fix stay. Clopen stays a
-             preference. SW cache 2.6.30.
+             pool no longer piles AM closes. Named KC closes only on reserved KC-C nights
+             (not regular C, not spare closer). Thin 2-person 2.6.22 scale and week-4 AM
+             pile fix stay. Clopen stays a preference. SW cache 2.6.30.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {

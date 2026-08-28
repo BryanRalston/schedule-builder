@@ -13990,17 +13990,30 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
     return { role: r, name: names[r] || r, we, opens, mids, closes, clopens };
   });
 
-  // Peer spread among AMs (and manager-coverage KCs); SM excluded from peer min/max
+  // Weekend range is every named manager (same story as the WE chip / weekend tile).
+  // Close min/max stay AM-peer; the scaled period goal is shown so 5-5 is not a fake pass.
   const peers = rows.filter((row) => row.role !== 'sm');
   const peerPool = peers.length ? peers : rows;
-  const weVals = peerPool.map((r) => r.we);
+  const weVals = rows.map((r) => r.we);
   const closeVals = peerPool.map((r) => r.closes);
-  const weMin = Math.min(...weVals);
-  const weMax = Math.max(...weVals);
-  const cMin = Math.min(...closeVals);
-  const cMax = Math.max(...closeVals);
+  const weMin = weVals.length ? Math.min(...weVals) : 0;
+  const weMax = weVals.length ? Math.max(...weVals) : 0;
+  const cMin = closeVals.length ? Math.min(...closeVals) : 0;
+  const cMax = closeVals.length ? Math.max(...closeVals) : 0;
   const weSpread = weMax - weMin;
   const cSpread = cMax - cMin;
+  const weMetN = rows.filter((row) => {
+    const t = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(row.role) : 2;
+    return row.we >= t;
+  }).length;
+  const nights = typeof getManagerNightsPerWeek === 'function'
+    ? getManagerNightsPerWeek(preferences)
+    : 6;
+  const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : 4;
+  const closeTargets = typeof getScaledCloseTargets === 'function'
+    ? getScaledCloseTargets(preferences, ROLES, nights)
+    : null;
+  const amPeriodGoal = closeTargets && closeTargets.amTarget ? closeTargets.amTarget * weeks : 0;
 
   // Coverage: every day has ≥1 open and ≥1 close (managers + non-mgr KC closes)
   // ALL_KC from generate is id strings; some callers pass {id} objects.
@@ -14043,14 +14056,17 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
   let html = '<div class="fu-head">';
   html += '<span class="fu-title">Fairness at a glance</span>';
   html +=
-    '<span class="fu-meta">AM peers · WE offs ' +
+    '<span class="fu-meta">WE offs ' +
     weMin +
     '–' +
     weMax +
-    ' · Closes ' +
-    cMin +
-    '–' +
-    cMax +
+    ' · ' +
+    weMetN +
+    '/' +
+    rows.length +
+    (amPeriodGoal
+      ? ' · AM closes ' + (cMin === cMax ? cMin : cMin + '–' + cMax) + ' / ' + amPeriodGoal
+      : ' · AM closes ' + cMin + '–' + cMax) +
     '</span> ';
   const thinCoverWhy = !coverOk && typeof twoPersonOffsCoverageNote === 'function'
     ? twoPersonOffsCoverageNote(ROLES)

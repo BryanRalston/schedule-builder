@@ -12686,6 +12686,97 @@ function _generateScheduleInner(opts) {
   ensureHardDailyCoverage();
   applyPeakSeasonVariants();
 
+  // Two named managers: put the missing weekday offs back if coverage/repair
+  // ate them. Only on days the other person already works.
+  if (thinRoster) {
+    for (let w = 0; w < numWeeks; w++) {
+      const weekDks = getWeekDks(w);
+      const targetDays = holidayWeeks[w] ? 4 : 5;
+      ROLES.forEach((r) => {
+        const schedNow = () => weekDks.filter((dk) => isWork(schedule[r][dk]) || isPto(schedule[r][dk])).length;
+        if (schedNow() <= targetDays) return;
+        const cands = weekDks.filter((dk) => {
+          if (isKcCloseNight(dk) || isInputLocked(r, dk)) return false;
+          if (!isWork(schedule[r][dk])) return false;
+          return ROLES.some((rx) => rx !== r && isWork(schedule[rx][dk]));
+        }).sort((a, b) => {
+          const aClose = isClose(schedule[r][a]) ? 1 : 0;
+          const bClose = isClose(schedule[r][b]) ? 1 : 0;
+          if (aClose !== bClose) return aClose - bClose;
+          return 0;
+        });
+        for (const dk of cands) {
+          if (schedNow() <= targetDays) break;
+          schedule[r][dk] = 'off';
+        }
+      });
+    }
+    ensureHardDailyCoverage();
+  }
+
+  // Slide an existing off into a long work streak. Does not add or remove
+  // scheduled days — only moves an off so max consecutive work stays at the limit.
+  const breakLongWorkStreaks = () => {
+    const maxWork = PREFS.maxConsecutiveWorkDays || 6;
+    ROLES.forEach((r) => {
+      for (let pass = 0; pass < 12; pass++) {
+        let streak = 0;
+        let start = -1;
+        let found = null;
+        for (let i = 0; i < allDks.length; i++) {
+          if (isWork(schedule[r][allDks[i]])) {
+            if (streak === 0) start = i;
+            streak++;
+            if (streak > maxWork) found = { start: start, end: i };
+          } else {
+            streak = 0;
+            start = -1;
+          }
+        }
+        if (!found) return;
+        const mid = Math.floor((found.start + found.end) / 2);
+        const tryIdx = [];
+        for (let i = 0; i < found.end - found.start + 1; i++) {
+          const idx = mid + (i % 2 === 0 ? Math.floor(i / 2) : -Math.ceil(i / 2));
+          if (idx >= found.start && idx <= found.end) tryIdx.push(idx);
+        }
+        const offIdx = [];
+        for (let i = 0; i < allDks.length; i++) {
+          if (i >= found.start && i <= found.end) continue;
+          const dk = allDks[i];
+          if (schedule[r][dk] !== 'off') continue;
+          if (isInputLocked(r, dk)) continue;
+          if (isKcCloseNight(dk)) continue;
+          offIdx.push(i);
+        }
+        let moved = false;
+        for (const si of tryIdx) {
+          const sdk = allDks[si];
+          if (isInputLocked(r, sdk) || isKcCloseNight(sdk)) continue;
+          if (ROLES.filter((rx) => rx !== r && isWork(schedule[rx][sdk])).length < 1) continue;
+          const shift = schedule[r][sdk];
+          for (const oi of offIdx) {
+            const odk = allDks[oi];
+            if (PREFS.avoidClopening && oi > 0 && isClose(schedule[r][allDks[oi - 1]]) && isOpen(shift)) continue;
+            schedule[r][sdk] = 'off';
+            schedule[r][odk] = shift;
+            if (ROLES.filter((rx) => isWork(schedule[rx][sdk])).length < 1) {
+              schedule[r][sdk] = shift;
+              schedule[r][odk] = 'off';
+              continue;
+            }
+            moved = true;
+            break;
+          }
+          if (moved) break;
+        }
+        if (!moved) return;
+      }
+    });
+  };
+  breakLongWorkStreaks();
+  ensureHardDailyCoverage();
+
   // ════════════════════════════════════════════════════
   // STEP 8: Final validation report
   // ════════════════════════════════════════════════════

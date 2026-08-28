@@ -3897,7 +3897,7 @@ html.view-locked .ap-btn-danger { display: none !important; }
 #post-gen-strip {
   display: none;
   position: sticky;
-  top: 56px;
+  top: var(--msb-sticky-top, 56px);
   z-index: 96;
   flex-wrap: wrap;
   align-items: center;
@@ -3941,9 +3941,9 @@ html.view-locked .ap-btn-danger { display: none !important; }
   box-shadow: 0 0 16px rgba(61,220,255,0.25);
 }
 #post-gen-strip .pgs-primary:hover { filter: brightness(1.06); }
-html.view-locked #post-gen-strip { top: 2.25rem; }
+html.view-locked #post-gen-strip { top: var(--msb-sticky-top, 2.25rem); }
 @media (max-width: 640px) {
-  #post-gen-strip { top: 0; font-size: 0.72rem; padding: 0.45rem 0.6rem; }
+  #post-gen-strip { top: var(--msb-sticky-top, 0px); font-size: 0.72rem; padding: 0.45rem 0.6rem; }
   #post-gen-strip .pgs-title { width: 100%; }
   #post-gen-strip .pgs-actions { width: 100%; margin-left: 0; }
   #post-gen-strip .pgs-primary { flex: 1; text-align: center; }
@@ -4360,11 +4360,40 @@ body.msb-board-live .container {
   position: relative;
   z-index: 97;
   pointer-events: auto;
+  overflow: visible;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 #tab-schedule.board-live .generate-actions {
   position: relative;
   z-index: 1;
   pointer-events: auto;
+}
+#built-rebuild-row.is-docked {
+  position: sticky;
+  top: calc(var(--msb-sticky-top, 56px) + var(--msb-pgs-h, 48px));
+  z-index: 97;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  background: rgba(8, 14, 28, 0.96);
+  padding: 0.28rem 1.5rem;
+  border-bottom: 1px solid rgba(61, 220, 255, 0.16);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
+}
+#built-rebuild-row.is-docked #btn-generate {
+  font-size: 0.75rem !important;
+  padding: 0.28rem 0.7rem !important;
+  min-height: auto !important;
+  font-weight: 700;
+  width: auto !important;
+}
+#built-rebuild-row.is-docked #btn-clear-board {
+  font-size: 0.72rem !important;
+  padding: 0.28rem 0.55rem !important;
+  min-height: auto !important;
 }
 #tab-schedule.board-live #btn-generate,
 #tab-schedule.board-live #built-pill,
@@ -4439,7 +4468,7 @@ body.msb-board-live .container {
     padding-bottom: env(safe-area-inset-bottom);
   }
   #post-gen-strip .pgs-title { display: none !important; width: auto; }
-  #post-gen-strip { flex-wrap: nowrap; overflow-x: auto; top: 0; }
+  #post-gen-strip { flex-wrap: nowrap; overflow-x: auto; top: var(--msb-sticky-top, 0px); }
   #post-gen-strip .pgs-actions { width: auto; margin-left: auto; flex-wrap: nowrap; }
   #post-gen-strip .pgs-actions .btn-secondary { display: none !important; }
   #post-gen-strip .pgs-primary { flex: 0 0 auto; }
@@ -4527,14 +4556,14 @@ body.msb-board-live .container {
 .cmd-empty { padding: 1.25rem; text-align: center; color: var(--ink-4); font-size: 0.85rem; }
 
 #post-gen-strip {
-  display: none; position: sticky; top: 58px; z-index: 95;
+  display: none; position: sticky; top: var(--msb-sticky-top, 58px); z-index: 95;
   background: linear-gradient(180deg, rgba(8,14,28,0.98), rgba(10,18,34,0.96));
   border-bottom: 1px solid rgba(61,220,255,0.22);
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
   padding: 0.45rem 0.85rem; gap: 0.55rem; flex-wrap: wrap; align-items: center; font-size: 0.78rem;
 }
 #post-gen-strip.show { display: flex; }
-html.view-locked #post-gen-strip { top: 2rem; }
+html.view-locked #post-gen-strip { top: var(--msb-sticky-top, 2rem); }
 .pgs-chip {
   display: inline-flex; align-items: center; gap: 0.28rem;
   padding: 0.22rem 0.5rem; border-radius: 999px;
@@ -5300,11 +5329,13 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         </div>
       </div>
       <div class="ready-checklist" id="ready-checklist"></div>
+      <div id="built-rebuild-slot">
       <div class="generate-actions" id="built-rebuild-row">
         <span class="built-pill" id="built-pill" hidden>Built</span>
         <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()">Build this period</button>
         <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()">Clear board</button>
         <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})">Load sample store</button>
+      </div>
       </div>
       <div class="gen-meta" id="gen-meta">Tip: set PTO/RTO first — the engine treats them as hard locks.</div>
     </div>
@@ -16925,6 +16956,7 @@ function updatePostGenStrip() {
     fair.textContent = st.fairOk ? 'Fairness OK' : 'Fairness Review';
     fair.className = 'pgs-chip ' + (st.fairOk ? 'ok' : 'warn');
   }
+  try { if (typeof syncStickyOffsets === 'function') syncStickyOffsets(); } catch (e) {}
 }
 
 function expandMobileAnalytics() {
@@ -16939,6 +16971,28 @@ function jumpToFairnessStrip() {
     document.getElementById('fairness-under-schedule')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 40);
 }
+
+function syncStickyOffsets() {
+  try {
+    const root = document.documentElement;
+    const header = document.querySelector('.app-header');
+    const lock = document.getElementById('view-lock-banner');
+    let top = 0;
+    if (header) top += header.getBoundingClientRect().height;
+    if (lock && getComputedStyle(lock).display !== 'none') {
+      top += lock.getBoundingClientRect().height;
+    }
+    root.style.setProperty('--msb-sticky-top', Math.round(top) + 'px');
+    const strip = document.getElementById('post-gen-strip');
+    const pgsH = (strip && !strip.hidden && strip.classList.contains('show'))
+      ? strip.getBoundingClientRect().height
+      : 0;
+    root.style.setProperty('--msb-pgs-h', Math.round(pgsH) + 'px');
+  } catch (e) {}
+}
+window.addEventListener('resize', () => {
+  if (typeof syncStickyOffsets === 'function') syncStickyOffsets();
+});
 
 function syncAppShell() {
   const results = document.getElementById('schedule-results');
@@ -16972,6 +17026,24 @@ function syncAppShell() {
   const btn = document.getElementById('btn-generate');
   if (btn && btn.getAttribute('aria-busy') !== 'true') {
     btn.textContent = hasBoard ? 'Rebuild' : 'Build this period';
+  }
+  try { if (typeof dockBuiltRebuildRow === 'function') dockBuiltRebuildRow(!!(onSched && hasBoard)); } catch (eDock) {}
+  try { if (typeof syncStickyOffsets === 'function') syncStickyOffsets(); } catch (e) {}
+}
+
+function dockBuiltRebuildRow(dock) {
+  const row = document.getElementById('built-rebuild-row');
+  const slot = document.getElementById('built-rebuild-slot');
+  const strip = document.getElementById('post-gen-strip');
+  if (!row || !slot) return;
+  if (dock && strip && strip.parentNode) {
+    if (row.previousElementSibling !== strip) {
+      strip.insertAdjacentElement('afterend', row);
+    }
+    row.classList.add('is-docked');
+  } else if (row.parentElement !== slot) {
+    slot.appendChild(row);
+    row.classList.remove('is-docked');
   }
 }
 

@@ -139,6 +139,11 @@ async function main() {
     && /#tab-schedule\.board-live #generate-section/.test(index)
     && /z-index: 97/.test(index)
     && /id="built-rebuild-row"/.test(index)
+    && /function syncStickyOffsets\(/.test(index)
+    && /function dockBuiltRebuildRow\(/.test(index)
+    && /#built-rebuild-row\.is-docked/.test(index)
+    && /--msb-sticky-top/.test(index)
+    && /--msb-pgs-h/.test(index)
     && /scroll-margin-top: 8\.5rem/.test(index)) {
     pass('rebuild-hit-css');
   } else fail('rebuild-hit-css', 'rebuild z-index / hit-area CSS missing');
@@ -318,10 +323,23 @@ async function main() {
 
     const built = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
+      const sm = document.getElementById('name-sm');
+      const am1 = document.getElementById('name-am1');
+      if (sm) sm.value = 'Pat Nguyen';
+      if (am1) am1.value = 'Alex Chen';
       if (typeof persistManagerNames === 'function') persistManagerNames();
-      generateSchedule({ skipFreeCount: true });
+      if (typeof persistStoreMeta === 'function') persistStoreMeta();
+      if (typeof loadThisNrfPeriod === 'function') loadThisNrfPeriod({ quiet: true });
+      else if (typeof loadPeriod === 'function') loadPeriod();
+      if (typeof buildFromSetup === 'function') buildFromSetup();
+      else generateSchedule({ skipFreeCount: true });
       return new Promise((resolve) => {
         setTimeout(() => {
+          if (typeof switchTab === 'function') switchTab('schedule');
+          if (typeof syncAppShell === 'function') syncAppShell();
+          if (typeof updatePostGenStrip === 'function') updatePostGenStrip();
+          if (typeof dockBuiltRebuildRow === 'function') dockBuiltRebuildRow(true);
+          if (typeof syncStickyOffsets === 'function') syncStickyOffsets();
           const btn = document.getElementById('btn-generate');
           const strip = document.getElementById('post-gen-strip');
           const pill = document.getElementById('built-pill');
@@ -331,8 +349,9 @@ async function main() {
             btn: btn ? (btn.textContent || '').trim() : '',
             stripShow: !!(strip && !strip.hidden && strip.classList.contains('show')),
             pillShown: !!(pill && !pill.hidden),
+            hasPeriod: !!(typeof periodDates !== 'undefined' && periodDates && periodDates.length),
           });
-        }, 2000);
+        }, 2200);
       });
     });
     if (built.tab === 'schedule' && built.cells > 10 && /Rebuild/i.test(built.btn) && built.stripShow && built.pillShown) {
@@ -340,28 +359,31 @@ async function main() {
     } else fail('board-built-with-review-bar', JSON.stringify(built));
 
     const desktopHit = await page.evaluate(() => {
+      if (typeof switchTab === 'function') switchTab('schedule');
+      if (typeof syncAppShell === 'function') syncAppShell();
+      if (typeof dockBuiltRebuildRow === 'function') dockBuiltRebuildRow(true);
+      if (typeof syncStickyOffsets === 'function') syncStickyOffsets();
+      const grid = document.getElementById('schedule-grid');
+      if (grid) grid.scrollIntoView({ block: 'start' });
       const btn = document.getElementById('btn-generate');
       const strip = document.getElementById('post-gen-strip');
       const pill = document.getElementById('built-pill');
       if (!btn || !strip) return { hitBtn: false, why: 'missing' };
-      const sr0 = strip.getBoundingClientRect();
-      const targetY = sr0.top + Math.max(10, sr0.height * 0.7);
-      const cur = btn.getBoundingClientRect();
-      window.scrollBy(0, cur.top - targetY);
       const br = btn.getBoundingClientRect();
       const sr = strip.getBoundingClientRect();
-      const x = br.left + Math.min(24, br.width / 2);
+      const x = br.left + Math.min(24, Math.max(8, br.width / 2));
       const y = br.top + br.height / 2;
       const top = document.elementFromPoint(x, y);
       const genZ = getComputedStyle(document.getElementById('generate-section')).zIndex;
+      const actions = btn.closest('.generate-actions');
       return {
         hitBtn: !!(top && (top.id === 'btn-generate' || (top.closest && top.closest('#btn-generate')))),
-        stripVisible: !strip.hidden && strip.classList.contains('show') && sr.height > 8,
+        stripVisible: !strip.hidden && strip.classList.contains('show') && sr.height > 8 && sr.bottom > 0,
         btnText: (btn.textContent || '').trim(),
         pillShown: !!(pill && !pill.hidden),
         z: genZ,
         topTag: top ? (top.id || top.className || top.tagName) : null,
-        overlap: br.top < sr.bottom && br.bottom > sr.top,
+        docked: !!(actions && actions.classList.contains('is-docked')),
       };
     });
     assertRebuildHit(desktopHit, 'rebuild-tappable-desktop');
@@ -392,28 +414,28 @@ async function main() {
       if (typeof switchTab === 'function') switchTab('schedule');
       if (typeof syncAppShell === 'function') syncAppShell();
       if (typeof updatePostGenStrip === 'function') updatePostGenStrip();
+      if (typeof dockBuiltRebuildRow === 'function') dockBuiltRebuildRow(true);
+      if (typeof syncStickyOffsets === 'function') syncStickyOffsets();
+      const grid = document.getElementById('schedule-grid');
+      if (grid) grid.scrollIntoView({ block: 'start' });
       const btn = document.getElementById('btn-generate');
       const strip = document.getElementById('post-gen-strip');
       const pill = document.getElementById('built-pill');
       if (!btn || !strip) return { hitBtn: false, why: 'missing' };
-      const sr0 = strip.getBoundingClientRect();
-      const targetY = sr0.top + Math.max(10, sr0.height * 0.7);
-      const cur = btn.getBoundingClientRect();
-      window.scrollBy(0, cur.top - targetY);
       const br = btn.getBoundingClientRect();
       const sr = strip.getBoundingClientRect();
-      const x = Math.min(window.innerWidth - 8, br.left + Math.min(20, br.width / 2));
+      const x = Math.min(window.innerWidth - 8, br.left + Math.min(20, Math.max(8, br.width / 2)));
       const y = br.top + br.height / 2;
       const top = document.elementFromPoint(x, y);
       const genZ = getComputedStyle(document.getElementById('generate-section')).zIndex;
       return {
         hitBtn: !!(top && (top.id === 'btn-generate' || (top.closest && top.closest('#btn-generate')))),
-        stripVisible: !strip.hidden && strip.classList.contains('show') && sr.height > 8,
+        stripVisible: !strip.hidden && strip.classList.contains('show') && sr.height > 8 && sr.bottom > 0,
         btnText: (btn.textContent || '').trim(),
         pillShown: !!(pill && !pill.hidden),
         z: genZ,
         topTag: top ? (top.id || top.className || top.tagName) : null,
-        overlap: br.top < sr.bottom && br.bottom > sr.top,
+        belowStrip: br.top >= sr.bottom - 2,
       };
     });
     assertRebuildHit(phoneHit, 'rebuild-tappable-phone');

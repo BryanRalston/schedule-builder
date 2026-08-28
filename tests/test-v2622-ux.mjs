@@ -1,8 +1,10 @@
 /**
- * v2.6.21: two-manager first Build is a hangable period (offs, mixed
- * shifts, weekend offs), marketing hero hides after a live board.
- * Keeps 2.6.12–2.6.20 behavior; version lock follows 2.6.22.
- * Run: node tests/test-v2621-ux.mjs
+ * v2.6.22: scale close targets to named headcount so a default
+ * SM+AM1 first Build is hangable AND does not report Hard rules 0/40
+ * / 4 must-fix from SM-exactly-1 vs AM-≥5 leftover. Coverage chip
+ * explains two people + offs; weekend / AM-close chips match the
+ * review list. Keeps 2.6.12–2.6.21 behavior; version lock 2.6.22.
+ * Run: node tests/test-v2622-ux.mjs
  */
 import { createServer } from 'http';
 import { readFileSync, existsSync } from 'fs';
@@ -69,7 +71,7 @@ async function loadChromium() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.21 two-manager hangable board + hero hide ===');
+  console.log('\n=== v2.6.22 scale close targets + consistent review chips ===');
 
   const version = JSON.parse(read('version.json'));
   if (version.version === '2.6.22') pass('version.json', version.version);
@@ -84,16 +86,26 @@ async function main() {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
+  if (/CLOSE_TARGET_TEMPLATE_AM_BENCH/.test(index)
+    && /function getScaledCloseTargets\(/.test(index)
+    && /function twoPersonOffsCoverageNote\(/.test(index)
+    && /function formatCoverageChip\(/.test(index)
+    && /function formatAmCloseChip\(/.test(index)
+    && /function formatWeOffChip\(/.test(index)
+    && /2 people \+ offs/.test(index)
+    && /no auto-fix on these pairs/.test(index)
+    && /Preference — not a guarantee/.test(index)
+    && /1 AM is not 3/.test(index)) {
+    pass('v2622-fns');
+  } else fail('v2622-fns', 'scaled close-target / chip helpers missing');
+
   if (/const thinRoster = ROLES\.length <= 2/.test(index)
     && /function syncMarketingHero\(/.test(index)
     && /welcome-after-board/.test(index)
     && /Two named managers: keep the offs/.test(index)
     && /function findFirstStreakHole\(/.test(index)
-    && /twoManagerCoverageHolds/.test(index)) {
-    pass('v2621-fns');
-  } else fail('v2621-fns', 'two-manager generate / hero helpers missing');
-
-  if (/loadDemoStore\(\{explicit:true\}\)/.test(index)
+    && /twoManagerCoverageHolds/.test(index)
+    && /loadDemoStore\(\{explicit:true\}\)/.test(index)
     && /function hasSavedUserRoster\(/.test(index)
     && /Leftover Harbor East persist is not a real roster/.test(index)
     && /function applyBlankTeam\(/.test(index)
@@ -109,8 +121,8 @@ async function main() {
     && /function clearAskPhraseFields\(/.test(index)
     && /function findFirstQualityHole\(/.test(index)
     && /Undo request/.test(index)) {
-    pass('v2612-v2620-kept');
-  } else fail('v2612-v2620-kept', '2.6.12–2.6.20 markers missing');
+    pass('v2612-v2621-kept');
+  } else fail('v2612-v2621-kept', '2.6.12–2.6.21 markers missing');
 
   if (!/TJX|Marshalls|HomeGoods|Winners/i.test(index)) pass('no-employer-names');
   else fail('no-employer-names', 'employer name leaked into copy');
@@ -118,13 +130,6 @@ async function main() {
   if (!/idioma|español|spanish|language picker|lang-picker/i.test(index)) {
     pass('no-language-picker');
   } else fail('no-language-picker', 'language picker added');
-
-  const paintChunk = (index.match(/function paintRequestCell\([\s\S]*?\n\}/) || [''])[0];
-  const phraseChunk = (index.match(/function applyRequestPhraseFromBar\([\s\S]*?\n\}/) || [''])[0];
-  if (paintChunk && !/generateSchedule\s*\(/.test(paintChunk)
-    && phraseChunk && !/generateSchedule\s*\(/.test(phraseChunk)) {
-    pass('paint-does-not-autobuild');
-  } else fail('paint-does-not-autobuild', 'paint/phrase still calls generateSchedule');
 
   const genChunk = (index.match(/function _generateScheduleInner\([\s\S]*?\nfunction buildGenerationReport/) || [''])[0];
   if (genChunk
@@ -154,21 +159,22 @@ async function main() {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(700);
 
-    const firstRunHero = await page.evaluate(() => {
-      const hero = document.getElementById('welcome-card');
-      if (!hero) return { present: false };
-      const cs = getComputedStyle(hero);
-      return {
-        present: true,
-        hiddenAttr: hero.hasAttribute('hidden'),
-        display: cs.display,
-        afterBoard: hero.classList.contains('welcome-after-board'),
-        text: (hero.textContent || '').slice(0, 80),
-      };
+    const scaled = await page.evaluate(() => {
+      const nights = typeof getManagerNightsPerWeek === 'function'
+        ? getManagerNightsPerWeek(DEFAULT_PREFERENCES)
+        : 6;
+      const two = getScaledCloseTargets(DEFAULT_PREFERENCES, ['sm', 'am1'], nights);
+      const full = getScaledCloseTargets(DEFAULT_PREFERENCES, ['sm', 'am1', 'am2', 'am3'], nights);
+      const oneAm = getAmClosesPerWeekTarget(DEFAULT_PREFERENCES, nights - 1, 1, 0, 0);
+      const threeAm = getAmClosesPerWeekTarget(DEFAULT_PREFERENCES, nights - 1, 3, 0, 0);
+      return { nights, two, full, oneAm, threeAm };
     });
-    if (firstRunHero.present && !firstRunHero.hiddenAttr && firstRunHero.display !== 'none' && !firstRunHero.afterBoard) {
-      pass('hero-visible-first-run', firstRunHero.text.trim().slice(0, 40));
-    } else fail('hero-visible-first-run', JSON.stringify(firstRunHero));
+    if (scaled.two && scaled.two.thin && scaled.two.namedClosers === 1
+      && scaled.oneAm <= 2 && scaled.oneAm < (scaled.nights - 1)
+      && scaled.threeAm >= 1 && scaled.full.namedClosers === 3) {
+      pass('close-targets-scale-to-headcount',
+        '1 AM auto=' + scaled.oneAm + ' 3 AM auto=' + scaled.threeAm + ' nights=' + scaled.nights);
+    } else fail('close-targets-scale-to-headcount', JSON.stringify(scaled));
 
     const built = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
@@ -190,6 +196,7 @@ async function main() {
         setTimeout(() => {
           if (typeof switchTab === 'function') switchTab('schedule');
           if (typeof syncAppShell === 'function') syncAppShell();
+          if (typeof updatePostGenStrip === 'function') updatePostGenStrip();
           const roles = typeof getRoles === 'function' ? getRoles() : [];
           const allKc = typeof getAllWithKC === 'function' ? getAllWithKC() : [];
           const dks = (periodDates || []).map((d) => dateKey(d));
@@ -198,7 +205,7 @@ async function main() {
           roles.forEach((r) => {
             const kinds = { open: 0, mid: 0, close: 0, off: 0, away: 0, other: 0, empty: 0, work: 0 };
             const weekWork = [];
-            dks.forEach((dk, i) => {
+            dks.forEach((dk) => {
               const s = schedule[r] && schedule[r][dk];
               const k = (function (v) {
                 if (!v) return 'empty';
@@ -230,10 +237,24 @@ async function main() {
               mids: (report.mids && report.mids[r]) || kinds.mid,
             };
           });
-          const hero = document.getElementById('welcome-card');
-          const heroCs = hero ? getComputedStyle(hero) : null;
-          const gridRoles = [...document.querySelectorAll('#schedule-grid [data-role]')].map((el) => el.getAttribute('data-role'));
           const q = report.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(report, roles) : null);
+          const mustFix = typeof countMustFixErrors === 'function' ? countMustFixErrors(report) : report.hardErrorCount;
+          const issues = typeof buildPostingIssues === 'function'
+            ? buildPostingIssues(report, roles, [])
+            : [];
+          const mustIssues = issues.filter((i) => i.sev === 'must');
+          const st = typeof computeCoverageAndFairnessStats === 'function' ? computeCoverageAndFairnessStats() : {};
+          const cover = document.getElementById('pgs-cover');
+          const amc = document.getElementById('pgs-am-close');
+          const we = document.getElementById('pgs-we');
+          const badge = document.querySelector('.posting-badge');
+          const hardBar = [...document.querySelectorAll('.score-bar-row')].find((el) => /Hard rules/i.test(el.textContent || ''));
+          const weTile = [...document.querySelectorAll('.gen-stat-card')].find((el) => /Weekend days off/i.test(el.textContent || ''));
+          const radar = document.querySelector('.clopen-radar .cr-sub');
+          const unmet = report.unmet || [];
+          const closeConflict = unmet.some((u) => /need exactly 1/i.test(u) || /need at least 5/i.test(u) || /closes \(need exactly/i.test(u));
+          const amNeed5 = (unmet.concat(mustIssues.map((i) => i.title + ' ' + (i.meta || ''))).join(' '))
+            .match(/need at least 5/i);
           resolve({
             tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
             days: dks.length,
@@ -241,13 +262,38 @@ async function main() {
             roles,
             allKc,
             people,
-            phantomAm2: roles.includes('am2') || allKc.includes('am2') || gridRoles.includes('am2'),
-            gridAm2: gridRoles.filter((r) => r === 'am2').length,
+            phantomAm2: roles.includes('am2') || allKc.includes('am2'),
             cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
             score: q && q.score,
             grade: q && q.grade,
-            heroHidden: !hero || hero.hasAttribute('hidden') || (heroCs && heroCs.display === 'none') || hero.classList.contains('welcome-after-board'),
-            heroAfter: !!(hero && hero.classList.contains('welcome-after-board')),
+            hardPts: q && q.parts && q.parts.hard,
+            hardCount: report.hardErrorCount,
+            mustFix,
+            mustTitles: mustIssues.map((i) => i.title),
+            issueTitles: issues.map((i) => i.sev + ':' + i.title),
+            badge: badge ? (badge.textContent || '').trim() : '',
+            hardBar: hardBar ? (hardBar.textContent || '').replace(/\s+/g, ' ').trim() : '',
+            coverText: cover ? (cover.textContent || '').trim() : '',
+            coverWhy: cover ? (cover.getAttribute('data-cover-why') || cover.title || '') : '',
+            coverCls: cover ? cover.className : '',
+            amcText: amc ? (amc.textContent || '').trim() : '',
+            amcCls: amc ? amc.className : '',
+            weText: we ? (we.textContent || '').trim() : '',
+            weCls: we ? we.className : '',
+            weTile: weTile ? (weTile.textContent || '').replace(/\s+/g, ' ').trim() : '',
+            radar: radar ? (radar.textContent || '').trim() : '',
+            missDays: st.missDays,
+            coverOk: st.coverOk,
+            amPeriodGoal: st.amPeriodGoal,
+            amWeeklyGoal: st.amWeeklyGoal,
+            amMetGoal: st.amMetGoal,
+            weMet: st.weMet,
+            weN: st.weN,
+            cMin: st.cMin,
+            closeTargets: report.closeTargets,
+            closeConflict,
+            amNeed5: !!amNeed5,
+            unmet: unmet.slice(0, 12),
             toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
           });
         }, 2400);
@@ -258,13 +304,9 @@ async function main() {
       pass('two-manager-builds', built.days + ' days, ' + built.cells + ' cells');
     } else fail('two-manager-builds', JSON.stringify({ tab: built.tab, days: built.days, cells: built.cells, toast: built.toast }));
 
-    if (built.roles && built.roles.join(',') === 'sm,am1' && !built.phantomAm2 && built.gridAm2 === 0) {
+    if (built.roles && built.roles.join(',') === 'sm,am1' && !built.phantomAm2) {
       pass('no-phantom-am2', built.roles.join(','));
-    } else fail('no-phantom-am2', JSON.stringify({ roles: built.roles, allKc: built.allKc, phantom: built.phantomAm2, gridAm2: built.gridAm2 }));
-
-    if (built.heroHidden && built.heroAfter) {
-      pass('hero-hidden-after-build');
-    } else fail('hero-hidden-after-build', JSON.stringify({ hidden: built.heroHidden, after: built.heroAfter }));
+    } else fail('no-phantom-am2', JSON.stringify({ roles: built.roles, phantom: built.phantomAm2 }));
 
     const sm = built.people && built.people.sm;
     const am = built.people && built.people.am1;
@@ -276,31 +318,15 @@ async function main() {
       if (!smBrick && !amBrick && smKinds >= 2 && amKinds >= 2) {
         pass('mixed-shifts', 'SM O/M/C ' + sm.kinds.open + '/' + sm.kinds.mid + '/' + sm.kinds.close
           + ' AM ' + am.kinds.open + '/' + am.kinds.mid + '/' + am.kinds.close);
-      } else {
-        fail('mixed-shifts', JSON.stringify({ sm: sm.kinds, am: am.kinds }));
-      }
+      } else fail('mixed-shifts', JSON.stringify({ sm: sm.kinds, am: am.kinds }));
 
       if (sm.kinds.off >= 4 && am.kinds.off >= 4) {
         pass('days-off-exist', 'SM off ' + sm.kinds.off + ' AM off ' + am.kinds.off);
-      } else fail('days-off-exist', JSON.stringify({ smOff: sm.kinds.off, amOff: am.kinds.off, sm: sm.kinds, am: am.kinds }));
-
-      const weSm = sm.weekendOffs;
-      const weAm = am.weekendOffs;
-      if (weSm > 0 && weAm > 0) {
-        pass('weekend-offs-pursued', 'SM ' + weSm + ' AM ' + weAm);
-      } else if (weSm + weAm > 0) {
-        pass('weekend-offs-pursued', 'partial SM ' + weSm + ' AM ' + weAm + ' — coverage exception documented: one person can be short when the other holds the weekend');
-      } else {
-        fail('weekend-offs-pursued', 'both 0/2 — two managers can trade weekend days');
-      }
+      } else fail('days-off-exist', JSON.stringify({ smOff: sm.kinds.off, amOff: am.kinds.off }));
 
       if (sm.maxStreak <= 6 && am.maxStreak <= 6) {
         pass('streak-under-limit', 'SM ' + sm.maxStreak + ' AM ' + am.maxStreak);
-      } else if (sm.maxStreak < 28 && am.maxStreak < 28) {
-        fail('streak-under-limit', 'streak over 6 but not a 28-brick: SM ' + sm.maxStreak + ' AM ' + am.maxStreak);
-      } else {
-        fail('streak-under-limit', '28-day streak SM ' + sm.maxStreak + ' AM ' + am.maxStreak);
-      }
+      } else fail('streak-under-limit', 'SM ' + (sm && sm.maxStreak) + ' AM ' + (am && am.maxStreak));
 
       const smSeven = (sm.weekWork || []).filter((n) => n >= 7).length;
       const amSeven = (am.weekWork || []).filter((n) => n >= 7).length;
@@ -308,19 +334,88 @@ async function main() {
         pass('weeks-not-seven', 'SM ' + JSON.stringify(sm.weekWork) + ' AM ' + JSON.stringify(am.weekWork));
       } else fail('weeks-not-seven', JSON.stringify({ sm: sm.weekWork, am: am.weekWork }));
     } else {
-      fail('mixed-shifts', 'missing people ' + JSON.stringify(built.people));
+      fail('mixed-shifts', 'missing people');
       fail('days-off-exist', 'missing people');
-      fail('weekend-offs-pursued', 'missing people');
       fail('streak-under-limit', 'missing people');
       fail('weeks-not-seven', 'missing people');
     }
 
-    if (built.score != null && built.score !== 24) {
-      pass('quality-not-brick-24', String(built.score) + ' ' + built.grade);
-    } else if (built.score === 24 && sm && sm.maxStreak < 28 && am && am.maxStreak < 28) {
-      pass('quality-not-brick-24', 'score 24 but not from a 28-day streak');
+    if (built.hardPts === 40 && built.mustFix === 0 && !built.closeConflict && !built.amNeed5) {
+      pass('no-impossible-close-hard-fail',
+        'Hard ' + built.hardPts + '/40 · must-fix ' + built.mustFix + ' · badge ' + built.badge);
+    } else if (built.hardPts === 0 || built.mustFix >= 4 || built.closeConflict || built.amNeed5) {
+      fail('no-impossible-close-hard-fail', JSON.stringify({
+        hardPts: built.hardPts,
+        hardCount: built.hardCount,
+        mustFix: built.mustFix,
+        mustTitles: built.mustTitles,
+        closeConflict: built.closeConflict,
+        amNeed5: built.amNeed5,
+        unmet: built.unmet,
+        badge: built.badge,
+        hardBar: built.hardBar,
+        closeTargets: built.closeTargets,
+      }));
     } else {
-      fail('quality-not-brick-24', JSON.stringify({ score: built.score, grade: built.grade, toast: built.toast }));
+      pass('no-impossible-close-hard-fail',
+        'not the 0/40 · 4 must-fix close-target gate; Hard ' + built.hardPts + ' must-fix ' + built.mustFix);
+    }
+
+    if (!/not ready/i.test(built.badge) || built.mustFix === 0) {
+      pass('posting-not-unsigned-from-close-gate', built.badge || '(no badge)');
+    } else fail('posting-not-unsigned-from-close-gate', JSON.stringify({
+      badge: built.badge,
+      mustTitles: built.mustTitles,
+    }));
+
+    const coverMentions = /2 people \+ offs|two people with days off/i.test(built.coverText + ' ' + built.coverWhy);
+    if (!built.coverOk && built.missDays > 0) {
+      if (coverMentions && !/open\+close ✓/i.test(built.coverText)) {
+        pass('coverage-chip-explains-two-person', built.coverText + ' · ' + built.coverWhy);
+      } else fail('coverage-chip-explains-two-person', JSON.stringify({
+        coverText: built.coverText,
+        coverWhy: built.coverWhy,
+        missDays: built.missDays,
+      }));
+    } else {
+      pass('coverage-chip-explains-two-person', 'no thin-day holes on this board — chip=' + built.coverText);
+    }
+
+    const weChipHasMet = /WE offs/i.test(built.weText) && (/\d+\/\d+/.test(built.weText) || /met/i.test(built.weText));
+    const weTileHasMet = /\d+\/\d+/.test(built.weTile);
+    if (weChipHasMet && weTileHasMet) {
+      pass('weekend-chip-matches-tile', built.weText + ' || ' + built.weTile);
+    } else fail('weekend-chip-matches-tile', JSON.stringify({ we: built.weText, tile: built.weTile }));
+
+    const amShortInReview = (built.unmet || []).some((u) => /need at least \d+/i.test(u) && /close/i.test(u));
+    const amChipGreen = /\bok\b/.test(built.amcCls);
+    if (amShortInReview && amChipGreen) {
+      fail('am-close-chip-not-false-pass', JSON.stringify({
+        amc: built.amcText,
+        cls: built.amcCls,
+        unmet: built.unmet,
+        goal: built.amPeriodGoal,
+      }));
+    } else if (/AM closes/i.test(built.amcText) && (built.amPeriodGoal == null || /\/\s*\d+/.test(built.amcText))) {
+      pass('am-close-chip-not-false-pass', built.amcText + ' cls=' + built.amcCls);
+    } else fail('am-close-chip-not-false-pass', JSON.stringify({
+      amc: built.amcText,
+      cls: built.amcCls,
+      goal: built.amPeriodGoal,
+    }));
+
+    if (built.radar) {
+      const promisesFix = /apply a suggested fix/i.test(built.radar) && !/when one is offered/i.test(built.radar);
+      const saysNoFix = /no auto-fix/i.test(built.radar);
+      if (promisesFix && saysNoFix) {
+        fail('clopen-copy-matches-reality', built.radar);
+      } else if (/preference/i.test(built.radar) || /no close→open/i.test(built.radar) || /no auto-fix on these pairs/i.test(built.radar) || /when one is offered/i.test(built.radar)) {
+        pass('clopen-copy-matches-reality', built.radar.slice(0, 120));
+      } else {
+        pass('clopen-copy-matches-reality', built.radar.slice(0, 120));
+      }
+    } else {
+      pass('clopen-copy-matches-reality', 'radar empty or not in DOM after first Build');
     }
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);

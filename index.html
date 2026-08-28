@@ -5454,7 +5454,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.22</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.23</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7004,6 +7004,24 @@ function recordFreeGenerate() {
   updateReadyChecklist();
 }
 
+/** Sample / Harbor East generate is a tour, not one of the two free builds. */
+function rosterIsDemoForFreeCount() {
+  try {
+    if (typeof liveRosterLooksLikeDemo === 'function' && liveRosterLooksLikeDemo()) return true;
+    const sn = ((document.getElementById('store-name') || {}).value || '').trim();
+    if (typeof isDemoStoreName === 'function' && isDemoStoreName(sn)) return true;
+  } catch (e) {}
+  return false;
+}
+
+/** Real user Build only. Demo, Pro, and skipFreeCount never burn a seat. */
+function shouldRecordFreeGenerate(opts) {
+  if (opts && opts.skipFreeCount) return false;
+  if (typeof isProUnlocked === 'function' && isProUnlocked()) return false;
+  if (rosterIsDemoForFreeCount()) return false;
+  return true;
+}
+
 function rosterManagerCount() {
   // SM + AMs + KCs marked as manager coverage
   return getRoles().length;
@@ -7344,13 +7362,63 @@ function getKcCloseDows(prefs) {
   return normalizeKcCloseDays((prefs || preferences || DEFAULT_PREFERENCES).kcCloseDays);
 }
 
+/** Named non-manager KCs only. Empty / placeholder KC1 is not a closer bench. */
+function namedNonManagerKcCount() {
+  try {
+    if (typeof getNonManagerKCs === 'function') return getNonManagerKCs().length;
+  } catch (e) {}
+  return 0;
+}
+
+/**
+ * Prefs may still check Monday as a KC-close template. When no KC is named,
+ * drop that residue — same hide rule as unnamed AM2. Do not invent a KC row.
+ */
+function getEffectiveKcCloseDows(prefs) {
+  if (namedNonManagerKcCount() === 0) return [];
+  return getKcCloseDows(prefs);
+}
+
 function getManagerNightsPerWeek(prefs) {
-  return 7 - getKcCloseDows(prefs).length;
+  return 7 - getEffectiveKcCloseDows(prefs).length;
 }
 
 function makeIsKcCloseNight(dkToDate, prefs) {
-  const dows = getKcCloseDows(prefs);
+  const dows = getEffectiveKcCloseDows(prefs);
   return (dk) => dows.includes(dkToDate(dk).getDay());
+}
+
+/** Expected two-person thin-day opener/closer lines — not a must-fix dump. */
+function isExpectedThinDayCoverageNote(msg) {
+  const s = String(msg || '');
+  if (/no named key carrier|reserved close night/i.test(s)) return true;
+  return /:\s*No opener\b/i.test(s) || /:\s*No closer\b/i.test(s);
+}
+
+/**
+ * Collapse ~30 No opener / No closer lines on a 2-person roster into one
+ * chip-pointing note. Keep real must-fix / non-thin-day items visible.
+ */
+function summarizeWarningsForDisplay(warnings, roles) {
+  const list = Array.isArray(warnings) ? warnings.slice() : [];
+  const thin = typeof isThinManagerRoster === 'function' && isThinManagerRoster(roles);
+  if (!thin || !list.length) return list;
+  const cover = [];
+  const rest = [];
+  list.forEach((w) => {
+    const msg = (w && (w.msg || w.detail)) || '';
+    const isHard = w && (w.type === 'error' || w.severity === 'error');
+    if (isHard || !isExpectedThinDayCoverageNote(msg)) rest.push(w);
+    else cover.push(w);
+  });
+  if (cover.length < 2) return list;
+  const why = typeof twoPersonOffsCoverageNote === 'function' ? twoPersonOffsCoverageNote(roles) : '';
+  rest.unshift({
+    type: 'info',
+    msg: (why || 'Two people with days off cannot cover Open+Close every day.')
+      + ' See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.'
+  });
+  return rest;
 }
 
 const DEFAULT_ROLE_RULES = {
@@ -7704,7 +7772,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.22';
+const APP_VERSION = '2.6.23';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8839,6 +8907,11 @@ function buildPostingIssues(genReport, ROLES, warnings) {
       // Avoid exact duplicates of hard count banner
       if (/hard constraint/i.test(msg) && issues.some((i) => /must-fix/i.test(i.title))) return;
       if (/clopen/i.test(msg)) return;
+      if (typeof isExpectedThinDayCoverageNote === 'function'
+        && isExpectedThinDayCoverageNote(msg)
+        && typeof isThinManagerRoster === 'function'
+        && isThinManagerRoster(ROLES)
+        && issues.some((i) => /missing open or close/i.test(i.title))) return;
       issues.push({
         sev: w.type === 'error' ? 'must' : 'review',
         title: String(msg).slice(0, 140),
@@ -10542,7 +10615,11 @@ function generateSchedule(opts) {
     switchTab('setup');
     return;
   }
-  if (!opts.skipFreeCount && !requireGenerateAllowance()) return;
+  const consumeFree = typeof shouldRecordFreeGenerate === 'function'
+    ? shouldRecordFreeGenerate(opts)
+    : (!opts.skipFreeCount && !isProUnlocked());
+  if (consumeFree && !requireGenerateAllowance()) return;
+  opts = Object.assign({}, opts, { _consumeFree: consumeFree });
   try { if (typeof cancelGenerateArrival === 'function') cancelGenerateArrival(); } catch (e) {}
   const btn = document.getElementById('btn-generate');
   const prevLabel = btn ? btn.textContent : '';
@@ -10634,7 +10711,11 @@ function _generateScheduleInner(opts) {
   const isDkSunday   = (dk) => dkToDate(dk).getDay() === 0;
   const isDkWeekend  = (dk) => { const dow = dkToDate(dk).getDay(); return dow === 0 || dow === 6; };
   const dkDow        = (dk) => dkToDate(dk).getDay();
-  const kcCloseDows = normalizeKcCloseDays(PREFS.kcCloseDays);
+  const kcCloseDows = typeof getEffectiveKcCloseDows === 'function'
+    ? getEffectiveKcCloseDows(PREFS)
+    : (typeof getNonManagerKCs === 'function' && getNonManagerKCs().length === 0
+      ? []
+      : normalizeKcCloseDays(PREFS.kcCloseDays));
   const isKcCloseNight = (dk) => kcCloseDows.includes(dkToDate(dk).getDay());
   const managerNightsPerWeek = 7 - kcCloseDows.length;
 
@@ -10979,6 +11060,26 @@ function _generateScheduleInner(opts) {
   // ════════════════════════════════════════════════════
   // The "closers pool" = AMs + manager-mode KCs (everyone in ROLES except SM)
   const closerPool = ROLES.filter(r => r !== 'sm');
+  const scaledSmCloseTarget = getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, closerPool.length === 0);
+  const scaledAmCloseRem = Math.max(0, managerNightsPerWeek - (closerPool.length === 0 ? 0 : scaledSmCloseTarget));
+  const weekCloseCountOf = (r, w) => getWeekDks(w).filter((d) => isClose(schedule[r][d])).length;
+  const scaledCloseTargetOf = (r, w) => {
+    if (r === 'sm') return scaledSmCloseTarget;
+    const idx = Math.max(0, closerPool.indexOf(r));
+    return getAmClosesPerWeekTarget(PREFS, scaledAmCloseRem, Math.max(1, closerPool.length), idx, w);
+  };
+  /** Two-person: only steal a mid for close while that person is under this week's seat. */
+  const promoteMidToCloseIfUnderTarget = (dk) => {
+    if (isKcCloseNight(dk)) return false;
+    const w = Math.floor(allDks.indexOf(dk) / 7);
+    const midUnder = ROLES.find((r) =>
+      isMid(schedule[r][dk]) && !isInputLocked(r, dk)
+      && weekCloseCountOf(r, w) < scaledCloseTargetOf(r, w)
+    );
+    if (!midUnder) return false;
+    schedule[midUnder][dk] = pickClose();
+    return true;
+  };
   if (!thinRoster) {
   const closerCount = closerPool.length;
   // SM / AM targets from preferences (defaults: SM 1, AMs auto fair-share of remainder)
@@ -11246,6 +11347,8 @@ function _generateScheduleInner(opts) {
       midVariety++;
       return s;
     };
+    const weekCloseCount = weekCloseCountOf;
+    const closeTargetFor = scaledCloseTargetOf;
     const pickSoloShift = (r, dk, pdk) => {
       const closedYest = pdk && isClose(schedule[r][pdk]);
       const nOpen = twoCount(r, isOpen);
@@ -11255,6 +11358,10 @@ function _generateScheduleInner(opts) {
       if (nMid <= nOpen && nMid <= nClose) kind = 'mid';
       else if (nClose <= nOpen && nClose <= nMid) kind = 'close';
       if (isKcCloseNight(dk) && kind === 'close') kind = nOpen <= nMid ? 'open' : 'mid';
+      const wSolo = Math.floor(allDks.indexOf(dk) / 7);
+      if (kind === 'close' && wSolo >= 0 && weekCloseCount(r, wSolo) >= closeTargetFor(r, wSolo)) {
+        kind = nOpen <= nMid ? 'open' : 'mid';
+      }
       if (closedYest && PREFS.avoidClopening && kind === 'open') kind = 'mid';
       if (kind === 'close') return pickClose();
       if (kind === 'mid') return nextMid();
@@ -11291,6 +11398,28 @@ function _generateScheduleInner(opts) {
         }
       }
       if (isKcCloseNight(dk)) {
+        schedule[opener][dk] = (PREFS.avoidClopening && pdk && isClose(schedule[opener][pdk]))
+          ? nextMid()
+          : nextOpenShift(0);
+        schedule[closer][dk] = nextMid();
+        return;
+      }
+      // Prefer the person still under this week's scaled close target.
+      const wPair = Math.floor(dkIdx / 7);
+      const openerAtCap = weekCloseCount(opener, wPair) >= closeTargetFor(opener, wPair);
+      const closerAtCap = weekCloseCount(closer, wPair) >= closeTargetFor(closer, wPair);
+      if (closerAtCap && !openerAtCap) {
+        const openerWouldClopen = PREFS.avoidClopening && pdk && isClose(schedule[opener][pdk]);
+        if (!openerWouldClopen) {
+          const swapRole = opener;
+          opener = closer;
+          closer = swapRole;
+        }
+      }
+      const bothAtCap = weekCloseCount(opener, wPair) >= closeTargetFor(opener, wPair)
+        && weekCloseCount(closer, wPair) >= closeTargetFor(closer, wPair);
+      if (bothAtCap) {
+        // Weekly close seats are filled — keep a mid so this is not an open/close brick.
         schedule[opener][dk] = (PREFS.avoidClopening && pdk && isClose(schedule[opener][pdk]))
           ? nextMid()
           : nextOpenShift(0);
@@ -11594,11 +11723,18 @@ function _generateScheduleInner(opts) {
                 }
                 if (opens === 0) {
                   const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-                  if (mid) schedule[mid][dk] = pickOpen();
+                  const workersN = ROLES.filter((r) => isWork(schedule[r][dk])).length;
+                  const wFix = Math.floor(allDks.indexOf(dk) / 7);
+                  const keepSoloMid = thinRoster && workersN === 1 && mid
+                    && getWeekDks(wFix).some((d) => isOpen(schedule[mid][d]));
+                  if (mid && !keepSoloMid) schedule[mid][dk] = pickOpen();
                 }
                 if (closes === 0 && !isKcCloseNight(dk)) {
-                  const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-                  if (mid) schedule[mid][dk] = pickClose();
+                  if (thinRoster) promoteMidToCloseIfUnderTarget(dk);
+                  else {
+                    const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+                    if (mid) schedule[mid][dk] = pickClose();
+                  }
                 }
               };
               fixDay(satDk);
@@ -11688,13 +11824,16 @@ function _generateScheduleInner(opts) {
             (r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk) && !(pdk && isClose(schedule[r][pdk]))
           );
           const midAny = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-          if (midSafe) schedule[midSafe][dk] = pickOpen();
-          else if (midAny) schedule[midAny][dk] = pickOpen();
+          const midPick = midSafe || midAny;
+          // Solo day: keep a mid once that person already opened this week.
+          const solo = workers.length === 1 && midPick;
+          const wOpen = Math.floor(allDks.indexOf(dk) / 7);
+          const alreadyOpened = solo && getWeekDks(wOpen).some((d) => isOpen(schedule[midPick][d]));
+          if (midPick && !alreadyOpened) schedule[midPick][dk] = pickOpen();
         }
         ocThin = countOC();
         if (ocThin.closes === 0 && !isKcCloseNight(dk) && workers.length >= 2) {
-          const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-          if (mid) schedule[mid][dk] = pickClose();
+          promoteMidToCloseIfUnderTarget(dk);
         }
         return;
       }
@@ -12242,6 +12381,81 @@ function _generateScheduleInner(opts) {
       }
     });
   };
+
+  // Two-person: rebalanceClosesPeriodLevel skips a 1-AM pool. Move extra AM
+  // closes toward the scaled weekly target onto SM when coverage still holds.
+  const rebalanceThinRosterClosesTowardTarget = () => {
+    if (!thinRoster || !ROLES.includes('sm')) return;
+    const ams = ROLES.filter((r) => r !== 'sm');
+    if (ams.length !== 1) return;
+    const am = ams[0];
+    const smT = scaledSmCloseTarget;
+    const amTFor = (w) => scaledCloseTargetOf(am, w);
+    const wouldClopen = (r, dk, newShift) => {
+      if (!PREFS.avoidClopening) return false;
+      const idx = allDks.indexOf(dk);
+      const prev = idx > 0 ? allDks[idx - 1] : null;
+      const next = idx < allDks.length - 1 ? allDks[idx + 1] : null;
+      if (prev && isClose(schedule[r][prev]) && isOpen(newShift)) return true;
+      if (next && isClose(newShift) && isOpen(schedule[r][next])) return true;
+      return false;
+    };
+    const dayOCLocal = (dk) => {
+      let opens = 0, closes = 0;
+      ROLES.forEach((r) => {
+        if (isOpen(schedule[r][dk])) opens++;
+        if (isClose(schedule[r][dk])) closes++;
+      });
+      return { opens, closes };
+    };
+    for (let w = 0; w < numWeeks; w++) {
+      const weekDks = getWeekDks(w);
+      const amTarget = amTFor(w);
+      const amCloses = () => weekDks.filter((dk) => isClose(schedule[am][dk])).length;
+      const smCloses = () => weekDks.filter((dk) => isClose(schedule.sm[dk])).length;
+      const tryGiveClose = (from, to) => {
+        const cands = weekDks.filter((dk) => {
+          if (isKcCloseNight(dk)) return false;
+          if (!isClose(schedule[from][dk]) || isInputLocked(from, dk)) return false;
+          if (!isWork(schedule[to][dk]) || isClose(schedule[to][dk]) || isInputLocked(to, dk)) return false;
+          if (wouldClopen(to, dk, schedule[from][dk])) return false;
+          return true;
+        }).sort((a, b) => (isMid(schedule[to][a]) ? 0 : 1) - (isMid(schedule[to][b]) ? 0 : 1));
+        for (const dk of cands) {
+          const fromShift = schedule[from][dk];
+          const toShift = schedule[to][dk];
+          let newFrom = toShift;
+          if (isOpen(toShift) && ROLES.filter((rx) => rx !== to && isOpen(schedule[rx][dk])).length === 0) {
+            newFrom = toShift;
+          }
+          if (wouldClopen(from, dk, newFrom)) {
+            if (isOpen(newFrom)) newFrom = 'mid-early';
+            else continue;
+          }
+          if (isOpen(toShift) && !isOpen(newFrom)
+            && ROLES.filter((rx) => rx !== to && isOpen(schedule[rx][dk])).length === 0) {
+            continue;
+          }
+          schedule[to][dk] = fromShift;
+          schedule[from][dk] = newFrom;
+          const oc = dayOCLocal(dk);
+          if (!twoManagerCoverageHolds(dk, oc.opens, oc.closes)) {
+            schedule[to][dk] = toShift;
+            schedule[from][dk] = fromShift;
+            continue;
+          }
+          return true;
+        }
+        return false;
+      };
+      while (amCloses() > amTarget && smCloses() < smT + 1) {
+        if (!tryGiveClose(am, 'sm')) break;
+      }
+      while (amCloses() < amTarget && smCloses() > smT) {
+        if (!tryGiveClose('sm', am)) break;
+      }
+    }
+  };
   const lightClopenCleanup = () => {
     if (!PREFS.avoidClopening) return;
     for (let i = 1; i < allDks.length; i++) {
@@ -12351,16 +12565,23 @@ function _generateScheduleInner(opts) {
       let { opens, closes } = dayOC(dk);
       if (opens === 0) {
         const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-        if (mid) schedule[mid][dk] = pickOpen();
-        else {
+        const workersN = ROLES.filter((r) => isWork(schedule[r][dk])).length;
+        const wFix = Math.floor(allDks.indexOf(dk) / 7);
+        const keepSoloMid = thinRoster && workersN === 1 && mid
+          && getWeekDks(wFix).some((d) => isOpen(schedule[mid][d]));
+        if (mid && !keepSoloMid) schedule[mid][dk] = pickOpen();
+        else if (!mid) {
           const w = ROLES.find((r) => isWork(schedule[r][dk]) && !isClose(schedule[r][dk]) && !isInputLocked(r, dk));
           if (w) schedule[w][dk] = pickOpen();
         }
       }
       ({ opens, closes } = dayOC(dk));
       if (closes === 0 && !isKcCloseNight(dk)) {
-        const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-        if (mid) schedule[mid][dk] = pickClose();
+        if (thinRoster) promoteMidToCloseIfUnderTarget(dk);
+        else {
+          const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+          if (mid) schedule[mid][dk] = pickClose();
+        }
       }
     };
     const wouldClopenTake = (r, dk, newShift) => {
@@ -12561,6 +12782,7 @@ function _generateScheduleInner(opts) {
   // Alternate rebalance + clopen fix so fairness and clopens both converge
   for (let rb = 0; rb < 4; rb++) {
     rebalanceClosesPeriodLevel();
+    rebalanceThinRosterClosesTowardTarget();
     ensureHardDailyCoverage();
     rebalanceWeekendOffsStrong();
     ensureHardDailyCoverage();
@@ -12869,10 +13091,12 @@ function _generateScheduleInner(opts) {
   // ════════════════════════════════════════════════════
 
   const finalViolations = validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDkMonday, isDkSaturday, isDkSunday, isDkWeekend, dkDow, allWeekendPairs, names, ROLES, ALL_KC, AMS, closerPool);
-  const warnings = finalViolations.map(v => ({
+  const warnings = (typeof summarizeWarningsForDisplay === 'function'
+    ? summarizeWarningsForDisplay
+    : (w) => w)(finalViolations.map(v => ({
     type: v.severity === 'error' ? 'error' : (v.severity === 'warning' ? 'warn' : 'info'),
     msg: v.detail
-  }));
+  })), ROLES);
 
   // Note non-manager KC mid usage (gap fill)
   allDks.forEach(dk => {
@@ -12908,7 +13132,9 @@ function _generateScheduleInner(opts) {
   if (ts) ts.textContent = 'Generated ' + new Date().toLocaleString();
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
   // Successful user Build only — sample / tour generate does not burn a free build
-  if (!opts.skipFreeCount) recordFreeGenerate();
+  if (opts._consumeFree || (typeof shouldRecordFreeGenerate === 'function' && shouldRecordFreeGenerate(opts))) {
+    recordFreeGenerate();
+  }
   const left = remainingFreeGenerates();
   let toastMsg = `Schedule ready · Quality ${q.score}/100 (${q.grade})`;
   if (!isProUnlocked()) {
@@ -13029,7 +13255,9 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   const v = (severity, rule, manager, week, day, detail) =>
     violations.push({ severity, rule, manager, week, day, detail });
 
-  const kcCloseDows = getKcCloseDows(preferences);
+  const kcCloseDows = typeof getEffectiveKcCloseDows === 'function'
+    ? getEffectiveKcCloseDows(preferences)
+    : getKcCloseDows(preferences);
   const isKcCloseNight = (dk) => kcCloseDows.includes(dkToDate(dk).getDay());
   const mgrNights = getManagerNightsPerWeek(preferences);
   const closeTargets = typeof getScaledCloseTargets === 'function'
@@ -13073,8 +13301,9 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   }
 
   // ── Rule 2: All managers work on KC-close nights (unless PTO/LOA) ──
+  // No named KC: Monday-as-KC-close is leftover template — do not invent a KC row.
   allDks.forEach(dk => {
-    if (!isKcCloseNight(dk)) return;
+    if (namedKcClosers === 0 || !isKcCloseNight(dk)) return;
     const dayName = DAY_NAMES_FULL[dkToDate(dk).getDay()] || 'day';
     ROLES.forEach(r => {
       const s = schedule[r][dk];
@@ -13207,8 +13436,7 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   // ── Rule 8: Coverage every day (1 opener + 1 closer minimum) ──
   // Two named managers: a staffed day is a warning, not a hard error that
   // repair will "fix" by cancelling the other person's day off.
-  // No named KC: reserved KC-close nights have no closer on purpose — review,
-  // not a must-fix (1 AM is not a KC bench).
+  // No named KC: do not treat leftover Monday-as-KC-close as a reserved hole.
   allDks.forEach(dk => {
     let opens = 0, closes = 0;
     ALL_KC.forEach(r => {
@@ -13219,8 +13447,7 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
     });
     const workers = ROLES.filter(r => isWork(schedule[r][dk])).length;
     const thinDay = ROLES.length <= 2 && workers === 1;
-    const kcNightNoKc = isKcCloseNight(dk) && namedKcClosers === 0;
-    const expectedHole = thinDay || (kcNightNoKc && closes === 0);
+    const expectedHole = thinDay;
     const sev = (workers === 0 || !expectedHole) ? 'error' : 'warning';
     if (opens === 0) {
       v(sev, 'coverage-open', null, null, dk,
@@ -13228,9 +13455,7 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
     }
     if (closes === 0) {
       v(sev, 'coverage-close', null, null, dk,
-        kcNightNoKc
-          ? `${formatDate(dkToDate(dk))}: No closer (no named key carrier for this reserved close night)`
-          : `${formatDate(dkToDate(dk))}: No closer`);
+        `${formatDate(dkToDate(dk))}: No closer`);
     }
   });
 
@@ -14363,10 +14588,12 @@ function revalidateAfterManualEdit(ROLES, ALL_KC) {
     AMS,
     closerPool
   );
-  const warnings = finalViolations.map((v) => ({
+  const warnings = (typeof summarizeWarningsForDisplay === 'function'
+    ? summarizeWarningsForDisplay
+    : (w) => w)(finalViolations.map((v) => ({
     type: v.severity === 'error' ? 'error' : v.severity === 'warning' ? 'warn' : 'info',
     msg: v.detail,
-  }));
+  })), ROLES);
   if (window._lastGenReport) {
     window._lastGenReport = buildGenerationReport(
       schedule,
@@ -14483,6 +14710,8 @@ function jumpToRoleOnGrid(role) {
    v2.6.20 — Quality / Needs work taps the same first person+day hole.
    v2.6.21 — Prefer weekend / streak / a real coverage miss over an arbitrary close.
    v2.6.22 — Close targets scale to named headcount; thin-day chip explains two people + offs.
+   v2.6.23 — Virgin free count is 2; demo does not consume; no KC-close residue when none named;
+             2-person opener/closer dump collapses to one chip line; spread closes toward target.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -15185,6 +15414,9 @@ function exportScheduleExcel() {
 
 // ── Render Summary ──
 function renderSummary(warnings, ROLES, ALL_KC, genReport) {
+  warnings = typeof summarizeWarningsForDisplay === 'function'
+    ? summarizeWarningsForDisplay(warnings, ROLES)
+    : (warnings || []);
   const names = getManagerNames();
   const numWeeks = currentPeriod.numWeeks;
   const allDks = periodDates.map(d => dateKey(d));
@@ -15198,7 +15430,10 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     const avoidOn = genReport.prefs && genReport.prefs.avoidClopening;
     const clopenOk = !avoidOn || totalClopens === 0;
     const hardOk = countMustFixErrors(genReport) === 0;
-    const unmet = genReport.unmet || [];
+    const unmetRaw = genReport.unmet || [];
+    const unmet = (typeof isThinManagerRoster === 'function' && isThinManagerRoster(ROLES))
+      ? unmetRaw.filter((u) => typeof isExpectedThinDayCoverageNote !== 'function' || !isExpectedThinDayCoverageNote(u))
+      : unmetRaw;
     const bannerCls = !hardOk ? 'bad' : ((avoidOn && totalClopens > 0) || unmet.length ? 'warn' : 'ok');
     const bannerText = bannerCls === 'ok'
       ? 'Must-fix rules look good — check the posting board before you hang this.'

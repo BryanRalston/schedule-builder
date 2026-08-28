@@ -3,7 +3,7 @@
  * No named team → device language (or ?lang=), FREE · 2, Build enabled,
  * no stale store name. Named team keeps language override + remaining count.
  * Demo still does not consume a free build.
- * Keeps 2.6.12–2.6.28 behavior; version lock 2.6.31.
+ * Keeps 2.6.12–2.6.28 behavior; version lock 2.6.32.
  * Run: node tests/test-v2629-ux.mjs
  */
 import { createServer } from 'http';
@@ -113,15 +113,15 @@ async function main() {
   console.log('\n=== v2.6.29 first visit is not leftover tester chrome ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.31') pass('version.json', version.version);
+  if (version.version === '2.6.32') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.31'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.32'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.31'") && index.includes('id="app-version-label">v2.6.31')) {
+  if (index.includes("const APP_VERSION = '2.6.32'") && index.includes('id="app-version-label">v2.6.32')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

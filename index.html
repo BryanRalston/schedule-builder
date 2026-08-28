@@ -2273,6 +2273,8 @@ input[type="radio"] { accent-color: var(--gold); }
 .quality-banner.ok { background: var(--ok-bg); border: 1px solid rgba(61,222,140,0.3); color: #7dffb8; }
 .quality-banner.warn { background: var(--warn-bg); border: 1px solid rgba(255,200,87,0.35); color: #ffd78a; }
 .quality-banner.bad { background: var(--bad-bg); border: 1px solid rgba(255,92,122,0.3); color: #ff8fa3; }
+.quality-banner.is-jump, .score-hero.is-jump { cursor: pointer; }
+.quality-banner.is-jump:hover, .score-hero.is-jump:hover { border-color: rgba(61,220,255,0.5); }
 .unmet-list {
   margin: 0.5rem 0 0;
   padding-left: 1.25rem;
@@ -2806,6 +2808,7 @@ input[type="radio"] { accent-color: var(--gold); }
 .toast.success { border-left-color: var(--ok); }
 .toast.warn { border-left-color: var(--warn); }
 .toast.error { border-left-color: var(--bad); }
+.toast.is-jump { cursor: pointer; }
 .toast .toast-msg { flex: 1; line-height: 1.4; font-weight: 500; }
 .toast button {
   background: transparent;
@@ -4998,6 +5001,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="view-lock-banner no-print" id="view-lock-banner" role="status">View only — schedule board</div>
 <div id="post-gen-strip" class="no-print" role="region" aria-label="Post-generate review" hidden>
   <span class="pgs-title">Review</span>
+  <button type="button" class="pgs-chip" id="pgs-quality" onclick="jumpToReviewChip('quality')">Quality</button>
   <button type="button" class="pgs-chip" id="pgs-cover" onclick="jumpToReviewChip('cover')">Coverage</button>
   <button type="button" class="pgs-chip" id="pgs-clopens" onclick="jumpToReviewChip('clopen')">Clopens</button>
   <button type="button" class="pgs-chip" id="pgs-am-close" onclick="jumpToReviewChip('am-close')">AM closes</button>
@@ -5234,7 +5238,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <p class="rpb-hint text-muted" id="request-phrase-hint">Runs on this device. “Casey off Thu–Fri” or “Alex off Thu 8/6”. Paint still works if this does not read it.</p>
         <div id="request-phrase-confirm" class="rpb-confirm" hidden>
           <span id="request-phrase-confirm-text"></span>
-          <button type="button" class="rpt-chip" id="btn-undo-request-phrase" onclick="undoRequestPhraseApply()">Undo</button>
+          <button type="button" class="rpt-chip" id="btn-undo-request-phrase" onclick="undoRequestPhraseApply()">Undo request</button>
         </div>
       </div>
       <div id="request-paint-toolbar" class="no-print" role="toolbar" aria-label="Request paint mode" data-tour="request-paint">
@@ -5447,7 +5451,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.19</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.20</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7648,7 +7652,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.19';
+const APP_VERSION = '2.6.20';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7694,7 +7698,7 @@ function applyPriceLabels() {
   if (ver) ver.textContent = 'v' + APP_VERSION;
 }
 
-function showToast(message, type) {
+function showToast(message, type, extra) {
   type = type || 'info';
   const host = document.getElementById('toast-host');
   if (!host) { console.log('[toast]', message); return; }
@@ -7703,6 +7707,17 @@ function showToast(message, type) {
   el.innerHTML = '<div class="toast-msg"></div><button type="button" aria-label="Dismiss">&times;</button>';
   el.querySelector('.toast-msg').textContent = message;
   el.querySelector('button').onclick = () => el.remove();
+  const onClick = extra && (typeof extra === 'function' ? extra : extra.onClick);
+  if (typeof onClick === 'function') {
+    el.classList.add('is-jump');
+    el.setAttribute('role', 'button');
+    el.tabIndex = 0;
+    el.title = el.title || 'Tap to jump to a hole on the board';
+    el.addEventListener('click', function (e) {
+      if (e.target && e.target.closest && e.target.closest('button')) return;
+      onClick();
+    });
+  }
   host.appendChild(el);
   setTimeout(() => { if (el.parentNode) el.remove(); }, 4200);
 }
@@ -12581,7 +12596,9 @@ function _generateScheduleInner(opts) {
   if (lastGenReport && lastGenReport.prefs && lastGenReport.prefs.avoidClopening && lastGenReport.totalClopens > 0) {
     toastMsg += ' · review leftover clopens';
   }
-  showToast(toastMsg, hasErrors ? 'warn' : 'success');
+  showToast(toastMsg, hasErrors ? 'warn' : 'success', function () {
+    if (typeof jumpToReviewChip === 'function') jumpToReviewChip('quality');
+  });
   try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
   try {
     if (typeof computeScheduleDiff === 'function') {
@@ -14072,6 +14089,7 @@ function jumpToRoleOnGrid(role) {
 /* ====================================================================
    v2.6.18 — tap-to-fix review chips + one-line why this cell
    Rule-based, on-device. Auto-fixes stay buttons. No zero-clopen claim.
+   v2.6.20 — Quality / Needs work taps the same first person+day hole.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -14260,8 +14278,73 @@ function explainCellWhy(role, dk) {
   return { kind: 'generated', text: 'This is the generated shift.' };
 }
 
+function findFirstQualityHole() {
+  const cover = typeof findFirstCoverageHole === 'function' ? findFirstCoverageHole() : null;
+  if (cover && cover.role) return cover;
+  try {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const list = window._clopenList || (typeof findClopens === 'function' ? findClopens(roles) : []);
+    if (list && list[0] && list[0].role) {
+      return { role: list[0].role, dk: list[0].openDk || list[0].closeDk || null };
+    }
+  } catch (e) {}
+  try {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const rows = typeof buildWeekendFairness === 'function' ? buildWeekendFairness(roles) : [];
+    const short = rows && rows.find(function (r) { return r.short > 0; });
+    if (short && short.role) {
+      const dk = typeof findWeekendWorkDay === 'function' ? findWeekendWorkDay(short.role) : null;
+      if (dk) return { role: short.role, dk: dk };
+    }
+  } catch (e2) {}
+  const issues = window._postingIssues || [];
+  const withCell = issues.find(function (i) { return i && i.role; });
+  if (withCell) return { role: withCell.role, dk: withCell.dk || null };
+  try {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const dks = (periodDates || []).map(function (d) { return typeof dateKey === 'function' ? dateKey(d) : null; });
+    for (let i = 0; i < dks.length; i++) {
+      if (!dks[i]) continue;
+      for (let r = 0; r < roles.length; r++) {
+        const why = typeof explainCellWhy === 'function' ? explainCellWhy(roles[r], dks[i]) : null;
+        if (!why || !why.kind) continue;
+        if (why.kind === 'coverage' || why.kind === 'clopen') {
+          return { role: roles[r], dk: dks[i] };
+        }
+        if (why.kind === 'weekend' && /short of weekend-off/i.test(why.text || '')) {
+          return { role: roles[r], dk: dks[i] };
+        }
+      }
+    }
+  } catch (e3) {}
+  try {
+    const report = window._lastGenReport;
+    const names = typeof getManagerNames === 'function' ? getManagerNames() : {};
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const unmet = (report && report.unmet) || [];
+    for (let u = 0; u < unmet.length; u++) {
+      const line = String(unmet[u] || '');
+      const role = roles.find(function (r) { return names[r] && line.indexOf(names[r]) !== -1; });
+      if (!role) continue;
+      const we = typeof findWeekendWorkDay === 'function' ? findWeekendWorkDay(role) : null;
+      if (we) return { role: role, dk: we };
+      const dks = (periodDates || []).map(function (d) { return typeof dateKey === 'function' ? dateKey(d) : null; });
+      for (let i = 0; i < dks.length; i++) {
+        if (dks[i] && schedule[role] && schedule[role][dks[i]]) return { role: role, dk: dks[i] };
+      }
+    }
+  } catch (e4) {}
+  return null;
+}
+
 function jumpToReviewChip(kind) {
-  if (kind === 'clopen') {
+  if (kind === 'quality' || kind === 'score' || kind === 'needs-work') {
+    const hole = findFirstQualityHole();
+    if (hole && hole.role) {
+      jumpToScheduleCell(hole.role, hole.dk || null);
+      return hole;
+    }
+  } else if (kind === 'clopen') {
     const list = window._clopenList || [];
     if (list[0]) {
       jumpToScheduleCell(list[0].role, list[0].openDk);
@@ -14693,7 +14776,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
       const cls = pct >= 90 ? 'ok' : pct >= 60 ? 'warn' : 'bad';
       return `<div class="score-bar-row"><span>${label}</span><div class="score-bar-track"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div><span>${pts}/${max}</span></div>`;
     };
-    html += `<div class="score-hero">
+    html += `<div class="score-hero is-jump" id="quality-score-hero" role="button" tabindex="0" title="Tap to jump to a hole on the board" onclick="jumpToReviewChip('quality')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();jumpToReviewChip('quality');}">
       <div class="score-ring-wrap">${scoreRingSVG(q.score)}<div class="score-num">${q.score}<span class="score-label">${esc(q.grade)}</span></div></div>
       <div class="score-details">
         <h3>Schedule Quality Score</h3>
@@ -14735,7 +14818,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     });
     html += '</tbody></table></div>';
 
-    html += `<div class="quality-banner ${bannerCls}"><span>${bannerCls === 'ok' ? '✓' : (bannerCls === 'bad' ? '!!' : '!')}</span><div><div>${bannerText}</div>`;
+    html += `<div class="quality-banner ${bannerCls} is-jump" id="quality-banner" role="button" tabindex="0" title="Tap to jump to a hole on the board" onclick="jumpToReviewChip('quality')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();jumpToReviewChip('quality');}"><span>${bannerCls === 'ok' ? '✓' : (bannerCls === 'bad' ? '!!' : '!')}</span><div><div>${bannerText}</div>`;
     if (unmet.length) {
       html += '<ul class="unmet-list">' + unmet.slice(0, 12).map(u => `<li>${esc(u)}</li>`).join('') + '</ul>';
       if (unmet.length > 12) html += `<div style="margin-top:0.35rem;font-size:0.8rem">+${unmet.length - 12} more…</div>`;
@@ -15209,6 +15292,20 @@ function clearSchedUndo() {
   updateUndoRedoButtons();
 }
 
+function clearAskPhraseFields() {
+  ['request-phrase-input', 'setup-request-phrase-input'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = '';
+    try { el.defaultValue = ''; } catch (e) {}
+  });
+}
+
+function lastUndoIsRequestPhrase() {
+  const last = undoStack && undoStack.length ? undoStack[undoStack.length - 1] : null;
+  return !!(last && /request phrase/i.test(last.label || ''));
+}
+
 function restoreUndoSnapshot(snap) {
   schedule = deepCloneState(snap.schedule);
   inputs = deepCloneState(snap.inputs);
@@ -15242,6 +15339,11 @@ function undoSchedEdit() {
   if (redoStack.length > SCHED_UNDO_MAX) redoStack.shift();
   restoreUndoSnapshot(step);
   updateUndoRedoButtons();
+  if (/request phrase/i.test(step.label || '')) {
+    clearAskPhraseFields();
+    window._requestPhraseUndoReady = false;
+    try { showRequestPhraseResult(true, 'Undid that request. Paint still works.', false); } catch (eAsk) {}
+  }
   showToast('Undid ' + (step.label || 'edit') + '.', 'success');
 }
 
@@ -15398,6 +15500,7 @@ function playPostGenStripArrival(token) {
   window._msbStripArriving = true;
   strip.hidden = false;
   strip.classList.add('show', 'pgs-arrive');
+  const quality = document.getElementById('pgs-quality');
   const cover = document.getElementById('pgs-cover');
   const cl = document.getElementById('pgs-clopens');
   const amc = document.getElementById('pgs-am-close');
@@ -15433,6 +15536,13 @@ function playPostGenStripArrival(token) {
     if (fair) {
       fair.textContent = p > 0.72 ? (st.fairOk ? 'Fairness OK' : 'Fairness Review') : 'Fairness…';
       fair.className = 'pgs-chip ' + (p > 0.72 ? (st.fairOk ? 'ok' : 'warn') : '');
+    }
+    if (quality) {
+      const q = (window._lastGenReport && (window._lastGenReport.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(window._lastGenReport, st.ROLES || []) : null))) || null;
+      if (q && q.score != null) {
+        quality.textContent = 'Quality ' + q.score + ' · ' + (q.grade || 'Needs work');
+        quality.className = 'pgs-chip ' + (q.score >= 85 ? 'ok' : q.score >= 55 ? 'warn' : 'bad');
+      }
     }
     if (p < 1) requestAnimationFrame(tick);
     else {
@@ -16931,11 +17041,22 @@ function updatePostGenStrip() {
   strip.hidden = false;
   strip.classList.add('show');
   const st = computeCoverageAndFairnessStats();
+  const quality = document.getElementById('pgs-quality');
   const cover = document.getElementById('pgs-cover');
   const cl = document.getElementById('pgs-clopens');
   const amc = document.getElementById('pgs-am-close');
   const we = document.getElementById('pgs-we');
   const fair = document.getElementById('pgs-fair');
+  if (quality) {
+    const q = (window._lastGenReport && (window._lastGenReport.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(window._lastGenReport, st.ROLES || []) : null))) || null;
+    if (q && q.score != null) {
+      quality.textContent = 'Quality ' + q.score + ' · ' + (q.grade || 'Needs work');
+      quality.className = 'pgs-chip ' + (q.score >= 85 ? 'ok' : q.score >= 55 ? 'warn' : 'bad');
+    } else {
+      quality.textContent = 'Quality';
+      quality.className = 'pgs-chip';
+    }
+  }
   if (cover) {
     cover.textContent = st.coverOk ? 'Open+close ✓' : st.missDays + ' missing';
     cover.className = 'pgs-chip ' + (st.coverOk ? 'ok' : 'bad');
@@ -17148,6 +17269,7 @@ function startNextPeriodSameTeam() {
 /* ====================================================================
    v2.6.17 — on-device request phrase bar (no network, no invented people)
    v2.6.19 — peel a trailing single date off the name (8/6, Aug 6). No “Alex 8/6”.
+   v2.6.20 — Undo request clears the Ask field; already-applied Enter is a no-op.
    ==================================================================== */
 
 const REQUEST_PHRASE_DAY_ALIASES = {
@@ -17422,7 +17544,16 @@ function showRequestPhraseResult(ok, message, showUndo) {
   box.hidden = false;
   box.classList.toggle('is-ok', !!ok);
   box.classList.toggle('is-error', !ok);
-  if (undoBtn) undoBtn.hidden = !showUndo;
+  if (undoBtn) {
+    undoBtn.textContent = 'Undo request';
+    undoBtn.hidden = !showUndo;
+  }
+}
+
+function requestPhraseAlreadyApplied(parsed) {
+  if (!parsed || !parsed.ok || !parsed.dateKeys || !parsed.dateKeys.length) return false;
+  const locks = (typeof inputs !== 'undefined' && inputs[parsed.role]) || {};
+  return parsed.dateKeys.every(function (dk) { return locks[dk] === parsed.lock; });
 }
 
 function applyRequestPhraseFromBar(inputId) {
@@ -17431,11 +17562,17 @@ function applyRequestPhraseFromBar(inputId) {
   const raw = input ? String(input.value || '').trim() : '';
   const requestsInput = document.getElementById('request-phrase-input');
   if (requestsInput && input && requestsInput !== input) requestsInput.value = raw;
+  const setupInput = document.getElementById('setup-request-phrase-input');
+  if (setupInput && input && setupInput !== input) setupInput.value = raw;
   const parsed = parseRequestPhrase(raw);
   if (!parsed.ok) {
     window._requestPhraseUndoReady = false;
     showRequestPhraseResult(false, parsed.message, false);
     return parsed;
+  }
+  if (requestPhraseAlreadyApplied(parsed)) {
+    showRequestPhraseResult(true, 'Already applied: ' + parsed.confirm, lastUndoIsRequestPhrase());
+    return Object.assign({}, parsed, { noop: true, alreadyApplied: true });
   }
   try { if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot('request phrase'); } catch (err) {}
   if (!inputs[parsed.role]) inputs[parsed.role] = {};
@@ -17458,7 +17595,9 @@ function undoRequestPhraseApply() {
   if (window._viewLocked) return;
   if (typeof undoSchedEdit === 'function') undoSchedEdit();
   window._requestPhraseUndoReady = false;
+  clearAskPhraseFields();
   showRequestPhraseResult(true, 'Undid that request. Paint still works.', false);
+  setTimeout(clearAskPhraseFields, 0);
 }
 
 function requestPaintModeLabel(mode) {

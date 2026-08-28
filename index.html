@@ -3261,6 +3261,9 @@ input[type="radio"] { accent-color: var(--gold); }
   line-height: 1.4;
   font-weight: 500;
 }
+.welcome-card.welcome-after-board {
+  display: none !important;
+}
 .welcome-card.compact .welcome-privacy {
   display: block;
   -webkit-line-clamp: unset;
@@ -5451,7 +5454,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.20</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.21</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7652,7 +7655,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.20';
+const APP_VERSION = '2.6.21';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7724,8 +7727,36 @@ function showToast(message, type, extra) {
 
 function dismissWelcome() {
   const c = document.getElementById('welcome-card');
-  if (c) c.style.display = 'none';
+  if (c) {
+    c.style.display = 'none';
+    c.setAttribute('hidden', '');
+  }
   try { localStorage.setItem('msb_welcome_dismissed', '1'); } catch(e) {}
+}
+
+/** Hide the marketing hero once a live board exists. First-run empty keeps it. */
+function syncMarketingHero() {
+  const hero = document.getElementById('welcome-card');
+  if (!hero) return;
+  let dismissed = false;
+  try { dismissed = localStorage.getItem('msb_welcome_dismissed') === '1'; } catch (e) {}
+  const live = typeof hasLiveBuiltBoard === 'function' && hasLiveBuiltBoard();
+  if (live) {
+    hero.classList.add('welcome-after-board');
+    hero.setAttribute('hidden', '');
+    hero.setAttribute('aria-hidden', 'true');
+    hero.style.display = 'none';
+    return;
+  }
+  hero.classList.remove('welcome-after-board');
+  hero.removeAttribute('aria-hidden');
+  if (dismissed) {
+    hero.style.display = 'none';
+    hero.setAttribute('hidden', '');
+  } else {
+    hero.removeAttribute('hidden');
+    hero.style.display = '';
+  }
 }
 
 const MSB_SETUP_MORE_KEY = 'msb_setup_more_open';
@@ -7910,7 +7941,8 @@ function buildFromSetup() {
 
 function restoreWelcomeState() {
   try {
-    if (localStorage.getItem('msb_welcome_dismissed') === '1') {
+    if (typeof syncMarketingHero === 'function') syncMarketingHero();
+    else if (localStorage.getItem('msb_welcome_dismissed') === '1') {
       const c = document.getElementById('welcome-card');
       if (c) c.style.display = 'none';
     }
@@ -10503,6 +10535,17 @@ function _generateScheduleInner(opts) {
   const ALL_KC = getAllWithKC();  // ROLES + non-manager KCs
   const AMS = getAMs();          // just AM IDs
   const nonMgrKCs = getNonManagerKCs(); // KCs not in manager mode
+  // Two named managers (SM + one AM): a hangable period needs offs and mixed
+  // shifts. Dual open+close every day is impossible once each person takes
+  // two days off, so single-coverage days are allowed. A 3+ roster thinned
+  // to two available people still keeps dual coverage (Period 8 rule).
+  const thinRoster = ROLES.length <= 2;
+  const twoManagerCoverageHolds = (dk, opens, closes) => {
+    const workers = ROLES.filter((r) => isWork(schedule[r][dk])).length;
+    if (workers < 1) return false;
+    if (thinRoster) return true;
+    return opens >= 1 && closes >= 1;
+  };
 
   if (!periodDates || periodDates.length === 0) {
     showToast('Load this NRF period on Setup first.', 'warn');
@@ -10630,11 +10673,14 @@ function _generateScheduleInner(opts) {
     return true;
   }).length;
 
-  // Minimum workers required after soft offs: 2 when 2+ could work, else all remaining
+  // Minimum workers after a soft off. 3+ available → keep dual coverage.
+  // Larger roster thinned to 2 → keep both working. Natural two-manager
+  // store → one may be off (the other covers the day).
   const minWorkersAfterSoftOff = (dk) => {
     const pool = managersNotInputLockedOff(dk);
     if (pool >= 3) return 2;
-    if (pool === 2) return 2;
+    if (!thinRoster && pool === 2) return 2;
+    if (pool === 2) return 1;
     return Math.max(1, pool);
   };
 
@@ -10665,7 +10711,9 @@ function _generateScheduleInner(opts) {
     const weDays = allDks.filter(isDkWeekend);
     if (weDays.length === 0) return 0;
     const avgAvail = weDays.reduce((sum, dk) => sum + managersNotInputLockedOff(dk), 0) / weDays.length;
-    if (avgAvail <= 2.2) t = Math.min(t, 1);
+    // Cap only when a larger team is thinned (LOA/RTO). Two named managers
+    // can still trade weekend days — one works, one is off.
+    if (!thinRoster && avgAvail <= 2.2) t = Math.min(t, 1);
     if (avgAvail <= 1.5) t = 0;
     const hardWeOff = allDks.filter(dk =>
       isDkWeekend(dk) && (schedule[r][dk] === 'rto' || schedule[r][dk] === 'pto' || schedule[r][dk] === 'loa')
@@ -10827,10 +10875,11 @@ function _generateScheduleInner(opts) {
         return dayOffCounts[a] - dayOffCounts[b];
       });
 
+      const maxOffStack = thinRoster ? 1 : 2;
       for (const dk of candidates) {
         if (offNeeded <= 0) break;
-        // Don't stack more than 2 managers off on the same day
-        if (dayOffCounts[dk] >= 2) continue;
+        // Two-manager: never put both off the same day. 3+: avoid stacking > 2.
+        if (dayOffCounts[dk] >= maxOffStack) continue;
         schedule[r][dk] = 'off';
         dayOffCounts[dk]++;
         offNeeded--;
@@ -10841,12 +10890,16 @@ function _generateScheduleInner(opts) {
         for (const dk of candidates) {
           if (offNeeded <= 0) break;
           if (schedule[r][dk] === 'off') continue; // already used
+          if (thinRoster && dayOffCounts[dk] >= 1) continue; // still never both off
           schedule[r][dk] = 'off';
+          dayOffCounts[dk]++;
           offNeeded--;
         }
       }
     });
   }
+
+  let midVariety = 0;
 
   // ════════════════════════════════════════════════════
   // STEP 4: ASSIGN CLOSING SHIFTS — night-first approach
@@ -10854,10 +10907,12 @@ function _generateScheduleInner(opts) {
   // For each manager-close night (not a KC-close night), assign exactly 1 closer.
   // managerNightsPerWeek nights per week. SM gets min(1, mgrNights) (or all if sole manager).
   // Remaining distributed among AMs (+ manager-mode KCs) as evenly as possible.
+  // Two named managers use assignTwoManagerShifts instead — the 3+ closer
+  // pool would dump every remaining night on AM1 and then pull offs back.
   // ════════════════════════════════════════════════════
-
   // The "closers pool" = AMs + manager-mode KCs (everyone in ROLES except SM)
   const closerPool = ROLES.filter(r => r !== 'sm');
+  if (!thinRoster) {
   const closerCount = closerPool.length;
   // SM / AM targets from preferences (defaults: SM 1, AMs auto fair-share of remainder)
   const smCloseTarget = getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, closerCount === 0);
@@ -10984,8 +11039,6 @@ function _generateScheduleInner(opts) {
   // Ensure at least 1 opener and 1 closer per day.
   // Peak on: first open = early, second = late; peak off: all opens late.
   // ════════════════════════════════════════════════════
-
-  let midVariety = 0;
 
   allDks.forEach((dk, dkIdx) => {
     const pdk = dkIdx > 0 ? allDks[dkIdx - 1] : null;
@@ -11117,6 +11170,77 @@ function _generateScheduleInner(opts) {
       }
     }
   });
+  } else {
+    // Two named managers: keep the offs from Steps 2–3, mix Open/Mid/Close,
+    // and never force both people to work just to paint open+close every day.
+    const twoCount = (r, pred) => allDks.filter((d) => pred(schedule[r][d])).length;
+    const nextMid = () => {
+      const s = (midVariety % 2 === 0) ? 'mid-early' : 'mid-late';
+      midVariety++;
+      return s;
+    };
+    const pickSoloShift = (r, dk, pdk) => {
+      const closedYest = pdk && isClose(schedule[r][pdk]);
+      const nOpen = twoCount(r, isOpen);
+      const nMid = twoCount(r, isMid);
+      const nClose = twoCount(r, isClose);
+      let kind = 'open';
+      if (nMid <= nOpen && nMid <= nClose) kind = 'mid';
+      else if (nClose <= nOpen && nClose <= nMid) kind = 'close';
+      if (isKcCloseNight(dk) && kind === 'close') kind = nOpen <= nMid ? 'open' : 'mid';
+      if (closedYest && PREFS.avoidClopening && kind === 'open') kind = 'mid';
+      if (kind === 'close') return pickClose();
+      if (kind === 'mid') return nextMid();
+      return nextOpenShift(0);
+    };
+    allDks.forEach((dk, dkIdx) => {
+      const pdk = dkIdx > 0 ? allDks[dkIdx - 1] : null;
+      const toFill = ROLES.filter((r) => {
+        if (isInputLocked(r, dk)) return false;
+        const s = schedule[r][dk];
+        if (s === 'off' || s === 'rto' || s === 'pto' || s === 'loa') return false;
+        if (isWork(s)) return false;
+        return !s;
+      });
+      if (toFill.length === 0) return;
+      if (toFill.length === 1) {
+        schedule[toFill[0]][dk] = pickSoloShift(toFill[0], dk, pdk);
+        return;
+      }
+      const a = toFill[0];
+      const b = toFill[1];
+      const aClosed = pdk && isClose(schedule[a][pdk]);
+      const bClosed = pdk && isClose(schedule[b][pdk]);
+      // Alternate who opens vs closes so neither person is a 28-day brick.
+      let opener = ((dkIdx + Math.floor(dkIdx / 7)) % 2 === 0) ? a : b;
+      let closer = opener === a ? b : a;
+      if (PREFS.avoidClopening) {
+        if (opener === a && aClosed && !bClosed) {
+          opener = b;
+          closer = a;
+        } else if (opener === b && bClosed && !aClosed) {
+          opener = a;
+          closer = b;
+        }
+      }
+      if (isKcCloseNight(dk)) {
+        schedule[opener][dk] = (PREFS.avoidClopening && pdk && isClose(schedule[opener][pdk]))
+          ? nextMid()
+          : nextOpenShift(0);
+        schedule[closer][dk] = nextMid();
+        return;
+      }
+      // Dual day: one open, one close. If opener would clopen and we couldn't
+      // swap, give them mid and keep the other on close — coverage preference.
+      if (PREFS.avoidClopening && pdk && isClose(schedule[opener][pdk]) && isClose(schedule[closer][pdk])) {
+        schedule[opener][dk] = nextMid();
+        schedule[closer][dk] = pickClose();
+      } else {
+        schedule[opener][dk] = nextOpenShift(0);
+        schedule[closer][dk] = pickClose();
+      }
+    });
+  }
 
   // Non-manager KC mid fill
   // A) Template pass first: preferred midDows per KC (intentional recurring mids)
@@ -11314,6 +11438,9 @@ function _generateScheduleInner(opts) {
           if (schedule[kc.id] && schedule[kc.id][dk] === 'kc-close') closes++;
         });
       }
+      if (thinRoster) {
+        return ROLES.filter((r) => isWork(schedule[r][dk])).length >= 1;
+      }
       return opens >= 1 && closes >= 1;
     };
     const wouldClopen = (r, dk, newShift) => {
@@ -11483,6 +11610,26 @@ function _generateScheduleInner(opts) {
         const soft = ROLES.find((r) => schedule[r][dk] === 'off' && !isInputLocked(r, dk));
         if (soft) schedule[soft][dk] = pickOpen();
         workers = ROLES.filter((r) => isWork(schedule[r][dk]));
+      }
+
+      // Two named managers: a staffed day is enough. Do not cancel the other
+      // person's off just to paint both an opener and a closer.
+      if (thinRoster && workers.length >= 1) {
+        let ocThin = countOC();
+        if (ocThin.opens === 0) {
+          const midSafe = ROLES.find(
+            (r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk) && !(pdk && isClose(schedule[r][pdk]))
+          );
+          const midAny = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+          if (midSafe) schedule[midSafe][dk] = pickOpen();
+          else if (midAny) schedule[midAny][dk] = pickOpen();
+        }
+        ocThin = countOC();
+        if (ocThin.closes === 0 && !isKcCloseNight(dk) && workers.length >= 2) {
+          const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+          if (mid) schedule[mid][dk] = pickClose();
+        }
+        return;
       }
 
       let { opens, closes } = countOC();
@@ -11938,7 +12085,7 @@ function _generateScheduleInner(opts) {
       schedule[under][dk] = overShift;
       schedule[over][dk] = newOverShift;
       const oc = dayOC(dk);
-      if (oc.opens < 1 || oc.closes < 1) {
+      if (!twoManagerCoverageHolds(dk, oc.opens, oc.closes)) {
         schedule[under][dk] = underShift;
         schedule[over][dk] = overShift;
         return false;
@@ -12023,7 +12170,7 @@ function _generateScheduleInner(opts) {
       schedule[demote][dk] = (midVariety % 2 === 0) ? 'mid-late' : 'mid-early';
       midVariety++;
       const oc = dayOC(dk);
-      if (oc.opens < 1 || oc.closes < 1) {
+      if (!twoManagerCoverageHolds(dk, oc.opens, oc.closes)) {
         schedule[demote][dk] = pickClose();
       }
     });
@@ -12184,8 +12331,7 @@ function _generateScheduleInner(opts) {
         schedule[over][weDk] = uShift;
         fixDayOC(weDk);
         const oc = dayOC(weDk);
-        const workers = ROLES.filter((r) => isWork(schedule[r][weDk])).length;
-        if (oc.opens < 1 || oc.closes < 1 || workers < 1) {
+        if (!twoManagerCoverageHolds(weDk, oc.opens, oc.closes)) {
           schedule[over][weDk] = snapO;
           schedule[under][weDk] = snapU;
           continue;
@@ -12213,7 +12359,7 @@ function _generateScheduleInner(opts) {
         schedule[under][weDk] = 'off';
         fixDayOC(weDk);
         const oc = dayOC(weDk);
-        if (oc.opens < 1 || oc.closes < 1) {
+        if (!twoManagerCoverageHolds(weDk, oc.opens, oc.closes)) {
           schedule[over][weDk] = snapO;
           schedule[under][weDk] = snapU;
           continue;
@@ -12247,7 +12393,7 @@ function _generateScheduleInner(opts) {
           fixDayOC(wdDk);
           const ocW = dayOC(weDk);
           const ocD = dayOC(wdDk);
-          if (ocW.opens < 1 || ocW.closes < 1 || ocD.opens < 1 || ocD.closes < 1) {
+          if (!twoManagerCoverageHolds(weDk, ocW.opens, ocW.closes) || !twoManagerCoverageHolds(wdDk, ocD.opens, ocD.closes)) {
             schedule[under][weDk] = weShift;
             schedule[under][wdDk] = 'off';
             continue;
@@ -12283,7 +12429,7 @@ function _generateScheduleInner(opts) {
           fixDayOC(wdDk);
           const ocW = dayOC(weDk);
           const ocD = dayOC(wdDk);
-          if (ocW.opens < 1 || ocW.closes < 1 || ocD.opens < 1 || ocD.closes < 1) {
+          if (!twoManagerCoverageHolds(weDk, ocW.opens, ocW.closes) || !twoManagerCoverageHolds(wdDk, ocD.opens, ocD.closes)) {
             schedule[over][wdDk] = wdShift;
             schedule[over][weDk] = 'off';
             continue;
@@ -12329,7 +12475,7 @@ function _generateScheduleInner(opts) {
           fixDayOC(wdDk);
           const ocW = dayOC(weDk);
           const ocD = dayOC(wdDk);
-          if (ocW.opens < 1 || ocW.closes < 1 || ocD.opens < 1 || ocD.closes < 1) {
+          if (!twoManagerCoverageHolds(weDk, ocW.opens, ocW.closes) || !twoManagerCoverageHolds(wdDk, ocD.opens, ocD.closes)) {
             schedule[over][weDk] = snap.oWe;
             schedule[under][weDk] = snap.uWe;
             schedule[over][wdDk] = snap.oWd;
@@ -12852,6 +12998,8 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   });
 
   // ── Rule 8: Coverage every day (1 opener + 1 closer minimum) ──
+  // Two named managers: a staffed day is a warning, not a hard error that
+  // repair will "fix" by cancelling the other person's day off.
   allDks.forEach(dk => {
     let opens = 0, closes = 0;
     ALL_KC.forEach(r => {
@@ -12859,12 +13007,15 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
       if (isOpen(s)) opens++;
       if (isClose(s)) closes++; // includes close, close-ext, kc-close
     });
+    const workers = ROLES.filter(r => isWork(schedule[r][dk])).length;
+    const thinDay = ROLES.length <= 2 && workers === 1;
+    const sev = (workers === 0 || !thinDay) ? 'error' : 'warning';
     if (opens === 0) {
-      v('error', 'coverage-open', null, null, dk,
+      v(sev, 'coverage-open', null, null, dk,
         `${formatDate(dkToDate(dk))}: No opener`);
     }
     if (closes === 0) {
-      v('error', 'coverage-close', null, null, dk,
+      v(sev, 'coverage-close', null, null, dk,
         `${formatDate(dkToDate(dk))}: No closer`);
     }
   });
@@ -14090,6 +14241,7 @@ function jumpToRoleOnGrid(role) {
    v2.6.18 — tap-to-fix review chips + one-line why this cell
    Rule-based, on-device. Auto-fixes stay buttons. No zero-clopen claim.
    v2.6.20 — Quality / Needs work taps the same first person+day hole.
+   v2.6.21 — Prefer weekend / streak / a real coverage miss over an arbitrary close.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -14243,12 +14395,6 @@ function explainCellWhy(role, dk) {
   if (closes < 1) {
     return { kind: 'coverage', text: 'Coverage hole — this day has no closer.' };
   }
-  if (typeof isOpen === 'function' && isOpen(shift) && opens === 1) {
-    return { kind: 'coverage', text: 'Coverage hole — only opener this day.' };
-  }
-  if (typeof isClose === 'function' && isClose(shift) && closes === 1) {
-    return { kind: 'coverage', text: 'Coverage hole — only closer this day.' };
-  }
 
   let weekend = false;
   try {
@@ -14278,16 +14424,43 @@ function explainCellWhy(role, dk) {
   return { kind: 'generated', text: 'This is the generated shift.' };
 }
 
+function findFirstStreakHole() {
+  const maxLim = (typeof preferences !== 'undefined' && preferences.maxConsecutiveWorkDays) ? preferences.maxConsecutiveWorkDays : 6;
+  const roles = typeof getRoles === 'function' ? getRoles() : [];
+  const dks = (periodDates || []).map(function (d) { return typeof dateKey === 'function' ? dateKey(d) : null; });
+  for (let r = 0; r < roles.length; r++) {
+    let streak = 0;
+    for (let i = 0; i < dks.length; i++) {
+      if (!dks[i] || !schedule[roles[r]]) continue;
+      if (typeof isWork === 'function' && isWork(schedule[roles[r]][dks[i]])) {
+        streak++;
+        if (streak > maxLim) return { role: roles[r], dk: dks[i] };
+      } else {
+        streak = 0;
+      }
+    }
+  }
+  return null;
+}
+
+function coverageHoleIsZeroStaff(hole) {
+  if (!hole || !hole.dk) return false;
+  const roles = typeof getRoles === 'function' ? getRoles() : [];
+  const workers = roles.filter(function (r) {
+    return schedule[r] && typeof isWork === 'function' && isWork(schedule[r][hole.dk]);
+  }).length;
+  return workers === 0;
+}
+
 function findFirstQualityHole() {
   const cover = typeof findFirstCoverageHole === 'function' ? findFirstCoverageHole() : null;
-  if (cover && cover.role) return cover;
-  try {
-    const roles = typeof getRoles === 'function' ? getRoles() : [];
-    const list = window._clopenList || (typeof findClopens === 'function' ? findClopens(roles) : []);
-    if (list && list[0] && list[0].role) {
-      return { role: list[0].role, dk: list[0].openDk || list[0].closeDk || null };
-    }
-  } catch (e) {}
+  // Zero-staff or a 3+ roster hole is a distinct coverage miss — jump there.
+  // Two-manager thin days (one person working, missing open or close) wait
+  // until weekend/streak holes are checked so Quality doesn't land on an
+  // arbitrary close just because every solo day is "equally" uncovered.
+  if (cover && cover.role && (coverageHoleIsZeroStaff(cover) || ((typeof getRoles === 'function' ? getRoles() : []).length >= 3))) {
+    return cover;
+  }
   try {
     const roles = typeof getRoles === 'function' ? getRoles() : [];
     const rows = typeof buildWeekendFairness === 'function' ? buildWeekendFairness(roles) : [];
@@ -14297,6 +14470,18 @@ function findFirstQualityHole() {
       if (dk) return { role: short.role, dk: dk };
     }
   } catch (e2) {}
+  try {
+    const streak = typeof findFirstStreakHole === 'function' ? findFirstStreakHole() : null;
+    if (streak && streak.role) return streak;
+  } catch (eStreak) {}
+  if (cover && cover.role) return cover;
+  try {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const list = window._clopenList || (typeof findClopens === 'function' ? findClopens(roles) : []);
+    if (list && list[0] && list[0].role) {
+      return { role: list[0].role, dk: list[0].openDk || list[0].closeDk || null };
+    }
+  } catch (e) {}
   const issues = window._postingIssues || [];
   const withCell = issues.find(function (i) { return i && i.role; });
   if (withCell) return { role: withCell.role, dk: withCell.dk || null };
@@ -17144,6 +17329,7 @@ function syncAppShell() {
   }
   const sample = document.getElementById('btn-sample-store');
   if (sample) sample.hidden = !!hasBoard;
+  try { if (typeof syncMarketingHero === 'function') syncMarketingHero(); } catch (eHero) {}
   const btn = document.getElementById('btn-generate');
   if (btn && btn.getAttribute('aria-busy') !== 'true') {
     btn.textContent = hasBoard ? 'Rebuild' : 'Build this period';

@@ -422,6 +422,17 @@ async function main() {
     }));
 
     try {
+      await esPage.evaluate(() => {
+        if (typeof openReviewSheet === 'function') openReviewSheet();
+        if (typeof showToast === 'function' && typeof formatScheduleReadyToast === 'function') {
+          const q = (window._lastGenReport && window._lastGenReport.quality) || { score: 82, grade: 'Good' };
+          const left = typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : 1;
+          const leftover = !!(window._lastGenReport && window._lastGenReport.prefs
+            && window._lastGenReport.prefs.avoidClopening && window._lastGenReport.totalClopens > 0);
+          showToast(formatScheduleReadyToast(q, left, leftover, false), leftover ? 'warn' : 'success');
+        }
+      });
+      await esPage.waitForTimeout(200);
       const shotDir = '/opt/cursor/artifacts/screenshots';
       mkdirSync(shotDir, { recursive: true });
       const shotPath = join(shotDir, 'v2627-es-warnings-toast.png');

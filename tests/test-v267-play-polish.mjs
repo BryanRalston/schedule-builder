@@ -120,7 +120,7 @@ async function main() {
 
   if (/Load a fiscal period first \(Setup → Load Period\)/.test(index)
     && /Name your managers on Setup before building/.test(index)
-    && /function generateSchedule\(\)/.test(index)) {
+    && /function generateSchedule\(/.test(index)) {
     pass('generate-toasts-in-source');
   } else fail('generate-toasts-in-source', 'missing generateSchedule guards');
 

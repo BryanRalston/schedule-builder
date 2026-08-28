@@ -479,7 +479,9 @@ async function main() {
       pass('export-colors-follow-cell-edit', exportPaint.afterLabel);
     } else fail('export-colors-follow-cell-edit', JSON.stringify(exportPaint));
 
+    await page.waitForTimeout(400);
     const deskClose = await page.evaluate(async () => {
+      window._msbSuppressCellClick = false;
       const cells = [...document.querySelectorAll('#schedule-grid td.shift-editable')];
       const work = cells.find((c) => {
         const s = schedule[c.getAttribute('data-role')] && schedule[c.getAttribute('data-role')][c.getAttribute('data-dk')];

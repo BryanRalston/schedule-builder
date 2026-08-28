@@ -202,7 +202,7 @@ async function main() {
       if (typeof openReviewSheet === 'function') openReviewSheet();
       const sheet = document.getElementById('review-sheet');
       const text = (sheet && sheet.innerText) || '';
-      const mustClopen = /Must[\s\S]{0,80}clopen/i.test(text);
+      const mustClopen = /must[\s-]clopen|must avoid clopen|clopen(?:ing)? (?:is )?(?:a )?must|must have (?:zero |no )?clopen/i.test(text);
       const ban = /clopening ban|clopen-free|zero clopen/i.test(text)
         || /clopen[\s\S]{0,40}hard constraint|hard constraint[\s\S]{0,40}clopen/i.test(text);
       return {

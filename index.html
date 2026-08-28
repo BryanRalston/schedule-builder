@@ -5454,7 +5454,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.23</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.24</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7396,6 +7396,42 @@ function isExpectedThinDayCoverageNote(msg) {
 }
 
 /**
+ * 2.6.24 — leftover No opener / No closer on a 2-person board is expected
+ * thin coverage (posting is Review first), not a leftover must-fix.
+ * Both people off is a real hole and stays a must-fix.
+ */
+function isExpectedThinCoverageRemainder(v, roles) {
+  if (!v) return false;
+  const rule = v.rule || '';
+  const detail = String(v.detail || v.msg || '');
+  const isCover = rule === 'coverage-open' || rule === 'coverage-close'
+    || (typeof isExpectedThinDayCoverageNote === 'function' && isExpectedThinDayCoverageNote(detail));
+  if (!isCover) return false;
+  const list = roles || (typeof getRoles === 'function' ? getRoles() : []);
+  const thin = typeof isThinManagerRoster === 'function'
+    ? isThinManagerRoster(list)
+    : (list && list.length > 0 && list.length <= 2);
+  if (!thin) return false;
+  const dk = v.day || v.dk;
+  if (dk && typeof schedule !== 'undefined' && schedule && typeof isWork === 'function') {
+    const workers = list.filter((r) => isWork(schedule[r] && schedule[r][dk])).length;
+    if (workers === 0) return false;
+  }
+  return true;
+}
+
+/** Hard leftovers that are not clopens and not expected 2-person thin coverage. */
+function leftoverMustFixViolations(violations, roles) {
+  return (violations || []).filter((v) => {
+    if (!v || v.severity !== 'error') return false;
+    if (v.rule === 'no-clopen') return false;
+    if (typeof isExpectedThinCoverageRemainder === 'function'
+      && isExpectedThinCoverageRemainder(v, roles)) return false;
+    return true;
+  });
+}
+
+/**
  * Collapse ~30 No opener / No closer lines on a 2-person roster into one
  * chip-pointing note. Keep real must-fix / non-thin-day items visible.
  */
@@ -7772,7 +7808,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.23';
+const APP_VERSION = '2.6.24';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8807,8 +8843,14 @@ function explainQualityScore(q, genReport, ROLES) {
   return tips.slice(0, 6);
 }
 
-/** Hard errors that are not leftover clopens (preference, not a ban). */
+/**
+ * Hard leftovers that still block posting. Expected 2-person thin coverage
+ * is Review first — not counted here. Score still uses hardErrorCount.
+ */
 function countMustFixErrors(genReport) {
+  if (genReport && typeof genReport.mustFixCount === 'number') {
+    return genReport.mustFixCount;
+  }
   const hard = (genReport && genReport.hardErrorCount) || 0;
   const cl = (genReport && genReport.totalClopens) || 0;
   const avoidOn = !!(genReport && genReport.prefs && genReport.prefs.avoidClopening);
@@ -13110,12 +13152,14 @@ function _generateScheduleInner(opts) {
     });
   });
 
-  const hardNonClopen = finalViolations.filter(v => v.severity === 'error' && v.rule !== 'no-clopen');
-  const hasErrors = hardNonClopen.length > 0;
+  const leftoverMust = typeof leftoverMustFixViolations === 'function'
+    ? leftoverMustFixViolations(finalViolations, ROLES)
+    : finalViolations.filter(v => v.severity === 'error' && v.rule !== 'no-clopen');
+  const hasErrors = leftoverMust.length > 0;
   if (!hasErrors) {
     warnings.unshift({ type: 'info', msg: `All hard constraints satisfied. (${pass} repair pass${pass !== 1 ? 'es' : ''})` });
   } else {
-    warnings.unshift({ type: 'warn', msg: `${hardNonClopen.length} hard constraint(s) remain after ${pass} repair passes.` });
+    warnings.unshift({ type: 'warn', msg: `${leftoverMust.length} hard constraint(s) remain after ${pass} repair passes.` });
   }
 
   // Build generation quality report
@@ -13227,7 +13271,10 @@ function buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, vi
   }
 
   const hardErrors = (violations || []).filter(v => v.severity === 'error' && v.rule !== 'no-clopen');
-  hardErrors.forEach(e => {
+  const leftoverMust = typeof leftoverMustFixViolations === 'function'
+    ? leftoverMustFixViolations(violations, ROLES)
+    : hardErrors;
+  leftoverMust.forEach(e => {
     if (e.detail && !unmet.includes(e.detail)) unmet.push(e.detail);
   });
 
@@ -13235,6 +13282,7 @@ function buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, vi
     weekendOffs, opens, closes, mids, clopens, maxStreak,
     totalClopens, unmet, prefs: PREFS,
     hardErrorCount: hardErrors.length,
+    mustFixCount: leftoverMust.length,
     closeTargets: typeof getScaledCloseTargets === 'function'
       ? getScaledCloseTargets(PREFS, ROLES, typeof getManagerNightsPerWeek === 'function' ? getManagerNightsPerWeek(PREFS) : 6)
       : null
@@ -14712,6 +14760,8 @@ function jumpToRoleOnGrid(role) {
    v2.6.22 — Close targets scale to named headcount; thin-day chip explains two people + offs.
    v2.6.23 — Virgin free count is 2; demo does not consume; no KC-close residue when none named;
              2-person opener/closer dump collapses to one chip line; spread closes toward target.
+   v2.6.24 — One story: leftover 2-person thin coverage is Review first, not a leftover hard
+             constraint next to “Must-fix rules look clean.” Score formula unchanged.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {

@@ -1,11 +1,12 @@
 /**
- * v2.6.23: playtest extras on 2.6.22.
- * Virgin free count is 2; first real Build leaves Rebuild enabled;
- * demo / sample store does not consume; no KC-close residue when
- * kcList is empty; 2-person warning list is a summary, not ~30
- * opener/closer lines; 2.6.22 ready-enough still holds.
- * Keeps 2.6.12–2.6.22 behavior; version lock 2.6.24.
- * Run: node tests/test-v2623-ux.mjs
+ * v2.6.24: one story for must-fix vs leftover hard constraints.
+ * Two-person first Build does not show both “Must-fix rules look clean”
+ * and “N hard constraint(s) remain after 50 repair passes.”
+ * Thin coverage on 2 people is Review first, not a leftover must-fix.
+ * Real unrelated must-fix still shows. Score formula unchanged.
+ * 2.6.23 free-build / no-KC / summary still hold.
+ * Keeps 2.6.12–2.6.23 behavior; version lock 2.6.24.
+ * Run: node tests/test-v2624-ux.mjs
  */
 import { createServer } from 'http';
 import { readFileSync, existsSync } from 'fs';
@@ -72,7 +73,7 @@ async function loadChromium() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.23 free count + KC residue + thin-day warning summary ===');
+  console.log('\n=== v2.6.24 must-fix vs leftover hard constraints ===');
 
   const version = JSON.parse(read('version.json'));
   if (version.version === '2.6.24') pass('version.json', version.version);
@@ -92,12 +93,14 @@ async function main() {
     && /function namedNonManagerKcCount\(/.test(index)
     && /function getEffectiveKcCloseDows\(/.test(index)
     && /function isExpectedThinDayCoverageNote\(/.test(index)
+    && /function isExpectedThinCoverageRemainder\(/.test(index)
+    && /function leftoverMustFixViolations\(/.test(index)
     && /function summarizeWarningsForDisplay\(/.test(index)
     && /rebalanceThinRosterClosesTowardTarget/.test(index)
     && /See the coverage chip/.test(index)
     && !/no named key carrier for this reserved close night/.test(index)) {
-    pass('v2623-fns');
-  } else fail('v2623-fns', '2.6.23 helpers missing or KC residue copy still present');
+    pass('v2624-fns');
+  } else fail('v2624-fns', '2.6.24 leftover-must-fix helpers missing');
 
   if (/const thinRoster = ROLES\.length <= 2/.test(index)
     && /function getScaledCloseTargets\(/.test(index)
@@ -122,9 +125,11 @@ async function main() {
     && /function clearAskPhraseFields\(/.test(index)
     && /function findFirstQualityHole\(/.test(index)
     && /Undo request/.test(index)
-    && /freeGenerateLimit: 2/.test(index)) {
-    pass('v2612-v2622-kept');
-  } else fail('v2612-v2622-kept', '2.6.12–2.6.22 markers missing');
+    && /freeGenerateLimit: 2/.test(index)
+    && /function shouldRecordFreeGenerate\(/.test(index)
+    && /function isExpectedThinDayCoverageNote\(/.test(index)) {
+    pass('v2612-v2623-kept');
+  } else fail('v2612-v2623-kept', '2.6.12–2.6.23 markers missing');
 
   if (!/TJX|Marshalls|HomeGoods|Winners/i.test(index)) pass('no-employer-names');
   else fail('no-employer-names', 'employer name leaked into copy');
@@ -363,6 +368,26 @@ async function main() {
           const namedKc = typeof namedNonManagerKcCount === 'function' ? namedNonManagerKcCount() : null;
           const effDows = typeof getEffectiveKcCloseDows === 'function' ? getEffectiveKcCloseDows(preferences) : null;
           const kcRows = [...document.querySelectorAll('#schedule-grid [data-role^="kc"]')].map((el) => el.getAttribute('data-role'));
+          const tips = typeof explainQualityScore === 'function' ? explainQualityScore(q, report, roles) : [];
+          const warnHard = warnItems.filter((t) => /hard constraint\(s\) remain after \d+ repair passes/i.test(t));
+          const mustClean = tips.some((t) => /Must-fix rules look clean/i.test(t));
+          const fakeDk = '1999-01-01';
+          const prevSm = schedule.sm[fakeDk];
+          const prevAm = schedule.am1[fakeDk];
+          schedule.sm[fakeDk] = 'off';
+          schedule.am1[fakeDk] = 'off';
+          const leftoverKeep = typeof leftoverMustFixViolations === 'function'
+            ? leftoverMustFixViolations([
+              { severity: 'error', rule: 'coverage-close', detail: '8/10: No closer', day: dks[0] },
+              { severity: 'error', rule: 'five-day-week', detail: 'Alex Rivera: Week 1 has 4 scheduled days (target 5)' },
+              { severity: 'error', rule: 'coverage-close', detail: '1/1: No closer', day: fakeDk },
+              { severity: 'error', rule: 'no-clopen', detail: 'Sam Chen: Clopen on 8/15' },
+            ], roles).map((v) => v.rule)
+            : [];
+          if (prevSm == null) delete schedule.sm[fakeDk];
+          else schedule.sm[fakeDk] = prevSm;
+          if (prevAm == null) delete schedule.am1[fakeDk];
+          else schedule.am1[fakeDk] = prevAm;
           resolve({
             tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
             days: dks.length,
@@ -392,6 +417,11 @@ async function main() {
             coverOk: st.coverOk,
             coverText: cover ? (cover.textContent || '').trim() : '',
             toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
+            tips,
+            mustClean,
+            warnHard,
+            leftoverKeep,
+            mustFixCount: report.mustFixCount,
           });
         }, 2400);
       });
@@ -493,6 +523,45 @@ async function main() {
       badge: built.badge,
       mustTitles: built.mustTitles,
     }));
+
+    const leftoverLine = (built.warnHard || []).length > 0
+      || (built.warnSample || []).some((t) => /hard constraint\(s\) remain after \d+ repair passes/i.test(t));
+    if (built.mustClean && leftoverLine) {
+      fail('one-story-mustfix-vs-leftover', JSON.stringify({
+        tips: built.tips,
+        warnHard: built.warnHard,
+        mustFix: built.mustFix,
+        badge: built.badge,
+      }));
+    } else {
+      pass('one-story-mustfix-vs-leftover',
+        (built.mustClean ? 'must-fix clean' : 'must-fix open')
+        + (leftoverLine ? ' + leftover hard line' : ' · no leftover hard line'));
+    }
+
+    if (Array.isArray(built.leftoverKeep)
+      && built.leftoverKeep.includes('five-day-week')
+      && built.leftoverKeep.includes('coverage-close')
+      && !built.leftoverKeep.includes('no-clopen')
+      && built.leftoverKeep.filter((r) => r === 'coverage-close').length === 1) {
+      pass('real-mustfix-not-hidden', built.leftoverKeep.join(','));
+    } else {
+      fail('real-mustfix-not-hidden', JSON.stringify(built.leftoverKeep));
+    }
+
+    if (built.hardCount > 0 && built.mustFix === 0 && built.hardPts < 40) {
+      pass('score-formula-unchanged',
+        'Hard ' + built.hardPts + '/40 from hardErrorCount ' + built.hardCount
+        + ' · must-fix ' + built.mustFix);
+    } else if (built.hardCount === 0 && built.mustFix === 0) {
+      pass('score-formula-unchanged', 'no leftover thin-coverage hard count this seed');
+    } else {
+      fail('score-formula-unchanged', JSON.stringify({
+        hardCount: built.hardCount,
+        mustFix: built.mustFix,
+        hardPts: built.hardPts,
+      }));
+    }
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

@@ -2,7 +2,7 @@
  * v2.6.20: Ask-bar undo clears the field + already-applied Enter is a
  * no-op; one undo story (Ask apply on the board stack, Ask button labeled
  * Undo request); Quality / Needs work taps the first person+day hole.
- * Keeps 2.6.12–2.6.19 behavior; version lock follows 2.6.26.
+ * Keeps 2.6.12–2.6.19 behavior; version lock follows 2.6.27.
  * Run: node tests/test-v2620-ux.mjs
  */
 import { createServer } from 'http';
@@ -106,15 +106,15 @@ async function main() {
   console.log('\n=== v2.6.20 ask undo, one undo story, quality jump ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.26') pass('version.json', version.version);
+  if (version.version === '2.6.27') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.26'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.27'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.26'") && index.includes('id="app-version-label">v2.6.26')) {
+  if (index.includes("const APP_VERSION = '2.6.27'") && index.includes('id="app-version-label">v2.6.27')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

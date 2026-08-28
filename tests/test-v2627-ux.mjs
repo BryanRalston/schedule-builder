@@ -5,7 +5,7 @@
  * when locale is ES. Custom role titles stay as typed. Person names stay typed.
  * 2.6.26 review-drawer leftovers still Spanish.
  * Language switch does not wipe the board or burn a free build.
- * Keeps 2.6.12–2.6.26 behavior; version lock 2.6.28.
+ * Keeps 2.6.12–2.6.26 behavior; version lock 2.6.29.
  * Run: node tests/test-v2627-ux.mjs
  */
 import { createServer } from 'http';
@@ -92,15 +92,15 @@ async function main() {
   console.log('\n=== v2.6.27 leftover Spanish generated notes / toast / week layer ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.28') pass('version.json', version.version);
+  if (version.version === '2.6.29') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.28'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.29'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.28'") && index.includes('id="app-version-label">v2.6.28')) {
+  if (index.includes("const APP_VERSION = '2.6.29'") && index.includes('id="app-version-label">v2.6.29')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

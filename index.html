@@ -978,6 +978,19 @@ input[type="radio"] { accent-color: var(--gold); }
 }
 .wf-row.short .wf-status { color: var(--warn); }
 .wf-row.met .wf-status { color: var(--ok); }
+.wf-pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+.wf-pair .wf-row { flex: 1; min-width: 200px; }
+.wf-fix {
+  font-size: 0.78rem !important;
+  padding: 0.55rem 0.85rem !important;
+  white-space: nowrap;
+  align-self: center;
+}
 
 /* Fairness under schedule (compact neon card) */
 .fairness-under {
@@ -1733,9 +1746,9 @@ input[type="radio"] { accent-color: var(--gold); }
   inset: 0;
   pointer-events: auto;
 }
-#cell-menu-portal.is-open { z-index: 100; }
-#sched-edit-portal.is-open { z-index: 210; }
-#cell-inspector-portal.is-open { z-index: 230; }
+#cell-menu-portal.is-open { z-index: 10040; }
+#sched-edit-portal.is-open { z-index: 10050; }
+#cell-inspector-portal.is-open { z-index: 10060; }
 
 /* ========== SCHEDULE EDIT POPUP ========== */
 .sched-edit-overlay {
@@ -1795,6 +1808,23 @@ input[type="radio"] { accent-color: var(--gold); }
   background: var(--line);
   margin: 0.2rem 0.5rem;
 }
+.sched-edit-why,
+.cell-why-line {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--ink-3);
+  padding: 0.35rem 0.7rem 0.4rem;
+  white-space: normal;
+}
+.cell-inspector .cell-why-line {
+  padding: 0;
+  margin: 0 0 0.45rem;
+}
+.cell-why-line[data-why-kind="lock"],
+.cell-why-line[data-why-kind="coverage"] { color: var(--warn); }
+.cell-why-line[data-why-kind="clopen"],
+.cell-why-line[data-why-kind="weekend"] { color: #ffd78a; }
+.cell-why-line[data-why-kind="generated"] { color: var(--ink-4); }
 
 /* Clickable shift cells in generated schedule */
 .week-table tbody td.shift-editable {
@@ -4479,6 +4509,14 @@ html.view-locked #post-gen-strip { top: 2rem; }
   background: rgba(255,255,255,0.06); border: 1px solid var(--line);
   color: var(--ink-2); font-weight: 600; white-space: nowrap;
 }
+button.pgs-chip {
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+button.pgs-chip:hover {
+  filter: brightness(1.12);
+}
 .pgs-chip.ok { border-color: rgba(61,222,140,0.35); color: #7dffb8; background: rgba(61,222,140,0.1); }
 .pgs-chip.warn { border-color: rgba(255,200,87,0.35); color: #ffd78a; background: rgba(255,200,87,0.1); }
 .pgs-chip.bad { border-color: rgba(255,92,122,0.35); color: #ffb0c0; background: rgba(255,92,122,0.1); }
@@ -4534,6 +4572,13 @@ html.view-locked #post-gen-strip { top: 2rem; }
   font-size: 0.8rem !important; padding: 0.35rem 0.85rem !important; min-height: 36px !important;
 }
 .rpb-hint { margin: 0.35rem 0 0; font-size: 0.72rem; }
+.request-board-hint {
+  margin: 0.4rem 0 0.55rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #ffc857;
+}
+.request-board-hint[hidden] { display: none !important; }
 .rpb-confirm {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.55rem;
   margin-top: 0.4rem; font-size: 0.8rem; color: var(--ink-2);
@@ -4892,11 +4937,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="view-lock-banner no-print" id="view-lock-banner" role="status">View only — schedule board</div>
 <div id="post-gen-strip" class="no-print" role="region" aria-label="Post-generate review" hidden>
   <span class="pgs-title">Review</span>
-  <span class="pgs-chip" id="pgs-cover">Coverage</span>
-  <span class="pgs-chip" id="pgs-clopens">Clopens</span>
-  <span class="pgs-chip" id="pgs-am-close">AM closes</span>
-  <span class="pgs-chip" id="pgs-we">WE offs</span>
-  <span class="pgs-chip" id="pgs-fair">Fairness</span>
+  <button type="button" class="pgs-chip" id="pgs-cover" onclick="jumpToReviewChip('cover')">Coverage</button>
+  <button type="button" class="pgs-chip" id="pgs-clopens" onclick="jumpToReviewChip('clopen')">Clopens</button>
+  <button type="button" class="pgs-chip" id="pgs-am-close" onclick="jumpToReviewChip('am-close')">AM closes</button>
+  <button type="button" class="pgs-chip" id="pgs-we" onclick="jumpToReviewChip('we')">WE offs</button>
+  <button type="button" class="pgs-chip" id="pgs-fair" onclick="jumpToReviewChip('fair')">Fairness</button>
   <div class="pgs-actions">
     <button type="button" class="pgs-primary" id="pgs-primary-cta" onclick="jumpToIssuesPanel()">Review issues</button>
     <button type="button" class="btn-secondary" onclick="jumpToFairnessStrip()">Fairness</button>
@@ -5151,6 +5196,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <div class="input-tabs" id="input-tabs"></div>
       <div id="input-calendars"></div>
       <p class="text-muted mt-1">Paint mode: drag across days. Or click a day for the full menu.</p>
+      <p id="request-board-hint" class="request-board-hint" hidden>Rebuild to apply — painted requests do not change the board until you Rebuild.</p>
     </div>
   </div>
       <div class="tab-footer-nav">
@@ -5342,7 +5388,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.17</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.18</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -5529,6 +5575,7 @@ function switchTab(name) {
   // Refresh dynamic bits when entering tabs
   if (name === 'requests') {
     try { buildInputTabs(); buildInputCalendar(activeTab); } catch(e) {}
+    try { if (typeof refreshRequestBoardHint === 'function') refreshRequestBoardHint(); } catch(eHint) {}
   }
   if (name === 'rules') {
     try { renderPreferencesUI(); renderRoleRulesUI(); } catch(e) {}
@@ -7027,18 +7074,29 @@ function isNamedKeyCarrier(kc) {
   return !!(String(n || '').trim());
 }
 
+function isNamedAssistant(i) {
+  const el = document.getElementById('name-am' + i);
+  const n = el ? el.value : '';
+  if (typeof isPlaceholderManagerName === 'function') return !isPlaceholderManagerName(n);
+  return !!(String(n || '').trim());
+}
+
 function getRoles() {
-  // Returns ['sm', 'am1', ..., 'amN'] plus named KCs with manager-mode on
+  // SM + named AMs + named KCs with manager-mode on. Unnamed AM2 stays off the board.
   const roles = ['sm'];
-  for (let i = 1; i <= amCount; i++) roles.push('am' + i);
+  for (let i = 1; i <= amCount; i++) {
+    if (isNamedAssistant(i)) roles.push('am' + i);
+  }
   kcList.forEach(kc => { if (kc.asManager && isNamedKeyCarrier(kc)) roles.push(kc.id); });
   return roles;
 }
 
 function getAMs() {
-  // Returns just the AM IDs
+  // Named AM IDs only — placeholders like AM2 are not scheduled
   const ams = [];
-  for (let i = 1; i <= amCount; i++) ams.push('am' + i);
+  for (let i = 1; i <= amCount; i++) {
+    if (isNamedAssistant(i)) ams.push('am' + i);
+  }
   return ams;
 }
 
@@ -7060,10 +7118,20 @@ function getAllWithKC() {
 }
 
 function getAllPersonIds() {
-  // Every person ID (for inputs, etc.)
+  // Every person ID (for inputs/storage). Request tabs use getRequestTabIds.
   const ids = ['sm'];
   for (let i = 1; i <= amCount; i++) ids.push('am' + i);
   kcList.forEach(kc => ids.push(kc.id));
+  return ids;
+}
+
+function getRequestTabIds() {
+  // Only people with a real name — same hide rule as unnamed KC / phantom AM2
+  const ids = ['sm'];
+  for (let i = 1; i <= amCount; i++) {
+    if (isNamedAssistant(i)) ids.push('am' + i);
+  }
+  kcList.forEach(kc => { if (isNamedKeyCarrier(kc)) ids.push(kc.id); });
   return ids;
 }
 
@@ -7521,7 +7589,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.17';
+const APP_VERSION = '2.6.18';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8534,33 +8602,48 @@ function buildPostingIssues(genReport, ROLES, warnings) {
   if (genReport) {
     const hard = countMustFixErrors(genReport);
     if (hard > 0) {
+      const hole = typeof findFirstCoverageHole === 'function' ? findFirstCoverageHole() : null;
       issues.push({
         sev: 'must',
         title: hard + ' must-fix rule' + (hard === 1 ? '' : 's') + ' still open',
         meta: 'Coverage, hours, or role constraints — fix before you post.',
-        target: 'summary',
+        target: hole ? 'grid' : 'summary',
+        role: hole && hole.role,
+        dk: hole && hole.dk,
       });
     }
     const cl = genReport.totalClopens || 0;
     if (cl > 0 && genReport.prefs && genReport.prefs.avoidClopening) {
+      let clRole = null, clDk = null;
+      try {
+        const roles = typeof getRoles === 'function' ? getRoles() : ROLES;
+        const list = typeof findClopens === 'function' ? findClopens(roles) : [];
+        if (list[0]) {
+          clRole = list[0].role;
+          clDk = list[0].openDk;
+        }
+      } catch (e) {}
       issues.push({
         sev: 'review',
         title: cl + ' clopen' + (cl === 1 ? '' : 's') + ' on the board',
         meta: 'Preference: close followed by open the next morning. Review before you post.',
         target: 'grid',
-        role: null,
+        role: clRole,
+        dk: clDk,
       });
     }
     ROLES.forEach((r) => {
       const target = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(r) : 2;
       const got = (genReport.weekendOffs && genReport.weekendOffs[r]) || 0;
       if (got < target) {
+        const weDk = typeof findWeekendWorkDay === 'function' ? findWeekendWorkDay(r) : null;
         issues.push({
           sev: 'review',
           title: nameOf(r) + ' is short on weekend offs',
           meta: got + ' of ' + target + ' weekend days off this period.',
           target: 'grid',
           role: r,
+          dk: weDk,
         });
       }
     });
@@ -8651,29 +8734,15 @@ function renderPostingBoard(issues, q) {
 
 function jumpToPostingIssue(idx) {
   const data = (window._postingIssues && window._postingIssues[idx]) || {};
-  switchTab('schedule');
-  if (data.target === 'summary' || !data.role) {
-    setTimeout(() => {
-      document.getElementById('summary-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      document.getElementById('posting-board')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 40);
+  if (data.role) {
+    jumpToScheduleCell(data.role, data.dk || null);
     return;
   }
+  switchTab('schedule');
+  if (typeof openReviewSheet === 'function') openReviewSheet();
   setTimeout(() => {
-    let el = document.querySelector(
-      '#schedule-grid tr[data-role="' + data.role + '"] td.shift-editable'
-    );
-    if (!el) {
-      el = document.querySelector('#schedule-grid td.shift-editable[data-role="' + data.role + '"]');
-    }
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('cell-flash');
-      setTimeout(() => el.classList.remove('cell-flash'), 1500);
-    } else {
-      document.getElementById('schedule-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 50);
+    document.getElementById('posting-board')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 40);
 }
 
 function scoreRingSVG(score) {
@@ -9800,8 +9869,9 @@ function removeKC() {
 function rebuildAfterConfigChange() {
   // Ensure inputs exist for all current roles
   getAllPersonIds().forEach(r => { if (!inputs[r]) inputs[r] = {}; });
-  // If the active tab no longer exists, switch to sm
-  if (!getAllPersonIds().includes(activeTab)) activeTab = 'sm';
+  // If the active tab no longer exists or is an unnamed placeholder, switch to sm
+  const tabIds = typeof getRequestTabIds === 'function' ? getRequestTabIds() : getAllPersonIds();
+  if (!tabIds.includes(activeTab)) activeTab = 'sm';
   buildInputTabs();
   buildInputCalendar(activeTab);
   // Clear generated schedule since config changed
@@ -9914,10 +9984,13 @@ function buildInputTabs() {
   const names = getManagerNames();
   const container = document.getElementById('input-tabs');
   container.innerHTML = '';
-  getAllPersonIds().forEach(r => {
+  const ids = typeof getRequestTabIds === 'function' ? getRequestTabIds() : getAllPersonIds();
+  if (!ids.includes(activeTab)) activeTab = 'sm';
+  ids.forEach(r => {
     const btn = document.createElement('button');
     btn.className = 'input-tab' + (r === activeTab ? ' active' : '');
     btn.textContent = names[r] || r.toUpperCase();
+    btn.dataset.role = r;
     btn.onclick = () => { activeTab = r; buildInputTabs(); buildInputCalendar(r); };
     container.appendChild(btn);
   });
@@ -10339,6 +10412,7 @@ function generateSchedule(opts) {
       }
       updateReadyChecklist();
       updateLicenseBadge();
+      try { if (typeof refreshRequestBoardHint === 'function') refreshRequestBoardHint(); } catch (eHint) {}
     }
   }, 30);
 }
@@ -13846,27 +13920,7 @@ function revalidateAfterManualEdit(ROLES, ALL_KC) {
 function jumpToClopen(idx) {
   const c = (window._clopenList && window._clopenList[idx]) || null;
   if (!c) return;
-  switchTab('schedule');
-  setTimeout(() => {
-    const el =
-      document.querySelector(
-        '#schedule-grid td.shift-editable[data-role="' + c.role + '"][data-dk="' + c.openDk + '"]'
-      ) ||
-      document.querySelector(
-        '#schedule-grid tr[data-role="' + c.role + '"] td.shift-editable[data-dk="' + c.openDk + '"]'
-      ) ||
-      document.querySelector(
-        '#schedule-grid .mw-person[data-role="' + c.role + '"][data-dk="' + c.openDk + '"]'
-      );
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('cell-flash');
-      setTimeout(() => el.classList.remove('cell-flash'), 1500);
-    } else {
-      const wrap = document.getElementById('week-wrap-' + (c.weekIdx || 0));
-      if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, 50);
+  jumpToScheduleCell(c.role, c.openDk);
 }
 
 /** Who is short on weekend days off this period. */
@@ -13918,6 +13972,8 @@ function renderWeekendFairnessBoard(ROLES) {
   html +=
     '<div class="wf-row wf-head"><span>Manager</span><span>Off</span><span>Goal</span><span></span></div>';
   rows.forEach((r) => {
+    const fix = (!r.met && typeof suggestWeekendOffFix === 'function') ? suggestWeekendOffFix(r.role) : null;
+    html += fix ? '<div class="wf-pair">' : '';
     html +=
       '<button type="button" class="wf-row' +
       (r.met ? ' met' : ' short') +
@@ -13936,24 +13992,241 @@ function renderWeekendFairnessBoard(ROLES) {
       '<span class="wf-status">' +
       (r.met ? 'Met' : 'Short ' + r.short) +
       '</span></button>';
+    if (fix) {
+      html +=
+        '<button type="button" class="wf-fix btn-secondary" onclick="applyWeekendOffFix(\'' +
+        r.role +
+        '\')">' +
+        esc(fix.label) +
+        '</button></div>';
+    }
   });
   html += '</div></div>';
   return html;
 }
 
 function jumpToRoleOnGrid(role) {
-  switchTab('schedule');
-  setTimeout(() => {
-    const el =
-      document.querySelector('#schedule-grid tr[data-role="' + role + '"] td.shift-editable') ||
-      document.querySelector('#schedule-grid .mw-person[data-role="' + role + '"]') ||
-      document.querySelector('#schedule-grid tr[data-role="' + role + '"] .name-col');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('cell-flash');
-      setTimeout(() => el.classList.remove('cell-flash'), 1500);
+  const dk = typeof findWeekendWorkDay === 'function' ? findWeekendWorkDay(role) : null;
+  jumpToScheduleCell(role, dk);
+}
+
+/* ====================================================================
+   v2.6.18 — tap-to-fix review chips + one-line why this cell
+   Rule-based, on-device. Auto-fixes stay buttons. No zero-clopen claim.
+   ==================================================================== */
+
+function findScheduleCellEl(role, dk) {
+  if (!role) return null;
+  const grid = document.getElementById('schedule-grid');
+  if (!grid) return null;
+  if (dk) {
+    return (
+      grid.querySelector('td.shift-editable[data-role="' + role + '"][data-dk="' + dk + '"]') ||
+      grid.querySelector('tr[data-role="' + role + '"] td.shift-editable[data-dk="' + dk + '"]') ||
+      grid.querySelector('.mw-person[data-role="' + role + '"][data-dk="' + dk + '"]') ||
+      grid.querySelector('.month-chip[data-role="' + role + '"][data-dk="' + dk + '"]')
+    );
+  }
+  return (
+    grid.querySelector('tr[data-role="' + role + '"] td.shift-editable') ||
+    grid.querySelector('td.shift-editable[data-role="' + role + '"]') ||
+    grid.querySelector('.mw-person[data-role="' + role + '"]')
+  );
+}
+
+function flashScheduleCell(el) {
+  if (!el) return false;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.add('cell-flash');
+  setTimeout(function () { el.classList.remove('cell-flash'); }, 1500);
+  return true;
+}
+
+function jumpToScheduleCell(role, dk) {
+  if (typeof closeReviewSheet === 'function') closeReviewSheet();
+  if (typeof switchTab === 'function') switchTab('schedule');
+  setTimeout(function () {
+    const el = findScheduleCellEl(role, dk);
+    if (!flashScheduleCell(el)) {
+      const grid = document.getElementById('schedule-grid');
+      if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, 50);
+  return { role: role || null, dk: dk || null };
+}
+
+function findWeekendWorkDay(role) {
+  if (!role || !periodDates || !periodDates.length) return null;
+  for (let i = 0; i < periodDates.length; i++) {
+    const d = periodDates[i];
+    if (typeof isWeekend === 'function' && !isWeekend(d)) continue;
+    const dk = typeof dateKey === 'function' ? dateKey(d) : null;
+    if (!dk) continue;
+    const s = schedule[role] && schedule[role][dk];
+    if (typeof isWork === 'function' && isWork(s)) return dk;
+  }
+  return null;
+}
+
+function findFirstCoverageHole() {
+  if (!periodDates || !periodDates.length) return null;
+  const ids = typeof getAllWithKC === 'function' ? getAllWithKC() : [];
+  for (let i = 0; i < periodDates.length; i++) {
+    const dk = dateKey(periodDates[i]);
+    let opens = 0, closes = 0, sample = null;
+    ids.forEach(function (r) {
+      const v = schedule[r] && schedule[r][dk];
+      if (typeof isOpen === 'function' && isOpen(v)) { opens++; sample = sample || r; }
+      if ((typeof isClose === 'function' && isClose(v)) || v === 'kc-close') { closes++; sample = sample || r; }
+      if (!sample && v) sample = r;
+    });
+    if (opens < 1 || closes < 1) {
+      return { role: sample || (ids[0] || null), dk: dk };
+    }
+  }
+  return null;
+}
+
+function suggestWeekendOffFix(role) {
+  const dk = findWeekendWorkDay(role);
+  if (!dk) return null;
+  if (typeof isCellLocked === 'function' && isCellLocked(role, dk)) return null;
+  const s = schedule[role] && schedule[role][dk];
+  if (typeof isWork !== 'function' || !isWork(s)) return null;
+  const ids = typeof getAllWithKC === 'function' ? getAllWithKC() : [];
+  let opens = 0, closes = 0;
+  ids.forEach(function (r) {
+    const v = r === role ? null : (schedule[r] && schedule[r][dk]);
+    if (typeof isOpen === 'function' && isOpen(v)) opens++;
+    if ((typeof isClose === 'function' && isClose(v)) || v === 'kc-close') closes++;
+  });
+  if (opens < 1 || closes < 1) return null;
+  let label = 'Give weekend off';
+  try {
+    const d = typeof parseDateKeyLocal === 'function' ? parseDateKeyLocal(dk) : null;
+    if (d && !isNaN(d.getTime())) {
+      label = 'Give ' + d.toLocaleDateString(undefined, { weekday: 'short' }) + ' off';
+    }
+  } catch (e) {}
+  return { role: role, dk: dk, label: label };
+}
+
+function applyWeekendOffFix(role) {
+  if (window._viewLocked) return;
+  const fix = suggestWeekendOffFix(role);
+  if (!fix || !schedule[role]) {
+    showToast('No automatic weekend-off that keeps coverage.', 'warn');
+    return;
+  }
+  if (typeof pushSchedUndo === 'function') pushSchedUndo(role, fix.dk, schedule[role][fix.dk]);
+  schedule[role][fix.dk] = 'off';
+  const names = typeof getManagerNames === 'function' ? getManagerNames() : {};
+  showToast((names[role] || role) + ': ' + fix.label + '.', 'success');
+  revalidateAfterManualEdit(getRoles(), getAllWithKC());
+}
+
+function explainCellWhy(role, dk) {
+  const shift = schedule[role] && schedule[role][dk];
+  const lock = (typeof inputs !== 'undefined' && inputs[role] && inputs[role][dk]) || null;
+  const lockKind = (lock === 'pto' || lock === 'rto' || lock === 'loa')
+    ? lock
+    : (shift === 'pto' || shift === 'rto' || shift === 'loa') ? shift : null;
+  if (lockKind) {
+    return {
+      kind: 'lock',
+      text: String(lockKind).toUpperCase() + ' lock — request stays on this day.'
+    };
+  }
+
+  let isClopenCell = false;
+  try {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const list = typeof findClopens === 'function' ? findClopens(roles) : (window._clopenList || []);
+    isClopenCell = !!(list && list.some(function (c) {
+      return c.role === role && (c.closeDk === dk || c.openDk === dk);
+    }));
+  } catch (e) {}
+  if (isClopenCell) {
+    return {
+      kind: 'clopen',
+      text: 'Clopen pair — close then open (preference to review).'
+    };
+  }
+
+  const ids = typeof getAllWithKC === 'function' ? getAllWithKC() : [];
+  let opens = 0, closes = 0;
+  ids.forEach(function (r) {
+    const v = schedule[r] && schedule[r][dk];
+    if (typeof isOpen === 'function' && isOpen(v)) opens++;
+    if ((typeof isClose === 'function' && isClose(v)) || v === 'kc-close') closes++;
+  });
+  if (opens < 1) {
+    return { kind: 'coverage', text: 'Coverage hole — this day has no opener.' };
+  }
+  if (closes < 1) {
+    return { kind: 'coverage', text: 'Coverage hole — this day has no closer.' };
+  }
+  if (typeof isOpen === 'function' && isOpen(shift) && opens === 1) {
+    return { kind: 'coverage', text: 'Coverage hole — only opener this day.' };
+  }
+  if (typeof isClose === 'function' && isClose(shift) && closes === 1) {
+    return { kind: 'coverage', text: 'Coverage hole — only closer this day.' };
+  }
+
+  let weekend = false;
+  try {
+    const d = typeof parseDateKeyLocal === 'function' ? parseDateKeyLocal(dk) : null;
+    weekend = !!(d && !isNaN(d.getTime()) && typeof isWeekend === 'function' && isWeekend(d));
+  } catch (e) {}
+  if (weekend) {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const rows = typeof buildWeekendFairness === 'function' ? buildWeekendFairness(roles) : [];
+    const row = rows.find(function (r) { return r.role === role; });
+    const isOffish = shift === 'off' || shift === 'rto' || shift === 'pto' || shift === 'loa';
+    if (row && row.short > 0 && typeof isWork === 'function' && isWork(shift)) {
+      return {
+        kind: 'weekend',
+        text: 'Weekend work — short of weekend-off target (' + row.got + ' of ' + row.target + ').'
+      };
+    }
+    if (isOffish) {
+      return {
+        kind: 'weekend',
+        text: 'Weekend off — counts toward this period\'s target' +
+          (row ? ' (' + row.got + ' of ' + row.target + ')' : '') + '.'
+      };
+    }
+  }
+
+  return { kind: 'generated', text: 'This is the generated shift.' };
+}
+
+function jumpToReviewChip(kind) {
+  if (kind === 'clopen') {
+    const list = window._clopenList || [];
+    if (list[0]) {
+      jumpToScheduleCell(list[0].role, list[0].openDk);
+      return;
+    }
+  } else if (kind === 'cover') {
+    const hole = findFirstCoverageHole();
+    if (hole) {
+      jumpToScheduleCell(hole.role, hole.dk);
+      return;
+    }
+  } else if (kind === 'we' || kind === 'weekend') {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const rows = typeof buildWeekendFairness === 'function' ? buildWeekendFairness(roles) : [];
+    const short = rows.find(function (r) { return r.short > 0; });
+    if (short) {
+      jumpToScheduleCell(short.role, findWeekendWorkDay(short.role));
+      return;
+    }
+  } else if (kind === 'fair' || kind === 'am-close') {
+    if (typeof jumpToFairnessStrip === 'function') jumpToFairnessStrip();
+    return;
+  }
+  if (typeof jumpToIssuesPanel === 'function') jumpToIssuesPanel();
 }
 
 // ── Render Print Schedule (posting sheet) ──
@@ -14755,10 +15028,12 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
     return;
   }
   const options = isKCRole ? getKCEditOptions() : getManagerEditOptions();
+  const why = typeof explainCellWhy === 'function' ? explainCellWhy(role, dk) : { kind: 'generated', text: 'This is the generated shift.' };
 
   const portal = document.getElementById('sched-edit-portal');
   let html = '<div class="sched-edit-overlay" onpointerdown="schedEditStop(event); closeSchedEditMenu();"></div>';
   html += `<div class="sched-edit-menu" style="top:${rect.bottom + 4}px;left:${rect.left}px" onpointerdown="event.stopPropagation();">`;
+  html += `<div class="sched-edit-why cell-why-line" data-why-kind="${esc(why.kind)}">${esc(why.text)}</div>`;
   html += `<button type="button" onpointerdown="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});" onclick="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});">`;
   html += `<span class="swatch" style="background:rgba(61,220,255,0.45)"></span><span class="sched-edit-label">Swap with…</span></button>`;
   html += `<div class="menu-divider"></div>`;
@@ -15233,7 +15508,7 @@ function openCellInspector(e, role, dk, weekIdx, isKCRole) {
       dayLab = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
     }
   } catch (err) {}
-  const cover = cellCoverageNote(role, dk);
+  const why = typeof explainCellWhy === 'function' ? explainCellWhy(role, dk) : { kind: 'generated', text: 'This is the generated shift.' };
   const listed = listSwapCandidates(role, dk);
   const wIdx = weekIdx == null ? 0 : weekIdx;
   const portal = document.getElementById('cell-inspector-portal');
@@ -15244,9 +15519,7 @@ function openCellInspector(e, role, dk, weekIdx, isKCRole) {
   html += '<div class="cell-insp-who">' + esc(name) + '</div>';
   html += '<div class="cell-insp-when">' + esc(dayLab) + '</div>';
   html += '<div class="cell-insp-shift">' + esc(shiftLab) + '</div>';
-  if (cover.text) {
-    html += '<p class="cell-insp-note' + (cover.only ? '' : ' ok') + '">' + esc(cover.text) + '</p>';
-  }
+  html += '<p class="cell-insp-note cell-why-line' + (why.kind === 'generated' ? ' ok' : '') + '" data-why-kind="' + esc(why.kind) + '">' + esc(why.text) + '</p>';
   html += '<div class="cell-insp-label">Swap with</div>';
   if (!listed.cands.length) {
     html += '<p class="cell-insp-empty">' + esc(listed.noneReason || 'No one else can take this.') + '</p>';
@@ -15622,6 +15895,7 @@ function persistManagerNames() {
     names.ams['am' + i] = el ? el.value : ('AM' + i);
   }
   localStorage.setItem('schedule_manager_names', JSON.stringify(names));
+  try { if (typeof buildInputTabs === 'function') buildInputTabs(); } catch (eTabs) {}
 }
 
 function restoreManagerNames() {
@@ -16986,6 +17260,7 @@ function applyRequestPhraseFromBar(inputId) {
     switchTab('requests');
   }
   showRequestPhraseResult(true, 'Applied: ' + parsed.confirm, true);
+  try { if (typeof refreshRequestBoardHint === 'function') refreshRequestBoardHint(); } catch (eHint) {}
   return parsed;
 }
 
@@ -17043,7 +17318,23 @@ function clearRequestPaintMode() {
   if (wasPainting) {
     try { if (typeof buildInputCalendar === 'function') buildInputCalendar(activeTab); } catch (e) {}
     try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
+    try { if (typeof refreshRequestBoardHint === 'function') refreshRequestBoardHint(); } catch (eHint) {}
   }
+}
+
+function hasLiveBuiltBoard() {
+  try {
+    return !!(schedule && Object.keys(schedule).some((r) => schedule[r] && Object.keys(schedule[r]).length > 0));
+  } catch (e) {
+    return false;
+  }
+}
+
+function refreshRequestBoardHint() {
+  const el = document.getElementById('request-board-hint');
+  if (!el) return;
+  if (hasLiveBuiltBoard()) el.removeAttribute('hidden');
+  else el.setAttribute('hidden', '');
 }
 
 function paintRequestCell(role, dk) {
@@ -17085,6 +17376,7 @@ function setupRequestPaintHandlers() {
     document.body.classList.remove('painting-requests');
     buildInputCalendar(activeTab);
     updateOpsHome();
+    try { if (typeof refreshRequestBoardHint === 'function') refreshRequestBoardHint(); } catch (eHint) {}
   };
   host.addEventListener('pointerup', endPaint);
   host.addEventListener('pointercancel', endPaint);

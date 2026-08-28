@@ -3817,6 +3817,8 @@ html.view-locked .no-lock-hide,
 html.view-locked #btn-generate,
 html.view-locked .generate-actions,
 html.view-locked #request-paint-toolbar,
+html.view-locked #request-phrase-bar,
+html.view-locked #setup-request-phrase-bar,
 html.view-locked #btn-undo-edit,
 html.view-locked #btn-redo-edit { display: none !important; }
 html.view-locked .shift-editable { cursor: default !important; pointer-events: none; }
@@ -4504,6 +4506,42 @@ html.view-locked #post-gen-strip { top: 2rem; }
 }
 .ops-home-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 
+#request-phrase-bar,
+#setup-request-phrase-bar {
+  margin-bottom: 0.65rem; padding: 0.55rem 0.7rem; border-radius: 10px;
+  border: 1px solid rgba(61,220,255,0.22);
+  background: rgba(8,14,28,0.72);
+}
+.rpb-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+}
+.rpb-label {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ink-4); font-family: var(--mono);
+}
+#request-phrase-input {
+  flex: 1 1 12rem; min-width: 0; min-height: 36px;
+  padding: 0.4rem 0.65rem; border-radius: 8px;
+  border: 1px solid var(--line); background: rgba(255,255,255,0.04);
+  color: var(--ink); font: inherit; font-size: 0.9rem;
+}
+#request-phrase-input::placeholder { color: var(--ink-4); }
+#request-phrase-input:focus {
+  outline: none; border-color: rgba(61,220,255,0.5);
+  box-shadow: 0 0 0 3px rgba(61,220,255,0.12);
+}
+.rpb-apply {
+  font-size: 0.8rem !important; padding: 0.35rem 0.85rem !important; min-height: 36px !important;
+}
+.rpb-hint { margin: 0.35rem 0 0; font-size: 0.72rem; }
+.rpb-confirm {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.55rem;
+  margin-top: 0.4rem; font-size: 0.8rem; color: var(--ink-2);
+}
+.rpb-confirm[hidden] { display: none !important; }
+.rpb-confirm.is-error { color: #ffb0c0; }
+.rpb-confirm.is-ok { color: #7dffb8; }
+
 #request-paint-toolbar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem;
   margin-bottom: 0.65rem; padding: 0.5rem 0.65rem; border-radius: 10px;
@@ -4659,6 +4697,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 }
 @media print {
   #post-gen-strip, #cmd-palette, #ops-home, #request-paint-toolbar,
+  #request-phrase-bar, #setup-request-phrase-bar,
   #schedule-diff-panel, #smart-suggestions, .view-lock-banner,
   .local-status-pill, .btn-cmdk, #backup-nudge, .cell-clopen-mark { display: none !important; }
   .day-hours { color: #333 !important; }
@@ -5054,6 +5093,17 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </div>
     </div>
   </div>
+      <div id="setup-request-phrase-bar" class="no-print setup-more-item">
+        <div class="rpb-row">
+          <label class="rpb-label" for="setup-request-phrase-input">Ask</label>
+          <input type="text" id="setup-request-phrase-input" placeholder="Casey off Thu–Fri"
+            aria-label="Type a request such as Casey off Thu–Fri"
+            autocomplete="off" spellcheck="false"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();applyRequestPhraseFromBar('setup-request-phrase-input');}">
+          <button type="button" class="btn-primary rpb-apply" id="btn-setup-apply-request-phrase" onclick="applyRequestPhraseFromBar('setup-request-phrase-input')">Apply</button>
+        </div>
+        <p class="rpb-hint text-muted">Same on-device requests as the Requests tab. Paint stays the fallback.</p>
+      </div>
       <div class="setup-more-toggle no-print" id="setup-more-toggle">
         <button type="button" class="btn-outline" id="btn-more-setup" onclick="toggleMoreSetup()" aria-expanded="false" aria-controls="setup-body">More setup</button>
       </div>
@@ -5066,10 +5116,25 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <!-- TAB: REQUESTS -->
     <div class="tab-panel" id="tab-requests" role="tabpanel" aria-labelledby="tabbtn-requests">
       <div class="tab-panel-title">Shift requests & time off</div>
-      <div class="tab-panel-desc">Lock PTO, RTO, LOA, and preferred shifts. The generator treats these as hard constraints.</div>
+      <div class="tab-panel-desc">Lock PTO, RTO, LOA, and preferred shifts. Type a request below, or paint / tap a day. The generator treats these as hard constraints.</div>
 <!-- INPUT SECTION -->
   <div class="section no-print" id="input-section" style="border:none">
     <div class="section-body" id="input-body" style="padding:0">
+      <div id="request-phrase-bar" class="no-print" data-tour="request-phrase">
+        <div class="rpb-row">
+          <label class="rpb-label" for="request-phrase-input">Ask</label>
+          <input type="text" id="request-phrase-input" placeholder="Casey off Thu–Fri"
+            aria-label="Type a request such as Casey off Thu–Fri"
+            autocomplete="off" spellcheck="false"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();applyRequestPhraseFromBar();}">
+          <button type="button" class="btn-primary rpb-apply" id="btn-apply-request-phrase" onclick="applyRequestPhraseFromBar()">Apply</button>
+        </div>
+        <p class="rpb-hint text-muted" id="request-phrase-hint">Runs on this device. Paint and the cell menu still work if this does not read it.</p>
+        <div id="request-phrase-confirm" class="rpb-confirm" hidden>
+          <span id="request-phrase-confirm-text"></span>
+          <button type="button" class="rpt-chip" id="btn-undo-request-phrase" onclick="undoRequestPhraseApply()">Undo</button>
+        </div>
+      </div>
       <div id="request-paint-toolbar" class="no-print" role="toolbar" aria-label="Request paint mode" data-tour="request-paint">
         <span class="rpt-label">Paint</span>
         <button type="button" class="rpt-chip" data-paint="off" onclick="setRequestPaintMode('off')">Day off</button>
@@ -5277,7 +5342,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.16</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.17</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7456,7 +7521,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.16';
+const APP_VERSION = '2.6.17';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -16704,6 +16769,231 @@ function startNextPeriodSameTeam() {
   if (currentPeriod && periodDates && periodDates.length) switchTab('requests');
   else switchTab('setup');
   showToast('Paint next period RTO/PTO, then Build.', 'success');
+}
+
+/* ====================================================================
+   v2.6.17 — on-device request phrase bar (no network, no invented people)
+   ==================================================================== */
+
+const REQUEST_PHRASE_DAY_ALIASES = {
+  sun: 0, sunday: 0,
+  mon: 1, monday: 1,
+  tue: 2, tues: 2, tuesday: 2,
+  wed: 3, wednesday: 3,
+  thu: 4, thur: 4, thurs: 4, thursday: 4,
+  fri: 5, friday: 5,
+  sat: 6, saturday: 6
+};
+
+function rosterPeopleForPhrase() {
+  const names = typeof getManagerNames === 'function' ? getManagerNames() : {};
+  const ids = typeof getAllPersonIds === 'function' ? getAllPersonIds() : [];
+  return ids.map((id) => {
+    const full = String(names[id] || '').replace(/\s+/g, ' ').trim();
+    const first = full.split(' ')[0] || '';
+    return { id: id, full: full, first: first };
+  }).filter((p) => p.full);
+}
+
+function matchRosterPersonForPhrase(query, people) {
+  const q = String(query || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  if (!q) return { status: 'missing' };
+  const hits = (people || []).filter((p) => {
+    const full = p.full.toLowerCase();
+    const first = p.first.toLowerCase();
+    if (full === q || first === q) return true;
+    if (q.indexOf(' ') !== -1 && full.indexOf(q) === 0) return true;
+    return false;
+  });
+  if (!hits.length) return { status: 'none', query: query };
+  if (hits.length > 1) return { status: 'ambiguous', query: query, hits: hits };
+  return { status: 'ok', person: hits[0] };
+}
+
+function expandDowRange(fromDow, toDow) {
+  const out = [];
+  let d = fromDow;
+  out.push(d);
+  let guard = 0;
+  while (d !== toDow && guard < 7) {
+    d = (d + 1) % 7;
+    out.push(d);
+    guard++;
+  }
+  return out;
+}
+
+function parseRequestPhraseDays(working) {
+  const dayRe = /\b(sun(?:day)?|mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:r(?:s(?:day)?)?)?|fri(?:day)?|sat(?:urday)?)\b/gi;
+  const hits = [];
+  let m;
+  while ((m = dayRe.exec(working))) {
+    const alias = m[1].toLowerCase();
+    const dow = REQUEST_PHRASE_DAY_ALIASES[alias];
+    if (dow == null) continue;
+    hits.push({ alias: alias, dow: dow, index: m.index, end: m.index + m[0].length, raw: m[0] });
+  }
+  if (!hits.length) return { ok: false, working: working };
+  let dows;
+  let label;
+  if (hits.length >= 2) {
+    const between = working.slice(hits[0].end, hits[1].index);
+    if (/^\s*[-–—]\s*$/.test(between) || /^\s+(to|through|thru)\s+$/i.test(between)) {
+      dows = expandDowRange(hits[0].dow, hits[1].dow);
+      label = hits[0].raw + '–' + hits[1].raw;
+    } else {
+      dows = hits.map((h) => h.dow);
+      label = hits.map((h) => h.raw).join(', ');
+    }
+  } else {
+    dows = [hits[0].dow];
+    label = hits[0].raw;
+  }
+  const uniq = [];
+  dows.forEach((d) => { if (uniq.indexOf(d) === -1) uniq.push(d); });
+  let stripped = working;
+  hits.slice().reverse().forEach((h) => {
+    stripped = stripped.slice(0, h.index) + ' ' + stripped.slice(h.end);
+  });
+  stripped = stripped.replace(/\b(to|through|thru)\b/gi, ' ');
+  stripped = stripped.replace(/[-–—]/g, ' ').replace(/\s+/g, ' ').trim();
+  return { ok: true, dows: uniq, label: label, working: stripped };
+}
+
+function parseRequestPhraseAction(working) {
+  const rules = [
+    { re: /\bno\s*closes?\b|\bdon'?t\s+close\b|\bcannot\s+close\b/i, lock: 'off', kind: 'no-close', label: 'Off (no close)' },
+    { re: /\bno\s*opens?\b|\bdon'?t\s+open\b|\bcannot\s+open\b/i, lock: 'off', kind: 'no-open', label: 'Off (no open)' },
+    { re: /\bprefer(?:s|red)?\s+close\b|\bwants?\s+close\b/i, lock: 'close', kind: 'prefer-close', label: 'Close' },
+    { re: /\bpto\b|\bvacation\b/i, lock: 'pto', kind: 'pto', label: 'PTO' },
+    { re: /\brto\b/i, lock: 'rto', kind: 'rto', label: 'RTO' },
+    { re: /\bday\s+off\b|\btime\s+off\b|\boff\b/i, lock: 'off', kind: 'off', label: 'Off' }
+  ];
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i];
+    if (!rule.re.test(working)) continue;
+    const stripped = working.replace(rule.re, ' ').replace(/\s+/g, ' ').trim();
+    return { ok: true, lock: rule.lock, kind: rule.kind, label: rule.label, working: stripped };
+  }
+  return { ok: false, working: working };
+}
+
+function dateKeysForDows(dows, dates) {
+  const out = [];
+  (dates || []).forEach((d) => {
+    const dt = d instanceof Date ? d : new Date(d);
+    if (isNaN(dt.getTime())) return;
+    if (dows.indexOf(dt.getDay()) === -1) return;
+    const dk = typeof dateKey === 'function' ? dateKey(dt) : dt.toISOString().slice(0, 10);
+    if (out.indexOf(dk) === -1) out.push(dk);
+  });
+  return out;
+}
+
+function parseRequestPhrase(text, opts) {
+  opts = opts || {};
+  const raw = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!raw) {
+    return { ok: false, reason: 'empty', message: 'Type a request like “Casey off Thu–Fri”, or paint the calendar.' };
+  }
+  const people = opts.people || rosterPeopleForPhrase();
+  const dates = opts.dates || (typeof periodDates !== 'undefined' ? periodDates : []);
+  let working = raw.replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
+
+  const action = parseRequestPhraseAction(working);
+  if (!action.ok) {
+    return { ok: false, reason: 'action', message: 'Couldn’t read that. Try “Casey off Thu–Fri” or paint the calendar.' };
+  }
+  working = action.working;
+
+  const days = parseRequestPhraseDays(working);
+  if (!days.ok) {
+    return { ok: false, reason: 'days', message: 'Which day? Try Thu–Fri or Saturday, or paint the calendar.' };
+  }
+  working = days.working.replace(/\b(this|next|on|for|the|is|a)\b/gi, ' ').replace(/\s+/g, ' ').trim();
+
+  const matched = matchRosterPersonForPhrase(working, people);
+  if (matched.status === 'missing') {
+    return { ok: false, reason: 'person', message: 'Name someone on this team, or paint the calendar.' };
+  }
+  if (matched.status === 'none') {
+    return { ok: false, reason: 'unknown-person', message: 'No one named “' + working + '” on this team. Paint the calendar or tap a day.' };
+  }
+  if (matched.status === 'ambiguous') {
+    return { ok: false, reason: 'ambiguous', message: 'Two people match “' + working + '”. Use a full name or paint the calendar.' };
+  }
+  if (!dates || !dates.length) {
+    return { ok: false, reason: 'period', message: 'Load a period first, then try again.' };
+  }
+  const dateKeys = dateKeysForDows(days.dows, dates);
+  if (!dateKeys.length) {
+    return { ok: false, reason: 'no-dates', message: 'Those days are not in this period. Paint the calendar or load a period.' };
+  }
+  const name = matched.person.first || matched.person.full;
+  const confirm = name + ' · ' + action.label + ' ' + days.label + ' · ' + dateKeys.length + (dateKeys.length === 1 ? ' day' : ' days');
+  return {
+    ok: true,
+    role: matched.person.id,
+    name: matched.person.full,
+    first: matched.person.first,
+    lock: action.lock,
+    kind: action.kind,
+    lockLabel: action.label,
+    dayLabel: days.label,
+    dows: days.dows,
+    dateKeys: dateKeys,
+    confirm: confirm
+  };
+}
+
+function showRequestPhraseResult(ok, message, showUndo) {
+  const box = document.getElementById('request-phrase-confirm');
+  const text = document.getElementById('request-phrase-confirm-text');
+  const undoBtn = document.getElementById('btn-undo-request-phrase');
+  if (!box || !text) {
+    if (typeof showToast === 'function') showToast(message, ok ? 'success' : 'warn');
+    return;
+  }
+  text.textContent = message;
+  box.hidden = false;
+  box.classList.toggle('is-ok', !!ok);
+  box.classList.toggle('is-error', !ok);
+  if (undoBtn) undoBtn.hidden = !showUndo;
+}
+
+function applyRequestPhraseFromBar(inputId) {
+  if (window._viewLocked) return { ok: false, reason: 'locked' };
+  const input = document.getElementById(inputId || 'request-phrase-input');
+  const raw = input ? String(input.value || '').trim() : '';
+  const requestsInput = document.getElementById('request-phrase-input');
+  if (requestsInput && input && requestsInput !== input) requestsInput.value = raw;
+  const parsed = parseRequestPhrase(raw);
+  if (!parsed.ok) {
+    window._requestPhraseUndoReady = false;
+    showRequestPhraseResult(false, parsed.message, false);
+    return parsed;
+  }
+  try { if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot('request phrase'); } catch (err) {}
+  if (!inputs[parsed.role]) inputs[parsed.role] = {};
+  parsed.dateKeys.forEach((dk) => {
+    inputs[parsed.role][dk] = parsed.lock;
+  });
+  window._requestPhraseUndoReady = true;
+  activeTab = parsed.role;
+  try { buildInputTabs(); buildInputCalendar(parsed.role); } catch (e) {}
+  try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e2) {}
+  if (typeof currentAppTab !== 'undefined' && currentAppTab !== 'requests' && typeof switchTab === 'function') {
+    switchTab('requests');
+  }
+  showRequestPhraseResult(true, 'Applied: ' + parsed.confirm, true);
+  return parsed;
+}
+
+function undoRequestPhraseApply() {
+  if (window._viewLocked) return;
+  if (typeof undoSchedEdit === 'function') undoSchedEdit();
+  window._requestPhraseUndoReady = false;
+  showRequestPhraseResult(true, 'Undid that request. Paint still works.', false);
 }
 
 function requestPaintModeLabel(mode) {

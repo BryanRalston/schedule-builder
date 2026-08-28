@@ -13045,6 +13045,9 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   const thinRoster = typeof isThinManagerRoster === 'function'
     ? isThinManagerRoster(ROLES)
     : (ROLES && ROLES.length <= 2);
+  const namedKcClosers = typeof getNonManagerKCs === 'function'
+    ? getNonManagerKCs().length
+    : (ALL_KC || []).filter((id) => id && !ROLES.includes(typeof id === 'string' ? id : id.id)).length;
 
   // ── Rule 1: Target scheduled days/week (work+PTO; RTO/LOA reduce availability) ──
   // Matches generation Step 3: holiday weeks target 4; LOA excluded via availDays.
@@ -13204,37 +13207,46 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   // ── Rule 8: Coverage every day (1 opener + 1 closer minimum) ──
   // Two named managers: a staffed day is a warning, not a hard error that
   // repair will "fix" by cancelling the other person's day off.
+  // No named KC: reserved KC-close nights have no closer on purpose — review,
+  // not a must-fix (1 AM is not a KC bench).
   allDks.forEach(dk => {
     let opens = 0, closes = 0;
     ALL_KC.forEach(r => {
-      const s = schedule[r][dk];
+      const id = typeof r === 'string' ? r : r && r.id;
+      const s = schedule[id] && schedule[id][dk];
       if (isOpen(s)) opens++;
       if (isClose(s)) closes++; // includes close, close-ext, kc-close
     });
     const workers = ROLES.filter(r => isWork(schedule[r][dk])).length;
     const thinDay = ROLES.length <= 2 && workers === 1;
-    const sev = (workers === 0 || !thinDay) ? 'error' : 'warning';
+    const kcNightNoKc = isKcCloseNight(dk) && namedKcClosers === 0;
+    const expectedHole = thinDay || (kcNightNoKc && closes === 0);
+    const sev = (workers === 0 || !expectedHole) ? 'error' : 'warning';
     if (opens === 0) {
       v(sev, 'coverage-open', null, null, dk,
         `${formatDate(dkToDate(dk))}: No opener`);
     }
     if (closes === 0) {
       v(sev, 'coverage-close', null, null, dk,
-        `${formatDate(dkToDate(dk))}: No closer`);
+        kcNightNoKc
+          ? `${formatDate(dkToDate(dk))}: No closer (no named key carrier for this reserved close night)`
+          : `${formatDate(dkToDate(dk))}: No closer`);
     }
   });
 
-  // ── Rule 9: No manager close on KC-close nights ──
-  allDks.forEach(dk => {
-    if (!isKcCloseNight(dk)) return;
-    const dayName = DAY_NAMES_FULL[dkToDate(dk).getDay()] || 'day';
-    ROLES.forEach(r => {
-      if (isClose(schedule[r][dk])) {
-        v('error', 'no-kc-night-close', r, null, dk,
-          `${names[r]}: Closing on ${dayName} ${formatDate(dkToDate(dk))} (KC handles this close night)`);
-      }
+  // ── Rule 9: No manager close on KC-close nights (only when a KC is named) ──
+  if (namedKcClosers > 0) {
+    allDks.forEach(dk => {
+      if (!isKcCloseNight(dk)) return;
+      const dayName = DAY_NAMES_FULL[dkToDate(dk).getDay()] || 'day';
+      ROLES.forEach(r => {
+        if (isClose(schedule[r][dk])) {
+          v('error', 'no-kc-night-close', r, null, dk,
+            `${names[r]}: Closing on ${dayName} ${formatDate(dkToDate(dk))} (KC handles this close night)`);
+        }
+      });
     });
-  });
+  }
 
   // ── Rule 10: Balance coverage across week (soft error — warning if spread > 2) ──
   for (let w = 0; w < numWeeks; w++) {

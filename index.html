@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Manager Schedule Builder Pro — preference-driven retail scheduling for store managers. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Works offline. Always review before you post.">
+<meta name="description" content="Manager Schedule Builder Pro — preference-driven retail scheduling for store managers. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Names, time off, and schedules stay on this device — nothing is uploaded. No account. Always review before you post.">
 <meta name="theme-color" content="#070b14">
 <meta name="application-name" content="Schedule Pro">
 <meta name="mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta property="og:title" content="Manager Schedule Builder Pro">
-<meta property="og:description" content="Fair retail schedules in minutes. NRF 4-5-4, PTO, role rules, offline. Always review before you post.">
+<meta property="og:description" content="Fair retail schedules in minutes. NRF 4-5-4, PTO, role rules. Names, time off, and the board stay on this device — nothing is uploaded. No account. Always review before you post.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icons/icon-512.png">
 <title>Schedule Pro · Manager Shifts</title>
@@ -2401,18 +2401,41 @@ input[type="radio"] { accent-color: var(--gold); }
 }
 .welcome-actions {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+.welcome-primary {
+  font-size: 0.95rem;
+  padding: 0.72rem 1.3rem;
+}
+.welcome-secondary {
+  display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem;
   align-items: center;
 }
-.welcome-actions button {
-  border: none;
+.welcome-secondary-btn {
+  font-size: 0.72rem;
+  padding: 0.28rem 0.65rem;
+  font-weight: 600;
+  min-height: auto;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.28);
+  color: rgba(255,255,255,0.82);
+}
+.welcome-secondary-btn:hover {
+  background: rgba(61,220,255,0.08);
+  border-color: rgba(61,220,255,0.4);
+  color: #fff;
 }
 .welcome-dismiss {
   background: transparent;
-  color: rgba(255,255,255,0.75);
-  border: 1px solid rgba(255,255,255,0.25) !important;
-  font-size: 0.78rem;
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  font-size: 0.72rem;
+  padding: 0.28rem 0.65rem;
+  min-height: auto;
 }
 .welcome-play {
   display: flex;
@@ -3132,6 +3155,19 @@ input[type="radio"] { accent-color: var(--gold); }
 .welcome-card.compact .welcome-steps { display: none; }
 .welcome-card.compact .feature-pills { display: none; }
 .welcome-card.compact p { margin-bottom: 0.65rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.welcome-privacy {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.8);
+  margin: 0 0 0.7rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.welcome-card.compact .welcome-privacy {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  margin-bottom: 0.7rem;
+}
 .welcome-card h2 { font-size: 1.05rem; }
 
 /* Generate bar inside schedule tab — less boxy */
@@ -3539,7 +3575,7 @@ html.auth-locked .toast-host { z-index: 20050; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px;
+  max-width: 132px;
 }
 .account-chip-plan {
   font-size: 0.6rem;
@@ -3612,6 +3648,7 @@ html.auth-locked .toast-host { z-index: 20050; }
 }
 .ap-row span:first-child { color: var(--ink-4); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-family: var(--mono); }
 .ap-row span:last-child { color: var(--ink); font-weight: 500; text-align: right; word-break: break-word; }
+.ap-row.ap-secondary span:last-child { color: var(--ink-3); font-weight: 400; font-size: 0.78rem; }
 .ap-actions, .license-modal-actions, .provider-modal-actions {
   display: flex;
   flex-wrap: wrap;
@@ -4583,8 +4620,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <h1 id="auth-title">Schedule Pro</h1>
     </div>
     <p class="auth-subtitle">Workforce scheduling for retail operations</p>
-    <div id="google-btn-host" class="google-btn-host" aria-hidden="true"></div>
-    <div class="auth-actions">
+    <div id="google-btn-host" class="google-btn-host" hidden aria-hidden="true"></div>
+    <div class="auth-actions" hidden>
       <button type="button" class="auth-btn" id="auth-google-btn" onclick="startProviderSignIn('google')">
         <span class="auth-provider-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.9-.1-1.2H12z"/><path fill="#4285F4" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-2.4 0-4.4-1.6-5.1-3.8l-3.4 2.6C5.1 19.1 8.3 20.7 12 20.7c3.5 0 6.4-1.2 8.1-3.2 2-2.2 2.5-5.3 2.5-7.3 0-.5 0-.9-.1-1.2H12z" opacity=".01"/><path fill="#FBBC05" d="M6.9 14.1c-.2-.7-.4-1.4-.4-2.1s.1-1.4.4-2.1L3.5 7.3C2.7 8.6 2.3 10 2.3 11.5s.4 2.9 1.2 4.2l3.4-1.6z"/><path fill="#34A853" d="M12 20.7c3.2 0 5.9-1.1 7.9-2.9l-3.4-2.6c-.9.6-2.1 1.1-3.5 1.1-2.7 0-5-1.8-5.8-4.3L3.8 14c1.4 2.8 4.3 4.7 8.2 4.7z"/><path fill="#4285F4" d="M21.5 11.2c0-.5 0-.9-.1-1.2H12v3.9h5.5c-.3 1.3-1.1 2.3-2.1 3l3.4 2.6c2-1.8 3.2-4.5 3.2-8.3z"/></svg>
@@ -4717,12 +4754,15 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="welcome-card no-print compact" id="welcome-card">
     <h2 id="welcome-title">Build the period. Post with confidence.</h2>
     <p id="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
+    <p id="welcome-privacy" class="welcome-privacy">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
     <div class="welcome-actions">
-      <button class="btn-demo" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
-      <button class="btn-primary" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
-      <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="startOnboardingTour(true)">Take tour</button>
-      <button class="btn-outline" style="border-color:rgba(61,220,255,0.45);color:#9ae8ff" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
-      <button class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
+      <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
+      <div class="welcome-secondary">
+        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
+        <button type="button" class="btn-outline welcome-secondary-btn" onclick="startOnboardingTour(true)">Take tour</button>
+        <button type="button" class="btn-outline welcome-secondary-btn" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
+        <button type="button" class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
+      </div>
     </div>
     <div class="welcome-play" id="welcome-play">
       <a class="gp-badge" id="welcome-play-link" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">
@@ -5085,7 +5125,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.13</span> · Offline · Data stays on this device · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.14</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -5112,27 +5152,32 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <!-- Account panel -->
 <div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title">
   <div class="account-panel-card">
-    <h3 id="account-panel-title">Account</h3>
-    <p class="ap-sub">Workspace session on this device</p>
+    <h3 id="account-panel-title">This device</h3>
+    <p class="ap-sub">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
+    <div hidden>
+      <span id="ap-org"></span>
+      <span id="ap-name"></span>
+      <span id="ap-email"></span>
+      <span id="ap-method">This device</span>
+    </div>
     <div class="ap-rows">
-      <div class="ap-row"><span>Organization</span><span id="ap-org">—</span></div>
-      <div class="ap-row"><span>Name</span><span id="ap-name">—</span></div>
-      <div class="ap-row"><span>Email</span><span id="ap-email">—</span></div>
-      <div class="ap-row"><span>Sign-in</span><span id="ap-method">—</span></div>
+      <div class="ap-row"><span>Store</span><span id="ap-store">This device</span></div>
       <div class="ap-row"><span>Plan</span><span id="ap-plan">Free</span></div>
     </div>
     <div class="ap-actions">
-      <button type="button" class="ap-btn-primary" id="ap-signin-btn" onclick="openSignInFromApp()" style="display:none">Sign in / switch account</button>
+      <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()">Activate team license</button>
       <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center">Manage billing</a>
       <button type="button" class="ap-btn-secondary" onclick="closeAccountPanel()">Close</button>
     </div>
-    <label class="ap-signout-opts">
-      <input type="checkbox" id="ap-wipe-schedules" />
-      <span>Also clear schedules &amp; roster data on this device when signing out</span>
-    </label>
-    <div class="ap-actions">
-      <button type="button" class="ap-btn-danger" onclick="signOutSession()">Sign out</button>
+    <div id="ap-leftover-session" hidden>
+      <label class="ap-signout-opts">
+        <input type="checkbox" id="ap-wipe-schedules" />
+        <span>Also clear schedules &amp; roster data on this device when signing out</span>
+      </label>
+      <div class="ap-actions">
+        <button type="button" class="ap-btn-danger" onclick="signOutSession()">Sign out</button>
+      </div>
     </div>
   </div>
 </div>
@@ -5325,11 +5370,68 @@ function setScheduleResultsVisible(visible) {
   try { if (typeof syncAppShell === 'function') syncAppShell(); } catch (e) {}
 }
 
+function persistedScheduleLooksBuilt(data) {
+  if (!data || !data.schedule || typeof data.schedule !== 'object') return false;
+  if (typeof isDemoStoreName === 'function' && isDemoStoreName(data.storeName)) return false;
+  if (typeof storedNamesLookLikeDemo === 'function' && storedNamesLookLikeDemo(data.names)) return false;
+  return Object.keys(data.schedule).some((r) => data.schedule[r] && Object.keys(data.schedule[r]).length > 0);
+}
+
+function hasPersistedBuiltSchedule() {
+  try {
+    const last = localStorage.getItem('schedule_last');
+    if (last) {
+      try {
+        const d = JSON.parse(localStorage.getItem(last) || 'null');
+        if (persistedScheduleLooksBuilt(d)) return true;
+      } catch (e0) {}
+    }
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !/^schedule_FY\d+-P\d+$/.test(k)) continue;
+      try {
+        const d = JSON.parse(localStorage.getItem(k) || 'null');
+        if (persistedScheduleLooksBuilt(d)) return true;
+      } catch (e2) {}
+    }
+  } catch (e) {}
+  return false;
+}
+
+/** Returning store: built period, or dismissed welcome with a real roster. First-run / leftover demo stay on Setup. */
+function shouldOpenOnSchedule() {
+  try {
+    if (typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule()) return true;
+    const dismissed = localStorage.getItem('msb_welcome_dismissed') === '1';
+    if (dismissed && typeof hasSavedUserRoster === 'function' && hasSavedUserRoster()) return true;
+  } catch (e) {}
+  return false;
+}
+
+function tryRestoreLastBuiltSchedule() {
+  try {
+    if (schedule && Object.keys(schedule).length && schedule.sm && Object.keys(schedule.sm).length) return false;
+    const last = localStorage.getItem('schedule_last');
+    if (!last) return false;
+    const d = JSON.parse(localStorage.getItem(last) || 'null');
+    if (!persistedScheduleLooksBuilt(d)) return false;
+    if (typeof loadSavedSchedule === 'function') {
+      loadSavedSchedule(last);
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
 function restoreAppTab() {
   try {
-    const t = localStorage.getItem('msb_active_tab');
-    if (t && ['setup','requests','rules','schedule'].includes(t)) switchTab(t);
-  } catch(e) {}
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab')) return;
+    if (shouldOpenOnSchedule()) {
+      try { tryRestoreLastBuiltSchedule(); } catch (e0) {}
+      if (typeof switchTab === 'function') switchTab('schedule');
+    }
+  } catch (e) {}
 }
 
 
@@ -5645,14 +5747,7 @@ function createSessionFromFields(opts) {
     industry: 'retail',
     seats: 1
   });
-  // Seed store name if empty
-  try {
-    const sn = document.getElementById('store-name');
-    if (sn && !sn.value.trim() && orgName && orgName !== 'This device') {
-      sn.value = orgName;
-      if (typeof persistStoreMeta === 'function') persistStoreMeta();
-    }
-  } catch (e) {}
+  // Store identity is the roster on this device — never seed it from Google / org sign-in.
   return session;
 }
 
@@ -6289,45 +6384,23 @@ async function signInWithMicrosoftOAuth() {
 }
 
 function updateAuthProviderButtons() {
-  const gLabel = document.getElementById('auth-google-label');
-  const mLabel = document.getElementById('auth-microsoft-label');
-  if (gLabel) {
-    gLabel.textContent = hasGoogleOAuth() ? 'Continue with Google' : 'Connect Google (preview)';
-  }
-  if (mLabel) {
-    mLabel.textContent = hasMicrosoftOAuth()
-      ? 'Continue with Microsoft'
-      : 'Connect Microsoft (preview)';
+  const actions = document.querySelector('#auth-shell .auth-actions');
+  if (actions) actions.setAttribute('hidden', '');
+  const host = document.getElementById('google-btn-host');
+  if (host) {
+    host.setAttribute('hidden', '');
+    host.setAttribute('aria-hidden', 'true');
+    host.innerHTML = '';
   }
   const gBtn = document.getElementById('auth-google-btn');
   const mBtn = document.getElementById('auth-microsoft-btn');
-  if (gBtn) {
-    gBtn.title = hasGoogleOAuth()
-      ? 'Sign in with Google OAuth'
-      : 'Device workspace setup (Google OAuth not configured)';
-  }
-  if (mBtn) {
-    mBtn.title = hasMicrosoftOAuth()
-      ? 'Sign in with Microsoft'
-      : 'Device workspace setup (Microsoft OAuth not configured)';
-  }
-  setupGoogleOneTapHost();
+  if (gBtn) gBtn.setAttribute('hidden', '');
+  if (mBtn) mBtn.setAttribute('hidden', '');
 }
 
 function updateAuthSupportNote() {
   const el = document.getElementById('auth-sso-note');
-  if (!el) return;
-  const g = hasGoogleOAuth();
-  const m = hasMicrosoftOAuth();
-  if (g && m) {
-    el.textContent = 'SSO ready · Google & Microsoft OAuth';
-  } else if (g) {
-    el.textContent = 'SSO · Google OAuth on · Microsoft preview';
-  } else if (m) {
-    el.textContent = 'SSO · Microsoft OAuth on · Google preview';
-  } else {
-    el.textContent = 'SSO preview mode · set client IDs in monetization.json';
-  }
+  if (el) el.textContent = 'Names, time off, and the board stay on this device. Nothing is uploaded.';
   updateAuthProviderButtons();
 }
 
@@ -6339,11 +6412,49 @@ function methodLabel(method) {
   return method || '—';
 }
 
+function getStoreIdentity() {
+  let name = '';
+  let num = '';
+  try {
+    name = ((document.getElementById('store-name') || {}).value || '').trim();
+    num = ((document.getElementById('store-number') || {}).value || '').trim();
+    if (!name || !num) {
+      const raw = localStorage.getItem('msb_store_meta');
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (!name && d && d.storeName) name = String(d.storeName).trim();
+        if (!num && d && d.storeNumber) num = String(d.storeNumber).trim();
+      }
+    }
+    if (typeof isDemoStoreName === 'function' && isDemoStoreName(name)) {
+      const liveDemo = typeof liveRosterLooksLikeDemo === 'function' && liveRosterLooksLikeDemo();
+      const explicit = typeof isExplicitDemoLaunch === 'function' && isExplicitDemoLaunch();
+      if (!liveDemo && !explicit) {
+        name = '';
+        if (typeof DEMO_STORE_NUMBER !== 'undefined' && String(num) === String(DEMO_STORE_NUMBER)) num = '';
+      }
+    }
+  } catch (e) {}
+  let label = 'This device';
+  if (name) {
+    label = (num && name.indexOf('#') === -1) ? (name + ' #' + num) : name;
+  }
+  return { name: name, number: num, label: label };
+}
+
+function formatSignInRow(s) {
+  if (!s || s.method === 'offline') return 'Not signed in · this device';
+  const method = formatSignInMethod(s);
+  const email = (s.email || '').trim();
+  if (email) return method + ' · ' + email;
+  return method;
+}
+
 function updateAccountChip() {
-  const s = getSession();
   const avatar = document.getElementById('account-chip-avatar');
   const nameEl = document.getElementById('account-chip-name');
   const planEl = document.getElementById('account-chip-plan');
+  const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : { label: 'This device' };
   const pro = isProUnlocked();
   const planText = pro
     ? 'Pro'
@@ -6351,18 +6462,9 @@ function updateAccountChip() {
         const left = remainingFreeGenerates();
         return left === 0 ? 'Free · 0' : 'Free · ' + left;
       })();
-  if (!s) {
-    if (avatar) avatar.textContent = '?';
-    if (nameEl) nameEl.textContent = 'Account';
-    if (planEl) {
-      planEl.textContent = planText;
-      planEl.classList.toggle('is-pro', pro);
-    }
-    return;
-  }
-  const initial = (s.name || s.email || 'U').trim().charAt(0).toUpperCase() || 'U';
+  const initial = (id.label || 'This device').trim().charAt(0).toUpperCase() || 'T';
   if (avatar) avatar.textContent = initial;
-  if (nameEl) nameEl.textContent = s.name || s.email || 'Account';
+  if (nameEl) nameEl.textContent = id.label || 'This device';
   if (planEl) {
     planEl.textContent = planText;
     planEl.classList.toggle('is-pro', pro);
@@ -6384,27 +6486,26 @@ function formatSignInMethod(s) {
 function openAccountPanel() {
   closeHeaderMenu();
   const s = getSession();
-  const set = (id, v) => {
-    const el = document.getElementById(id);
+  const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : { label: 'This device', name: '', number: '' };
+  const set = (elId, v) => {
+    const el = document.getElementById(elId);
     if (el) el.textContent = v || '—';
   };
-  if (s) {
-    set('ap-org', s.orgName || (getWorkspace() || {}).orgName || '—');
-    set('ap-name', s.name);
-    set('ap-email', s.email || (s.method === 'offline' ? 'Device session' : '—'));
-    set('ap-method', formatSignInMethod(s));
-  } else {
-    set('ap-org', '—');
-    set('ap-name', '—');
-    set('ap-email', '—');
-    set('ap-method', '—');
-  }
+  const title = document.getElementById('account-panel-title');
+  if (title) title.textContent = id.label || 'This device';
+  set('ap-store', id.label || 'This device');
+  set('ap-org', id.label || 'This device');
+  set('ap-name', id.label || 'This device');
+  set('ap-email', '—');
+  set('ap-method', 'This device');
   set('ap-plan', isProUnlocked() ? 'Pro' : 'Free');
   const signInBtn = document.getElementById('ap-signin-btn');
   if (signInBtn) {
-    // Offer sign-in when offline or unsigned — never required
-    signInBtn.style.display = !s || s.method === 'offline' ? '' : 'none';
+    signInBtn.hidden = true;
+    signInBtn.style.display = 'none';
   }
+  const leftover = document.getElementById('ap-leftover-session');
+  if (leftover) leftover.hidden = !(s && s.method && s.method !== 'offline');
   const wipe = document.getElementById('ap-wipe-schedules');
   if (wipe) wipe.checked = false;
   const modal = document.getElementById('account-modal');
@@ -6482,74 +6583,40 @@ function signOutSession() {
 }
 
 function personalizeWelcome() {
-  const s = getSession();
   const title = document.getElementById('welcome-title');
   if (!title) return;
-  if (s && s.name && s.method !== 'offline') {
-    const org = s.orgName ? ' · ' + s.orgName : '';
-    title.textContent = 'Welcome back, ' + s.name + org;
-  } else if (s && s.method === 'offline' && s.orgName && s.orgName !== 'This device') {
-    title.textContent = 'Welcome · ' + s.orgName;
-  } else {
-    title.textContent = 'Build the period. Post with confidence.';
-  }
+  const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : { name: '', label: 'This device' };
+  if (id.name) title.textContent = 'Welcome · ' + id.label;
+  else title.textContent = 'Build the period. Post with confidence.';
+}
+
+function forceOfflineSession() {
+  const s = getSession();
+  if (s && s.method === 'offline') return s;
+  createSessionFromFields({
+    method: 'offline',
+    email: '',
+    name: 'Device user',
+    orgName: 'This device'
+  });
+  return getSession();
 }
 
 function ensureAuthOnBoot() {
-  updateAuthSupportNote();
   hideAuthShell(); // never trap closed testers / first launch
-  let s = getSession();
-  // Silent offline session so Play testers land in the app with zero clicks
-  if (!s) {
-    createSessionFromFields({
-      method: 'offline',
-      email: '',
-      name: 'Device user',
-      orgName: 'This device'
-    });
-    personalizeWelcome();
-    updateAccountChip();
-    return;
-  }
-  if (s.method === 'offline') {
-    personalizeWelcome();
-    updateAccountChip();
-    return;
-  }
-  // Signed-in accounts: integrity check async; fall back offline if broken (still not blocking)
-  validateSessionIntegrity(s).then((ok) => {
-    if (!ok) {
-      clearSession();
-      createSessionFromFields({
-        method: 'offline',
-        email: '',
-        name: 'Device user',
-        orgName: 'This device'
-      });
-      personalizeWelcome();
-      updateAccountChip();
-      if (typeof showToast === 'function') {
-        showToast('Signed-in session expired — continuing offline. Use Account → Sign in anytime.', 'info');
-      }
-      return;
-    }
-    saveSession(s);
-    personalizeWelcome();
-    updateAccountChip();
-  }).catch(() => {
-    saveSession(s);
-    personalizeWelcome();
-    updateAccountChip();
-  });
+  // Leftover Google / org preview is not whose store this is — drop it, keep the roster.
+  forceOfflineSession();
+  updateAuthSupportNote();
   personalizeWelcome();
   updateAccountChip();
 }
 
-/** Optional sign-in from Account — does not clear schedules. */
+/** Sign-in preview is stripped. Keep the hook so leftover Account clicks stay offline. */
 function openSignInFromApp() {
   closeAccountPanel();
-  showAuthShell();
-  updateAuthSupportNote();
+  hideAuthShell();
+  forceOfflineSession();
+  updateAccountChip();
 }
 
 function validLicenseKey(k) {
@@ -7224,7 +7291,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.13';
+const APP_VERSION = '2.6.14';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -7373,6 +7440,7 @@ function persistStoreMeta() {
   } catch(e) {}
   updateReadyChecklist();
   if (typeof updateStoreHoursSummary === 'function') updateStoreHoursSummary();
+  try { if (typeof updateAccountChip === 'function') updateAccountChip(); } catch (e3) {}
 }
 
 function persistSetupDraft() {
@@ -16830,6 +16898,7 @@ if (
 }
 try { applyRoleTitleUI(); } catch (eRtBoot) {}
 restoreWelcomeState();
+try { if (typeof restoreAppTab === 'function') restoreAppTab(); } catch (eTabBoot) {}
 renderTeamTemplateUI();
 updateStoreHoursSummary();
 renderPreferencesUI();

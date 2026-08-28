@@ -1,6 +1,6 @@
 /* Manager Schedule Builder Pro — service worker
    Paths are relative to this script so GitHub project pages (/schedule-builder/) work. */
-const CACHE = 'msb-pro-v2.6.30';
+const CACHE = 'msb-pro-v2.6.31';
 const PRECACHE = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const PRECACHE = [
   './icons/icon-512-maskable.png',
   './icons/favicon-32.png',
   './icons/favicon-16.png',
+  './favicon.ico',
   'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'
 ];
 

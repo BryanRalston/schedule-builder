@@ -4,15 +4,70 @@
 <script>
 (function () {
   try {
-    var saved = localStorage.getItem('msb_ui_lang');
-    var lang = (saved === 'en' || saved === 'es') ? saved : '';
-    if (!lang) {
-      var list = [];
-      if (navigator.languages) list = list.concat(navigator.languages);
-      if (navigator.language) list.push(navigator.language);
-      for (var i = 0; i < list.length; i++) {
-        var tag = String(list[i] || '').toLowerCase().replace('_', '-');
-        if (tag === 'es' || tag.indexOf('es-') === 0) { lang = 'es'; break; }
+    var params = new URLSearchParams(location.search);
+    var q = params.get('lang');
+    var lang = (q === 'en' || q === 'es') ? q : '';
+    if (lang) {
+      try { localStorage.setItem('msb_ui_lang', lang); } catch (eQ) {}
+    } else {
+      var hasPeople = false;
+      try {
+        function peopleLookReal(list) {
+          var demo = /^(alex morgan|casey brooks|riley quinn|taylor hayes|jordan lee|sam rivera)$/i;
+          var ph = /^(store manager|assistant manager(\s*\d+)?|key carrier(\s*\d+)?|am\d+)$/i;
+          for (var p = 0; p < list.length; p++) {
+            var n = String(list[p] || '').trim();
+            if (n && !demo.test(n) && !ph.test(n)) return true;
+          }
+          return false;
+        }
+        var names = JSON.parse(localStorage.getItem('schedule_manager_names') || 'null');
+        if (names) {
+          var plist = [];
+          if (names.sm) plist.push(names.sm);
+          if (names.ams) {
+            for (var ak in names.ams) {
+              if (Object.prototype.hasOwnProperty.call(names.ams, ak)) plist.push(names.ams[ak]);
+            }
+          }
+          if (names.kcList) {
+            for (var ki = 0; ki < names.kcList.length; ki++) {
+              if (names.kcList[ki] && names.kcList[ki].name) plist.push(names.kcList[ki].name);
+            }
+          }
+          hasPeople = peopleLookReal(plist);
+        }
+        if (!hasPeople) {
+          for (var si = 0; si < localStorage.length; si++) {
+            var sk = localStorage.key(si);
+            if (!sk || !/^schedule_FY\d+-P\d+$/.test(sk)) continue;
+            var sd = JSON.parse(localStorage.getItem(sk) || 'null');
+            if (!sd || !sd.names) continue;
+            var slist = [];
+            if (sd.names.sm) slist.push(sd.names.sm);
+            if (sd.names.ams) {
+              for (var sak in sd.names.ams) {
+                if (Object.prototype.hasOwnProperty.call(sd.names.ams, sak)) slist.push(sd.names.ams[sak]);
+              }
+            }
+            if (peopleLookReal(slist)) { hasPeople = true; break; }
+          }
+        }
+      } catch (ePeople) {}
+      if (hasPeople) {
+        var saved = localStorage.getItem('msb_ui_lang');
+        if (saved === 'en' || saved === 'es') lang = saved;
+      } else {
+        try { localStorage.removeItem('msb_ui_lang'); } catch (eClr) {}
+      }
+      if (!lang) {
+        var list = [];
+        if (navigator.languages) list = list.concat(navigator.languages);
+        if (navigator.language) list.push(navigator.language);
+        for (var i = 0; i < list.length; i++) {
+          var tag = String(list[i] || '').toLowerCase().replace('_', '-');
+          if (tag === 'es' || tag.indexOf('es-') === 0) { lang = 'es'; break; }
+        }
       }
     }
     document.documentElement.lang = lang || 'en';
@@ -3998,6 +4053,9 @@ html.view-locked .ap-btn-danger { display: none !important; }
 #post-gen-strip .pgs-chip {
   padding: 0.28rem 0.6rem;
   font-size: 0.76rem;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 #post-gen-strip .pgs-actions {
   display: flex;
@@ -4511,10 +4569,12 @@ body.msb-board-live .container {
   display: flex; align-items: center; justify-content: space-between;
   gap: 0.75rem; padding: 0.75rem 0.9rem;
   border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 6; flex-shrink: 0;
+  background: rgba(10, 16, 30, 0.98);
 }
 .review-sheet-head strong { font-size: 0.95rem; }
 .review-sheet-close {
-  position: relative; z-index: 2;
+  position: relative; z-index: 7;
   background: transparent; border: none; color: var(--ink-3);
   font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
   padding: 0.45rem 0.7rem; min-height: 44px; min-width: 44px;
@@ -4646,11 +4706,13 @@ html.view-locked #post-gen-strip { top: var(--msb-sticky-top, 2rem); }
   padding: 0.22rem 0.5rem; border-radius: 999px;
   background: rgba(255,255,255,0.06); border: 1px solid var(--line);
   color: var(--ink-2); font-weight: 600; white-space: nowrap;
+  position: relative; z-index: 2; pointer-events: auto;
 }
 button.pgs-chip {
   cursor: pointer;
   font: inherit;
   font-weight: 600;
+  position: relative; z-index: 2; pointer-events: auto;
 }
 button.pgs-chip:hover {
   filter: brightness(1.12);
@@ -5412,7 +5474,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <div class="ops-home-title" id="ops-home-title" data-i18n="Period ready">Period ready</div>
         <div class="ops-home-meta" id="ops-home-meta"></div>
         <div class="ops-home-actions">
-          <button type="button" class="btn-success no-lock-hide" onclick="generateSchedule()" data-i18n="Build">Build</button>
+          <button type="button" class="btn-success no-lock-hide" onclick="generateScheduleFromButton()" data-i18n="Build">Build</button>
           <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()" data-i18n="Next period">Next period</button>
           <button type="button" class="btn-outline" onclick="startOnboardingTour(true)" data-i18n="Tour">Tour</button>
           <button type="button" class="btn-outline" onclick="openCommandPalette()">⌘K</button>
@@ -5422,7 +5484,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <div id="built-rebuild-slot">
       <div class="generate-actions" id="built-rebuild-row">
         <span class="built-pill" id="built-pill" hidden data-i18n="Built">Built</span>
-        <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateSchedule()" data-i18n="Build this period">Build this period</button>
+        <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateScheduleFromButton()" data-i18n="Build this period">Build this period</button>
         <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()" data-i18n="Clear board">Clear board</button>
         <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})" data-i18n="Load sample store">Load sample store</button>
       </div>
@@ -5537,7 +5599,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.28</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.29</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -7113,6 +7175,12 @@ function shouldRecordFreeGenerate(opts) {
   return true;
 }
 
+/** Rebuild after a board already exists (Ask / paint iterate) does not spend a free seat. */
+function generateScheduleFromButton() {
+  const skip = typeof hasLiveBuiltBoard === 'function' && hasLiveBuiltBoard();
+  generateSchedule(skip ? { skipFreeCount: true } : {});
+}
+
 function rosterManagerCount() {
   // SM + AMs + KCs marked as manager coverage
   return getRoles().length;
@@ -7912,7 +7980,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.28';
+const APP_VERSION = '2.6.29';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -8486,8 +8554,16 @@ function getUiLangOverride() {
   return null;
 }
 
+function getUiLangQuery() {
+  try {
+    const q = new URLSearchParams(location.search).get('lang');
+    if (q === 'en' || q === 'es') return q;
+  } catch (e) {}
+  return null;
+}
+
 function resolveUiLang() {
-  return getUiLangOverride() || detectDeviceUiLang();
+  return getUiLangQuery() || getUiLangOverride() || detectDeviceUiLang();
 }
 
 function msbT(en, vars) {
@@ -8611,7 +8687,18 @@ function setUiLang(lang) {
   return next;
 }
 
+/** ?lang=en / ?lang=es wins this load and persists as an explicit picker choice. */
+function persistUiLangQueryIfPresent() {
+  const q = typeof getUiLangQuery === 'function' ? getUiLangQuery() : null;
+  if (!q) return null;
+  try { localStorage.setItem(MSB_LANG_KEY, q); } catch (e) {}
+  currentUiLang = q;
+  try { document.documentElement.lang = q; } catch (e2) {}
+  return q;
+}
+
 function bootUiLang() {
+  try { if (typeof persistUiLangQueryIfPresent === 'function') persistUiLangQueryIfPresent(); } catch (eQ) {}
   currentUiLang = resolveUiLang();
   try { document.documentElement.lang = currentUiLang; } catch (e) {}
   applyStaticI18n();
@@ -10298,6 +10385,95 @@ function peopleIndicateUserRoster(people) {
 function storeIndicatesUserRoster(storeName) {
   const n = String(storeName || '').trim();
   return !!(n && !isDemoStoreName(n));
+}
+
+/** Named people on this device. Leftover Harbor East / placeholders do not count. */
+function hasSavedUserPeople() {
+  try {
+    const livePeople = [((document.getElementById('name-sm') || {}).value || '')];
+    const amMax = typeof amCount === 'number' ? amCount : 8;
+    for (let i = 1; i <= amMax; i++) {
+      const el = document.getElementById('name-am' + i);
+      if (el && el.value) livePeople.push(el.value);
+    }
+    if (typeof kcList !== 'undefined' && Array.isArray(kcList)) {
+      kcList.forEach((kc) => {
+        const el = kc && document.getElementById('name-' + kc.id);
+        livePeople.push(el ? el.value : (kc && kc.name) || '');
+      });
+    }
+    if (peopleIndicateUserRoster(livePeople)) return true;
+
+    const rawNames = localStorage.getItem('schedule_manager_names');
+    if (rawNames) {
+      const names = JSON.parse(rawNames);
+      if (peopleIndicateUserRoster(collectRosterPeople(names))) return true;
+    }
+    if (typeof listTeamTemplates === 'function') {
+      const list = listTeamTemplates();
+      if (Array.isArray(list) && list.length) {
+        for (let i = 0; i < list.length; i++) {
+          const t = list[i] || {};
+          const people = collectRosterPeople(t.names || {});
+          if (Array.isArray(t.kcList)) {
+            t.kcList.forEach((kc) => {
+              if (kc && kc.name) people.push(kc.name);
+            });
+          }
+          if (peopleIndicateUserRoster(people)) return true;
+        }
+      }
+    }
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !/^schedule_FY\d+-P\d+$/.test(k)) continue;
+      try {
+        const d = JSON.parse(localStorage.getItem(k) || 'null');
+        if (!d) continue;
+        if (peopleIndicateUserRoster(collectRosterPeople(d.names || {}))) return true;
+      } catch (e2) {}
+    }
+  } catch (e) {}
+  return false;
+}
+
+/**
+ * First visit = no named team. Leftover tester chrome (Español override,
+ * spent free builds, Harbor East / stale store name) must not greet the next
+ * person. A real manager who named their team on this device is kept.
+ */
+function isFirstVisitOpen() {
+  return typeof hasSavedUserPeople === 'function' ? !hasSavedUserPeople() : true;
+}
+
+function applyFirstVisitReset() {
+  if (typeof isFirstVisitOpen === 'function' && !isFirstVisitOpen()) return false;
+  const q = typeof getUiLangQuery === 'function' ? getUiLangQuery() : null;
+  if (q) {
+    try { localStorage.setItem(MSB_LANG_KEY, q); } catch (eQ) {}
+    currentUiLang = q;
+    try { document.documentElement.lang = q; } catch (eLang) {}
+  } else {
+    try { localStorage.removeItem(MSB_LANG_KEY); } catch (eClr) {}
+    currentUiLang = typeof detectDeviceUiLang === 'function' ? detectDeviceUiLang() : 'en';
+    try { document.documentElement.lang = currentUiLang; } catch (eLang2) {}
+  }
+  if (typeof setFreeGenerateCount === 'function') setFreeGenerateCount(0);
+  const sn = document.getElementById('store-name');
+  const num = document.getElementById('store-number');
+  if (sn) sn.value = '';
+  if (num) num.value = '';
+  try {
+    const raw = localStorage.getItem('msb_store_meta');
+    const d = raw ? JSON.parse(raw) : {};
+    if (d && typeof d === 'object') {
+      d.storeName = '';
+      d.storeNumber = '';
+      localStorage.setItem('msb_store_meta', JSON.stringify(d));
+    }
+  } catch (eMeta) {}
+  try { if (typeof persistStoreMeta === 'function') persistStoreMeta(); } catch (eP) {}
+  return true;
 }
 
 /** True when this device already has a real team/store (not empty, not Harbor East sample). */
@@ -15869,6 +16045,10 @@ function jumpToRoleOnGrid(role) {
    v2.6.28 — Cheap leftover Spanish: Setup hours day abbrevs, FY/Period/month names,
              “No saved teams yet”, and aria/tooltips (Remove last AM, Build, Privacy, e.g. 100).
              US holiday names stay English. Custom titles and roster names stay typed.
+   v2.6.29 — First visit is not leftover tester chrome. No named team → device language
+             (unless ?lang=), marketing 2 free builds, no stale store name, Build on.
+             Named team keeps language override and remaining free count. SW cache 2.6.29.
+             Rebuild-to-apply after a board exists does not spend a free seat.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -16068,6 +16248,20 @@ function explainCellWhy(role, dk) {
     }
   }
 
+  try {
+    const issues = window._postingIssues || [];
+    const hit = issues.find(function (i) {
+      return i && i.role === role && (!i.dk || i.dk === dk);
+    });
+    if (hit && hit.title) {
+      const kind = hit.sev === 'must' ? 'coverage' : (hit.sev === 'review' ? 'weekend' : 'generated');
+      return {
+        kind: kind,
+        text: hit.meta ? (hit.title + ' — ' + hit.meta) : String(hit.title)
+      };
+    }
+  } catch (eIss) {}
+
   return { kind: 'generated', text: msbT('This is the generated shift.') };
 }
 
@@ -16200,7 +16394,16 @@ function jumpToReviewChip(kind) {
     if (typeof jumpToFairnessStrip === 'function') jumpToFairnessStrip();
     return;
   }
-  if (typeof jumpToIssuesPanel === 'function') jumpToIssuesPanel();
+  try {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const dks = (periodDates || []).map(function (d) {
+      return typeof dateKey === 'function' ? dateKey(d) : null;
+    }).filter(Boolean);
+    if (roles[0] && dks[0] && typeof jumpToScheduleCell === 'function') {
+      jumpToScheduleCell(roles[0], dks[0]);
+      return;
+    }
+  } catch (eFlash) {}
 }
 
 // ── Render Print Schedule (posting sheet) ──
@@ -20308,6 +20511,7 @@ if (
 ) {
   applyBlankTeam({ persist: true });
 }
+try { if (typeof applyFirstVisitReset === 'function') applyFirstVisitReset(); } catch (eFirst) {}
 try { applyRoleTitleUI(); } catch (eRtBoot) {}
 restoreWelcomeState();
 try { if (typeof restoreAppTab === 'function') restoreAppTab(); } catch (eTabBoot) {}

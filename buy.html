@@ -273,7 +273,7 @@
           <code>https://bryanralston.github.io/schedule-builder/?pro=1</code>
         </li>
         <li>Also share the app link: <code>https://bryanralston.github.io/schedule-builder/</code></li>
-        <li>Optional: email license key — buyers paste it under “Unlock code” below (any key ≥ 6 chars or starting with <code>MSB-PRO-</code>)</li>
+        <li>Optional: email license key — buyers paste it under “Unlock code” below (Gumroad license or an <code>MSB-PRO-</code> unlock code)</li>
       </ol>
       <p style="margin:0.65rem 0 0.25rem"><strong>Copy product description:</strong></p>
       <div class="copy-block" id="gumroad-copy">Manager Schedule Builder Pro — preference-driven retail manager scheduling.
@@ -345,8 +345,9 @@ Price: $19.99 one-time lifetime unlock.</div>
 
     function validLicenseKey(k) {
       const s = String(k || '').trim();
-      if (s.length >= 6) return true;
-      if (/^MSB-PRO-/i.test(s)) return true;
+      if (!s) return false;
+      if (/^MSB-PRO-[A-Z0-9]+(?:-[A-Z0-9]+)*$/i.test(s) && s.length >= 12) return true;
+      if (/^[A-Z0-9]{6,8}(?:-[A-Z0-9]{6,8}){3}$/i.test(s)) return true;
       return false;
     }
 
@@ -425,7 +426,7 @@ Price: $19.99 one-time lifetime unlock.</div>
         const msg = document.getElementById('unlock-msg');
         if (!validLicenseKey(val)) {
           msg.className = 'msg err';
-          msg.textContent = 'Enter a code at least 6 characters (or MSB-PRO-…).';
+          msg.textContent = 'Enter a Gumroad license or an MSB-PRO- unlock code.';
           return;
         }
         unlockPro(val.trim());

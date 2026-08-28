@@ -5252,9 +5252,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="license-modal no-print" id="license-modal" hidden role="dialog" aria-modal="true" aria-labelledby="license-modal-title">
   <div class="license-modal-card">
     <h3 id="license-modal-title">Activate team license</h3>
-    <p>Enter your Gumroad license or unlock code (MSB-PRO-… or any key 6+ characters).</p>
+    <p>Enter your Gumroad license or an MSB-PRO- unlock code.</p>
     <label>License / unlock code
-      <input type="text" id="license-input" autocomplete="off" placeholder="Paste license key" />
+      <input type="text" id="license-input" autocomplete="off" placeholder="Gumroad license or MSB-PRO-…" />
     </label>
     <div class="license-error" id="license-error" role="alert"></div>
     <div class="license-modal-actions">
@@ -6606,7 +6606,7 @@ function submitLicenseUnlock() {
   const key = (input && input.value) || '';
   if (!validLicenseKey(key)) {
     if (err) {
-      err.textContent = 'Code too short — use 6+ characters or MSB-PRO-…';
+      err.textContent = 'Enter a Gumroad license or an MSB-PRO- unlock code.';
       err.classList.add('show');
     }
     return;
@@ -6688,8 +6688,11 @@ function openSignInFromApp() {
 
 function validLicenseKey(k) {
   const s = String(k || '').trim();
-  if (s.length >= 6) return true;
-  if (/^MSB-PRO-/i.test(s)) return true;
+  if (!s) return false;
+  // Issued unlock codes (friend/tester and Play review). Bare "MSB-PRO-" is not enough.
+  if (/^MSB-PRO-[A-Z0-9]+(?:-[A-Z0-9]+)*$/i.test(s) && s.length >= 12) return true;
+  // Gumroad-issued keys stay on-device — no server verify. Typical 4 groups of 6–8.
+  if (/^[A-Z0-9]{6,8}(?:-[A-Z0-9]{6,8}){3}$/i.test(s)) return true;
   return false;
 }
 

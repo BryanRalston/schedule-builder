@@ -143,6 +143,31 @@ async function main() {
     pass('nudge-stays-offline');
   } else fail('nudge-stays-offline', 'nudge invented a cloud/account path');
 
+  const licenseModal = (index.match(/id="license-modal"[\s\S]*?id="provider-modal"/) || [''])[0];
+  if (/Enter your Gumroad license or an MSB-PRO- unlock code/.test(licenseModal)
+    && /placeholder="Gumroad license or MSB-PRO-…/.test(licenseModal)
+    && !/any key 6\+/.test(licenseModal)
+    && !/6\+ characters/.test(licenseModal)
+    && !/PLAY-REVIEW/.test(licenseModal)) {
+    pass('license-modal-honest-copy');
+  } else fail('license-modal-honest-copy', licenseModal.slice(0, 280));
+
+  if (/s\.length >= 6\) return true/.test(index) || /if \(s\.length >= 6\) return true/.test(index)) {
+    fail('license-rejects-six-char-junk', 'validLicenseKey still accepts any 6+ string');
+  } else if (/MSB-PRO-\[A-Z0-9\]/.test(index) && /\[A-Z0-9\]\{6,8\}/.test(index)) {
+    pass('license-rejects-six-char-junk');
+  } else fail('license-rejects-six-char-junk', 'expected MSB-PRO- + Gumroad-shaped gate');
+
+  if (!/MSB-PRO-PLAY-REVIEW/.test(index)) pass('play-review-key-not-in-app-copy');
+  else fail('play-review-key-not-in-app-copy', 'reviewer key leaked into index.html');
+
+  const buy = read('buy.html');
+  if (/any key ≥ 6|at least 6 characters/.test(buy) || /s\.length >= 6\) return true/.test(buy)) {
+    fail('buy-unlock-not-six-char-junk', 'buy.html still accepts any 6+ key');
+  } else if (/Gumroad license or an MSB-PRO- unlock code/.test(buy)) {
+    pass('buy-unlock-not-six-char-junk');
+  } else fail('buy-unlock-not-six-char-junk', 'buy.html unlock copy/gate missing');
+
   const chromium = await loadChromium();
   const { server, base } = await startStaticServer();
   const browser = await chromium.launch({
@@ -152,6 +177,41 @@ async function main() {
   });
 
   try {
+    const firstRun = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await firstRun.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await firstRun.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+    await firstRun.reload({ waitUntil: 'domcontentloaded' });
+    await firstRun.waitForTimeout(700);
+    const firstRunAuth = await firstRun.evaluate(() => {
+      const visible = (el) => {
+        if (!el) return false;
+        if (el.hidden || el.hasAttribute('hidden')) return false;
+        const cs = getComputedStyle(el);
+        if (!cs || cs.display === 'none' || cs.visibility === 'hidden') return false;
+        return el.getBoundingClientRect().height > 2;
+      };
+      const g = document.getElementById('auth-google-btn');
+      const m = document.getElementById('auth-microsoft-btn');
+      const actions = document.querySelector('#auth-shell .auth-actions');
+      const shell = document.getElementById('auth-shell');
+      const offline = [...document.querySelectorAll('button')].find((b) => /Continue offline/i.test(b.textContent || ''));
+      return {
+        shellVisible: visible(shell),
+        actionsVisible: visible(actions),
+        googleVisible: visible(g),
+        microsoftVisible: visible(m),
+        googleText: g ? (g.textContent || '').replace(/\s+/g, ' ').trim() : '',
+        offlineVisible: visible(offline),
+      };
+    });
+    if (!firstRunAuth.googleVisible && !firstRunAuth.microsoftVisible && !firstRunAuth.actionsVisible) {
+      pass('first-run-no-sso-preview');
+    } else fail('first-run-no-sso-preview', JSON.stringify(firstRunAuth));
+    await firstRun.close();
+
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
@@ -296,6 +356,43 @@ async function main() {
     if (clopenLive.pairGone && clopenLive.closeCleared && clopenLive.openCleared && clopenLive.cellsAfter > 20) {
       pass('clopen-marks-clear-when-pair-gone');
     } else fail('clopen-marks-clear-when-pair-gone', JSON.stringify(clopenLive));
+
+    const lic = await page.evaluate(() => {
+      const check = (k) => (typeof validLicenseKey === 'function' ? validLicenseKey(k) : null);
+      const before = typeof isProUnlocked === 'function' ? isProUnlocked() : null;
+      const input = document.getElementById('license-input');
+      const err = document.getElementById('license-error');
+      if (input) input.value = 'abcdef';
+      if (typeof submitLicenseUnlock === 'function') submitLicenseUnlock();
+      const junkBlocked = !!(err && /Gumroad license or an MSB-PRO-/.test(err.textContent || ''));
+      const stillBefore = typeof isProUnlocked === 'function' ? isProUnlocked() : null;
+      if (input) input.value = 'MSB-PRO-CLOSED-TEST';
+      if (typeof submitLicenseUnlock === 'function') submitLicenseUnlock();
+      let stored = null;
+      try { stored = JSON.parse(localStorage.getItem('msb_pro_license') || 'null'); } catch (e) {}
+      return {
+        empty: check(''),
+        junk: check('abcdef'),
+        six: check('123456'),
+        closed: check('MSB-PRO-CLOSED-TEST'),
+        play: check('MSB-PRO-PLAY-REVIEW'),
+        gumroad: check('A1B2C3D4-E5F6G7H8-I9J0K1L2-M3N4O5P6'),
+        barePrefix: check('MSB-PRO-'),
+        junkBlocked,
+        unlockedBeforeJunk: before,
+        unlockedAfterJunk: stillBefore,
+        unlockedAfterClosed: typeof isProUnlocked === 'function' ? isProUnlocked() : null,
+        storedKey: stored && stored.key,
+      };
+    });
+    if (lic.empty === false && lic.junk === false && lic.six === false && lic.barePrefix === false
+      && lic.closed === true && lic.play === true && lic.gumroad === true) {
+      pass('license-gate-live');
+    } else fail('license-gate-live', JSON.stringify(lic));
+    if (lic.junkBlocked && lic.unlockedAfterJunk === lic.unlockedBeforeJunk
+      && lic.unlockedAfterClosed === true && lic.storedKey === 'MSB-PRO-CLOSED-TEST') {
+      pass('license-modal-rejects-junk-accepts-closed-test');
+    } else fail('license-modal-rejects-junk-accepts-closed-test', JSON.stringify(lic));
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

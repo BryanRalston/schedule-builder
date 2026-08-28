@@ -15,6 +15,7 @@ const PRECACHE = [
   './icons/icon-512-maskable.png',
   './icons/favicon-32.png',
   './icons/favicon-16.png',
+  './favicon.ico',
   'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'
 ];
 

@@ -86,6 +86,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -3489,7 +3490,11 @@ input[type="radio"] { accent-color: var(--gold); }
 .install-banner .ib-icon {
   width: 40px; height: 40px; border-radius: 9px;
   flex-shrink: 0;
-  background: #1a1a2e url('icons/icon-192.png') center/cover no-repeat;
+  overflow: hidden;
+  background: #070b14;
+}
+.install-banner .ib-icon img {
+  width: 40px; height: 40px; display: block; object-fit: cover;
 }
 .install-banner .ib-text { flex: 1; min-width: 160px; }
 .install-banner .ib-text strong { display: block; font-size: 0.9rem; }
@@ -5162,7 +5167,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
   <!-- PWA INSTALL BANNER -->
   <div class="install-banner no-print" id="install-banner" role="region" aria-label="Install app">
-    <div class="ib-icon" aria-hidden="true"></div>
+    <div class="ib-icon" aria-hidden="true"><img src="icons/icon-192.png" alt="" width="40" height="40"></div>
     <div class="ib-text">
       <strong data-i18n="Install Schedule Pro">Install Schedule Pro</strong>
       <span data-i18n="Add to your home screen, or get the Android app on Google Play — $19.99 one-time.">Add to your home screen, or get the Android app on Google Play — $19.99 one-time.</span>

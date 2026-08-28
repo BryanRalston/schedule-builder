@@ -122,6 +122,32 @@ function main() {
     }
   }
 
+  if (index.includes('rel="apple-touch-icon" href="icons/icon-192.png"')
+    && index.includes('rel="apple-touch-icon" sizes="180x180" href="icons/icon-192.png"')) {
+    pass('apple-touch-icon-192');
+  } else fail('apple-touch-icon-192', 'apple-touch does not point at icons/icon-192.png');
+
+  const icoRoot = join(ROOT, 'favicon.ico');
+  if (!existsSync(icoRoot)) fail('favicon-ico', 'missing repo-root favicon.ico');
+  else {
+    const ico = readFileSync(icoRoot);
+    if (ico[0] === 0 && ico[1] === 0 && ico[2] === 1 && ico[3] === 0) pass('favicon-ico', ico.length + ' bytes');
+    else fail('favicon-ico', 'not an ICO');
+  }
+  if (index.includes('rel="icon" href="favicon.ico"') && sw.includes("'./favicon.ico'")) {
+    pass('favicon-ico-wired');
+  } else fail('favicon-ico-wired', 'index or sw.js missing favicon.ico');
+
+  if (index.includes('id="install-banner"')
+    && /class="ib-icon"[^>]*>\s*<img src="icons\/icon-192\.png"/.test(index)) {
+    pass('install-banner-icon');
+  } else fail('install-banner-icon', 'Install banner does not use icons/icon-192.png');
+
+  if (/<header[\s\S]*class="brand-row"/.test(index)
+    && !/class="brand-row"[\s\S]{0,400}<img[^>]+icon-/.test(index)) {
+    pass('header-wordmark-only');
+  } else fail('header-wordmark-only', 'header grew a graphical logo');
+
   const failed = results.filter((r) => !r.ok);
   console.log('\n' + results.length + ' checks, ' + failed.length + ' failed');
   if (failed.length) process.exitCode = 1;

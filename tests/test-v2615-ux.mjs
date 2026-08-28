@@ -161,6 +161,15 @@ async function main() {
   if (!/MSB-PRO-PLAY-REVIEW/.test(index)) pass('play-review-key-not-in-app-copy');
   else fail('play-review-key-not-in-app-copy', 'reviewer key leaked into index.html');
 
+  if (/function liveExportCell\(/.test(index)
+    && /function exportPaintForCell\(/.test(index)
+    && /function buildExcelExportHtml\(/.test(index)
+    && /liveExportCell\(r, dateKey\(wd\)\)/.test(index)
+    && /always read schedule now, never a generate-time snapshot/.test(index)
+    && !/mso-shading: auto/.test(index)) {
+    pass('export-paints-live-cells');
+  } else fail('export-paints-live-cells', 'Word/Excel still snapshot or skip live paint');
+
   const buy = read('buy.html');
   if (/any key ≥ 6|at least 6 characters/.test(buy) || /s\.length >= 6\) return true/.test(buy)) {
     fail('buy-unlock-not-six-char-junk', 'buy.html still accepts any 6+ key');
@@ -393,6 +402,48 @@ async function main() {
       && lic.unlockedAfterClosed === true && lic.storedKey === 'MSB-PRO-CLOSED-TEST') {
       pass('license-modal-rejects-junk-accepts-closed-test');
     } else fail('license-modal-rejects-junk-accepts-closed-test', JSON.stringify(lic));
+
+    const exportPaint = await page.evaluate(() => {
+      const ROLES = getRoles();
+      const allDks = periodDates.map((d) => dateKey(d));
+      let hit = null;
+      ROLES.forEach((r) => {
+        if (hit) return;
+        allDks.forEach((dk) => {
+          if (hit) return;
+          const s = schedule[r] && schedule[r][dk];
+          if (typeof isOpen === 'function' && isOpen(s)) hit = { role: r, dk, before: s };
+        });
+      });
+      if (!hit) return { error: 'no-open-cell' };
+      const before = exportPaintForCell(hit.role, hit.dk);
+      const weekIdx = Math.floor(allDks.indexOf(hit.dk) / 7);
+      applySchedEdit(hit.role, hit.dk, weekIdx, 'close');
+      const after = exportPaintForCell(hit.role, hit.dk);
+      const excel = typeof buildExcelExportHtml === 'function' ? buildExcelExportHtml() : '';
+      const board = document.querySelector(
+        'td.shift-editable[data-role="' + hit.role + '"][data-dk="' + hit.dk + '"]'
+      );
+      return {
+        beforeShift: hit.before,
+        beforeBg: before.bg,
+        afterShift: after.shift,
+        afterBg: after.bg,
+        afterLabel: after.label,
+        excelHasCloseFill: excel.indexOf('#fce7f3') !== -1,
+        excelHasCloseLabel: excel.indexOf(after.label) !== -1,
+        boardClose: !!(board && board.classList.contains('shift-close')),
+      };
+    });
+    if (exportPaint.error) fail('export-colors-follow-cell-edit', exportPaint.error);
+    else if (exportPaint.beforeBg === '#d1fae5'
+      && exportPaint.afterBg === '#fce7f3'
+      && exportPaint.afterShift === 'close'
+      && exportPaint.excelHasCloseFill
+      && exportPaint.excelHasCloseLabel
+      && exportPaint.boardClose) {
+      pass('export-colors-follow-cell-edit', exportPaint.afterLabel);
+    } else fail('export-colors-follow-cell-edit', JSON.stringify(exportPaint));
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

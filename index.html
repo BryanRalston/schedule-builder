@@ -9110,6 +9110,26 @@ function getExportCellColors(s) {
   return { bg: '#ffffff', color: '#000000' };
 }
 
+/** Live cell paint for Word/Excel — always read schedule now, never a generate-time snapshot. */
+function liveExportCell(role, dk, opts) {
+  const s = schedule && schedule[role] ? schedule[role][dk] : '';
+  let used = s;
+  if (opts && opts.kcBlankIfIdle) {
+    if (!(s && (isWork(s) || s === 'pto' || s === 'rto' || s === 'loa' || s === 'kc-close'))) used = null;
+  }
+  const paint = getExportCellColors(used);
+  return {
+    shift: used || '',
+    label: used ? getPrintShiftLabel(used) : '',
+    bg: paint.bg,
+    color: paint.color
+  };
+}
+
+function exportPaintForCell(role, dk) {
+  return liveExportCell(role, dk);
+}
+
 // ── NRF 4-5-4 Fiscal Calendar ──
 function getFiscalYearStart(year) {
   // NRF fiscal year starts on the Sunday closest to Feb 1
@@ -13837,11 +13857,10 @@ function exportSchedule() {
       body += '<tr>';
       body += '<td style="' + nameStyle + '">' + esc(names[r] || r.toUpperCase()) + '</td>';
       weekDates.forEach(wd => {
-        const s = schedule[r] && schedule[r][dateKey(wd)];
-        const label = s ? getPrintShiftLabel(s) : '';
-        const c = getExportCellColors(s);
-        body += '<td style="' + tdBase + 'background:' + c.bg + ';color:' + c.color +
-          ';font-weight:600;">' + esc(label) + '</td>';
+        const cell = liveExportCell(r, dateKey(wd));
+        body += '<td bgcolor="' + cell.bg + '" style="' + tdBase + 'background:' + cell.bg +
+          ';color:' + cell.color + ';mso-shading:' + cell.bg + ';font-weight:600;">' +
+          esc(cell.label) + '</td>';
       });
       body += '</tr>';
     });
@@ -13851,16 +13870,10 @@ function exportSchedule() {
       body += '<tr>';
       body += '<td style="' + nameStyle + '">' + esc(names[kc.id] || kc.name) + '</td>';
       weekDates.forEach(wd => {
-        const s = schedule[kc.id] && schedule[kc.id][dateKey(wd)];
-        let label = '';
-        let cellShift = null;
-        if (s && (isWork(s) || s === 'pto' || s === 'rto' || s === 'loa' || s === 'kc-close')) {
-          label = getPrintShiftLabel(s);
-          cellShift = s;
-        }
-        const c = getExportCellColors(cellShift);
-        body += '<td style="' + tdBase + 'background:' + c.bg + ';color:' + c.color +
-          ';font-weight:600;">' + esc(label) + '</td>';
+        const cell = liveExportCell(kc.id, dateKey(wd), { kcBlankIfIdle: true });
+        body += '<td bgcolor="' + cell.bg + '" style="' + tdBase + 'background:' + cell.bg +
+          ';color:' + cell.color + ';mso-shading:' + cell.bg + ';font-weight:600;">' +
+          esc(cell.label) + '</td>';
       });
       body += '</tr>';
     });
@@ -13880,7 +13893,7 @@ function exportSchedule() {
     '  @page { size: landscape; margin: 0.5in; }\n' +
     '  body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #111; }\n' +
     '  table { border-collapse: collapse; }\n' +
-    '  td, th { -webkit-print-color-adjust: exact; print-color-adjust: exact; mso-shading: auto; }\n' +
+    '  td, th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }\n' +
     '</style>\n' +
     '</head>\n' +
     '<body>\n' + body + '\n</body>\n</html>';
@@ -13896,7 +13909,78 @@ function exportSchedule() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// ── Export plain Excel (.xlsx via SheetJS) ──
+// ── Export Excel (.xls HTML) painted from live cells — same palette as the board ──
+function buildExcelExportHtml() {
+  const names = getManagerNames();
+  const p = currentPeriod;
+  const storeNum = (document.getElementById('store-number') || {}).value || '';
+  const ROLES = getRoles();
+  const nonMgrKCs = getNonManagerKCs();
+  const DAY_HDR = ['SUN', 'MON', 'TUES', 'WED', 'THURS', 'FRI', 'SAT'];
+  const tdBase = 'border:1px solid #333;padding:4px 6px;text-align:center;vertical-align:middle;font-size:9pt;';
+  const nameStyle = 'border:1px solid #333;padding:4px 6px;text-align:left;font-weight:700;background:#f8f9fb;';
+  const thStyle = 'border:1px solid #333;padding:4px 6px;text-align:center;font-weight:700;background:#f3f4f6;';
+
+  let body = '<table style="border-collapse:collapse;font-family:Arial,sans-serif">';
+  body += '<tr><td colspan="8" style="font-size:16pt;font-weight:700">MANAGEMENT SCHEDULE</td></tr>';
+  let subtitle = 'Period ' + p.number + '  FY' + fiscalYear + '  Month: ' + esc(p.approxMonth);
+  if (storeNum) subtitle = 'Store: ' + esc(storeNum) + '     ' + subtitle;
+  body += '<tr><td colspan="8">' + subtitle + '</td></tr>';
+  body += '<tr><td colspan="8"></td></tr>';
+
+  p.weeks.forEach((week, wIdx) => {
+    const weekDates = [];
+    const d = new Date(week.start);
+    for (let i = 0; i < 7; i++) { weekDates.push(new Date(d)); d.setDate(d.getDate() + 1); }
+    const sat = weekDates[6];
+    const weLabel = 'W/E ' + (sat.getMonth() + 1) + '/' + sat.getDate() + (holidayWeeks[wIdx] ? '  Hol' : '');
+
+    body += '<tr><td colspan="8" style="font-weight:700;background:#1a1a2e;color:#fff">' + esc(weLabel) + '</td></tr>';
+    body += '<tr><td style="' + thStyle + '"></td>';
+    DAY_HDR.forEach((dn) => { body += '<td style="' + thStyle + '">' + dn + '</td>'; });
+    body += '</tr><tr><td style="' + thStyle + '"></td>';
+    weekDates.forEach((wd) => { body += '<td style="' + thStyle + '">' + wd.getDate() + '</td>'; });
+    body += '</tr>';
+
+    ROLES.forEach((r) => {
+      body += '<tr><td style="' + nameStyle + '">' + esc(names[r] || r.toUpperCase()) + '</td>';
+      weekDates.forEach((wd) => {
+        const cell = liveExportCell(r, dateKey(wd));
+        body += '<td bgcolor="' + cell.bg + '" style="' + tdBase + 'background:' + cell.bg +
+          ';color:' + cell.color + ';mso-shading:' + cell.bg + ';font-weight:600">' +
+          esc(cell.label) + '</td>';
+      });
+      body += '</tr>';
+    });
+
+    nonMgrKCs.forEach((kc) => {
+      body += '<tr><td style="' + nameStyle + '">' + esc(names[kc.id] || kc.name) + '</td>';
+      weekDates.forEach((wd) => {
+        const cell = liveExportCell(kc.id, dateKey(wd), { kcBlankIfIdle: true });
+        body += '<td bgcolor="' + cell.bg + '" style="' + tdBase + 'background:' + cell.bg +
+          ';color:' + cell.color + ';mso-shading:' + cell.bg + ';font-weight:600">' +
+          esc(cell.label) + '</td>';
+      });
+      body += '</tr>';
+    });
+
+    body += '<tr><td colspan="8"></td></tr>';
+  });
+  body += '</table>';
+
+  return (
+    '<html xmlns:o="urn:schemas-microsoft-com:office:office"\n' +
+    '      xmlns:x="urn:schemas-microsoft-com:office:excel"\n' +
+    '      xmlns="http://www.w3.org/TR/REC-html40">\n' +
+    '<head><meta charset="utf-8">\n' +
+    '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>\n' +
+    '<x:Name>Schedule</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>\n' +
+    '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->\n' +
+    '<style>td,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style>\n' +
+    '</head><body>\n' + body + '\n</body></html>'
+  );
+}
+
 function exportScheduleExcel() {
   if (!requirePro('Excel export')) return;
   if (!currentPeriod) {
@@ -13908,73 +13992,22 @@ function exportScheduleExcel() {
     alert('Please generate the schedule first before exporting.');
     return;
   }
-  if (typeof XLSX === 'undefined') {
-    alert('Excel library not loaded. Check your internet connection and try again.');
-    return;
-  }
 
-  const names = getManagerNames();
-  const p = currentPeriod;
-  const storeNum = document.getElementById('store-number').value || '';
-  const ROLES = getRoles();
-  const nonMgrKCs = getNonManagerKCs();
-  const DAY_HDR = ['SUN', 'MON', 'TUES', 'WED', 'THURS', 'FRI', 'SAT'];
-
+  const storeNum = (document.getElementById('store-number') || {}).value || '';
   let filename = 'Manager_Schedule';
   if (storeNum) filename += '_Store' + storeNum;
-  filename += '_P' + String(p.number).padStart(2, '0') + '_' + fiscalYear + '.xlsx';
+  filename += '_P' + String(currentPeriod.number).padStart(2, '0') + '_' + fiscalYear + '.xls';
 
-  const rows = [];
-
-  // Title block
-  rows.push(['MANAGEMENT SCHEDULE']);
-  let subtitle = 'Period ' + p.number + '  FY' + fiscalYear + '  Month: ' + p.approxMonth;
-  if (storeNum) subtitle = 'Store: ' + storeNum + '     ' + subtitle;
-  rows.push([subtitle]);
-  rows.push([]);
-
-  p.weeks.forEach((week, wIdx) => {
-    const weekDates = [];
-    const d = new Date(week.start);
-    for (let i = 0; i < 7; i++) { weekDates.push(new Date(d)); d.setDate(d.getDate() + 1); }
-
-    const sat = weekDates[6];
-    const weLabel = 'W/E ' + (sat.getMonth() + 1) + '/' + sat.getDate() + (holidayWeeks[wIdx] ? ' 🏖' : '');
-
-    rows.push([weLabel, ...DAY_HDR]);
-    rows.push(['', ...weekDates.map(wd => wd.getDate())]);
-
-    ROLES.forEach(r => {
-      rows.push([
-        names[r] || r.toUpperCase(),
-        ...weekDates.map(wd => {
-          const s = schedule[r] && schedule[r][dateKey(wd)];
-          return s ? getPrintShiftLabel(s) : '';
-        })
-      ]);
-    });
-
-    nonMgrKCs.forEach(kc => {
-      rows.push([
-        names[kc.id] || kc.name,
-        ...weekDates.map(wd => {
-          const s = schedule[kc.id] && schedule[kc.id][dateKey(wd)];
-          return (s && (isWork(s) || s === 'pto' || s === 'rto' || s === 'loa')) ? getPrintShiftLabel(s) : '';
-        })
-      ]);
-    });
-
-    rows.push([]);
-  });
-
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-
-  // Column widths: name col wide, 7 day cols medium
-  ws['!cols'] = [{ wch: 24 }, ...Array(7).fill({ wch: 13 })];
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
-  XLSX.writeFile(wb, filename);
+  const html = buildExcelExportHtml();
+  const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ── Render Summary ──

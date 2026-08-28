@@ -170,6 +170,40 @@ async function main() {
     pass('export-paints-live-cells');
   } else fail('export-paints-live-cells', 'Word/Excel still snapshot or skip live paint');
 
+  if (/function schedEditStop\(/.test(index)
+    && /onpointerdown="schedEditStop\(event\); applySchedEdit/.test(index)
+    && /document\.addEventListener\('pointerdown'/.test(index)
+    && !/Close schedule edit menu on outside click/.test(index)) {
+    pass('cell-edit-applies-on-pointerdown');
+  } else fail('cell-edit-applies-on-pointerdown', 'edit menu still click-only / outside-click race');
+
+  if (/#review-sheet\.open/.test(index)
+    && /z-index: 20080/.test(index)
+    && /onpointerdown="event\.preventDefault\(\); event\.stopPropagation\(\); closeReviewSheet/.test(index)
+    && /onpointerdown="event\.preventDefault\(\); event\.stopPropagation\(\); closeAccountPanel/.test(index)
+    && /if \(event\.target === this\) closeAccountPanel/.test(index)) {
+    pass('close-buttons-pointerdown');
+  } else fail('close-buttons-pointerdown', 'Review/Account Close still click-only or under header');
+
+  if (/\.header-menu-panel \{[\s\S]*?max-height: min\(70vh/.test(index)
+    && /\.header-menu-panel \{[\s\S]*?overflow-y: auto/.test(index)) {
+    pass('more-menu-scrolls');
+  } else fail('more-menu-scrolls', 'More panel missing max-height / overflow-y');
+
+  if (/function isNamedKeyCarrier\(/.test(index)
+    && /Unnamed KC1 stays off the board/.test(index)
+    && /isNamedKeyCarrier\(kc\)/.test(index)) {
+    pass('unnamed-kc-hidden-from-board');
+  } else fail('unnamed-kc-hidden-from-board', 'getAllWithKC still always includes KC1');
+
+  if (/skipFreeCount: true/.test(index)
+    && /if \(!opts\.skipFreeCount\) recordFreeGenerate/.test(index)
+    && /if \(!opts\.skipFreeCount && !requireGenerateAllowance/.test(index)
+    && !/Tour sample store/.test(index)
+    && /id="btn-tour-sample"[^>]*>Load sample store</.test(index)) {
+    pass('sample-does-not-burn-free-build');
+  } else fail('sample-does-not-burn-free-build', 'demo generate still counts or Tour sample label remains');
+
   const buy = read('buy.html');
   if (/any key ≥ 6|at least 6 characters/.test(buy) || /s\.length >= 6\) return true/.test(buy)) {
     fail('buy-unlock-not-six-char-junk', 'buy.html still accepts any 6+ key');
@@ -444,6 +478,176 @@ async function main() {
       && exportPaint.boardClose) {
       pass('export-colors-follow-cell-edit', exportPaint.afterLabel);
     } else fail('export-colors-follow-cell-edit', JSON.stringify(exportPaint));
+
+    const deskClose = await page.evaluate(async () => {
+      const cells = [...document.querySelectorAll('#schedule-grid td.shift-editable')];
+      const work = cells.find((c) => {
+        const s = schedule[c.getAttribute('data-role')] && schedule[c.getAttribute('data-role')][c.getAttribute('data-dk')];
+        return typeof isOpen === 'function' && isOpen(s);
+      });
+      if (!work) return { error: 'no-open-cell' };
+      work.scrollIntoView({ block: 'center' });
+      work.click();
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const menu = document.querySelector('.sched-edit-menu');
+      const closeBtn = menu && [...menu.querySelectorAll('button')].find((b) => /^Close$/i.test((b.textContent || '').trim()));
+      if (!closeBtn) return { error: 'no-close-btn', portalOpen: !!menu };
+      const r = closeBtn.getBoundingClientRect();
+      const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      const hitClose = !!(el && (el === closeBtn || (el.closest && el.closest('button') === closeBtn)));
+      const role = work.getAttribute('data-role');
+      const dk = work.getAttribute('data-dk');
+      closeBtn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+      await new Promise((res) => setTimeout(res, 200));
+      const live = document.querySelector('td.shift-editable[data-role="' + role + '"][data-dk="' + dk + '"]');
+      const undo = document.getElementById('btn-undo-edit');
+      return {
+        hitClose,
+        stored: schedule[role] && schedule[role][dk],
+        after: live ? (live.textContent || '').replace(/\s+/g, ' ').trim() : '',
+        undoLabel: undo ? (undo.title || undo.textContent || '') : '',
+      };
+    });
+    if (deskClose.hitClose && deskClose.stored === 'close' && /cell edit/i.test(deskClose.undoLabel)) {
+      pass('desktop-close-hit-applies', deskClose.after);
+    } else fail('desktop-close-hit-applies', JSON.stringify(deskClose));
+
+    const closeTaps = await page.evaluate(() => {
+      if (typeof openReviewSheet === 'function') openReviewSheet();
+      const sheet = document.getElementById('review-sheet');
+      const revBtn = document.querySelector('.review-sheet-close');
+      const revRect = revBtn ? revBtn.getBoundingClientRect() : null;
+      const revHit = revRect
+        ? document.elementFromPoint(revRect.left + revRect.width / 2, revRect.top + revRect.height / 2)
+        : null;
+      const revHitOk = !!(revHit && (revHit === revBtn || (revHit.closest && revHit.closest('.review-sheet-close'))));
+      if (revBtn) {
+        revBtn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+      }
+      const reviewClosed = !!(sheet && (sheet.hidden || !sheet.classList.contains('open')));
+      if (typeof openAccountPanel === 'function') openAccountPanel();
+      const modal = document.getElementById('account-modal');
+      const accBtn = [...document.querySelectorAll('#account-modal button')].find((b) => /^Close$/i.test((b.textContent || '').trim()));
+      const accRect = accBtn ? accBtn.getBoundingClientRect() : null;
+      const accHit = accRect
+        ? document.elementFromPoint(accRect.left + accRect.width / 2, accRect.top + accRect.height / 2)
+        : null;
+      const accHitOk = !!(accHit && (accHit === accBtn || (accHit.closest && accHit.closest('button') === accBtn)));
+      if (accBtn) {
+        accBtn.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+      }
+      const accountClosed = !!(modal && modal.hasAttribute('hidden'));
+      return { revHitOk, reviewClosed, accHitOk, accountClosed };
+    });
+    if (closeTaps.revHitOk && closeTaps.reviewClosed) pass('review-close-tap');
+    else fail('review-close-tap', JSON.stringify(closeTaps));
+    if (closeTaps.accHitOk && closeTaps.accountClosed) pass('account-close-tap');
+    else fail('account-close-tap', JSON.stringify(closeTaps));
+
+    const moreScroll = await page.evaluate(() => {
+      const panel = document.getElementById('header-menu-panel');
+      const btn = document.getElementById('header-more-btn');
+      if (btn && typeof toggleHeaderMenu === 'function') toggleHeaderMenu({ stopPropagation() {} });
+      const cs = panel ? getComputedStyle(panel) : null;
+      const maxH = cs ? cs.maxHeight : '';
+      const overflowY = cs ? cs.overflowY : '';
+      const buy = panel && [...panel.querySelectorAll('button')].find((b) => /Buy Pro/i.test(b.textContent || ''));
+      const tour = panel && [...panel.querySelectorAll('button')].find((b) => /Take tour/i.test(b.textContent || ''));
+      const account = panel && [...panel.querySelectorAll('button')].find((b) => /Account/i.test(b.textContent || ''));
+      const panelH = panel ? panel.getBoundingClientRect().height : 0;
+      if (typeof closeHeaderMenu === 'function') closeHeaderMenu();
+      return {
+        maxH,
+        overflowY,
+        panelH,
+        hasBuy: !!buy,
+        hasTour: !!tour,
+        hasAccount: !!account,
+        scrollable: panel ? panel.scrollHeight > panel.clientHeight + 2 || panelH <= window.innerHeight * 0.75 : false,
+      };
+    });
+    if (/px|vh|dvh|%/.test(moreScroll.maxH) && /auto|scroll/.test(moreScroll.overflowY)
+      && moreScroll.hasBuy && moreScroll.hasTour && moreScroll.hasAccount) {
+      pass('more-menu-all-items-reachable', moreScroll.maxH);
+    } else fail('more-menu-all-items-reachable', JSON.stringify(moreScroll));
+
+    const kcBoard = await page.evaluate(() => {
+      const ids = typeof getAllWithKC === 'function' ? getAllWithKC() : [];
+      const rows = [...document.querySelectorAll('#schedule-grid [data-role^="kc"]')].map((el) => el.getAttribute('data-role'));
+      return { allWithKc: ids, kcRows: [...new Set(rows)] };
+    });
+    if (!kcBoard.allWithKc.includes('kc1') && kcBoard.kcRows.length === 0) {
+      pass('unnamed-kc1-not-on-board');
+    } else fail('unnamed-kc1-not-on-board', JSON.stringify(kcBoard));
+
+    const freePage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await freePage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await freePage.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('msb_tour_done', '1');
+      localStorage.setItem('msb_welcome_dismissed', '1');
+    });
+    await freePage.reload({ waitUntil: 'domcontentloaded' });
+    await freePage.waitForTimeout(700);
+    const freeFresh = await freePage.evaluate(() => {
+      const limit = typeof freeGenerateLimit === 'function' ? freeGenerateLimit() : null;
+      const left = typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null;
+      const count = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
+      const chip = (document.getElementById('account-chip-plan') || {}).textContent || '';
+      const meta = (document.getElementById('gen-meta') || {}).textContent || '';
+      const named = typeof isNamedKeyCarrier === 'function' && kcList[0] ? isNamedKeyCarrier(kcList[0]) : null;
+      const boardIds = typeof getAllWithKC === 'function' ? getAllWithKC() : [];
+      return { limit, left, count, chip, meta, named, boardIds };
+    });
+    if (freeFresh.limit === 2 && freeFresh.left === 2 && freeFresh.count === 0
+      && /2/.test(freeFresh.chip) && freeFresh.named === false && !freeFresh.boardIds.includes('kc1')) {
+      pass('fresh-free-shows-two-builds', freeFresh.chip);
+    } else fail('fresh-free-shows-two-builds', JSON.stringify(freeFresh));
+
+    const freeBuilt = await freePage.evaluate(() => {
+      const sm = document.getElementById('name-sm');
+      const am1 = document.getElementById('name-am1');
+      if (sm) sm.value = 'Bryan Test';
+      if (am1) am1.value = 'Pat Nguyen';
+      persistManagerNames();
+      persistStoreMeta();
+      if (typeof loadPeriod === 'function' && (!periodDates || !periodDates.length)) loadPeriod();
+      buildFromSetup();
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const left = typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null;
+          const count = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
+          const chip = (document.getElementById('account-chip-plan') || {}).textContent || '';
+          const btn = document.getElementById('btn-generate');
+          resolve({
+            left, count, chip,
+            canAgain: typeof canGenerateSchedule === 'function' ? canGenerateSchedule() : null,
+            disabled: !!(btn && btn.disabled),
+            cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+          });
+        }, 2000);
+      });
+    });
+    if (freeBuilt.left === 1 && freeBuilt.count === 1 && freeBuilt.canAgain === true && !freeBuilt.disabled && freeBuilt.cells > 10) {
+      pass('first-build-leaves-one-free', freeBuilt.chip);
+    } else fail('first-build-leaves-one-free', JSON.stringify(freeBuilt));
+
+    const sampleFree = await freePage.evaluate(() => {
+      const before = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
+      if (typeof loadDemoStore === 'function') loadDemoStore({ explicit: true, confirmed: true });
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const after = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
+          const left = typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null;
+          resolve({ before, after, left });
+        }, 2200);
+      });
+    });
+    if (sampleFree.after === sampleFree.before && sampleFree.left === 1) {
+      pass('sample-generate-does-not-consume', 'still ' + sampleFree.left + ' left');
+    } else fail('sample-generate-does-not-consume', JSON.stringify(sampleFree));
+    await freePage.close();
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

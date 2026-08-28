@@ -1693,12 +1693,12 @@ input[type="radio"] { accent-color: var(--gold); }
 .sched-edit-overlay {
   position: absolute;
   inset: 0;
-  z-index: 200;
+  z-index: 1;
   pointer-events: auto;
 }
 .sched-edit-menu {
   position: absolute;
-  z-index: 210;
+  z-index: 2;
   pointer-events: auto;
   background: rgba(12, 18, 32, 0.97);
   border: 1px solid var(--line-strong);
@@ -2901,6 +2901,11 @@ input[type="radio"] { accent-color: var(--gold); }
   padding: 0.4rem;
   z-index: 200;
   backdrop-filter: blur(16px);
+  max-height: min(70vh, calc(100dvh - 4.5rem));
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .header-menu-panel[hidden] { display: none !important; }
 .header-menu-panel button {
@@ -3606,6 +3611,9 @@ html.auth-locked .toast-host { z-index: 20050; }
 .account-panel-card,
 .license-modal-card,
 .provider-modal-card {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
   background: rgba(12, 18, 32, 0.97);
   color: var(--ink);
   border: 1px solid var(--line-strong);
@@ -4250,13 +4258,22 @@ body.msb-board-live .app-footer { display: none !important; }
 .built-pill[hidden] { display: none !important; }
 
 .review-sheet { display: none; }
-.review-sheet.open { display: block; }
+.review-sheet.open,
+#review-sheet.open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 20080; /* above sticky header (100); below Account (20100) */
+  pointer-events: auto;
+}
+#review-sheet[hidden] { display: none !important; }
 .review-sheet-backdrop {
-  position: fixed; inset: 0; z-index: 240;
+  position: absolute; inset: 0; z-index: 0;
   background: rgba(3, 6, 14, 0.62);
+  pointer-events: auto;
 }
 .review-sheet-panel {
-  position: fixed; z-index: 241;
+  position: absolute; z-index: 1;
   background: rgba(10, 16, 30, 0.98);
   border: 1px solid rgba(61, 220, 255, 0.28);
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
@@ -4270,8 +4287,11 @@ body.msb-board-live .app-footer { display: none !important; }
 }
 .review-sheet-head strong { font-size: 0.95rem; }
 .review-sheet-close {
+  position: relative; z-index: 2;
   background: transparent; border: none; color: var(--ink-3);
-  font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 0.25rem 0.4rem;
+  font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  padding: 0.45rem 0.7rem; min-height: 44px; min-width: 44px;
+  pointer-events: auto;
 }
 .review-sheet-body {
   overflow: auto; padding: 0.65rem 0.85rem 1rem;
@@ -4287,6 +4307,7 @@ body.msb-board-live .app-footer { display: none !important; }
     width: min(440px, 92vw);
     border-radius: 0;
     border-right: none; border-top: none; border-bottom: none;
+    pointer-events: auto;
   }
 }
 @media (max-width: 720px) {
@@ -4814,7 +4835,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="welcome-actions">
       <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()">Start with my team</button>
       <div class="welcome-secondary">
-        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
+        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})">Load sample store</button>
         <button type="button" class="btn-outline welcome-secondary-btn" onclick="startOnboardingTour(true)">Take tour</button>
         <button type="button" class="btn-outline welcome-secondary-btn" onclick="location.href='buy.html'" data-price-label>Pro · $19.99</button>
         <button type="button" class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)">Dismiss</button>
@@ -5088,7 +5109,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <strong>No schedule yet</strong>
         Name two managers on Setup, then Build. Requests and rules can wait.
         <div style="margin-top:0.85rem">
-          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Tour sample store</button>
+          <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})">Load sample store</button>
           <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
@@ -5159,7 +5180,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="review-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="review-sheet-title">
     <div class="review-sheet-head">
       <strong id="review-sheet-title">Review</strong>
-      <button type="button" class="review-sheet-close" onclick="closeReviewSheet()">Close</button>
+      <button type="button" class="review-sheet-close" onpointerdown="event.preventDefault(); event.stopPropagation(); closeReviewSheet();" onclick="event.stopPropagation(); closeReviewSheet();">Close</button>
     </div>
     <div class="review-sheet-body">
       <div id="schedule-diff-panel" class="no-print" hidden>
@@ -5216,8 +5237,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <!-- Account panel -->
-<div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title">
-  <div class="account-panel-card">
+<div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title" onclick="if (event.target === this) closeAccountPanel();">
+  <div class="account-panel-card" onclick="event.stopPropagation()">
     <h3 id="account-panel-title">This device</h3>
     <p class="ap-sub">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
     <div hidden>
@@ -5234,7 +5255,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()">Activate team license</button>
       <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center">Manage billing</a>
-      <button type="button" class="ap-btn-secondary" onclick="closeAccountPanel()">Close</button>
+      <button type="button" class="ap-btn-secondary" onpointerdown="event.preventDefault(); event.stopPropagation(); closeAccountPanel();" onclick="event.stopPropagation(); closeAccountPanel();">Close</button>
     </div>
     <div id="ap-leftover-session" hidden>
       <label class="ap-signout-opts">
@@ -6867,11 +6888,19 @@ function canAddManagerSeat() {
 }
 
 // ── Computed Role Arrays ──
+function isNamedKeyCarrier(kc) {
+  if (!kc) return false;
+  const el = document.getElementById('name-' + kc.id);
+  const n = el ? el.value : (kc.name || '');
+  if (typeof isPlaceholderManagerName === 'function') return !isPlaceholderManagerName(n);
+  return !!(String(n || '').trim());
+}
+
 function getRoles() {
-  // Returns ['sm', 'am1', ..., 'amN'] plus any KCs with manager-mode on
+  // Returns ['sm', 'am1', ..., 'amN'] plus named KCs with manager-mode on
   const roles = ['sm'];
   for (let i = 1; i <= amCount; i++) roles.push('am' + i);
-  kcList.forEach(kc => { if (kc.asManager) roles.push(kc.id); });
+  kcList.forEach(kc => { if (kc.asManager && isNamedKeyCarrier(kc)) roles.push(kc.id); });
   return roles;
 }
 
@@ -6883,19 +6912,19 @@ function getAMs() {
 }
 
 function getNonManagerKCs() {
-  // KCs that are NOT in manager mode
-  return kcList.filter(kc => !kc.asManager);
+  // Named KCs that are NOT in manager mode
+  return kcList.filter(kc => !kc.asManager && isNamedKeyCarrier(kc));
 }
 
 function getManagerKCs() {
-  // KCs that ARE in manager mode
-  return kcList.filter(kc => kc.asManager);
+  // Named KCs that ARE in manager mode
+  return kcList.filter(kc => kc.asManager && isNamedKeyCarrier(kc));
 }
 
 function getAllWithKC() {
-  // All roles that appear in the schedule grid: managers + non-manager KCs
+  // Board rows: managers + named non-manager KCs. Unnamed KC1 stays off the board.
   const roles = getRoles();
-  kcList.forEach(kc => { if (!kc.asManager) roles.push(kc.id); });
+  kcList.forEach(kc => { if (!kc.asManager && isNamedKeyCarrier(kc)) roles.push(kc.id); });
   return roles;
 }
 
@@ -8752,7 +8781,7 @@ function loadDemoStore(opts) {
       updateReadyChecklist();
       showToast('Sample store loaded — generating schedule…', 'success');
       setTimeout(() => {
-        generateSchedule();
+        generateSchedule({ skipFreeCount: true });
         dismissWelcome();
       }, 200);
     }, 100);
@@ -9962,7 +9991,8 @@ function prevDateKey(dk) {
 
 // ── GENERATE SCHEDULE ──
 let _generateBusy = false;
-function generateSchedule() {
+function generateSchedule(opts) {
+  opts = opts || {};
   if (_generateBusy) return;
   if (window._viewLocked) {
     showToast('View only - cannot generate.', 'warn');
@@ -9978,7 +10008,7 @@ function generateSchedule() {
     switchTab('setup');
     return;
   }
-  if (!requireGenerateAllowance()) return;
+  if (!opts.skipFreeCount && !requireGenerateAllowance()) return;
   try { if (typeof cancelGenerateArrival === 'function') cancelGenerateArrival(); } catch (e) {}
   const btn = document.getElementById('btn-generate');
   const prevLabel = btn ? btn.textContent : '';
@@ -10004,7 +10034,7 @@ function generateSchedule() {
   // Yield so the button state paints before heavy work
   setTimeout(() => {
     try {
-      _generateScheduleInner();
+      _generateScheduleInner(opts);
       try { if (typeof notifyTourGenerateComplete === 'function') notifyTourGenerateComplete(); } catch (e2) {}
     } catch (e) {
       console.error(e);
@@ -10024,7 +10054,8 @@ function generateSchedule() {
     }
   }, 30);
 }
-function _generateScheduleInner() {
+function _generateScheduleInner(opts) {
+  opts = opts || {};
   schedule = {};
   const names = getManagerNames();
   readPreferencesFromUI();
@@ -12116,8 +12147,8 @@ function _generateScheduleInner() {
   const ts = document.getElementById('gen-timestamp');
   if (ts) ts.textContent = 'Generated ' + new Date().toLocaleString();
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
-  // Successful build only — free allowance decrements after a real schedule lands
-  recordFreeGenerate();
+  // Successful user Build only — sample / tour generate does not burn a free build
+  if (!opts.skipFreeCount) recordFreeGenerate();
   const left = remainingFreeGenerates();
   let toastMsg = `Schedule ready · Quality ${q.score}/100 (${q.grade})`;
   if (!isProUnlocked()) {
@@ -14414,13 +14445,23 @@ function getKCEditOptions() {
 
 let schedEditOpen = false;
 
+function schedEditStop(e) {
+  if (!e) return;
+  try { e.preventDefault(); } catch (err) {}
+  try { e.stopPropagation(); } catch (err2) {}
+  if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+}
+
 function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
-  e.stopPropagation();
+  if (e) {
+    e.stopPropagation();
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+  }
   if (window._viewLocked) return;
   closeSchedEditMenu();
 
-  const cell = e.currentTarget;
-  const rect = cell.getBoundingClientRect();
+  const cell = e && e.currentTarget ? e.currentTarget : null;
+  const rect = cell && cell.getBoundingClientRect ? cell.getBoundingClientRect() : { left: 8, top: 8, bottom: 40, width: 40, height: 32 };
   if (window._msbSuppressCellClick) {
     window._msbSuppressCellClick = false;
     return;
@@ -14429,15 +14470,15 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
 
   const portal = document.getElementById('sched-edit-portal');
   const layer = layerRectFromClient(rect);
-  let html = '<div class="sched-edit-overlay" onclick="closeSchedEditMenu()"></div>';
-  html += `<div class="sched-edit-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px">`;
-  html += `<button type="button" onclick="event.stopPropagation(); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});">`;
+  let html = '<div class="sched-edit-overlay" onpointerdown="schedEditStop(event); closeSchedEditMenu();"></div>';
+  html += `<div class="sched-edit-menu" style="top:${layer.bottom + 4}px;left:${layer.left}px" onpointerdown="event.stopPropagation();">`;
+  html += `<button type="button" onpointerdown="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});" onclick="schedEditStop(event); openCellInspector(event,'${role}','${dk}',${weekIdx},${isKCRole});">`;
   html += `<span class="swatch" style="background:rgba(61,220,255,0.45)"></span>Swap with…</button>`;
   html += `<div class="menu-divider"></div>`;
 
-  options.forEach((o, i) => {
+  options.forEach((o) => {
     if (o.value === '__custom__') {
-      html += `<button onclick="showSchedCustomInput('${role}','${dk}',${weekIdx}); event.stopPropagation();" style="color:#7e22ce;font-weight:600">`;
+      html += `<button type="button" onpointerdown="schedEditStop(event); showSchedCustomInput('${role}','${dk}',${weekIdx});" onclick="schedEditStop(event); showSchedCustomInput('${role}','${dk}',${weekIdx});" style="color:#7e22ce;font-weight:600">`;
       html += `<span class="swatch" style="background:${o.color}"></span>`;
       html += o.label;
       html += `</button>`;
@@ -14446,11 +14487,11 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
       html += `<input type="text" id="sched-custom-start-${role}-${dk}" placeholder="10a">`;
       html += `<span class="ci-dash">-</span>`;
       html += `<input type="text" id="sched-custom-end-${role}-${dk}" placeholder="6p">`;
-      html += `<button class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onclick="applySchedCustom('${role}','${dk}',${weekIdx}); event.stopPropagation();">OK</button>`;
+      html += `<button type="button" class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onpointerdown="schedEditStop(event); applySchedCustom('${role}','${dk}',${weekIdx});" onclick="schedEditStop(event); applySchedCustom('${role}','${dk}',${weekIdx});">OK</button>`;
       html += `</div></div>`;
     } else {
       const valArg = o.value === null ? 'null' : "'" + o.value + "'";
-      html += `<button onclick="applySchedEdit('${role}','${dk}',${weekIdx},${valArg}); event.stopPropagation();">`;
+      html += `<button type="button" onpointerdown="schedEditStop(event); applySchedEdit('${role}','${dk}',${weekIdx},${valArg});" onclick="schedEditStop(event); applySchedEdit('${role}','${dk}',${weekIdx},${valArg});">`;
       html += `<span class="swatch" style="background:${o.color}"></span>`;
       html += o.label;
       html += `</button>`;
@@ -14461,9 +14502,15 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
   portal.classList.add('is-open');
   portal.innerHTML = html;
   schedEditOpen = true;
+  window._msbSuppressCellClick = true;
+  setTimeout(function () { window._msbSuppressCellClick = false; }, 350);
 
   requestAnimationFrame(() => {
     placePortaledMenu(portal.querySelector('.sched-edit-menu'), rect);
+    const firstBtn = portal.querySelector('.sched-edit-menu button');
+    if (firstBtn && typeof firstBtn.focus === 'function') {
+      try { firstBtn.focus({ preventScroll: true }); } catch (err) { try { firstBtn.focus(); } catch (err2) {} }
+    }
   });
 }
 
@@ -14592,10 +14639,17 @@ function redoSchedEdit() {
 function applySchedEdit(role, dk, weekIdx, value) {
   if (window._viewLocked) return;
   if (!schedule[role]) schedule[role] = {};
+  const cur = schedule[role][dk];
+  if ((value === null && (cur == null || cur === '')) || cur === value) {
+    closeSchedEditMenu();
+    return;
+  }
   pushUndoSnapshot('cell edit');
   if (value === null) delete schedule[role][dk];
   else schedule[role][dk] = value;
   closeSchedEditMenu();
+  window._msbSuppressCellClick = true;
+  setTimeout(function () { window._msbSuppressCellClick = false; }, 350);
   const ROLES = getRoles();
   const ALL_KC = getAllWithKC();
   try { revalidateAfterManualEdit(ROLES, ALL_KC); }
@@ -14640,11 +14694,12 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Close schedule edit menu on outside click
-document.addEventListener('click', (e) => {
-  if (schedEditOpen && !e.target.closest('.sched-edit-menu') && !e.target.closest('.cell-inspector')) {
-    closeSchedEditMenu();
-  }
+// Overlay + pointerdown on options apply the edit. Do not close on a
+// bubbling click after the menu node is removed — that was a desktop no-op.
+document.addEventListener('pointerdown', (e) => {
+  if (!schedEditOpen) return;
+  if (e.target && e.target.closest && e.target.closest('.sched-edit-menu, .sched-edit-overlay, #sched-edit-portal, .cell-inspector')) return;
+  closeSchedEditMenu();
 });
 
 // ── v2.6.2 generate arrival + cell inspector / swap ──

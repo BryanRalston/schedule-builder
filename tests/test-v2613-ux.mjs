@@ -130,10 +130,11 @@ async function main() {
     pass('role-title-fns');
   } else fail('role-title-fns', 'role title control / persist missing');
 
-  if (/Tour sample store/.test(index) && /Load sample store/.test(index)
+  if (/Load sample store/.test(index) && /Take tour/.test(index)
+    && !/Tour sample store/.test(index)
     && !/>Try Demo</.test(index) && !/>Demo</.test(index)) {
     pass('no-leading-demo-label');
-  } else fail('no-leading-demo-label', 'a user-facing Demo action label remains');
+  } else fail('no-leading-demo-label', 'sample/tour labels should be Load sample store + Take tour');
 
   const chromium = await loadChromium();
   const { server, base } = await startStaticServer();

@@ -313,7 +313,7 @@ async function main() {
     } else fail('live-empty-teams-es', live.teams);
 
     if (/Quitar último AM/.test(live.removeTitle + ' ' + live.removeAria)
-      && /Agregar gerente asistente/.test(live.addTitle)
+      && /Agregar (gerente|Gerente) asistente/.test(live.addTitle)
       && /Armar horario optimizado/.test(live.buildTitle)
       && live.privacy === 'Privacidad'
       && live.eg === 'ej. 100') {
@@ -336,6 +336,23 @@ async function main() {
     } else fail('custom-title-and-roster-stay', JSON.stringify({
       custom: live.custom, sm: live.sm, am: live.am,
     }));
+
+    await esPage.evaluate(() => {
+      if (typeof switchTab === 'function') switchTab('setup');
+      if (typeof setMoreSetupOpen === 'function') setMoreSetupOpen(true);
+      const hours = document.getElementById('store-hours-block');
+      if (hours && hours.scrollIntoView) hours.scrollIntoView({ block: 'center' });
+    });
+    await esPage.waitForTimeout(200);
+    try {
+      const shotDir = '/opt/cursor/artifacts/screenshots';
+      mkdirSync(shotDir, { recursive: true });
+      const shotPath = join(shotDir, 'v2628_spanish_setup.png');
+      await esPage.screenshot({ path: shotPath, fullPage: false });
+      pass('screenshot', shotPath);
+    } catch (shotErr) {
+      fail('screenshot', shotErr.message || shotErr);
+    }
 
     const built = await esPage.evaluate(() => {
       const beforeCount = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
@@ -364,23 +381,6 @@ async function main() {
       && !/\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/.test(built.title)) {
       pass('live-schedule-header-es', built.title);
     } else fail('live-schedule-header-es', built.title);
-
-    if (typeof esPage.evaluate === 'function') {
-      await esPage.evaluate(() => {
-        if (typeof switchTab === 'function') switchTab('setup');
-        if (typeof setMoreSetupOpen === 'function') setMoreSetupOpen(true);
-      });
-      await esPage.waitForTimeout(200);
-      try {
-        const shotDir = '/opt/cursor/artifacts/screenshots';
-        mkdirSync(shotDir, { recursive: true });
-        const shotPath = join(shotDir, 'v2628-es-setup.png');
-        await esPage.screenshot({ path: shotPath, fullPage: false });
-        pass('screenshot', shotPath);
-      } catch (shotErr) {
-        fail('screenshot', shotErr.message || shotErr);
-      }
-    }
 
     const afterSwitch = await esPage.evaluate(() => {
       const cells = document.querySelectorAll('#schedule-grid td.shift-editable').length;

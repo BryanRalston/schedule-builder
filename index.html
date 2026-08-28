@@ -9290,8 +9290,16 @@ function applyRoleTitleUI() {
   }
   const addAm = document.getElementById('btn-add-am');
   const addKc = document.getElementById('btn-add-kc');
-  if (addAm) addAm.title = msbT('Add {title}', { title: amT });
-  if (addKc) addKc.title = msbT('Add {title}', { title: kcT });
+  if (addAm) {
+    const addAmLabel = msbT('Add {title}', { title: amT });
+    addAm.title = addAmLabel;
+    addAm.setAttribute('aria-label', addAmLabel);
+  }
+  if (addKc) {
+    const addKcLabel = msbT('Add {title}', { title: kcT });
+    addKc.title = addKcLabel;
+    addKc.setAttribute('aria-label', addKcLabel);
+  }
   const base = document.getElementById('new-role-base');
   if (base && base.options) {
     for (let i = 0; i < base.options.length; i++) {

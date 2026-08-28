@@ -118,7 +118,7 @@ async function main() {
     }
   }
 
-  if (/Load a fiscal period first \(Setup → Load Period\)/.test(index)
+  if (/Load this NRF period on Setup first/.test(index)
     && /Name your managers on Setup before building/.test(index)
     && /function generateSchedule\(/.test(index)) {
     pass('generate-toasts-in-source');
@@ -234,7 +234,7 @@ async function main() {
         tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
       };
     });
-    if (/Load a fiscal period first/.test(noPeriod.toast) && noPeriod.tab === 'setup') pass('generate-no-period', noPeriod.toast);
+    if (/Load this NRF period/.test(noPeriod.toast) && noPeriod.tab === 'setup') pass('generate-no-period', noPeriod.toast);
     else fail('generate-no-period', JSON.stringify(noPeriod));
 
     const noNames = await page.evaluate(() => {

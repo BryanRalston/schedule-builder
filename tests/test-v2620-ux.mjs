@@ -282,6 +282,11 @@ async function main() {
       pass('undo-clears-ask-field', afterUndo.confirm);
     } else fail('undo-clears-ask-field', JSON.stringify(afterUndo));
 
+    await page.waitForTimeout(80);
+    const stillEmpty = await page.evaluate(() => ((document.getElementById('request-phrase-input') || {}).value || ''));
+    if (stillEmpty === '') pass('undo-field-stays-cleared');
+    else fail('undo-field-stays-cleared', stillEmpty);
+
     await page.keyboard.press('Enter');
     await page.waitForTimeout(200);
     const emptyEnter = await page.evaluate(() => {

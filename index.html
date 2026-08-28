@@ -15295,7 +15295,9 @@ function clearSchedUndo() {
 function clearAskPhraseFields() {
   ['request-phrase-input', 'setup-request-phrase-input'].forEach(function (id) {
     const el = document.getElementById(id);
-    if (el) el.value = '';
+    if (!el) return;
+    el.value = '';
+    try { el.defaultValue = ''; } catch (e) {}
   });
 }
 
@@ -17591,13 +17593,11 @@ function applyRequestPhraseFromBar(inputId) {
 
 function undoRequestPhraseApply() {
   if (window._viewLocked) return;
-  if (typeof undoSchedEdit === 'function') {
-    undoSchedEdit();
-    return;
-  }
-  clearAskPhraseFields();
+  if (typeof undoSchedEdit === 'function') undoSchedEdit();
   window._requestPhraseUndoReady = false;
+  clearAskPhraseFields();
   showRequestPhraseResult(true, 'Undid that request. Paint still works.', false);
+  setTimeout(clearAskPhraseFields, 0);
 }
 
 function requestPaintModeLabel(mode) {

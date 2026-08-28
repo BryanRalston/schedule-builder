@@ -313,9 +313,9 @@ async function main() {
       tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
       scheduleActive: !!(document.getElementById('tab-schedule') || {}).classList?.contains('active'),
       should: typeof shouldOpenOnSchedule === 'function' ? shouldOpenOnSchedule() : null,
-      built: typeof hasPersistedBuiltSchedule === 'function' ? hasPersistedBuiltSchedule() : null,
+      hasRoster: typeof hasSavedUserRoster === 'function' ? hasSavedUserRoster() : null,
     }));
-    if (returning.tab === 'schedule' && returning.scheduleActive && returning.should && returning.built) {
+    if (returning.tab === 'schedule' && returning.scheduleActive && returning.should && returning.hasRoster) {
       pass('returning-built-opens-schedule');
     } else fail('returning-built-opens-schedule', JSON.stringify(returning));
 
@@ -327,7 +327,9 @@ async function main() {
       pass('returning-setup-is-full');
     } else fail('returning-setup-is-full', JSON.stringify(returningSetup));
 
-    await page.evaluate((payload) => {
+    const leftoverPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await leftoverPage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await leftoverPage.evaluate((payload) => {
       localStorage.clear();
       sessionStorage.clear();
       localStorage.setItem('msb_tour_done', '1');
@@ -335,10 +337,34 @@ async function main() {
       localStorage.setItem('msb_active_tab', 'schedule');
       localStorage.setItem('schedule_manager_names', JSON.stringify(payload.names));
       localStorage.setItem('msb_store_meta', JSON.stringify(payload.meta));
+      const n = payload.names;
+      amCount = n.amCount;
+      kcList = (n.kcList || []).map((kc) => ({
+        id: kc.id,
+        name: kc.name,
+        asManager: !!kc.asManager,
+        midDows: kc.midDows || [],
+      }));
+      if (typeof renderAMRows === 'function') renderAMRows();
+      if (typeof renderKCRows === 'function') renderKCRows();
+      const sm = document.getElementById('name-sm');
+      if (sm) sm.value = n.sm;
+      Object.keys(n.ams || {}).forEach((id) => {
+        const el = document.getElementById('name-' + id);
+        if (el) el.value = n.ams[id];
+      });
+      (n.kcList || []).forEach((kc) => {
+        const el = document.getElementById('name-' + kc.id);
+        if (el) el.value = kc.name;
+      });
+      const store = document.getElementById('store-name');
+      const num = document.getElementById('store-number');
+      if (store) store.value = payload.meta.storeName;
+      if (num) num.value = payload.meta.storeNumber;
     }, DEMO_LEFTOVER);
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(800);
-    const leftover = await page.evaluate(() => ({
+    await leftoverPage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await leftoverPage.waitForTimeout(800);
+    const leftover = await leftoverPage.evaluate(() => ({
       tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
       setupActive: !!(document.getElementById('tab-setup') || {}).classList?.contains('active'),
       store: (document.getElementById('store-name') || {}).value || '',
@@ -352,6 +378,7 @@ async function main() {
       && !/harbor east/i.test(leftover.store) && !/alex morgan/i.test(leftover.sm)) {
       pass('leftover-demo-stays-setup-ease');
     } else fail('leftover-demo-stays-setup-ease', JSON.stringify(leftover));
+    await leftoverPage.close();
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

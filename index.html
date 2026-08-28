@@ -7576,6 +7576,7 @@ function shouldUseFirstRunEase() {
     if (pref === '1') return false;
     if (pref === '0') return true;
     if (typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule()) return false;
+    if (typeof hasSavedUserRoster === 'function' && hasSavedUserRoster()) return false;
   } catch (e) {}
   return true;
 }

@@ -11060,6 +11060,26 @@ function _generateScheduleInner(opts) {
   // ════════════════════════════════════════════════════
   // The "closers pool" = AMs + manager-mode KCs (everyone in ROLES except SM)
   const closerPool = ROLES.filter(r => r !== 'sm');
+  const scaledSmCloseTarget = getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, closerPool.length === 0);
+  const scaledAmCloseRem = Math.max(0, managerNightsPerWeek - (closerPool.length === 0 ? 0 : scaledSmCloseTarget));
+  const weekCloseCountOf = (r, w) => getWeekDks(w).filter((d) => isClose(schedule[r][d])).length;
+  const scaledCloseTargetOf = (r, w) => {
+    if (r === 'sm') return scaledSmCloseTarget;
+    const idx = Math.max(0, closerPool.indexOf(r));
+    return getAmClosesPerWeekTarget(PREFS, scaledAmCloseRem, Math.max(1, closerPool.length), idx, w);
+  };
+  /** Two-person: only steal a mid for close while that person is under this week's seat. */
+  const promoteMidToCloseIfUnderTarget = (dk) => {
+    if (isKcCloseNight(dk)) return false;
+    const w = Math.floor(allDks.indexOf(dk) / 7);
+    const midUnder = ROLES.find((r) =>
+      isMid(schedule[r][dk]) && !isInputLocked(r, dk)
+      && weekCloseCountOf(r, w) < scaledCloseTargetOf(r, w)
+    );
+    if (!midUnder) return false;
+    schedule[midUnder][dk] = pickClose();
+    return true;
+  };
   if (!thinRoster) {
   const closerCount = closerPool.length;
   // SM / AM targets from preferences (defaults: SM 1, AMs auto fair-share of remainder)
@@ -11327,14 +11347,8 @@ function _generateScheduleInner(opts) {
       midVariety++;
       return s;
     };
-    const thinSmCloseTarget = getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, false);
-    const thinAmCloseRem = Math.max(0, managerNightsPerWeek - thinSmCloseTarget);
-    const weekCloseCount = (r, w) => getWeekDks(w).filter((d) => isClose(schedule[r][d])).length;
-    const closeTargetFor = (r, w) => {
-      if (r === 'sm') return thinSmCloseTarget;
-      const idx = Math.max(0, closerPool.indexOf(r));
-      return getAmClosesPerWeekTarget(PREFS, thinAmCloseRem, Math.max(1, closerPool.length), idx, w);
-    };
+    const weekCloseCount = weekCloseCountOf;
+    const closeTargetFor = scaledCloseTargetOf;
     const pickSoloShift = (r, dk, pdk) => {
       const closedYest = pdk && isClose(schedule[r][pdk]);
       const nOpen = twoCount(r, isOpen);
@@ -11401,6 +11415,16 @@ function _generateScheduleInner(opts) {
           opener = closer;
           closer = swapRole;
         }
+      }
+      const bothAtCap = weekCloseCount(opener, wPair) >= closeTargetFor(opener, wPair)
+        && weekCloseCount(closer, wPair) >= closeTargetFor(closer, wPair);
+      if (bothAtCap) {
+        // Weekly close seats are filled — keep a mid so this is not an open/close brick.
+        schedule[opener][dk] = (PREFS.avoidClopening && pdk && isClose(schedule[opener][pdk]))
+          ? nextMid()
+          : nextOpenShift(0);
+        schedule[closer][dk] = nextMid();
+        return;
       }
       // Dual day: one open, one close. If opener would clopen and we couldn't
       // swap, give them mid and keep the other on close — coverage preference.
@@ -11699,11 +11723,18 @@ function _generateScheduleInner(opts) {
                 }
                 if (opens === 0) {
                   const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-                  if (mid) schedule[mid][dk] = pickOpen();
+                  const workersN = ROLES.filter((r) => isWork(schedule[r][dk])).length;
+                  const wFix = Math.floor(allDks.indexOf(dk) / 7);
+                  const keepSoloMid = thinRoster && workersN === 1 && mid
+                    && getWeekDks(wFix).some((d) => isOpen(schedule[mid][d]));
+                  if (mid && !keepSoloMid) schedule[mid][dk] = pickOpen();
                 }
                 if (closes === 0 && !isKcCloseNight(dk)) {
-                  const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-                  if (mid) schedule[mid][dk] = pickClose();
+                  if (thinRoster) promoteMidToCloseIfUnderTarget(dk);
+                  else {
+                    const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+                    if (mid) schedule[mid][dk] = pickClose();
+                  }
                 }
               };
               fixDay(satDk);
@@ -11793,13 +11824,16 @@ function _generateScheduleInner(opts) {
             (r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk) && !(pdk && isClose(schedule[r][pdk]))
           );
           const midAny = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-          if (midSafe) schedule[midSafe][dk] = pickOpen();
-          else if (midAny) schedule[midAny][dk] = pickOpen();
+          const midPick = midSafe || midAny;
+          // Solo day: keep a mid once that person already opened this week.
+          const solo = workers.length === 1 && midPick;
+          const wOpen = Math.floor(allDks.indexOf(dk) / 7);
+          const alreadyOpened = solo && getWeekDks(wOpen).some((d) => isOpen(schedule[midPick][d]));
+          if (midPick && !alreadyOpened) schedule[midPick][dk] = pickOpen();
         }
         ocThin = countOC();
         if (ocThin.closes === 0 && !isKcCloseNight(dk) && workers.length >= 2) {
-          const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-          if (mid) schedule[mid][dk] = pickClose();
+          promoteMidToCloseIfUnderTarget(dk);
         }
         return;
       }
@@ -12355,9 +12389,8 @@ function _generateScheduleInner(opts) {
     const ams = ROLES.filter((r) => r !== 'sm');
     if (ams.length !== 1) return;
     const am = ams[0];
-    const smT = getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, false);
-    const rem = Math.max(0, managerNightsPerWeek - smT);
-    const amTFor = (w) => getAmClosesPerWeekTarget(PREFS, rem, 1, 0, w);
+    const smT = scaledSmCloseTarget;
+    const amTFor = (w) => scaledCloseTargetOf(am, w);
     const wouldClopen = (r, dk, newShift) => {
       if (!PREFS.avoidClopening) return false;
       const idx = allDks.indexOf(dk);
@@ -12380,37 +12413,46 @@ function _generateScheduleInner(opts) {
       const amTarget = amTFor(w);
       const amCloses = () => weekDks.filter((dk) => isClose(schedule[am][dk])).length;
       const smCloses = () => weekDks.filter((dk) => isClose(schedule.sm[dk])).length;
-      const cands = weekDks.filter((dk) => {
-        if (isKcCloseNight(dk)) return false;
-        if (!isClose(schedule[am][dk]) || isInputLocked(am, dk)) return false;
-        if (!isWork(schedule.sm[dk]) || isClose(schedule.sm[dk]) || isInputLocked('sm', dk)) return false;
-        if (wouldClopen('sm', dk, schedule[am][dk])) return false;
-        return true;
-      }).sort((a, b) => (isMid(schedule.sm[a]) ? 0 : 1) - (isMid(schedule.sm[b]) ? 0 : 1));
-      for (const dk of cands) {
-        if (amCloses() <= amTarget) break;
-        if (smCloses() >= smT + 2) break;
-        const smShift = schedule.sm[dk];
-        const amShift = schedule[am][dk];
-        let newAm = smShift;
-        if (isOpen(smShift) && ROLES.filter((rx) => rx !== 'sm' && isOpen(schedule[rx][dk])).length === 0) {
-          newAm = smShift;
+      const tryGiveClose = (from, to) => {
+        const cands = weekDks.filter((dk) => {
+          if (isKcCloseNight(dk)) return false;
+          if (!isClose(schedule[from][dk]) || isInputLocked(from, dk)) return false;
+          if (!isWork(schedule[to][dk]) || isClose(schedule[to][dk]) || isInputLocked(to, dk)) return false;
+          if (wouldClopen(to, dk, schedule[from][dk])) return false;
+          return true;
+        }).sort((a, b) => (isMid(schedule[to][a]) ? 0 : 1) - (isMid(schedule[to][b]) ? 0 : 1));
+        for (const dk of cands) {
+          const fromShift = schedule[from][dk];
+          const toShift = schedule[to][dk];
+          let newFrom = toShift;
+          if (isOpen(toShift) && ROLES.filter((rx) => rx !== to && isOpen(schedule[rx][dk])).length === 0) {
+            newFrom = toShift;
+          }
+          if (wouldClopen(from, dk, newFrom)) {
+            if (isOpen(newFrom)) newFrom = 'mid-early';
+            else continue;
+          }
+          if (isOpen(toShift) && !isOpen(newFrom)
+            && ROLES.filter((rx) => rx !== to && isOpen(schedule[rx][dk])).length === 0) {
+            continue;
+          }
+          schedule[to][dk] = fromShift;
+          schedule[from][dk] = newFrom;
+          const oc = dayOCLocal(dk);
+          if (!twoManagerCoverageHolds(dk, oc.opens, oc.closes)) {
+            schedule[to][dk] = toShift;
+            schedule[from][dk] = fromShift;
+            continue;
+          }
+          return true;
         }
-        if (wouldClopen(am, dk, newAm)) {
-          if (isOpen(newAm)) newAm = 'mid-early';
-          else continue;
-        }
-        if (isOpen(smShift) && !isOpen(newAm)
-          && ROLES.filter((rx) => rx !== 'sm' && isOpen(schedule[rx][dk])).length === 0) {
-          continue;
-        }
-        schedule.sm[dk] = amShift;
-        schedule[am][dk] = newAm;
-        const oc = dayOCLocal(dk);
-        if (!twoManagerCoverageHolds(dk, oc.opens, oc.closes)) {
-          schedule.sm[dk] = smShift;
-          schedule[am][dk] = amShift;
-        }
+        return false;
+      };
+      while (amCloses() > amTarget && smCloses() < smT + 1) {
+        if (!tryGiveClose(am, 'sm')) break;
+      }
+      while (amCloses() < amTarget && smCloses() > smT) {
+        if (!tryGiveClose('sm', am)) break;
       }
     }
   };
@@ -12523,16 +12565,23 @@ function _generateScheduleInner(opts) {
       let { opens, closes } = dayOC(dk);
       if (opens === 0) {
         const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-        if (mid) schedule[mid][dk] = pickOpen();
-        else {
+        const workersN = ROLES.filter((r) => isWork(schedule[r][dk])).length;
+        const wFix = Math.floor(allDks.indexOf(dk) / 7);
+        const keepSoloMid = thinRoster && workersN === 1 && mid
+          && getWeekDks(wFix).some((d) => isOpen(schedule[mid][d]));
+        if (mid && !keepSoloMid) schedule[mid][dk] = pickOpen();
+        else if (!mid) {
           const w = ROLES.find((r) => isWork(schedule[r][dk]) && !isClose(schedule[r][dk]) && !isInputLocked(r, dk));
           if (w) schedule[w][dk] = pickOpen();
         }
       }
       ({ opens, closes } = dayOC(dk));
       if (closes === 0 && !isKcCloseNight(dk)) {
-        const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
-        if (mid) schedule[mid][dk] = pickClose();
+        if (thinRoster) promoteMidToCloseIfUnderTarget(dk);
+        else {
+          const mid = ROLES.find((r) => isMid(schedule[r][dk]) && !isInputLocked(r, dk));
+          if (mid) schedule[mid][dk] = pickClose();
+        }
       }
     };
     const wouldClopenTake = (r, dk, newShift) => {

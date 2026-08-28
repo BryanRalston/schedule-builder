@@ -197,8 +197,10 @@ async function main() {
   } else fail('unnamed-kc-hidden-from-board', 'getAllWithKC still always includes KC1');
 
   if (/skipFreeCount: true/.test(index)
-    && /if \(!opts\.skipFreeCount\) recordFreeGenerate/.test(index)
-    && /if \(!opts\.skipFreeCount && !requireGenerateAllowance/.test(index)
+    && (/if \(!opts\.skipFreeCount\) recordFreeGenerate/.test(index)
+      || /function shouldRecordFreeGenerate\(/.test(index))
+    && (/if \(!opts\.skipFreeCount && !requireGenerateAllowance/.test(index)
+      || /consumeFree && !requireGenerateAllowance/.test(index))
     && !/Tour sample store/.test(index)
     && /id="btn-tour-sample"[^>]*>Load sample store</.test(index)) {
     pass('sample-does-not-burn-free-build');

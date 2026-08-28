@@ -435,7 +435,7 @@ async function main() {
       const amKinds = [am.kinds.open > 0, am.kinds.mid > 0, am.kinds.close > 0].filter(Boolean).length;
       const smBrick = sm.kinds.work >= 28 && (sm.kinds.open === sm.kinds.work || sm.kinds.close === sm.kinds.work);
       const amBrick = am.kinds.work >= 28 && (am.kinds.open === am.kinds.work || am.kinds.close === am.kinds.work);
-      if (!smBrick && !amBrick && smKinds >= 2 && amKinds >= 2) {
+      if (!smBrick && !amBrick && smKinds >= 2 && amKinds >= 2 && (sm.kinds.mid + am.kinds.mid) > 0) {
         pass('mixed-shifts', 'SM O/M/C ' + sm.kinds.open + '/' + sm.kinds.mid + '/' + sm.kinds.close
           + ' AM ' + am.kinds.open + '/' + am.kinds.mid + '/' + am.kinds.close);
       } else fail('mixed-shifts', JSON.stringify({ sm: sm.kinds, am: am.kinds }));
@@ -456,11 +456,14 @@ async function main() {
 
       const amWeekCloses = am.weekCloses || [];
       const maxAmWeek = amWeekCloses.length ? Math.max(...amWeekCloses) : 0;
-      if (maxAmWeek <= 3) {
+      const minAmWeek = amWeekCloses.length ? Math.min(...amWeekCloses) : 0;
+      if (maxAmWeek <= 3 && am.kinds.close >= 4 && minAmWeek <= 2) {
         pass('am-closes-spread-toward-target', JSON.stringify(amWeekCloses));
-      } else {
+      } else if (maxAmWeek <= 3) {
         pass('am-closes-spread-toward-target',
-          'max ' + maxAmWeek + ' still labeled expected when coverage forces it · ' + JSON.stringify(amWeekCloses));
+          'no week-4 pile · ' + JSON.stringify(amWeekCloses) + ' period AM closes ' + am.kinds.close);
+      } else {
+        fail('am-closes-spread-toward-target', JSON.stringify({ amWeekCloses, sm: sm.kinds, am: am.kinds }));
       }
     } else {
       fail('mixed-shifts', 'missing people');

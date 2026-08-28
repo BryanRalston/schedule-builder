@@ -71,8 +71,6 @@ async function loadChromium() {
 }
 
 function seedDirtyTesterChrome() {
-  localStorage.clear();
-  sessionStorage.clear();
   localStorage.setItem('msb_tour_done', '1');
   localStorage.setItem('msb_welcome_dismissed', '1');
   localStorage.setItem('msb_ui_lang', 'es');
@@ -81,6 +79,34 @@ function seedDirtyTesterChrome() {
     storeName: 'Playtest Store',
     storeNumber: '999',
   }));
+}
+
+function seedHarborEastChrome() {
+  localStorage.setItem('msb_tour_done', '1');
+  localStorage.setItem('msb_welcome_dismissed', '1');
+  localStorage.setItem('msb_ui_lang', 'es');
+  localStorage.setItem('msb_free_generate_count', '2');
+  localStorage.setItem('msb_store_meta', JSON.stringify({
+    storeName: 'Harbor East Demo Store',
+    storeNumber: '851',
+  }));
+}
+
+function seedRealRoster() {
+  localStorage.setItem('msb_tour_done', '1');
+  localStorage.setItem('msb_welcome_dismissed', '1');
+  localStorage.setItem('schedule_manager_names', JSON.stringify({
+    sm: 'Alex Rivera',
+    amCount: 2,
+    ams: { am1: 'Sam Chen', am2: '' },
+    kcList: [{ id: 'kc1', name: '', asManager: false, midDows: [] }],
+  }));
+  localStorage.setItem('msb_store_meta', JSON.stringify({
+    storeName: 'Riverside',
+    storeNumber: '',
+  }));
+  localStorage.setItem('msb_ui_lang', 'es');
+  localStorage.setItem('msb_free_generate_count', '1');
 }
 
 async function main() {
@@ -141,9 +167,8 @@ async function main() {
       viewport: { width: 1280, height: 800 },
       locale: 'en-US',
     });
+    await dirty.addInitScript(seedDirtyTesterChrome);
     await dirty.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await dirty.evaluate(seedDirtyTesterChrome);
-    await dirty.reload({ waitUntil: 'domcontentloaded' });
     await dirty.waitForTimeout(900);
 
     const dirtyState = await dirty.evaluate(() => {
@@ -187,17 +212,16 @@ async function main() {
       pass('dirty-origin-no-stale-store', dirtyState.name);
     } else fail('dirty-origin-no-stale-store', JSON.stringify(dirtyState));
 
-    await dirty.evaluate(() => {
-      localStorage.setItem('msb_ui_lang', 'es');
-      localStorage.setItem('msb_free_generate_count', '2');
-      localStorage.setItem('msb_store_meta', JSON.stringify({
-        storeName: 'Harbor East Demo Store',
-        storeNumber: '851',
-      }));
+    await dirty.close();
+
+    const harborPage = await browser.newPage({
+      viewport: { width: 1280, height: 800 },
+      locale: 'en-US',
     });
-    await dirty.reload({ waitUntil: 'domcontentloaded' });
-    await dirty.waitForTimeout(800);
-    const harbor = await dirty.evaluate(() => ({
+    await harborPage.addInitScript(seedHarborEastChrome);
+    await harborPage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await harborPage.waitForTimeout(800);
+    const harbor = await harborPage.evaluate(() => ({
       lang: document.documentElement.lang,
       store: ((document.getElementById('store-name') || {}).value || ''),
       name: (document.getElementById('account-chip-name') || {}).textContent || '',
@@ -209,14 +233,13 @@ async function main() {
       && !/harbor east/i.test(harbor.store + harbor.name) && /Setup/.test(harbor.setup)) {
       pass('leftover-harbor-east-is-first-visit', harbor.name);
     } else fail('leftover-harbor-east-is-first-visit', JSON.stringify(harbor));
-    await dirty.close();
+    await harborPage.close();
 
     const qEn = await browser.newPage({
       viewport: { width: 1280, height: 800 },
       locale: 'en-US',
     });
-    await qEn.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await qEn.evaluate(seedDirtyTesterChrome);
+    await qEn.addInitScript(seedDirtyTesterChrome);
     await qEn.goto(base + '/index.html?lang=en', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await qEn.waitForTimeout(800);
     const qEnState = await qEn.evaluate(() => ({
@@ -237,26 +260,8 @@ async function main() {
       viewport: { width: 1280, height: 800 },
       locale: 'en-US',
     });
+    await real.addInitScript(seedRealRoster);
     await real.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await real.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-      localStorage.setItem('msb_tour_done', '1');
-      localStorage.setItem('msb_welcome_dismissed', '1');
-      localStorage.setItem('schedule_manager_names', JSON.stringify({
-        sm: 'Alex Rivera',
-        amCount: 2,
-        ams: { am1: 'Sam Chen', am2: '' },
-        kcList: [{ id: 'kc1', name: '', asManager: false, midDows: [] }],
-      }));
-      localStorage.setItem('msb_store_meta', JSON.stringify({
-        storeName: 'Riverside',
-        storeNumber: '',
-      }));
-      localStorage.setItem('msb_ui_lang', 'es');
-      localStorage.setItem('msb_free_generate_count', '1');
-    });
-    await real.reload({ waitUntil: 'domcontentloaded' });
     await real.waitForTimeout(900);
     const realState = await real.evaluate(() => ({
       lang: document.documentElement.lang,

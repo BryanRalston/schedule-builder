@@ -5454,7 +5454,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.21</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.22</span> · Offline · Names, time off, and the board stay on this device · nothing uploaded · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label>Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()">Help</button>
     <button type="button" onclick="openFeedbackPage()">Send feedback</button>
@@ -7242,8 +7242,25 @@ function getSmClosesPerWeekTarget(prefs, managerNights, soleManager) {
 }
 
 /**
+ * Default close template assumes a 3-AM bench sharing leftover manager nights
+ * after the SM's 1. One named AM is not three AMs — auto targets scale down.
+ */
+const CLOSE_TARGET_TEMPLATE_AM_BENCH = 3;
+
+function countNamedClosers(roles) {
+  const list = roles || (typeof getRoles === 'function' ? getRoles() : []);
+  return list.filter((r) => r && r !== 'sm').length;
+}
+
+function isThinManagerRoster(roles) {
+  const list = roles || (typeof getRoles === 'function' ? getRoles() : []);
+  return list.length > 0 && list.length <= 2;
+}
+
+/**
  * AM (or manager-mode closer) closes/week target.
- * Fixed when prefs.amClosesPerWeek is set; otherwise fair share of remaining after SM.
+ * Fixed when prefs.amClosesPerWeek is set; otherwise fair share of remaining after SM,
+ * scaled to named headcount so a 1-AM roster is not asked for a 3-AM leftover (5/week).
  */
 function getAmClosesPerWeekTarget(prefs, remainingCloses, closerCount, closerIdx, weekIdx) {
   const p = prefs || preferences || DEFAULT_PREFERENCES;
@@ -7258,11 +7275,43 @@ function getAmClosesPerWeekTarget(prefs, remainingCloses, closerCount, closerIdx
   }
   if (!closerCount || closerCount <= 0) return 0;
   const rem = Math.max(0, remainingCloses | 0);
-  const base = Math.floor(rem / closerCount);
-  const extra = rem % closerCount;
+  // Scale the auto pool to named AM count. Template leftover (all remaining
+  // nights) must not land on 1 named AM as a must-meet floor.
+  const sharePool = closerCount < CLOSE_TARGET_TEMPLATE_AM_BENCH
+    ? Math.ceil(rem * closerCount / CLOSE_TARGET_TEMPLATE_AM_BENCH)
+    : rem;
+  const base = Math.floor(sharePool / closerCount);
+  const extra = sharePool % closerCount;
   const idx = Math.max(0, closerIdx | 0);
   const w = Math.max(0, weekIdx | 0);
   return base + ((idx + w) % closerCount < extra ? 1 : 0);
+}
+
+/** SM + per-AM weekly close targets for this named roster. */
+function getScaledCloseTargets(prefs, roles, managerNights) {
+  const nights = Math.max(0, managerNights | 0);
+  const namedClosers = countNamedClosers(roles);
+  const sole = namedClosers === 0;
+  const smTarget = getSmClosesPerWeekTarget(prefs, nights, sole);
+  const remaining = Math.max(0, nights - (sole ? 0 : smTarget));
+  const amTarget = sole ? 0 : getAmClosesPerWeekTarget(prefs, remaining, namedClosers, 0, 0);
+  const p = prefs || preferences || DEFAULT_PREFERENCES;
+  const userFixedAM = p.amClosesPerWeek != null && p.amClosesPerWeek !== '';
+  return {
+    smTarget,
+    amTarget,
+    namedClosers,
+    sole,
+    remaining,
+    userFixedAM,
+    thin: isThinManagerRoster(roles)
+  };
+}
+
+/** One-line why for thin-day coverage holes (2 named people + offs). */
+function twoPersonOffsCoverageNote(roles) {
+  if (!isThinManagerRoster(roles)) return '';
+  return 'Two people with days off cannot cover Open+Close every day.';
 }
 
 function syncCloseTargetsToRoleRules() {
@@ -7514,7 +7563,7 @@ function renderPreferencesUI() {
       <label class="pref-label">${esc(typeof getRoleTitle === 'function' ? getRoleTitle('am') : 'Assistant Manager')} closes / week
         <input type="number" id="pref-am-closes" min="0" max="7" placeholder="auto" value="${p.amClosesPerWeek == null || p.amClosesPerWeek === '' ? '' : p.amClosesPerWeek}" onchange="readPreferencesFromUI()">
       </label>
-      <div class="pref-desc">Per AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — remaining closes after the SM are split evenly. Set 2 for smaller teams where each AM closes twice. Coverage still wins if totals don’t match nights available.</div>
+      <div class="pref-desc">Per named AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — remaining closes after the SM are split evenly, scaled to how many AMs you named (1 AM is not 3). Set a number to lock a weekly target. Coverage still wins if totals don’t match nights available.</div>
     </div>
     <div class="pref-card">
       <label class="toggle-switch">
@@ -7655,7 +7704,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.21';
+const APP_VERSION = '2.6.22';
 
 // ── Schedule view mode: month | week | day ──
 let scheduleViewMode = 'week';
@@ -8753,6 +8802,24 @@ function buildPostingIssues(genReport, ROLES, warnings) {
         });
       }
     });
+    if (typeof isThinManagerRoster === 'function' && isThinManagerRoster(ROLES)) {
+      let missDays = 0;
+      try {
+        const st = typeof computeCoverageAndFairnessStats === 'function' ? computeCoverageAndFairnessStats() : null;
+        missDays = st && st.missDays ? st.missDays : 0;
+      } catch (eCover) {}
+      if (missDays > 0) {
+        const hole = typeof findFirstCoverageHole === 'function' ? findFirstCoverageHole() : null;
+        issues.push({
+          sev: 'review',
+          title: missDays + ' day' + (missDays === 1 ? '' : 's') + ' missing open or close',
+          meta: twoPersonOffsCoverageNote(ROLES) || 'Thin days are expected on a two-person roster with offs.',
+          target: hole ? 'grid' : 'summary',
+          role: hole && hole.role,
+          dk: hole && hole.dk,
+        });
+      }
+    }
     (genReport.unmet || []).slice(0, 6).forEach((u) => {
       issues.push({
         sev: 'note',
@@ -12941,7 +13008,10 @@ function buildGenerationReport(schedule, allDks, ROLES, ALL_KC, names, PREFS, vi
   const report = {
     weekendOffs, opens, closes, mids, clopens, maxStreak,
     totalClopens, unmet, prefs: PREFS,
-    hardErrorCount: hardErrors.length
+    hardErrorCount: hardErrors.length,
+    closeTargets: typeof getScaledCloseTargets === 'function'
+      ? getScaledCloseTargets(PREFS, ROLES, typeof getManagerNightsPerWeek === 'function' ? getManagerNightsPerWeek(PREFS) : 6)
+      : null
   };
   report.quality = computeQualityScore(report, ROLES);
   return report;
@@ -12962,9 +13032,22 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   const kcCloseDows = getKcCloseDows(preferences);
   const isKcCloseNight = (dk) => kcCloseDows.includes(dkToDate(dk).getDay());
   const mgrNights = getManagerNightsPerWeek(preferences);
-  const smCloseTarget = getSmClosesPerWeekTarget(preferences, mgrNights, closerPool.length === 0);
-  const remainingCloses = Math.max(0, mgrNights - (closerPool.length === 0 ? 0 : smCloseTarget));
+  const closeTargets = typeof getScaledCloseTargets === 'function'
+    ? getScaledCloseTargets(preferences, ROLES, mgrNights)
+    : null;
+  const smCloseTarget = closeTargets
+    ? closeTargets.smTarget
+    : getSmClosesPerWeekTarget(preferences, mgrNights, closerPool.length === 0);
+  const remainingCloses = closeTargets
+    ? closeTargets.remaining
+    : Math.max(0, mgrNights - (closerPool.length === 0 ? 0 : smCloseTarget));
   const amFixed = preferences.amClosesPerWeek != null && preferences.amClosesPerWeek !== '';
+  const thinRoster = typeof isThinManagerRoster === 'function'
+    ? isThinManagerRoster(ROLES)
+    : (ROLES && ROLES.length <= 2);
+  const namedKcClosers = typeof getNonManagerKCs === 'function'
+    ? getNonManagerKCs().length
+    : (ALL_KC || []).filter((id) => id && !ROLES.includes(typeof id === 'string' ? id : id.id)).length;
 
   // ── Rule 1: Target scheduled days/week (work+PTO; RTO/LOA reduce availability) ──
   // Matches generation Step 3: holiday weeks target 4; LOA excluded via availDays.
@@ -13003,6 +13086,8 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   });
 
   // ── Rule 3: SM closes target per week (or all manager nights if sole manager) ──
+  // Two named people: SM exactly-1 vs AM leftover-5 is a 3-AM template. Keep
+  // the SM goal as a preference so a hangable two-person board is not a hard fail.
   for (let w = 0; w < numWeeks; w++) {
     const weekDks = getWeekDks(w);
     const smCloses = weekDks.filter(dk => isClose(schedule.sm[dk])).length;
@@ -13012,9 +13097,16 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
         v('warning', 'sm-close-1', 'sm', w, null,
           `${names.sm}: Week ${w+1} has ${smCloses} closes (sole manager — need ${mgrNights} for full coverage)`);
       }
+    } else if (thinRoster && !amFixed) {
+      if (smCloses === 0 && smCloseTarget > 0) {
+        v('warning', 'sm-close-1', 'sm', w, null,
+          `${names.sm}: Week ${w+1} has no closes (goal ${smCloseTarget} — close share is a preference on a two-person roster)`);
+      }
     } else if (smCloses !== smCloseTarget) {
-      v('error', 'sm-close-1', 'sm', w, null,
-        `${names.sm}: Week ${w+1} has ${smCloses} closes (need exactly ${smCloseTarget})`);
+      v(thinRoster ? 'warning' : 'error', 'sm-close-1', 'sm', w, null,
+        thinRoster
+          ? `${names.sm}: Week ${w+1} has ${smCloses} closes (goal ${smCloseTarget} — two-person boards often share closes)`
+          : `${names.sm}: Week ${w+1} has ${smCloses} closes (need exactly ${smCloseTarget})`);
     }
   }
 
@@ -13037,13 +13129,15 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
       const target = getAmClosesPerWeekTarget(preferences, remainingCloses, closerCount, closerIdx, w);
       const minTarget = amFixed ? target : Math.max(0, target - (closerCount > 1 ? 0 : 0));
       const maxTarget = amFixed ? target : target;
-      // Auto mode allows +1 slack for coverage; fixed mode is exact with +1 soft slack
+      // Auto mode allows +1 slack for coverage; fixed mode is exact with +1 soft slack.
+      // Thin roster: over/under the scaled seat is a preference — two people sharing
+      // six manager nights will often sit above a 3-AM-bench per-seat target.
       if (closes < minTarget) {
         v('warning', 'am-close-2', r, w, null,
-          `${names[r]}: Week ${w+1} has ${closes} closes (need at least ${minTarget}${amFixed ? '' : ' — auto share'})`);
+          `${names[r]}: Week ${w+1} has ${closes} closes (need at least ${minTarget}${amFixed ? '' : ' — auto share for ' + closerCount + ' named AM' + (closerCount === 1 ? '' : 's')})`);
       } else if (closes > maxTarget + 1) {
-        v('error', 'am-close-2', r, w, null,
-          `${names[r]}: Week ${w+1} has ${closes} closes (target ${maxTarget})`);
+        v(thinRoster ? 'warning' : 'error', 'am-close-2', r, w, null,
+          `${names[r]}: Week ${w+1} has ${closes} closes (target ${maxTarget}${thinRoster ? ' — extra closes are expected on a two-person roster' : ''})`);
       } else if (closes === maxTarget + 1 && maxTarget >= 0) {
         v('warning', 'am-close-2', r, w, null,
           `${names[r]}: Week ${w+1} has ${closes} closes (target ${maxTarget}; extra may be needed for coverage)`);
@@ -13103,45 +13197,56 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
       if (off1 && off2) hasConsec = true;
     });
     if (!hasConsec) {
-      v('error', 'weekend-off', r, null, null,
-        `${names[r]}: No consecutive Sat+Sun off in the period`);
+      v(thinRoster ? 'warning' : 'error', 'weekend-off', r, null, null,
+        thinRoster
+          ? `${names[r]}: No consecutive Sat+Sun off (two-person roster — a full weekend package is a preference)`
+          : `${names[r]}: No consecutive Sat+Sun off in the period`);
     }
   });
 
   // ── Rule 8: Coverage every day (1 opener + 1 closer minimum) ──
   // Two named managers: a staffed day is a warning, not a hard error that
   // repair will "fix" by cancelling the other person's day off.
+  // No named KC: reserved KC-close nights have no closer on purpose — review,
+  // not a must-fix (1 AM is not a KC bench).
   allDks.forEach(dk => {
     let opens = 0, closes = 0;
     ALL_KC.forEach(r => {
-      const s = schedule[r][dk];
+      const id = typeof r === 'string' ? r : r && r.id;
+      const s = schedule[id] && schedule[id][dk];
       if (isOpen(s)) opens++;
       if (isClose(s)) closes++; // includes close, close-ext, kc-close
     });
     const workers = ROLES.filter(r => isWork(schedule[r][dk])).length;
     const thinDay = ROLES.length <= 2 && workers === 1;
-    const sev = (workers === 0 || !thinDay) ? 'error' : 'warning';
+    const kcNightNoKc = isKcCloseNight(dk) && namedKcClosers === 0;
+    const expectedHole = thinDay || (kcNightNoKc && closes === 0);
+    const sev = (workers === 0 || !expectedHole) ? 'error' : 'warning';
     if (opens === 0) {
       v(sev, 'coverage-open', null, null, dk,
         `${formatDate(dkToDate(dk))}: No opener`);
     }
     if (closes === 0) {
       v(sev, 'coverage-close', null, null, dk,
-        `${formatDate(dkToDate(dk))}: No closer`);
+        kcNightNoKc
+          ? `${formatDate(dkToDate(dk))}: No closer (no named key carrier for this reserved close night)`
+          : `${formatDate(dkToDate(dk))}: No closer`);
     }
   });
 
-  // ── Rule 9: No manager close on KC-close nights ──
-  allDks.forEach(dk => {
-    if (!isKcCloseNight(dk)) return;
-    const dayName = DAY_NAMES_FULL[dkToDate(dk).getDay()] || 'day';
-    ROLES.forEach(r => {
-      if (isClose(schedule[r][dk])) {
-        v('error', 'no-kc-night-close', r, null, dk,
-          `${names[r]}: Closing on ${dayName} ${formatDate(dkToDate(dk))} (KC handles this close night)`);
-      }
+  // ── Rule 9: No manager close on KC-close nights (only when a KC is named) ──
+  if (namedKcClosers > 0) {
+    allDks.forEach(dk => {
+      if (!isKcCloseNight(dk)) return;
+      const dayName = DAY_NAMES_FULL[dkToDate(dk).getDay()] || 'day';
+      ROLES.forEach(r => {
+        if (isClose(schedule[r][dk])) {
+          v('error', 'no-kc-night-close', r, null, dk,
+            `${names[r]}: Closing on ${dayName} ${formatDate(dkToDate(dk))} (KC handles this close night)`);
+        }
+      });
     });
-  });
+  }
 
   // ── Rule 10: Balance coverage across week (soft error — warning if spread > 2) ──
   for (let w = 0; w < numWeeks; w++) {
@@ -13885,17 +13990,30 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
     return { role: r, name: names[r] || r, we, opens, mids, closes, clopens };
   });
 
-  // Peer spread among AMs (and manager-coverage KCs); SM excluded from peer min/max
+  // Weekend range is every named manager (same story as the WE chip / weekend tile).
+  // Close min/max stay AM-peer; the scaled period goal is shown so 5-5 is not a fake pass.
   const peers = rows.filter((row) => row.role !== 'sm');
   const peerPool = peers.length ? peers : rows;
-  const weVals = peerPool.map((r) => r.we);
+  const weVals = rows.map((r) => r.we);
   const closeVals = peerPool.map((r) => r.closes);
-  const weMin = Math.min(...weVals);
-  const weMax = Math.max(...weVals);
-  const cMin = Math.min(...closeVals);
-  const cMax = Math.max(...closeVals);
+  const weMin = weVals.length ? Math.min(...weVals) : 0;
+  const weMax = weVals.length ? Math.max(...weVals) : 0;
+  const cMin = closeVals.length ? Math.min(...closeVals) : 0;
+  const cMax = closeVals.length ? Math.max(...closeVals) : 0;
   const weSpread = weMax - weMin;
   const cSpread = cMax - cMin;
+  const weMetN = rows.filter((row) => {
+    const t = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(row.role) : 2;
+    return row.we >= t;
+  }).length;
+  const nights = typeof getManagerNightsPerWeek === 'function'
+    ? getManagerNightsPerWeek(preferences)
+    : 6;
+  const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : 4;
+  const closeTargets = typeof getScaledCloseTargets === 'function'
+    ? getScaledCloseTargets(preferences, ROLES, nights)
+    : null;
+  const amPeriodGoal = closeTargets && closeTargets.amTarget ? closeTargets.amTarget * weeks : 0;
 
   // Coverage: every day has ≥1 open and ≥1 close (managers + non-mgr KC closes)
   // ALL_KC from generate is id strings; some callers pass {id} objects.
@@ -13938,18 +14056,25 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
   let html = '<div class="fu-head">';
   html += '<span class="fu-title">Fairness at a glance</span>';
   html +=
-    '<span class="fu-meta">AM peers · WE offs ' +
+    '<span class="fu-meta">WE offs ' +
     weMin +
     '–' +
     weMax +
-    ' · Closes ' +
-    cMin +
-    '–' +
-    cMax +
+    ' · ' +
+    weMetN +
+    '/' +
+    rows.length +
+    (amPeriodGoal
+      ? ' · AM closes ' + (cMin === cMax ? cMin : cMin + '–' + cMax) + ' / ' + amPeriodGoal
+      : ' · AM closes ' + cMin + '–' + cMax) +
     '</span> ';
+  const thinCoverWhy = !coverOk && typeof twoPersonOffsCoverageNote === 'function'
+    ? twoPersonOffsCoverageNote(ROLES)
+    : '';
   html += coverOk
     ? '<span class="fu-cover ok">All days open+close ✓</span>'
-    : '<span class="fu-cover warn">' + missDays + ' day(s) missing open/close</span>';
+    : '<span class="fu-cover warn">' + missDays + ' day(s) missing open/close' +
+      (thinCoverWhy ? ' — ' + thinCoverWhy : '') + '</span>';
   html += '</div>';
   html +=
     '<table><thead><tr><th>Name</th><th>WE offs</th><th>Closes</th><th>Opens</th><th>Mids</th><th>Clopens</th><th></th></tr></thead><tbody>';
@@ -14114,13 +14239,17 @@ function renderClopenRadar(ROLES) {
     );
   }
   let html = '<div class="clopen-radar no-print">';
+  const hasSuggestedFix = list.some((c) => c && c.fix);
   html += '<h3>Clopen radar</h3>';
   html +=
     '<div class="cr-sub">' +
     list.length +
     ' close→open pair' +
     (list.length === 1 ? '' : 's') +
-    ' — jump to edit or apply a suggested fix.</div>';
+    (hasSuggestedFix
+      ? ' — jump to edit, or apply a suggested fix when one is offered. Preference — not a guarantee.'
+      : ' — no auto-fix on these pairs; edit the board if you want to change them. Preference — not a guarantee.') +
+    '</div>';
   html += '<div class="cr-list">';
   list.forEach((c, idx) => {
     html += '<div class="cr-row">';
@@ -14353,6 +14482,7 @@ function jumpToRoleOnGrid(role) {
    Rule-based, on-device. Auto-fixes stay buttons. No zero-clopen claim.
    v2.6.20 — Quality / Needs work taps the same first person+day hole.
    v2.6.21 — Prefer weekend / streak / a real coverage miss over an arbitrary close.
+   v2.6.22 — Close targets scale to named headcount; thin-day chip explains two people + offs.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -14500,11 +14630,24 @@ function explainCellWhy(role, dk) {
     if (typeof isOpen === 'function' && isOpen(v)) opens++;
     if ((typeof isClose === 'function' && isClose(v)) || v === 'kc-close') closes++;
   });
+  const thinCover = typeof twoPersonOffsCoverageNote === 'function'
+    ? twoPersonOffsCoverageNote(typeof getRoles === 'function' ? getRoles() : [])
+    : '';
   if (opens < 1) {
-    return { kind: 'coverage', text: 'Coverage hole — this day has no opener.' };
+    return {
+      kind: 'coverage',
+      text: thinCover
+        ? 'Coverage hole — this day has no opener. ' + thinCover
+        : 'Coverage hole — this day has no opener.'
+    };
   }
   if (closes < 1) {
-    return { kind: 'coverage', text: 'Coverage hole — this day has no closer.' };
+    return {
+      kind: 'coverage',
+      text: thinCover
+        ? 'Coverage hole — this day has no closer. ' + thinCover
+        : 'Coverage hole — this day has no closer.'
+    };
   }
 
   let weekend = false;
@@ -15127,7 +15270,9 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     const avgWe = weVals.length ? (weVals.reduce((a,b)=>a+b,0) / weVals.length) : 0;
     const metWe = ROLES.filter(r => (genReport.weekendOffs[r] || 0) >= getWeekendTargetForPerson(r)).length;
     html += '<div class="gen-summary">';
-    html += `<div class="gen-stat-card"><h4>Weekend days off</h4><div class="stat-value ${metWe === ROLES.length ? 'ok' : 'warn'}">${metWe}/${ROLES.length}</div><div class="stat-sub">met target (avg ${avgWe.toFixed(1)}, goal ${weTarget})</div></div>`;
+    const weMinTile = weVals.length ? Math.min(...weVals) : 0;
+    const weMaxTile = weVals.length ? Math.max(...weVals) : 0;
+    html += `<div class="gen-stat-card"><h4>Weekend days off</h4><div class="stat-value ${metWe === ROLES.length ? 'ok' : 'warn'}">${metWe}/${ROLES.length}</div><div class="stat-sub">met target (avg ${avgWe.toFixed(1)}, range ${weMinTile}-${weMaxTile}, goal ${weTarget})</div></div>`;
     html += `<div class="gen-stat-card"><h4>Clopens</h4><div class="stat-value ${clopenOk ? 'ok' : 'warn'}">${totalClopens}</div><div class="stat-sub">${avoidOn ? 'Avoid-clopen preference ON' : 'Avoid-clopen preference OFF'}</div></div>`;
     const totalOpens = ROLES.reduce((s,r)=>s+(genReport.opens[r]||0),0);
     const totalCloses = ROLES.reduce((s,r)=>s+(genReport.closes[r]||0),0);
@@ -15813,8 +15958,10 @@ function playPostGenStripArrival(token) {
         cover.textContent = p > 0.62 ? 'Open+close ✓' : 'Coverage…';
         cover.className = 'pgs-chip ' + (p > 0.62 ? 'ok' : '');
       } else {
-        cover.textContent = Math.round(st.missDays * e) + ' missing';
-        cover.className = 'pgs-chip bad';
+        const cov = formatCoverageChip(st);
+        cover.textContent = p > 0.55 ? cov.text : Math.round(st.missDays * e) + ' missing';
+        cover.className = 'pgs-chip ' + cov.cls;
+        cover.title = cov.title;
       }
     }
     if (cl) {
@@ -15822,12 +15969,27 @@ function playPostGenStripArrival(token) {
       cl.className = 'pgs-chip ' + (st.clopens === 0 && p > 0.5 ? 'ok' : st.clopens ? 'warn' : '');
     }
     if (amc) {
-      amc.textContent = 'AM closes ' + Math.round(st.cMin * e) + '-' + Math.round(st.cMax * e);
-      amc.className = 'pgs-chip ' + (st.cSpread > 2 ? 'warn' : 'ok');
+      const amChip = formatAmCloseChip({
+        cMin: Math.round(st.cMin * e),
+        cMax: Math.round(st.cMax * e),
+        cSpread: st.cSpread,
+        amPeriodGoal: st.amPeriodGoal,
+        amWeeklyGoal: st.amWeeklyGoal,
+        amMetGoal: st.amMetGoal
+      });
+      amc.textContent = amChip.text;
+      amc.className = 'pgs-chip ' + amChip.cls;
     }
     if (we) {
-      we.textContent = 'WE offs ' + Math.round(st.weMin * e) + '-' + Math.round(st.weMax * e);
-      we.className = 'pgs-chip ' + (st.weSpread > 1 ? 'warn' : 'ok');
+      const weChip = formatWeOffChip({
+        weMin: Math.round(st.weMin * e),
+        weMax: Math.round(st.weMax * e),
+        weMet: st.weMet,
+        weN: st.weN,
+        weTarget: st.weTarget
+      });
+      we.textContent = weChip.text;
+      we.className = 'pgs-chip ' + weChip.cls;
     }
     if (fair) {
       fair.textContent = p > 0.72 ? (st.fairOk ? 'Fairness OK' : 'Fairness Review') : 'Fairness…';
@@ -17269,11 +17431,13 @@ function computeCoverageAndFairnessStats() {
   const ALL_KC = typeof getAllWithKC === 'function' ? getAllWithKC() : ROLES;
   const report = window._lastGenReport || null;
   const allDks = (periodDates || []).map((d) => dateKey(d));
+  const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : Math.max(1, Math.ceil(allDks.length / 7));
   let missDays = 0;
+  let emptyDays = 0;
   let coverOk = true;
   let clopens = 0;
   const peerCloses = [];
-  const peerWe = [];
+  const allWe = [];
   const isDayOffish = (s) => s === 'off' || s === 'rto' || s === 'pto' || s === 'loa';
   const isWeekendDk = (dk) => {
     const parts = String(dk).split('-');
@@ -17297,31 +17461,121 @@ function computeCoverageAndFairnessStats() {
     if (opens < 1 || closes < 1) {
       coverOk = false;
       missDays++;
+      const workers = ROLES.filter((r) => schedule[r] && typeof isWork === 'function' && isWork(schedule[r][dk])).length;
+      if (workers === 0) emptyDays++;
     }
   });
   ROLES.filter((r) => r !== 'sm').forEach((r) => {
-    let closes = 0, we = 0;
+    let closes = 0;
     if (report) {
       closes = report.closes[r] || 0;
-      we = report.weekendOffs[r] || 0;
     } else {
       allDks.forEach((dk) => {
         const s = schedule[r] && schedule[r][dk];
         if (isClose(s)) closes++;
-        if (isWeekendDk(dk) && isDayOffish(s)) we++;
       });
     }
     peerCloses.push(closes);
-    peerWe.push(we);
+  });
+  ROLES.forEach((r) => {
+    let we = 0;
+    if (report && report.weekendOffs) {
+      we = report.weekendOffs[r] || 0;
+    } else {
+      allDks.forEach((dk) => {
+        const s = schedule[r] && schedule[r][dk];
+        if (isWeekendDk(dk) && isDayOffish(s)) we++;
+      });
+    }
+    allWe.push({
+      role: r,
+      we,
+      target: typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(r) : 2
+    });
   });
   const cMin = peerCloses.length ? Math.min(...peerCloses) : 0;
   const cMax = peerCloses.length ? Math.max(...peerCloses) : 0;
-  const weMin = peerWe.length ? Math.min(...peerWe) : 0;
-  const weMax = peerWe.length ? Math.max(...peerWe) : 0;
+  const weVals = allWe.map((row) => row.we);
+  const weMin = weVals.length ? Math.min(...weVals) : 0;
+  const weMax = weVals.length ? Math.max(...weVals) : 0;
+  const weMet = allWe.filter((row) => row.we >= row.target).length;
+  const weTarget = allWe.length ? allWe[0].target : 2;
   const cSpread = cMax - cMin;
   const weSpread = weMax - weMin;
-  const fairOk = cSpread <= 2 && weSpread <= 1 && clopens === 0;
-  return { coverOk, missDays, clopens, cMin, cMax, cSpread, weMin, weMax, weSpread, fairOk, ROLES, ALL_KC };
+  const thin = typeof isThinManagerRoster === 'function' ? isThinManagerRoster(ROLES) : ROLES.length <= 2;
+  const coverWhy = !coverOk && thin ? twoPersonOffsCoverageNote(ROLES) : '';
+  const nights = typeof getManagerNightsPerWeek === 'function'
+    ? getManagerNightsPerWeek((report && report.prefs) || preferences)
+    : 6;
+  const closeTargets = (report && report.closeTargets) ||
+    (typeof getScaledCloseTargets === 'function'
+      ? getScaledCloseTargets((report && report.prefs) || preferences, ROLES, nights)
+      : null);
+  const amWeeklyGoal = closeTargets ? closeTargets.amTarget : 0;
+  const amPeriodGoal = amWeeklyGoal * weeks;
+  const amMetGoal = !peerCloses.length || amPeriodGoal <= 0 || cMin >= amPeriodGoal;
+  const fairOk = cSpread <= 2 && weSpread <= 1 && clopens === 0 && amMetGoal && weMet === ROLES.length;
+  return {
+    coverOk,
+    missDays,
+    emptyDays,
+    coverWhy,
+    thin,
+    clopens,
+    cMin,
+    cMax,
+    cSpread,
+    weMin,
+    weMax,
+    weSpread,
+    weMet,
+    weN: ROLES.length,
+    weTarget,
+    amWeeklyGoal,
+    amPeriodGoal,
+    amMetGoal,
+    fairOk,
+    ROLES,
+    ALL_KC
+  };
+}
+
+function formatCoverageChip(st) {
+  if (!st) return { text: 'Coverage', cls: '', title: '' };
+  if (st.coverOk) {
+    return { text: 'Open+close ✓', cls: 'ok', title: 'Every day has an opener and a closer.' };
+  }
+  const why = st.coverWhy || '';
+  const text = st.missDays + ' missing' + (why ? ' · 2 people + offs' : '');
+  const cls = st.emptyDays > 0 ? 'bad' : (st.thin ? 'warn' : 'bad');
+  return { text, cls, title: why || (st.missDays + ' days missing open or close') };
+}
+
+function formatAmCloseChip(st) {
+  if (!st) return { text: 'AM closes', cls: '', title: '' };
+  const goal = st.amPeriodGoal || 0;
+  const range = st.cMin === st.cMax ? String(st.cMin) : (st.cMin + '-' + st.cMax);
+  const text = goal
+    ? 'AM closes ' + range + ' / ' + goal
+    : 'AM closes ' + (st.cMin === st.cMax ? st.cMin : (st.cMin + '-' + st.cMax));
+  // Green only when the scaled period target is met — never a pass next to "needs ≥N/week".
+  const cls = st.amMetGoal && st.cSpread <= 2 ? 'ok' : 'warn';
+  const title = goal
+    ? 'Named AM closes this period ' + range + ' (scaled goal ' + goal + ', ' + (st.amWeeklyGoal || 0) + '/week).'
+    : 'Named AM close counts this period.';
+  return { text, cls, title };
+}
+
+function formatWeOffChip(st) {
+  if (!st) return { text: 'WE offs', cls: '', title: '' };
+  const range = st.weMin + '-' + st.weMax;
+  const met = (st.weMet != null && st.weN) ? (st.weMet + '/' + st.weN) : '';
+  const text = met ? ('WE offs ' + range + ' · ' + met) : ('WE offs ' + range);
+  const cls = st.weN && st.weMet === st.weN ? 'ok' : 'warn';
+  const title = met
+    ? met + ' met weekend-off goal (range ' + range + ', goal ' + (st.weTarget || 2) + ').'
+    : 'Weekend days off this period: ' + range;
+  return { text, cls, title };
 }
 
 function updatePostGenStrip() {
@@ -17354,20 +17608,31 @@ function updatePostGenStrip() {
     }
   }
   if (cover) {
-    cover.textContent = st.coverOk ? 'Open+close ✓' : st.missDays + ' missing';
-    cover.className = 'pgs-chip ' + (st.coverOk ? 'ok' : 'bad');
+    const cov = formatCoverageChip(st);
+    cover.textContent = cov.text;
+    cover.className = 'pgs-chip ' + cov.cls;
+    cover.title = cov.title;
+    if (st.coverWhy) cover.setAttribute('data-cover-why', st.coverWhy);
+    else cover.removeAttribute('data-cover-why');
   }
   if (cl) {
     cl.textContent = 'Clopens ' + st.clopens;
     cl.className = 'pgs-chip ' + (st.clopens === 0 ? 'ok' : 'warn');
+    cl.title = st.clopens
+      ? 'Clopen pairs are a preference to review — not a guarantee.'
+      : 'No close→open pairs on this board.';
   }
   if (amc) {
-    amc.textContent = 'AM closes ' + st.cMin + '-' + st.cMax;
-    amc.className = 'pgs-chip ' + (st.cSpread > 2 ? 'warn' : 'ok');
+    const amChip = formatAmCloseChip(st);
+    amc.textContent = amChip.text;
+    amc.className = 'pgs-chip ' + amChip.cls;
+    amc.title = amChip.title;
   }
   if (we) {
-    we.textContent = 'WE offs ' + st.weMin + '-' + st.weMax;
-    we.className = 'pgs-chip ' + (st.weSpread > 1 ? 'warn' : 'ok');
+    const weChip = formatWeOffChip(st);
+    we.textContent = weChip.text;
+    we.className = 'pgs-chip ' + weChip.cls;
+    we.title = weChip.title;
   }
   if (fair) {
     fair.textContent = st.fairOk ? 'Fairness OK' : 'Fairness Review';

@@ -70,7 +70,7 @@ async function main() {
   console.log('\n=== v2.6.9 first-run Start with my team ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.19') pass('version.json', version.version);
+  if (version.version === '2.6.20') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const index = read('index.html');

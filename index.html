@@ -5599,7 +5599,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.30</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.31</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -8077,7 +8077,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.30';
+const APP_VERSION = '2.6.31';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -16213,6 +16213,10 @@ function jumpToRoleOnGrid(role) {
              pool no longer piles AM closes. Named KC closes only on reserved KC-C nights
              (not regular C, not spare closer). Thin 2-person 2.6.22 scale and week-4 AM
              pile fix stay. Clopen stays a preference. SW cache 2.6.30.
+   v2.6.31 — Play / TWA / PWA icon is Bryan's split-day MSP mark (maroon
+             close crescent left, gold open arc right, small gold MSP,
+             navy #070b14). Generate / close / first-visit unchanged.
+             SW cache 2.6.31 so installed PWAs pick up the new icons.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {

@@ -6,7 +6,7 @@
  * Unnamed KC stays hidden.
  * Thin 2-person 2.6.22 scale and 2.6.29 first-visit still hold.
  * Clopen stays a preference — no zero-clopen guarantee.
- * Keeps 2.6.12–2.6.29 behavior; version lock 2.6.30.
+ * Keeps 2.6.12–2.6.29 behavior; version lock 2.6.31.
  * Run: node tests/test-v2630-ux.mjs
  */
 import { createServer } from 'http';
@@ -88,15 +88,15 @@ async function main() {
   console.log('\n=== v2.6.30 even SM+AM closes on a 4–5 person bench ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.30') pass('version.json', version.version);
+  if (version.version === '2.6.31') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.30'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.31'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.30'") && index.includes('id="app-version-label">v2.6.30')) {
+  if (index.includes("const APP_VERSION = '2.6.31'") && index.includes('id="app-version-label">v2.6.31')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -110,7 +110,7 @@ async function main() {
     && /3\+ AM team/.test(index)
     && /Reserved-night KC-C only/.test(index)) {
     pass('v2630-fns');
-  } else fail('v2630-fns', '2.6.30 even-close helpers missing');
+  } else fail('v2630-fns', '2.6.31 even-close helpers missing');
 
   if (/function getScaledCloseTargets\(/.test(index)
     && /CLOSE_TARGET_TEMPLATE_AM_BENCH/.test(index)

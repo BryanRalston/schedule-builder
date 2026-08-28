@@ -2,7 +2,7 @@
  * v2.6.19: Ask-bar trailing date parse, Rebuild hit area above the
  * sticky review bar, Word/Excel Pro modal Not now on pointerdown,
  * and drop the 404 Play badge image.
- * Keeps 2.6.12–2.6.18 behavior; version lock follows 2.6.30.
+ * Keeps 2.6.12–2.6.18 behavior; version lock follows 2.6.31.
  * Run: node tests/test-v2619-ux.mjs
  */
 import { createServer } from 'http';
@@ -114,15 +114,15 @@ async function main() {
   console.log('\n=== v2.6.19 ask-bar date, rebuild hit, pro dismiss ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.30') pass('version.json', version.version);
+  if (version.version === '2.6.31') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.30'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.31'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.30'") && index.includes('id="app-version-label">v2.6.30')) {
+  if (index.includes("const APP_VERSION = '2.6.31'") && index.includes('id="app-version-label">v2.6.31')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

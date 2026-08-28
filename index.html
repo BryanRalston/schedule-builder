@@ -5537,7 +5537,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.25</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.26</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -7420,7 +7420,7 @@ function getScaledCloseTargets(prefs, roles, managerNights) {
 /** One-line why for thin-day coverage holes (2 named people + offs). */
 function twoPersonOffsCoverageNote(roles) {
   if (!isThinManagerRoster(roles)) return '';
-  return 'Two people with days off cannot cover Open+Close every day.';
+  return msbT('Two people with days off cannot cover Open+Close every day.');
 }
 
 function syncCloseTargetsToRoleRules() {
@@ -7553,11 +7553,10 @@ function summarizeWarningsForDisplay(warnings, roles) {
   if (cover.length < 2) {
     return rest.concat(cover);
   }
-  const why = typeof twoPersonOffsCoverageNote === 'function' ? twoPersonOffsCoverageNote(roles) : '';
   rest.unshift({
     type: 'info',
-    msg: (why || 'Two people with days off cannot cover Open+Close every day.')
-      + ' See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.'
+    msg: msbT('Two people with days off cannot cover Open+Close every day.')
+      + ' ' + msbT('See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.')
   });
   return rest;
 }
@@ -7913,7 +7912,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.25';
+const APP_VERSION = '2.6.26';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -8249,6 +8248,116 @@ const MSB_I18N_ES = {
   'team hours': 'horas del equipo',
   'period hours': 'horas del período',
   'optional to fix': 'opcional corregir',
+  'Your team': 'Tu equipo',
+  'Hide extra setup': 'Ocultar extra',
+  'Name two managers, load this NRF period, then Build. Requests and rules can wait. New phone? More → Backup JSON, then Load.': 'Nombra dos gerentes, carga este período NRF y luego Arma. Solicitudes y reglas pueden esperar. ¿Teléfono nuevo? Más → Respaldo JSON, luego Cargar.',
+  'Clopen radar': 'Radar de clopen',
+  'No close→open pairs on this board. Still review before you post.': 'No hay pares cierre→apertura en este tablero. Igual revisa antes de publicar.',
+  'close→open pair': 'par cierre→apertura',
+  'close→open pairs': 'pares cierre→apertura',
+  ' — jump to edit, or apply a suggested fix when one is offered. Preference — not a guarantee.': ' — ve a editar, o aplica un arreglo sugerido si hay uno. Preferencia — no es garantía.',
+  ' — no auto-fix on these pairs; edit the board if you want to change them. Preference — not a guarantee.': ' — no hay arreglo automático en estos pares; edita el tablero si quieres cambiarlos. Preferencia — no es garantía.',
+  'No auto-fix — edit manually': 'Sin arreglo automático — edita a mano',
+  'Weekend fairness': 'Equidad de fin de semana',
+  'Everyone met their weekend-off target for this period.': 'Todos cumplieron su meta de libres de fin en este período.',
+  '{n} manager still short on weekend days off.': '{n} gerente aún corto de libres de fin.',
+  '{n} managers still short on weekend days off.': '{n} gerentes aún cortos de libres de fin.',
+  'Goal': 'Meta',
+  'Met': 'Cumplió',
+  'Short {n}': 'Falta {n}',
+  '{n} missing': 'Faltan {n}',
+  '{n} day missing open or close': '{n} día sin apertura o cierre',
+  '{n} days missing open or close': '{n} días sin apertura o cierre',
+  'Two people with days off cannot cover Open+Close every day.': 'Dos personas con días libres no cubren Apertura+Cierre todos los días.',
+  'See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.': 'Mira el chip de cobertura — los días delgados son el trueque de dos personas + libres, no un Armado fallido.',
+  'New phone? Export a JSON backup, then Load on the new device.': '¿Teléfono nuevo? Exporta un respaldo JSON y luego Cargar en el aparato nuevo.',
+  'Store hours': 'Horario de tienda',
+  'Hours override': 'Horario especial',
+  'Generated': 'Armado',
+  'Generated {when}': 'Armado {when}',
+  'Coverage…': 'Cobertura…',
+  'Coverage · {o} open · {m} mid · {c} close': 'Cobertura · {o} apertura · {m} medio · {c} cierre',
+  'Only opener this day': 'Única apertura este día',
+  'Only closer this day': 'Único cierre este día',
+  '{n} openers this day': '{n} aperturas este día',
+  '{n} closers this day': '{n} cierres este día',
+  '{kind} lock — request stays on this day.': 'Candado {kind} — el pedido se queda este día.',
+  'Clopen pair — close then open (preference to review).': 'Par clopen — cierre y luego apertura (preferencia a revisar).',
+  'Clopen pair — preference to review before you post': 'Par clopen — preferencia a revisar antes de publicar',
+  'Coverage hole — this day has no opener.': 'Hueco de cobertura — este día no tiene apertura.',
+  'Coverage hole — this day has no closer.': 'Hueco de cobertura — este día no tiene cierre.',
+  'Coverage hole — this day has no opener. {why}': 'Hueco de cobertura — este día no tiene apertura. {why}',
+  'Coverage hole — this day has no closer. {why}': 'Hueco de cobertura — este día no tiene cierre. {why}',
+  'Weekend work — short of weekend-off target ({got} of {target}).': 'Trabajo de fin — corto de la meta de libres ({got} de {target}).',
+  'Weekend off — counts toward this period\'s target ({got} of {target}).': 'Libre de fin — cuenta para la meta de este período ({got} de {target}).',
+  'Weekend off — counts toward this period\'s target.': 'Libre de fin — cuenta para la meta de este período.',
+  'This is the generated shift.': 'Este es el turno armado.',
+  'low WE offs': 'pocos libres de fin',
+  'high WE offs': 'muchos libres de fin',
+  'more closes': 'más cierres',
+  'fewer closes': 'menos cierres',
+  '{n} clopen': '{n} clopen',
+  '{n} clopens': '{n} clopens',
+  '{name} is short on weekend offs': '{name} está corto de libres de fin',
+  '{got} of {target} weekend days off this period.': '{got} de {target} libres de fin en este período.',
+  'Swap open with {name}': 'Cambiar apertura con {name}',
+  'Change open → mid (keep coverage)': 'Cambiar apertura → medio (mantener cobertura)',
+  'Change close → mid (other closer stays)': 'Cambiar cierre → medio (el otro cierre se queda)',
+  'Swap this shift': 'Cambiar este turno',
+  'Excellent': 'Excelente',
+  'Strong': 'Fuerte',
+  'Good': 'Bien',
+  'Fair': 'Regular',
+  'Needs work': 'Hay que pulir',
+  '1 must-fix issue remains (coverage, hours, or role rules). Fix those first.': 'Queda 1 cosa que corregir (cobertura, horas o reglas de puesto). Eso primero.',
+  '{n} must-fix issues remain (coverage, hours, or role rules). Fix those first.': 'Quedan {n} cosas que corregir (cobertura, horas o reglas de puesto). Eso primero.',
+  '{n} clopen(s) remain (close then open the next day). Preference — review those pairs before you post.': 'Quedan {n} clopen(s) (cierre y apertura al día siguiente). Preferencia — revisa esos pares antes de publicar.',
+  'Clopen preference is costing points — check close→open pairs.': 'La preferencia de clopen baja el puntaje — mira los pares cierre→apertura.',
+  'No close→open pairs under current preferences — still review before posting.': 'No hay pares cierre→apertura con las preferencias actuales — igual revisa antes de publicar.',
+  'Weekend fairness: {met}/{n} managers hit their weekend-off goal.': 'Equidad de fin: {met}/{n} gerentes cumplieron su meta de libres de fin.',
+  'Someone is over max consecutive work days — break long streaks with an off day.': 'Alguien pasó el máximo de días seguidos — corta la racha con un día libre.',
+  'Some shift preferences could not be fully honored (optional polish).': 'Algunas preferencias de turno no se pudieron cumplir del todo (pulido opcional).',
+  'Ready to post — strong enough for the breakroom.': 'Listo para publicar — suficientemente sólido para el cuarto de descanso.',
+  'Nearly ready — only small preference polish left.': 'Casi listo — solo queda pulir preferencias.',
+  'Usable baseline — clear must-fix issues before posting.': 'Base usable — corrige lo que hay que corregir antes de publicar.',
+  'Not ready to post yet — start with must-fix issues, then weekends.': 'Aún no está listo — empieza por lo que hay que corregir, luego los fines.',
+  'Weekend days off': 'Libres de fin',
+  'met target (avg {avg}, range {min}-{max}, goal {goal})': 'cumplieron la meta (prom. {avg}, rango {min}-{max}, meta {goal})',
+  'Avoid-clopen preference ON': 'Preferencia evitar clopen SÍ',
+  'Avoid-clopen preference OFF': 'Preferencia evitar clopen NO',
+  'Shift mix': 'Mezcla de turnos',
+  'Opens · Mids · Closes (period)': 'Aperturas · Medios · Cierres (período)',
+  'Longest work streak': 'Racha de trabajo más larga',
+  'limit {n} consecutive days': 'límite {n} días seguidos',
+  'Consecutive Sat+Sun': 'Sáb+Dom seguidos',
+  'Extra Sat Off': 'Sáb extra libre',
+  'Extra Sun Off': 'Dom extra libre',
+  'NONE': 'NINGUNO',
+  'OK': 'OK',
+  'Low': 'Bajo',
+  'MANAGER SCHEDULE SUMMARY': 'RESUMEN DE HORARIO DE GERENCIA',
+  'Quality score: {score}/100 ({grade})': 'Puntaje de calidad: {score}/100 ({grade})',
+  'Labor: {hours} hrs · {shifts} shifts · ~{avg} hrs/week': 'Labor: {hours} h · {shifts} turnos · ~{avg} h/semana',
+  'Clopens: {n}': 'Clopens: {n}',
+  'WEEKEND DAYS OFF': 'LIBRES DE FIN',
+  'UNMET / NOTES': 'NO CUMPLIDO / NOTAS',
+  'Generated with Manager Schedule Builder Pro': 'Armado con Manager Schedule Builder Pro',
+  'Summary copied to clipboard.': 'Resumen copiado al portapapeles.',
+  'Backup JSON downloaded. New phone? Load that file there.': 'Respaldo JSON descargado. ¿Teléfono nuevo? Carga ese archivo allá.',
+  'Generate a schedule first.': 'Arma un horario primero.',
+  'Load a period first.': 'Carga un período primero.',
+  'Named AM closes this period {range} (scaled goal {goal}, {weekly}/week).': 'Cierres AM en este período {range} (meta escalada {goal}, {weekly}/semana).',
+  'Named AM close counts this period.': 'Conteo de cierres AM de este período.',
+  '{met} met weekend-off goal (range {range}, goal {goal}).': '{met} cumplieron la meta de libres de fin (rango {range}, meta {goal}).',
+  'Weekend days off this period: {range}': 'Libres de fin en este período: {range}',
+  'Store hours · {sum}': 'Horario de tienda · {sum}',
+  'Store hours · Wk1: {bits}': 'Horario de tienda · Sem 1: {bits}',
+  ' (* override)': ' (* especial)',
+  'Management Schedule': 'Horario de gerencia',
+  'Name': 'Nombre',
+  'WE offs {min}–{max} · {met}/{n}': 'Libres de fin {min}–{max} · {met}/{n}',
+  'AM closes {range} / {goal}': 'Cierres AM {range} / {goal}',
+  'AM closes {range}': 'Cierres AM {range}',
   'Close panel': 'Cerrar'
 };
 
@@ -8262,14 +8371,24 @@ const MSB_I18N_EN = {
 
 let currentUiLang = 'en';
 
-function detectDeviceUiLang() {
+/** Device UI language. Optional `source` is a BCP-47 tag (es / es-MX / es-US)
+ *  or a navigator-like { language, languages } object so tests can inject
+ *  Spanish without a persist override. Playwright locale and init-script
+ *  injection are lab checks only — a real Spanish-locale phone is still
+ *  required to confirm the device-default path. */
+function detectDeviceUiLang(source) {
   const cands = [];
-  try {
-    if (navigator.languages && navigator.languages.length) {
-      for (let i = 0; i < navigator.languages.length; i++) cands.push(navigator.languages[i]);
-    }
-  } catch (e) {}
-  try { if (navigator.language) cands.push(navigator.language); } catch (e2) {}
+  if (typeof source === 'string' && source) {
+    cands.push(source);
+  } else {
+    const nav = source || (typeof navigator !== 'undefined' ? navigator : null);
+    try {
+      if (nav && nav.languages && nav.languages.length) {
+        for (let i = 0; i < nav.languages.length; i++) cands.push(nav.languages[i]);
+      }
+    } catch (e) {}
+    try { if (nav && nav.language) cands.push(nav.language); } catch (e2) {}
+  }
   for (let i = 0; i < cands.length; i++) {
     const tag = String(cands[i] || '').toLowerCase().replace('_', '-');
     if (tag === 'es' || tag.indexOf('es-') === 0) return 'es';
@@ -8339,6 +8458,13 @@ function syncLangPickers() {
 function refreshUiLangChrome() {
   applyStaticI18n();
   syncLangPickers();
+  try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEase) {}
+  try {
+    const ts = document.getElementById('gen-timestamp');
+    if (ts && window._lastGeneratedAt) {
+      ts.textContent = msbT('Generated {when}', { when: window._lastGeneratedAt.toLocaleString() });
+    }
+  } catch (eTs) {}
   try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
   try { if (typeof personalizeWelcome === 'function') personalizeWelcome(); } catch (e0) {}
   try { if (typeof updateAccountChip === 'function') updateAccountChip(); } catch (e1) {}
@@ -8395,6 +8521,7 @@ function bootUiLang() {
   applyStaticI18n();
   syncLangPickers();
   try { if (typeof applyRoleTitleUI === 'function') applyRoleTitleUI(); } catch (eRt) {}
+  try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEase) {}
 }
 
 try { currentUiLang = resolveUiLang(); } catch (eLang) { currentUiLang = 'en'; }
@@ -8403,7 +8530,26 @@ function localizeWarningMsg(msg) {
   let s = String(msg || '');
   s = s.replace(/:\s*No opener\b/g, ': ' + msbT('No opener'));
   s = s.replace(/:\s*No closer\b/g, ': ' + msbT('No closer'));
+  const twoEn = 'Two people with days off cannot cover Open+Close every day.';
+  const seeEn = 'See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.';
+  if (s.indexOf(twoEn) !== -1) s = s.replace(twoEn, msbT(twoEn));
+  if (s.indexOf(seeEn) !== -1) s = s.replace(seeEn, msbT(seeEn));
   return s;
+}
+
+function localizeQualityGrade(grade) {
+  return msbT(grade || 'Needs work');
+}
+
+/** One story for thin-day chips and review titles — never mix "8 missing" with "17 faltan". */
+function formatMissingDaysShort(n) {
+  return msbT('{n} missing', { n: n });
+}
+
+function formatMissingDaysLong(n) {
+  return n === 1
+    ? msbT('{n} day missing open or close', { n: n })
+    : msbT('{n} days missing open or close', { n: n });
 }
 
 // ── Schedule view mode: month | week | day ──
@@ -8597,15 +8743,15 @@ function syncFirstRunEase() {
   if (wrap) wrap.hidden = returningFull;
   if (btn) {
     btn.setAttribute('aria-expanded', ease ? 'false' : 'true');
-    btn.textContent = ease ? 'More setup' : 'Hide extra setup';
+    btn.textContent = ease ? msbT('More setup') : msbT('Hide extra setup');
   }
   const title = document.getElementById('setup-panel-title');
   const desc = document.getElementById('setup-panel-desc');
-  if (title) title.textContent = ease ? 'Your team' : 'Store & team';
+  if (title) title.textContent = ease ? msbT('Your team') : msbT('Store & team');
   if (desc) {
     desc.textContent = ease
-      ? 'Name two managers, load this NRF period, then Build. Requests and rules can wait. New phone? More → Backup JSON, then Load.'
-      : 'Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.';
+      ? msbT('Name two managers, load this NRF period, then Build. Requests and rules can wait. New phone? More → Backup JSON, then Load.')
+      : msbT('Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.');
   }
   updateLoadThisNrfButton();
 }
@@ -9070,10 +9216,11 @@ function updateScheduleHoursLine() {
   const week0 = periodDates.slice(0, 7);
   const bits = week0.map((d) => {
     const h = getStoreHoursForDate(d);
-    const dn = DAY_NAMES[d.getDay()];
+    const dn = msbT(DAY_NAMES[d.getDay()]);
     return dn + ' ' + h.open + '–' + h.close + (h.isOverride ? '*' : '');
   });
-  line.textContent = 'Store hours · Wk1: ' + bits.join(' · ') + (bits.some((_, i) => getStoreHoursForDate(week0[i]).isOverride) ? ' (* override)' : '');
+  line.textContent = msbT('Store hours · Wk1: {bits}', { bits: bits.join(' · ') }) +
+    (bits.some((_, i) => getStoreHoursForDate(week0[i]).isOverride) ? msbT(' (* override)') : '');
 }
 
 function toggleStoreHoursPanel() {
@@ -9404,8 +9551,8 @@ function explainQualityScore(q, genReport, ROLES) {
   if (mustFix > 0) {
     tips.push(
       mustFix === 1
-        ? '1 must-fix issue remains (coverage, hours, or role rules). Fix those first.'
-        : mustFix + ' must-fix issues remain (coverage, hours, or role rules). Fix those first.'
+        ? msbT('1 must-fix issue remains (coverage, hours, or role rules). Fix those first.')
+        : msbT('{n} must-fix issues remain (coverage, hours, or role rules). Fix those first.', { n: mustFix })
     );
   } else {
     tips.push(msbT('Must-fix rules look clean — openers, closers, and role constraints hold.'));
@@ -9414,28 +9561,28 @@ function explainQualityScore(q, genReport, ROLES) {
     const cl = q.cl != null ? q.cl : (genReport && genReport.totalClopens) || 0;
     tips.push(
       cl
-        ? cl + ' clopen(s) remain (close then open the next day). Preference — review those pairs before you post.'
-        : 'Clopen preference is costing points — check close→open pairs.'
+        ? msbT('{n} clopen(s) remain (close then open the next day). Preference — review those pairs before you post.', { n: cl })
+        : msbT('Clopen preference is costing points — check close→open pairs.')
     );
   } else if (q.avoidOn !== false) {
-    tips.push('No close→open pairs under current preferences — still review before posting.');
+    tips.push(msbT('No close→open pairs under current preferences — still review before posting.'));
   }
   if ((q.parts.weekend || 0) < 20 && n) {
     const met = q.met != null ? q.met : 0;
     tips.push(
-      'Weekend fairness: ' + met + '/' + n + ' managers hit their weekend-off goal.'
+      msbT('Weekend fairness: {met}/{n} managers hit their weekend-off goal.', { met: met, n: n })
     );
   }
   if ((q.parts.streak || 0) < 10) {
-    tips.push('Someone is over max consecutive work days — break long streaks with an off day.');
+    tips.push(msbT('Someone is over max consecutive work days — break long streaks with an off day.'));
   }
   if ((q.parts.soft || 0) < 10) {
-    tips.push('Some shift preferences could not be fully honored (optional polish).');
+    tips.push(msbT('Some shift preferences could not be fully honored (optional polish).'));
   }
-  if (q.score >= 95) tips.unshift('Ready to post — strong enough for the breakroom.');
-  else if (q.score >= 85) tips.unshift('Nearly ready — only small preference polish left.');
-  else if (q.score >= 70) tips.unshift('Usable baseline — clear must-fix issues before posting.');
-  else tips.unshift('Not ready to post yet — start with must-fix issues, then weekends.');
+  if (q.score >= 95) tips.unshift(msbT('Ready to post — strong enough for the breakroom.'));
+  else if (q.score >= 85) tips.unshift(msbT('Nearly ready — only small preference polish left.'));
+  else if (q.score >= 70) tips.unshift(msbT('Usable baseline — clear must-fix issues before posting.'));
+  else tips.unshift(msbT('Not ready to post yet — start with must-fix issues, then weekends.'));
   return tips.slice(0, 6);
 }
 
@@ -9500,8 +9647,8 @@ function buildPostingIssues(genReport, ROLES, warnings) {
         const weDk = typeof findWeekendWorkDay === 'function' ? findWeekendWorkDay(r) : null;
         issues.push({
           sev: 'review',
-          title: nameOf(r) + ' is short on weekend offs',
-          meta: got + ' of ' + target + ' weekend days off this period.',
+          title: msbT('{name} is short on weekend offs', { name: nameOf(r) }),
+          meta: msbT('{got} of {target} weekend days off this period.', { got: got, target: target }),
           target: 'grid',
           role: r,
           dk: weDk,
@@ -9518,7 +9665,7 @@ function buildPostingIssues(genReport, ROLES, warnings) {
         const hole = typeof findFirstCoverageHole === 'function' ? findFirstCoverageHole() : null;
         issues.push({
           sev: 'review',
-          title: missDays + ' day' + (missDays === 1 ? '' : 's') + ' missing open or close',
+          title: formatMissingDaysLong(missDays),
           meta: twoPersonOffsCoverageNote(ROLES) || msbT('Thin days are expected on a two-person roster with offs.'),
           target: hole ? 'grid' : 'summary',
           role: hole && hole.role,
@@ -9549,7 +9696,7 @@ function buildPostingIssues(genReport, ROLES, warnings) {
         && isExpectedThinDayCoverageNote(msg)
         && typeof isThinManagerRoster === 'function'
         && isThinManagerRoster(ROLES)) {
-        if (issues.some((i) => /missing open or close/i.test(i.title) || i.sev === 'note')) return;
+        if (issues.some((i) => /missing open or close|sin apertura o cierre/i.test(i.title) || i.sev === 'note')) return;
         issues.push({
           sev: 'note',
           title: localizeWarningMsg(String(msg).slice(0, 140)),
@@ -9594,7 +9741,10 @@ function renderPostingBoard(issues, q) {
     blurb = msbT('Schedule is usable — glance at the notes below, then post.');
   }
   if (!issues.length && q && q.score >= 85) {
-    blurb = msbT('Looks solid. Score {score}/100 · {grade}.', { score: q.score, grade: q.grade || '' });
+    blurb = msbT('Looks solid. Score {score}/100 · {grade}.', {
+      score: q.score,
+      grade: localizeQualityGrade(q.grade)
+    });
   }
 
   let html = '<div class="posting-board no-print" id="posting-board">';
@@ -10099,7 +10249,7 @@ function saveBackupFromNudge() {
 
 function exportBackupJSON() {
   if (!currentPeriod) {
-    showToast('Load a period first.', 'warn');
+    showToast(msbT('Load a period first.'), 'warn');
     return;
   }
   const data = buildSnapshotData();
@@ -10111,13 +10261,13 @@ function exportBackupJSON() {
   a.click();
   URL.revokeObjectURL(a.href);
   try { if (typeof markBackupNudgeDone === 'function') markBackupNudgeDone(); } catch (e) {}
-  showToast('Backup JSON downloaded. New phone? Load that file there.', 'success');
+  showToast(msbT('Backup JSON downloaded. New phone? Load that file there.'), 'success');
 }
 
 function copySummaryText() {
   const report = window._lastGenReport;
   if (!report || !currentPeriod) {
-    showToast('Generate a schedule first.', 'warn');
+    showToast(msbT('Generate a schedule first.'), 'warn');
     return;
   }
   const names = getManagerNames();
@@ -10127,26 +10277,30 @@ function copySummaryText() {
   const storeName = (document.getElementById('store-name') || {}).value || '';
   const storeNum = (document.getElementById('store-number') || {}).value || '';
   let lines = [];
-  lines.push('MANAGER SCHEDULE SUMMARY');
-  lines.push(`${storeName || 'Store'}${storeNum ? ' #' + storeNum : ''} · FY${fiscalYear} Period ${currentPeriod.number}`);
-  lines.push(`Quality score: ${q.score}/100 (${q.grade})`);
-  lines.push(`Labor: ${labor.totalHours} hrs · ${labor.totalShifts} shifts · ~${labor.avgPerWeek} hrs/week`);
-  lines.push(`Clopens: ${report.totalClopens || 0}`);
+  lines.push(msbT('MANAGER SCHEDULE SUMMARY'));
+  lines.push(`${storeName || msbT('Store')}${storeNum ? ' #' + storeNum : ''} · FY${fiscalYear} ${msbT('Period')} ${currentPeriod.number}`);
+  lines.push(msbT('Quality score: {score}/100 ({grade})', { score: q.score, grade: localizeQualityGrade(q.grade) }));
+  lines.push(msbT('Labor: {hours} hrs · {shifts} shifts · ~{avg} hrs/week', {
+    hours: labor.totalHours,
+    shifts: labor.totalShifts,
+    avg: labor.avgPerWeek
+  }));
+  lines.push(msbT('Clopens: {n}', { n: report.totalClopens || 0 }));
   lines.push('');
-  lines.push('WEEKEND DAYS OFF');
+  lines.push(msbT('WEEKEND DAYS OFF'));
   ROLES.forEach(r => {
-    lines.push(`  ${names[r] || r}: ${report.weekendOffs[r] || 0} (target ${getWeekendTargetForPerson(r)}) · O${report.opens[r]||0} M${report.mids[r]||0} C${report.closes[r]||0}`);
+    lines.push(`  ${names[r] || r}: ${report.weekendOffs[r] || 0} (${msbT('Target')} ${getWeekendTargetForPerson(r)}) · O${report.opens[r]||0} M${report.mids[r]||0} C${report.closes[r]||0}`);
   });
   if (report.unmet && report.unmet.length) {
     lines.push('');
-    lines.push('UNMET / NOTES');
+    lines.push(msbT('UNMET / NOTES'));
     report.unmet.forEach(u => lines.push('  - ' + u));
   }
   lines.push('');
-  lines.push('Generated with Manager Schedule Builder Pro');
+  lines.push(msbT('Generated with Manager Schedule Builder Pro'));
   const text = lines.join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => showToast('Summary copied to clipboard.', 'success'))
+    navigator.clipboard.writeText(text).then(() => showToast(msbT('Summary copied to clipboard.'), 'success'))
       .catch(() => fallbackCopy(text));
   } else {
     fallbackCopy(text);
@@ -10160,7 +10314,7 @@ function fallbackCopy(text) {
   ta.select();
   try {
     document.execCommand('copy');
-    showToast('Summary copied to clipboard.', 'success');
+    showToast(msbT('Summary copied to clipboard.'), 'success');
   } catch(e) {
     showToast('Could not copy — select text manually.', 'warn');
   }
@@ -13778,7 +13932,8 @@ function _generateScheduleInner(opts) {
   renderSummary(warnings, ROLES, ALL_KC, lastGenReport);
   renderFairnessUnderSchedule(ROLES, ALL_KC, lastGenReport);
   const ts = document.getElementById('gen-timestamp');
-  if (ts) ts.textContent = 'Generated ' + new Date().toLocaleString();
+  window._lastGeneratedAt = new Date();
+  if (ts) ts.textContent = msbT('Generated {when}', { when: window._lastGeneratedAt.toLocaleString() });
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
   // Successful user Build only — sample / tour generate does not burn a free build
   if (opts._consumeFree || (typeof shouldRecordFreeGenerate === 'function' && shouldRecordFreeGenerate(opts))) {
@@ -14632,7 +14787,7 @@ function renderDayCardsHtml(weekDates, wIdx, names, ALL_KC) {
       html += `</div>`;
     });
     const covCls = opens === 0 || closes === 0 ? 'coverage-bad' : '';
-    html += `<div class="mw-coverage ${covCls}">Coverage · ${opens} open · ${mids} mid · ${closes} close</div>`;
+    html += `<div class="mw-coverage ${covCls}">${esc(msbT('Coverage · {o} open · {m} mid · {c} close', { o: opens, m: mids, c: closes }))}</div>`;
     html += `</div>`;
   });
   html += '</div>';
@@ -14656,13 +14811,13 @@ function renderWeekTableHtml(weekDates, wIdx, names, ALL_KC) {
         const h = getStoreHoursForDate(dkH);
         if (h && h.open && h.close) {
           hoursHtml = '<span class="day-hours' + (h.isOverride ? ' is-override' : '') + '" title="' +
-            (h.isOverride ? 'Hours override' : 'Store hours') + '">' +
+            esc(h.isOverride ? msbT('Hours override') : msbT('Store hours')) + '">' +
             esc(h.open) + '–' + esc(h.close) + (h.isOverride ? '*' : '') + '</span>';
         }
       }
     } catch (e) {}
     const fedLab = fhH ? '<span class="fh-day-label" title="' + esc(fhH.name) + '">' + esc(fhH.name) + '</span>' : '';
-    html += '<th class="' + cls + '"><span class="dh-day">' + DAY_NAMES[dow] + '</span>' +
+    html += '<th class="' + cls + '"><span class="dh-day">' + esc(msbT(DAY_NAMES[dow])) + '</span>' +
       '<span class="dh-date">' + formatDate(wd) + '</span>' + hoursHtml + fedLab + '</th>';
   });
   html += '</tr>';
@@ -14688,11 +14843,11 @@ function renderWeekTableHtml(weekDates, wIdx, names, ALL_KC) {
       }
       if (isWeekend(wd) && !s) cellCls += ' weekend-stripe';
       cellCls += ' shift-editable';
-      html += `<td class="${cellCls}" data-role="${r}" data-dk="${dk}" data-week="${wIdx}" data-is-kc="${isKC}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})"><span class="cell-shift-txt">${content}</span><button type="button" class="cell-swap-btn no-print" title="Swap this shift" aria-label="Swap this shift" onclick="event.preventDefault();event.stopPropagation();openCellInspector(event,'${r}','${dk}',${wIdx},${isKC});">⇄</button></td>`;
+      html += `<td class="${cellCls}" data-role="${r}" data-dk="${dk}" data-week="${wIdx}" data-is-kc="${isKC}" onclick="openSchedEditMenu(event, '${r}', '${dk}', ${wIdx}, ${isKC})"><span class="cell-shift-txt">${content}</span><button type="button" class="cell-swap-btn no-print" title="${esc(msbT('Swap this shift'))}" aria-label="${esc(msbT('Swap this shift'))}" onclick="event.preventDefault();event.stopPropagation();openCellInspector(event,'${r}','${dk}',${wIdx},${isKC});">⇄</button></td>`;
     });
     html += '</tr>';
   });
-  html += '<tr class="coverage-row"><td class="name-col">Coverage</td>';
+  html += '<tr class="coverage-row"><td class="name-col">' + esc(msbT('Coverage')) + '</td>';
   weekDates.forEach(wd => {
     const dk = dateKey(wd);
     let opens = 0, mids = 0, closes = 0, total = 0;
@@ -14921,12 +15076,12 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
     const notes = [];
     const inPeer = peerPool.some((p) => p.role === row.role);
     if (inPeer && weSpread >= 2 && (row.we === weMin || row.we === weMax) && weMin !== weMax) {
-      notes.push(row.we === weMin ? 'low WE offs' : 'high WE offs');
+      notes.push(row.we === weMin ? msbT('low WE offs') : msbT('high WE offs'));
     }
     if (inPeer && cSpread >= 3 && (row.closes === cMin || row.closes === cMax) && cMin !== cMax) {
-      notes.push(row.closes === cMax ? 'more closes' : 'fewer closes');
+      notes.push(row.closes === cMax ? msbT('more closes') : msbT('fewer closes'));
     }
-    if (row.clopens > 0) notes.push(row.clopens + ' clopen' + (row.clopens === 1 ? '' : 's'));
+    if (row.clopens > 0) notes.push(row.clopens === 1 ? msbT('{n} clopen', { n: row.clopens }) : msbT('{n} clopens', { n: row.clopens }));
     row.flag = notes.length > 0;
     row.note = notes.join(' · ');
   });
@@ -14934,25 +15089,27 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
   let html = '<div class="fu-head">';
   html += '<span class="fu-title">' + esc(msbT('Fairness at a glance')) + '</span>';
   html +=
-    '<span class="fu-meta">WE offs ' +
-    weMin +
-    '–' +
-    weMax +
-    ' · ' +
-    weMetN +
-    '/' +
-    rows.length +
+    '<span class="fu-meta">' +
+    esc(msbT('WE offs {min}–{max} · {met}/{n}', {
+      min: weMin,
+      max: weMax,
+      met: weMetN,
+      n: rows.length
+    })) +
     (amPeriodGoal
-      ? ' · AM closes ' + (cMin === cMax ? cMin : cMin + '–' + cMax) + ' / ' + amPeriodGoal
-      : ' · AM closes ' + cMin + '–' + cMax) +
+      ? ' · ' + esc(msbT('AM closes {range} / {goal}', {
+        range: (cMin === cMax ? String(cMin) : cMin + '–' + cMax),
+        goal: amPeriodGoal
+      }))
+      : ' · ' + esc(msbT('AM closes {range}', { range: cMin + '–' + cMax }))) +
     '</span> ';
   const thinCoverWhy = !coverOk && typeof twoPersonOffsCoverageNote === 'function'
     ? twoPersonOffsCoverageNote(ROLES)
     : '';
   html += coverOk
     ? '<span class="fu-cover ok">' + esc(msbT('All days open+close ✓')) + '</span>'
-    : '<span class="fu-cover warn">' + missDays + ' day(s) missing open/close' +
-      (thinCoverWhy ? ' — ' + thinCoverWhy : '') + '</span>';
+    : '<span class="fu-cover warn">' + esc(formatMissingDaysLong(missDays)) +
+      (thinCoverWhy ? ' — ' + esc(thinCoverWhy) : '') + '</span>';
   html += '</div>';
   html +=
     '<table><thead><tr><th>' + esc(msbT('Name')) + '</th><th>' + esc(msbT('WE offs')) + '</th><th>' + esc(msbT('Closes')) + '</th><th>' + esc(msbT('Opens')) + '</th><th>' + esc(msbT('Mids')) + '</th><th>' + esc(msbT('Clopens')) + '</th><th></th></tr></thead><tbody>';
@@ -14987,6 +15144,9 @@ function isCellLocked(role, dk) {
 
 /** List every close → next-day open (clopen) for managers, with fix options. */
 const CLOPEN_CELL_TITLE = 'Clopen pair — preference to review before you post';
+function clopenCellTitle() {
+  return msbT(CLOPEN_CELL_TITLE);
+}
 
 /** Mark close→open pair cells on the editing board using findClopens (same radar detection). */
 function applyClopenMarksOnBoard(ROLES) {
@@ -14997,9 +15157,13 @@ function applyClopenMarksOnBoard(ROLES) {
     el.classList.remove('cell-clopen');
     el.removeAttribute('data-clopen');
     const t = el.getAttribute('title') || '';
-    if (t === CLOPEN_CELL_TITLE) el.removeAttribute('title');
-    else if (t.indexOf(CLOPEN_CELL_TITLE) !== -1) {
-      el.setAttribute('title', t.replace(' · ' + CLOPEN_CELL_TITLE, '').replace(CLOPEN_CELL_TITLE, '').trim());
+    const locTitle = clopenCellTitle();
+    if (t === CLOPEN_CELL_TITLE || t === locTitle) el.removeAttribute('title');
+    else if (t.indexOf(CLOPEN_CELL_TITLE) !== -1 || t.indexOf(locTitle) !== -1) {
+      el.setAttribute('title', t
+        .replace(' · ' + locTitle, '').replace(locTitle, '')
+        .replace(' · ' + CLOPEN_CELL_TITLE, '').replace(CLOPEN_CELL_TITLE, '')
+        .trim());
     }
   });
   if (!schedule || !ROLES || !ROLES.length) return;
@@ -15011,8 +15175,9 @@ function applyClopenMarksOnBoard(ROLES) {
         el.classList.add('cell-clopen');
         el.setAttribute('data-clopen', '1');
         const prev = el.getAttribute('title') || '';
-        if (prev.indexOf(CLOPEN_CELL_TITLE) === -1) {
-          el.setAttribute('title', prev ? prev + ' · ' + CLOPEN_CELL_TITLE : CLOPEN_CELL_TITLE);
+        const locTitle = clopenCellTitle();
+        if (prev.indexOf(locTitle) === -1 && prev.indexOf(CLOPEN_CELL_TITLE) === -1) {
+          el.setAttribute('title', prev ? prev + ' · ' + locTitle : locTitle);
         }
         if (!el.querySelector('.cell-clopen-mark')) {
           const mark = document.createElement('span');
@@ -15079,7 +15244,7 @@ function suggestClopenFix(role, closeDk, openDk, ROLES, allDks, closeIdx) {
   if (swapWith) {
     return {
       type: 'swap-open',
-      label: 'Swap open with ' + (names[swapWith] || swapWith),
+      label: msbT('Swap open with {name}', { name: names[swapWith] || swapWith }),
       withRole: swapWith,
       dk: openDk,
     };
@@ -15089,7 +15254,7 @@ function suggestClopenFix(role, closeDk, openDk, ROLES, allDks, closeIdx) {
   if (!isCellLocked(role, openDk) && otherOpens > 0) {
     return {
       type: 'to-mid',
-      label: 'Change open → mid (keep coverage)',
+      label: msbT('Change open → mid (keep coverage)'),
       dk: openDk,
     };
   }
@@ -15098,7 +15263,7 @@ function suggestClopenFix(role, closeDk, openDk, ROLES, allDks, closeIdx) {
   if (!isCellLocked(role, closeDk) && otherCloses > 0) {
     return {
       type: 'close-to-mid',
-      label: 'Change close → mid (other closer stays)',
+      label: msbT('Change close → mid (other closer stays)'),
       dk: closeDk,
     };
   }
@@ -15111,22 +15276,22 @@ function renderClopenRadar(ROLES) {
   if (!list.length) {
     return (
       '<div class="clopen-radar empty-ok no-print">' +
-      '<h3>Clopen radar</h3>' +
-      '<div class="cr-sub">No close→open pairs on this board. Still review before you post.</div>' +
+      '<h3>' + esc(msbT('Clopen radar')) + '</h3>' +
+      '<div class="cr-sub">' + esc(msbT('No close→open pairs on this board. Still review before you post.')) + '</div>' +
       '</div>'
     );
   }
   let html = '<div class="clopen-radar no-print">';
   const hasSuggestedFix = list.some((c) => c && c.fix);
-  html += '<h3>Clopen radar</h3>';
+  html += '<h3>' + esc(msbT('Clopen radar')) + '</h3>';
   html +=
     '<div class="cr-sub">' +
     list.length +
-    ' close→open pair' +
-    (list.length === 1 ? '' : 's') +
-    (hasSuggestedFix
-      ? ' — jump to edit, or apply a suggested fix when one is offered. Preference — not a guarantee.'
-      : ' — no auto-fix on these pairs; edit the board if you want to change them. Preference — not a guarantee.') +
+    ' ' +
+    esc(list.length === 1 ? msbT('close→open pair') : msbT('close→open pairs')) +
+    esc(hasSuggestedFix
+      ? msbT(' — jump to edit, or apply a suggested fix when one is offered. Preference — not a guarantee.')
+      : msbT(' — no auto-fix on these pairs; edit the board if you want to change them. Preference — not a guarantee.')) +
     '</div>';
   html += '<div class="cr-list">';
   list.forEach((c, idx) => {
@@ -15141,7 +15306,7 @@ function renderClopenRadar(ROLES) {
       '<span class="cr-when">' +
       esc(c.label.replace(c.name + ': ', '')) +
       '</span>' +
-      '<span class="cr-go">Find →</span></button>';
+      '<span class="cr-go">' + esc(msbT('Find →')) + '</span></button>';
     if (c.fix) {
       html +=
         '<button type="button" class="cr-fix btn-secondary" onclick="applyClopenFix(' +
@@ -15150,7 +15315,7 @@ function renderClopenRadar(ROLES) {
         esc(c.fix.label) +
         '</button>';
     } else {
-      html += '<span class="cr-nofix">No auto-fix — edit manually</span>';
+      html += '<span class="cr-nofix">' + esc(msbT('No auto-fix — edit manually')) + '</span>';
     }
     html += '</div>';
   });
@@ -15305,19 +15470,18 @@ function renderWeekendFairnessBoard(ROLES) {
     '<div class="weekend-board no-print' +
     (allMet ? ' empty-ok' : '') +
     '">';
-  html += '<h3>Weekend fairness</h3>';
+  html += '<h3>' + esc(msbT('Weekend fairness')) + '</h3>';
   html +=
     '<div class="cr-sub">' +
     (allMet
-      ? 'Everyone met their weekend-off target for this period.'
-      : shortN +
-        ' manager' +
-        (shortN === 1 ? '' : 's') +
-        ' still short on weekend days off.') +
+      ? esc(msbT('Everyone met their weekend-off target for this period.'))
+      : esc(shortN === 1
+        ? msbT('{n} manager still short on weekend days off.', { n: shortN })
+        : msbT('{n} managers still short on weekend days off.', { n: shortN }))) +
     '</div>';
   html += '<div class="wf-table">';
   html +=
-    '<div class="wf-row wf-head"><span>Manager</span><span>Off</span><span>Goal</span><span></span></div>';
+    '<div class="wf-row wf-head"><span>' + esc(msbT('Manager')) + '</span><span>' + esc(msbT('Off')) + '</span><span>' + esc(msbT('Goal')) + '</span><span></span></div>';
   rows.forEach((r) => {
     const fix = (!r.met && typeof suggestWeekendOffFix === 'function') ? suggestWeekendOffFix(r.role) : null;
     html += fix ? '<div class="wf-pair">' : '';
@@ -15337,7 +15501,7 @@ function renderWeekendFairnessBoard(ROLES) {
       r.target +
       '</span>' +
       '<span class="wf-status">' +
-      (r.met ? 'Met' : 'Short ' + r.short) +
+      (r.met ? msbT('Met') : msbT('Short {n}', { n: r.short })) +
       '</span></button>';
     if (fix) {
       html +=
@@ -15369,6 +15533,9 @@ function jumpToRoleOnGrid(role) {
              constraint next to “Must-fix rules look clean.” Score formula unchanged.
    v2.6.25 — English + Spanish chrome on this device. Device language default, Account/More
              override, local dictionary only. Roster names stay as typed. NRF stays U.S. retail.
+   v2.6.26 — Finish leftover Spanish review / board / export / backup chrome. Tour keeps the
+             active-locale Setup heading. detectDeviceUiLang accepts an injected tag for tests;
+             a real Spanish-locale phone is still required.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -15490,7 +15657,7 @@ function explainCellWhy(role, dk) {
   if (lockKind) {
     return {
       kind: 'lock',
-      text: String(lockKind).toUpperCase() + ' lock — request stays on this day.'
+      text: msbT('{kind} lock — request stays on this day.', { kind: String(lockKind).toUpperCase() })
     };
   }
 
@@ -15505,7 +15672,7 @@ function explainCellWhy(role, dk) {
   if (isClopenCell) {
     return {
       kind: 'clopen',
-      text: 'Clopen pair — close then open (preference to review).'
+      text: msbT('Clopen pair — close then open (preference to review).')
     };
   }
 
@@ -15523,16 +15690,16 @@ function explainCellWhy(role, dk) {
     return {
       kind: 'coverage',
       text: thinCover
-        ? 'Coverage hole — this day has no opener. ' + thinCover
-        : 'Coverage hole — this day has no opener.'
+        ? msbT('Coverage hole — this day has no opener. {why}', { why: thinCover })
+        : msbT('Coverage hole — this day has no opener.')
     };
   }
   if (closes < 1) {
     return {
       kind: 'coverage',
       text: thinCover
-        ? 'Coverage hole — this day has no closer. ' + thinCover
-        : 'Coverage hole — this day has no closer.'
+        ? msbT('Coverage hole — this day has no closer. {why}', { why: thinCover })
+        : msbT('Coverage hole — this day has no closer.')
     };
   }
 
@@ -15549,19 +15716,26 @@ function explainCellWhy(role, dk) {
     if (row && row.short > 0 && typeof isWork === 'function' && isWork(shift)) {
       return {
         kind: 'weekend',
-        text: 'Weekend work — short of weekend-off target (' + row.got + ' of ' + row.target + ').'
+        text: msbT('Weekend work — short of weekend-off target ({got} of {target}).', {
+          got: row.got,
+          target: row.target
+        })
       };
     }
     if (isOffish) {
       return {
         kind: 'weekend',
-        text: 'Weekend off — counts toward this period\'s target' +
-          (row ? ' (' + row.got + ' of ' + row.target + ')' : '') + '.'
+        text: row
+          ? msbT('Weekend off — counts toward this period\'s target ({got} of {target}).', {
+            got: row.got,
+            target: row.target
+          })
+          : msbT('Weekend off — counts toward this period\'s target.')
       };
     }
   }
 
-  return { kind: 'generated', text: 'This is the generated shift.' };
+  return { kind: 'generated', text: msbT('This is the generated shift.') };
 }
 
 function findFirstStreakHole() {
@@ -15712,7 +15886,7 @@ function renderPrintSchedule(ROLES, ALL_KC) {
 
   // Title block — breakroom posting style
   html += '<div class="print-title">';
-  html += '<div class="print-main-title">Management Schedule</div>';
+  html += '<div class="print-main-title">' + esc(msbT('Management Schedule')) + '</div>';
   if (storeName || storeNum) {
     html += '<div class="print-store-line">' + esc([storeName, storeNum ? '#' + storeNum : ''].filter(Boolean).join(' · ')) + '</div>';
   }
@@ -15722,7 +15896,7 @@ function renderPrintSchedule(ROLES, ALL_KC) {
   html += '</div>';
   try {
     const sum = typeof summarizeStoreHours === 'function' ? summarizeStoreHours() : '';
-    if (sum) html += '<div class="print-hours-line">Store hours · ' + esc(sum) + '</div>';
+    if (sum) html += '<div class="print-hours-line">' + esc(msbT('Store hours · {sum}', { sum: sum })) + '</div>';
   } catch (e) {}
   html += '</div>';
 
@@ -15851,8 +16025,8 @@ function exportSchedule() {
   body += '<div style="font-size:16pt;font-weight:700;letter-spacing:0.05em;">' + esc(msbT('MANAGEMENT SCHEDULE')) + '</div>';
   body += '<div style="font-size:11pt;margin-top:4px;">';
   const subParts = [];
-  if (storeNum) subParts.push('Store #' + esc(storeNum));
-  subParts.push('Period ' + p.number);
+  if (storeNum) subParts.push(msbT('Store #') + ' ' + esc(storeNum));
+  subParts.push(msbT('Period') + ' ' + p.number);
   subParts.push('FY' + fiscalYear);
   subParts.push(esc(p.approxMonth));
   subParts.push(formatDate(p.start) + ' – ' + formatDate(p.end));
@@ -15897,7 +16071,7 @@ function exportSchedule() {
 
     // Day header
     body += '<tr>';
-    body += '<th style="' + thStyle + 'text-align:left;">Name</th>';
+    body += '<th style="' + thStyle + 'text-align:left;">' + esc(msbT('Name')) + '</th>';
     DAY_HDR.forEach(dn => {
       body += '<th style="' + thStyle + '">' + dn + '</th>';
     });
@@ -15981,9 +16155,9 @@ function buildExcelExportHtml() {
   const thStyle = 'border:1px solid #333;padding:4px 6px;text-align:center;font-weight:700;background:#f3f4f6;';
 
   let body = '<table style="border-collapse:collapse;font-family:Arial,sans-serif">';
-  body += '<tr><td colspan="8" style="font-size:16pt;font-weight:700">MANAGEMENT SCHEDULE</td></tr>';
-  let subtitle = 'Period ' + p.number + '  FY' + fiscalYear + '  Month: ' + esc(p.approxMonth);
-  if (storeNum) subtitle = 'Store: ' + esc(storeNum) + '     ' + subtitle;
+  body += '<tr><td colspan="8" style="font-size:16pt;font-weight:700">' + esc(msbT('MANAGEMENT SCHEDULE')) + '</td></tr>';
+  let subtitle = msbT('Period') + ' ' + p.number + '  FY' + fiscalYear + '  ' + esc(p.approxMonth);
+  if (storeNum) subtitle = msbT('Store') + ': ' + esc(storeNum) + '     ' + subtitle;
   body += '<tr><td colspan="8">' + subtitle + '</td></tr>';
   body += '<tr><td colspan="8"></td></tr>';
 
@@ -16108,7 +16282,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
       return `<div class="score-bar-row"><span>${label}</span><div class="score-bar-track"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div><span>${pts}/${max}</span></div>`;
     };
     html += `<div class="score-hero is-jump" id="quality-score-hero" role="button" tabindex="0" title="Tap to jump to a hole on the board" onclick="jumpToReviewChip('quality')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();jumpToReviewChip('quality');}">
-      <div class="score-ring-wrap">${scoreRingSVG(q.score)}<div class="score-num">${q.score}<span class="score-label">${esc(q.grade)}</span></div></div>
+      <div class="score-ring-wrap">${scoreRingSVG(q.score)}<div class="score-num">${q.score}<span class="score-label">${esc(localizeQualityGrade(q.grade))}</span></div></div>
       <div class="score-details">
         <h3>${esc(msbT('Schedule Quality Score'))}</h3>
         <p>${bannerText}</p>
@@ -16124,10 +16298,10 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
           <ul>${explainQualityScore(q, genReport, ROLES).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
         </div>
         <div class="score-actions no-print">
-          <p class="score-backup-hint">New phone? Export a JSON backup, then Load on the new device.</p>
-          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">Copy summary</button>
-          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">Backup JSON — new phone</button>
-          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">Excel</button>
+          <p class="score-backup-hint">${esc(msbT('New phone? Export a JSON backup, then Load on the new device.'))}</p>
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="copySummaryText()">${esc(msbT('Copy summary'))}</button>
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportBackupJSON()">${esc(msbT('Backup JSON — new phone'))}</button>
+          <button class="btn-secondary" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="exportScheduleExcel()">${esc(msbT('Excel'))}</button>
         </div>
       </div>
     </div>`;
@@ -16164,15 +16338,15 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     html += '<div class="gen-summary">';
     const weMinTile = weVals.length ? Math.min(...weVals) : 0;
     const weMaxTile = weVals.length ? Math.max(...weVals) : 0;
-    html += `<div class="gen-stat-card"><h4>Weekend days off</h4><div class="stat-value ${metWe === ROLES.length ? 'ok' : 'warn'}">${metWe}/${ROLES.length}</div><div class="stat-sub">met target (avg ${avgWe.toFixed(1)}, range ${weMinTile}-${weMaxTile}, goal ${weTarget})</div></div>`;
-    html += `<div class="gen-stat-card"><h4>Clopens</h4><div class="stat-value ${clopenOk ? 'ok' : 'warn'}">${totalClopens}</div><div class="stat-sub">${avoidOn ? 'Avoid-clopen preference ON' : 'Avoid-clopen preference OFF'}</div></div>`;
+    html += `<div class="gen-stat-card"><h4>${esc(msbT('Weekend days off'))}</h4><div class="stat-value ${metWe === ROLES.length ? 'ok' : 'warn'}">${metWe}/${ROLES.length}</div><div class="stat-sub">${esc(msbT('met target (avg {avg}, range {min}-{max}, goal {goal})', { avg: avgWe.toFixed(1), min: weMinTile, max: weMaxTile, goal: weTarget }))}</div></div>`;
+    html += `<div class="gen-stat-card"><h4>${esc(msbT('Clopens'))}</h4><div class="stat-value ${clopenOk ? 'ok' : 'warn'}">${totalClopens}</div><div class="stat-sub">${esc(avoidOn ? msbT('Avoid-clopen preference ON') : msbT('Avoid-clopen preference OFF'))}</div></div>`;
     const totalOpens = ROLES.reduce((s,r)=>s+(genReport.opens[r]||0),0);
     const totalCloses = ROLES.reduce((s,r)=>s+(genReport.closes[r]||0),0);
     const totalMids = ROLES.reduce((s,r)=>s+(genReport.mids[r]||0),0);
-    html += `<div class="gen-stat-card"><h4>Shift mix</h4><div class="stat-value" style="font-size:1.05rem">${totalOpens}O · ${totalMids}M · ${totalCloses}C</div><div class="stat-sub">Opens · Mids · Closes (period)</div></div>`;
+    html += `<div class="gen-stat-card"><h4>${esc(msbT('Shift mix'))}</h4><div class="stat-value" style="font-size:1.05rem">${totalOpens}O · ${totalMids}M · ${totalCloses}C</div><div class="stat-sub">${esc(msbT('Opens · Mids · Closes (period)'))}</div></div>`;
     const maxSt = Math.max(0, ...ROLES.map(r => genReport.maxStreak[r] || 0));
     const maxLim = (genReport.prefs && genReport.prefs.maxConsecutiveWorkDays) || 6;
-    html += `<div class="gen-stat-card"><h4>Longest work streak</h4><div class="stat-value ${maxSt > maxLim ? 'warn' : 'ok'}">${maxSt}</div><div class="stat-sub">limit ${maxLim} consecutive days</div></div>`;
+    html += `<div class="gen-stat-card"><h4>${esc(msbT('Longest work streak'))}</h4><div class="stat-value ${maxSt > maxLim ? 'warn' : 'ok'}">${maxSt}</div><div class="stat-sub">${esc(msbT('limit {n} consecutive days', { n: maxLim }))}</div></div>`;
     html += '</div>';
 
     // Per-person weekend + shift distribution
@@ -16180,7 +16354,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
     ROLES.forEach(r => {
       const t = getWeekendTargetForPerson(r);
       const we = genReport.weekendOffs[r] || 0;
-      const badge = we >= t ? '<span class="badge-pill badge-ok">OK</span>' : '<span class="badge-pill badge-miss">Low</span>';
+      const badge = we >= t ? '<span class="badge-pill badge-ok">' + esc(msbT('OK')) + '</span>' : '<span class="badge-pill badge-miss">' + esc(msbT('Low')) + '</span>';
       const cp = genReport.clopens[r] || 0;
       html += `<tr><td style="text-align:left;font-weight:600">${esc(names[r] || r)}</td><td>${we} ${badge}</td><td>${t}</td><td>${genReport.opens[r]||0}</td><td>${genReport.mids[r]||0}</td><td>${genReport.closes[r]||0}</td><td style="${cp ? 'color:#dc2626;font-weight:700' : ''}">${cp}</td><td>${genReport.maxStreak[r]||0}</td></tr>`;
     });
@@ -16217,7 +16391,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
   html += '</tbody></table></div>';
 
   // Weekend off tracking
-  html += '<div class="summary-panel"><h3>Weekend Off Tracking (Period)</h3><table><thead><tr><th>Manager</th><th>Consecutive Sat+Sun</th><th>Extra Sat Off</th><th>Extra Sun Off</th></tr></thead><tbody>';
+  html += '<div class="summary-panel"><h3>' + esc(msbT('Weekend Off Tracking (Period)')) + '</h3><table><thead><tr><th>' + esc(msbT('Manager')) + '</th><th>' + esc(msbT('Consecutive Sat+Sun')) + '</th><th>' + esc(msbT('Extra Sat Off')) + '</th><th>' + esc(msbT('Extra Sun Off')) + '</th></tr></thead><tbody>';
 
   ROLES.forEach(r => {
     let consecWeekends = [];
@@ -16247,7 +16421,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
       if (isSunday(d) && (s === 'off' || isRto(s)) && !consecSet.has(dk)) extraSun++;
     }
 
-    const consecLabel = consecWeekends.length > 0 ? consecWeekends.join(', ') : '<span style="color:#dc2626">NONE</span>';
+    const consecLabel = consecWeekends.length > 0 ? consecWeekends.join(', ') : '<span style="color:#dc2626">' + esc(msbT('NONE')) + '</span>';
     html += `<tr><td style="text-align:left;font-weight:600">${names[r] || r.toUpperCase()}</td><td>${consecLabel}</td><td>${extraSat}</td><td>${extraSun}</td></tr>`;
   });
   html += '</tbody></table></div>';
@@ -16847,17 +17021,17 @@ function playPostGenStripArrival(token) {
     const e = 1 - Math.pow(1 - p, 3);
     if (cover) {
       if (st.coverOk) {
-        cover.textContent = p > 0.62 ? 'Open+close ✓' : 'Coverage…';
+        cover.textContent = p > 0.62 ? msbT('Open+close ✓') : msbT('Coverage…');
         cover.className = 'pgs-chip ' + (p > 0.62 ? 'ok' : '');
       } else {
         const cov = formatCoverageChip(st);
-        cover.textContent = p > 0.55 ? cov.text : Math.round(st.missDays * e) + ' missing';
+        cover.textContent = p > 0.55 ? cov.text : formatMissingDaysShort(Math.round(st.missDays * e));
         cover.className = 'pgs-chip ' + cov.cls;
         cover.title = cov.title;
       }
     }
     if (cl) {
-      cl.textContent = 'Clopens ' + Math.round(st.clopens * e);
+      cl.textContent = msbT('Clopens {n}', { n: Math.round(st.clopens * e) });
       cl.className = 'pgs-chip ' + (st.clopens === 0 && p > 0.5 ? 'ok' : st.clopens ? 'warn' : '');
     }
     if (amc) {
@@ -16890,7 +17064,7 @@ function playPostGenStripArrival(token) {
     if (quality) {
       const q = (window._lastGenReport && (window._lastGenReport.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(window._lastGenReport, st.ROLES || []) : null))) || null;
       if (q && q.score != null) {
-        quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: q.grade || msbT('Needs work') });
+        quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: localizeQualityGrade(q.grade) });
         quality.className = 'pgs-chip ' + (q.score >= 85 ? 'ok' : q.score >= 55 ? 'warn' : 'bad');
       }
     }
@@ -16920,10 +17094,10 @@ function cellCoverageNote(role, dk) {
     if (isOpen(v)) opens++;
     if (isClose(v)) closes++;
   });
-  if (isOpen(s) && opens === 1) return { text: 'Only opener this day', only: true };
-  if (isClose(s) && closes === 1) return { text: 'Only closer this day', only: true };
-  if (isOpen(s)) return { text: opens + ' openers this day', only: false };
-  if (isClose(s)) return { text: closes + ' closers this day', only: false };
+  if (isOpen(s) && opens === 1) return { text: msbT('Only opener this day'), only: true };
+  if (isClose(s) && closes === 1) return { text: msbT('Only closer this day'), only: true };
+  if (isOpen(s)) return { text: msbT('{n} openers this day', { n: opens }), only: false };
+  if (isClose(s)) return { text: msbT('{n} closers this day', { n: closes }), only: false };
   return { text: '', only: false };
 }
 
@@ -17253,7 +17427,7 @@ function openSavedSchedulesModal() {
       html += `<div class="saved-meta">`;
       if (smName) html += smName + ' &middot; ';
       html += `${amCnt} AMs, ${kcCnt} KCs`;
-      if (hasSchedule) html += ' &middot; Generated';
+      if (hasSchedule) html += ' &middot; ' + msbT('Generated');
       if (savedDate) html += ' &middot; Saved: ' + savedDate;
       html += `</div></div>`;
       html += `<div class="saved-entry-actions">`;
@@ -17981,6 +18155,7 @@ function endOnboardingTour(markDone) {
   const ring = document.getElementById('tour-ring');
   if (ring) ring.style.display = 'none';
   if (markDone) setTourDone();
+  try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEase) {}
 }
 
 function notifyTourGenerateComplete() {
@@ -18438,35 +18613,45 @@ function formatCoverageChip(st) {
     return { text: msbT('Open+close ✓'), cls: 'ok', title: msbT('Every day has an opener and a closer.') };
   }
   const why = st.coverWhy || '';
-  const text = st.missDays + ' ' + msbT('missing') + (why ? ' · ' + msbT('2 people + offs') : '');
+  const text = formatMissingDaysShort(st.missDays) + (why ? ' · ' + msbT('2 people + offs') : '');
   const cls = st.emptyDays > 0 ? 'bad' : (st.thin ? 'warn' : 'bad');
-  return { text, cls, title: why || (st.missDays + ' ' + msbT('days missing open or close')) };
+  return { text, cls, title: why || formatMissingDaysLong(st.missDays) };
 }
 
 function formatAmCloseChip(st) {
-  if (!st) return { text: 'AM closes', cls: '', title: '' };
+  if (!st) return { text: msbT('AM closes'), cls: '', title: '' };
   const goal = st.amPeriodGoal || 0;
   const range = st.cMin === st.cMax ? String(st.cMin) : (st.cMin + '-' + st.cMax);
   const text = goal
-    ? 'AM closes ' + range + ' / ' + goal
-    : 'AM closes ' + (st.cMin === st.cMax ? st.cMin : (st.cMin + '-' + st.cMax));
+    ? msbT('AM closes {range} / {goal}', { range: range, goal: goal })
+    : msbT('AM closes {range}', { range: (st.cMin === st.cMax ? String(st.cMin) : (st.cMin + '-' + st.cMax)) });
   // Green only when the scaled period target is met — never a pass next to "needs ≥N/week".
   const cls = st.amMetGoal && st.cSpread <= 2 ? 'ok' : 'warn';
   const title = goal
-    ? 'Named AM closes this period ' + range + ' (scaled goal ' + goal + ', ' + (st.amWeeklyGoal || 0) + '/week).'
-    : 'Named AM close counts this period.';
+    ? msbT('Named AM closes this period {range} (scaled goal {goal}, {weekly}/week).', {
+      range: range,
+      goal: goal,
+      weekly: st.amWeeklyGoal || 0
+    })
+    : msbT('Named AM close counts this period.');
   return { text, cls, title };
 }
 
 function formatWeOffChip(st) {
-  if (!st) return { text: 'WE offs', cls: '', title: '' };
+  if (!st) return { text: msbT('WE offs'), cls: '', title: '' };
   const range = st.weMin + '-' + st.weMax;
   const met = (st.weMet != null && st.weN) ? (st.weMet + '/' + st.weN) : '';
-  const text = met ? ('WE offs ' + range + ' · ' + met) : ('WE offs ' + range);
+  const text = met
+    ? msbT('WE offs {min}–{max} · {met}/{n}', { min: st.weMin, max: st.weMax, met: st.weMet, n: st.weN })
+    : (msbT('WE offs') + ' ' + range);
   const cls = st.weN && st.weMet === st.weN ? 'ok' : 'warn';
   const title = met
-    ? met + ' met weekend-off goal (range ' + range + ', goal ' + (st.weTarget || 2) + ').'
-    : 'Weekend days off this period: ' + range;
+    ? msbT('{met} met weekend-off goal (range {range}, goal {goal}).', {
+      met: met,
+      range: range,
+      goal: st.weTarget || 2
+    })
+    : msbT('Weekend days off this period: {range}', { range: range });
   return { text, cls, title };
 }
 
@@ -18492,7 +18677,7 @@ function updatePostGenStrip() {
   if (quality) {
     const q = (window._lastGenReport && (window._lastGenReport.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(window._lastGenReport, st.ROLES || []) : null))) || null;
     if (q && q.score != null) {
-      quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: q.grade || msbT('Needs work') });
+      quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: localizeQualityGrade(q.grade) });
       quality.className = 'pgs-chip ' + (q.score >= 85 ? 'ok' : q.score >= 55 ? 'warn' : 'bad');
     } else {
       quality.textContent = msbT('Quality');
@@ -19667,7 +19852,7 @@ function initMobileAnalyticsDefault() {
       const bad =
         (fair && fair.classList.contains('warn')) ||
         (cover && (cover.classList.contains('warn') || cover.classList.contains('bad')));
-      cta.textContent = bad ? 'Review issues' : 'Review';
+      cta.textContent = bad ? msbT('Review issues') : msbT('Review');
       cta.onclick = openReviewSheet;
     } catch (e) {}
   }
@@ -19684,7 +19869,7 @@ function initMobileAnalyticsDefault() {
       if (!el) return;
       const title = el.getAttribute('title') || el.textContent || '';
       if (el.textContent && el.textContent.length > 14) {
-        el.innerHTML = '<span class="pill-text">Saved</span>';
+        el.innerHTML = '<span class="pill-text">' + msbT('Saved') + '</span>';
         if (title) el.title = title;
       }
     } catch (e) {}

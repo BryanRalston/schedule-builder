@@ -5599,7 +5599,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.29</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.30</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -7435,6 +7435,63 @@ function isThinManagerRoster(roles) {
 }
 
 /**
+ * 2.6.30 — leftover SM-exactly-1 + AM leftover pool piles AM closes on a
+ * 4–5 person bench (1 SM + 3 AMs). Default auto (no slider retune) shares
+ * manager-close nights among named SM+AMs. Thin (2-person) 2.6.22 scale
+ * and a typed AM weekly lock stay as-is. Named KC-C nights are not in this pool.
+ */
+function shouldEvenSmAmCloses(prefs, roles) {
+  const list = roles || (typeof getRoles === 'function' ? getRoles() : []);
+  if (typeof isThinManagerRoster === 'function' ? isThinManagerRoster(list) : (list.length > 0 && list.length <= 2)) {
+    return false;
+  }
+  const named = typeof countNamedClosers === 'function' ? countNamedClosers(list) : list.filter((r) => r && r !== 'sm').length;
+  if (named < 3) return false;
+  const p = prefs || preferences || DEFAULT_PREFERENCES;
+  if (p.amClosesPerWeek != null && p.amClosesPerWeek !== '') return false;
+  const amRule = (typeof roleRules !== 'undefined' && roleRules.am) ? roleRules.am : null;
+  if (amRule && amRule.closesPerWeek != null && amRule.closesPerWeek !== '') return false;
+  let sm = p.smClosesPerWeek;
+  if (sm == null || sm === '') {
+    const smRule = (typeof roleRules !== 'undefined' && roleRules.sm) ? roleRules.sm : null;
+    sm = (smRule && smRule.closesPerWeek != null) ? smRule.closesPerWeek : 1;
+  }
+  sm = parseInt(sm, 10);
+  if (Number.isFinite(sm) && sm !== 1) return false;
+  return true;
+}
+
+/** Rotate extras so week-4 does not pile one closer (same pattern as AM leftover). */
+function getEvenCloseShare(nights, peerCount, peerIdx, weekIdx) {
+  const rem = Math.max(0, nights | 0);
+  if (!peerCount || peerCount <= 0) return 0;
+  const base = Math.floor(rem / peerCount);
+  const extra = rem % peerCount;
+  const idx = Math.max(0, peerIdx | 0);
+  const w = Math.max(0, weekIdx | 0);
+  return base + ((idx + w) % peerCount < extra ? 1 : 0);
+}
+
+/** Weekly close seat for SM or a named AM / manager-mode KC. */
+function getCloseTargetForRole(prefs, roles, nights, role, weekIdx) {
+  const list = roles || [];
+  const closers = list.filter((r) => r && r !== 'sm');
+  if (typeof shouldEvenSmAmCloses === 'function' && shouldEvenSmAmCloses(prefs, list)) {
+    const peers = closers.length + (list.indexOf('sm') >= 0 ? 1 : 0);
+    const idx = role === 'sm' ? 0 : Math.max(0, closers.indexOf(role)) + 1;
+    return getEvenCloseShare(nights, Math.max(1, peers), idx, weekIdx);
+  }
+  if (role === 'sm') return getSmClosesPerWeekTarget(prefs, nights, closers.length === 0);
+  return getAmClosesPerWeekTarget(
+    prefs,
+    Math.max(0, nights - getSmClosesPerWeekTarget(prefs, nights, closers.length === 0)),
+    closers.length,
+    closers.indexOf(role),
+    weekIdx
+  );
+}
+
+/**
  * AM (or manager-mode closer) closes/week target.
  * Fixed when prefs.amClosesPerWeek is set; otherwise fair share of remaining after SM,
  * scaled to named headcount so a 1-AM roster is not asked for a 3-AM leftover (5/week).
@@ -7469,9 +7526,17 @@ function getScaledCloseTargets(prefs, roles, managerNights) {
   const nights = Math.max(0, managerNights | 0);
   const namedClosers = countNamedClosers(roles);
   const sole = namedClosers === 0;
-  const smTarget = getSmClosesPerWeekTarget(prefs, nights, sole);
+  const evenPeers = !sole && typeof shouldEvenSmAmCloses === 'function' && shouldEvenSmAmCloses(prefs, roles);
+  const peerCount = namedClosers + (sole ? 0 : 1);
+  const smTarget = evenPeers
+    ? getEvenCloseShare(nights, peerCount, 0, 0)
+    : getSmClosesPerWeekTarget(prefs, nights, sole);
   const remaining = Math.max(0, nights - (sole ? 0 : smTarget));
-  const amTarget = sole ? 0 : getAmClosesPerWeekTarget(prefs, remaining, namedClosers, 0, 0);
+  const amTarget = sole
+    ? 0
+    : (evenPeers
+      ? getEvenCloseShare(nights, peerCount, 1, 0)
+      : getAmClosesPerWeekTarget(prefs, remaining, namedClosers, 0, 0));
   const p = prefs || preferences || DEFAULT_PREFERENCES;
   const userFixedAM = p.amClosesPerWeek != null && p.amClosesPerWeek !== '';
   return {
@@ -7481,6 +7546,8 @@ function getScaledCloseTargets(prefs, roles, managerNights) {
     sole,
     remaining,
     userFixedAM,
+    evenPeers,
+    peerCount,
     thin: isThinManagerRoster(roles)
   };
 }
@@ -7586,6 +7653,11 @@ function leftoverMustFixViolations(violations, roles) {
     if (v.rule === 'no-clopen') return false;
     if (typeof isExpectedThinCoverageRemainder === 'function'
       && isExpectedThinCoverageRemainder(v, roles)) return false;
+    // 2.6.30: leftover SM-exactly-1 is a preference on a 3+ AM bench, not must-fix.
+    if (v.rule === 'sm-close-1' && typeof shouldEvenSmAmCloses === 'function'
+      && shouldEvenSmAmCloses(typeof preferences !== 'undefined' ? preferences : null, roles)) {
+      return false;
+    }
     return true;
   });
 }
@@ -7833,13 +7905,13 @@ function renderPreferencesUI() {
       <label class="pref-label">${esc(typeof getRoleTitle === 'function' ? getRoleTitle('sm') : 'Store Manager')} closes / week
         <input type="number" id="pref-sm-closes" min="0" max="7" value="${p.smClosesPerWeek != null ? p.smClosesPerWeek : 1}" onchange="readPreferencesFromUI()">
       </label>
-      <div class="pref-desc">How many manager-close nights the SM takes each week (default 1). Raise to 2 if you close twice. Capped by nights that aren’t KC-close nights. Sole manager always covers all manager nights.</div>
+      <div class="pref-desc">How many manager-close nights the SM takes each week (default 1 on a short bench). On a 3+ AM team, default Build shares closes evenly with the AMs — you do not need to raise this. Capped by nights that aren’t KC-close nights. Sole manager always covers all manager nights.</div>
     </div>
     <div class="pref-card">
       <label class="pref-label">${esc(typeof getRoleTitle === 'function' ? getRoleTitle('am') : 'Assistant Manager')} closes / week
         <input type="number" id="pref-am-closes" min="0" max="7" placeholder="auto" value="${p.amClosesPerWeek == null || p.amClosesPerWeek === '' ? '' : p.amClosesPerWeek}" onchange="readPreferencesFromUI()">
       </label>
-      <div class="pref-desc">Per named AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — remaining closes after the SM are split evenly, scaled to how many AMs you named (1 AM is not 3). Set a number to lock a weekly target. Coverage still wins if totals don’t match nights available.</div>
+      <div class="pref-desc">Per named AM (and manager-coverage KCs). Leave blank for <strong>auto</strong> — on a 3+ AM bench, SM and AMs share manager-close nights evenly. One named AM is still not three. Set a number to lock a weekly target. Coverage still wins if totals don’t match nights available.</div>
     </div>
     <div class="pref-card">
       <label class="toggle-switch">
@@ -7980,7 +8052,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.29';
+const APP_VERSION = '2.6.30';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -12367,17 +12439,23 @@ function _generateScheduleInner(opts) {
   // STEP 4: ASSIGN CLOSING SHIFTS — night-first approach
   // Offs already placed so close-before-off scoring works.
   // For each manager-close night (not a KC-close night), assign exactly 1 closer.
-  // managerNightsPerWeek nights per week. SM gets min(1, mgrNights) (or all if sole manager).
-  // Remaining distributed among AMs (+ manager-mode KCs) as evenly as possible.
+  // Default 3+ AM bench: SM+AMs share manager nights evenly (2.6.30).
+  // Thin / leftover-1 SM seat still uses scaled leftover for 2-person boards.
   // Two named managers use assignTwoManagerShifts instead — the 3+ closer
   // pool would dump every remaining night on AM1 and then pull offs back.
   // ════════════════════════════════════════════════════
   // The "closers pool" = AMs + manager-mode KCs (everyone in ROLES except SM)
   const closerPool = ROLES.filter(r => r !== 'sm');
-  const scaledSmCloseTarget = getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, closerPool.length === 0);
+  const evenSmAmCloses = typeof shouldEvenSmAmCloses === 'function' && shouldEvenSmAmCloses(PREFS, ROLES);
+  const scaledSmCloseTarget = evenSmAmCloses
+    ? getCloseTargetForRole(PREFS, ROLES, managerNightsPerWeek, 'sm', 0)
+    : getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, closerPool.length === 0);
   const scaledAmCloseRem = Math.max(0, managerNightsPerWeek - (closerPool.length === 0 ? 0 : scaledSmCloseTarget));
   const weekCloseCountOf = (r, w) => getWeekDks(w).filter((d) => isClose(schedule[r][d])).length;
   const scaledCloseTargetOf = (r, w) => {
+    if (typeof getCloseTargetForRole === 'function') {
+      return getCloseTargetForRole(PREFS, ROLES, managerNightsPerWeek, r, w);
+    }
     if (r === 'sm') return scaledSmCloseTarget;
     const idx = Math.max(0, closerPool.indexOf(r));
     return getAmClosesPerWeekTarget(PREFS, scaledAmCloseRem, Math.max(1, closerPool.length), idx, w);
@@ -12396,8 +12474,10 @@ function _generateScheduleInner(opts) {
   };
   if (!thinRoster) {
   const closerCount = closerPool.length;
-  // SM / AM targets from preferences (defaults: SM 1, AMs auto fair-share of remainder)
-  const smCloseTarget = getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, closerCount === 0);
+  // SM / AM targets: 3+ AM auto even-share, else leftover SM 1 + AM remainder
+  const smCloseTarget = evenSmAmCloses
+    ? getCloseTargetForRole(PREFS, ROLES, managerNightsPerWeek, 'sm', 0)
+    : getSmClosesPerWeekTarget(PREFS, managerNightsPerWeek, closerCount === 0);
   const remainingCloses = Math.max(0, managerNightsPerWeek - (closerCount === 0 ? 0 : smCloseTarget));
   const baseClosesPerCloser = closerCount > 0 ? Math.floor(remainingCloses / closerCount) : 0;
   const extraClosers = closerCount > 0 ? remainingCloses % closerCount : 0;
@@ -12451,19 +12531,28 @@ function _generateScheduleInner(opts) {
       // Role rules + SM/AM targets from preferences
       const rule = getRoleRuleForPerson(r);
       if (r === 'sm') {
-        const smTarget = smCloseTarget;
+        const smTarget = evenSmAmCloses
+          ? getCloseTargetForRole(PREFS, ROLES, managerNightsPerWeek, 'sm', w)
+          : smCloseTarget;
         if (closerCount === 0) {
           score -= 5;
+        } else if (evenSmAmCloses) {
+          if (myCloses >= smTarget + 1) score += 100;
+          else if (myCloses >= smTarget) score += 50;
+          else if (myCloses === smTarget - 1) score -= 3;
+          else score -= 5;
         } else if (myCloses >= smTarget) {
           score += 100;
         } else {
           score -= 5;
         }
-        // Prefer SM not taking weekend closes when they only take 1
-        if (isDkWeekend(dk) && smTarget <= 1) score += 10;
+        // Prefer SM not taking weekend closes when they only take 1 (leftover seat)
+        if (isDkWeekend(dk) && smTarget <= 1 && !evenSmAmCloses) score += 10;
       } else {
         const closerIdx = closerPool.indexOf(r);
-        let targetForThisCloser = getAmClosesPerWeekTarget(PREFS, remainingCloses, closerCount, closerIdx, w);
+        let targetForThisCloser = evenSmAmCloses
+          ? getCloseTargetForRole(PREFS, ROLES, managerNightsPerWeek, r, w)
+          : getAmClosesPerWeekTarget(PREFS, remainingCloses, closerCount, closerIdx, w);
         // Per-person role override still wins when set on a custom rule (not global AM auto)
         if (rule && rule.family !== 'am' && rule.closesPerWeek != null) {
           targetForThisCloser = Math.max(0, parseInt(rule.closesPerWeek, 10) || 0);
@@ -12499,8 +12588,8 @@ function _generateScheduleInner(opts) {
       const totalCloses = allDks.filter(d => isClose(schedule[r][d])).length;
       score += totalCloses;
 
-      // Weekend close fairness (when fairDistribution on)
-      if (PREFS.fairDistribution && isDkWeekend(dk) && r !== 'sm') {
+      // Weekend close fairness (when fairDistribution on). 3+ AM even-share includes SM.
+      if (PREFS.fairDistribution && isDkWeekend(dk) && (evenSmAmCloses || r !== 'sm')) {
         const myWeekendCloses = allDks.filter(d => isClose(schedule[r][d]) && isDkWeekend(d)).length;
         score += myWeekendCloses * 5;
       }
@@ -13544,6 +13633,7 @@ function _generateScheduleInner(opts) {
   // ════════════════════════════════════════════════════
   const rebalanceClosesPeriodLevel = () => {
     let pool = ROLES.filter((r) => r !== 'sm');
+    if (evenSmAmCloses) pool = ROLES.slice();
     if (pool.length === 0) pool = ROLES.filter((r) => r === 'sm');
     if (pool.length < 2) return; // sole manager — skip
 
@@ -14583,6 +14673,8 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
     ? closeTargets.remaining
     : Math.max(0, mgrNights - (closerPool.length === 0 ? 0 : smCloseTarget));
   const amFixed = preferences.amClosesPerWeek != null && preferences.amClosesPerWeek !== '';
+  const evenPeers = !!(closeTargets && closeTargets.evenPeers)
+    || (typeof shouldEvenSmAmCloses === 'function' && shouldEvenSmAmCloses(preferences, ROLES));
   const thinRoster = typeof isThinManagerRoster === 'function'
     ? isThinManagerRoster(ROLES)
     : (ROLES && ROLES.length <= 2);
@@ -14630,9 +14722,13 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
   // ── Rule 3: SM closes target per week (or all manager nights if sole manager) ──
   // Two named people: SM exactly-1 vs AM leftover-5 is a 3-AM template. Keep
   // the SM goal as a preference so a hangable two-person board is not a hard fail.
+  // 3+ AM auto even-share: SM weekly seat is a preference (±1), not must-fix.
   for (let w = 0; w < numWeeks; w++) {
     const weekDks = getWeekDks(w);
     const smCloses = weekDks.filter(dk => isClose(schedule.sm[dk])).length;
+    const smEven = typeof getCloseTargetForRole === 'function'
+      ? getCloseTargetForRole(preferences, ROLES, mgrNights, 'sm', w)
+      : smCloseTarget;
     if (closerPool.length === 0) {
       // Sole manager — SM covers all manager nights
       if (smCloses < mgrNights) {
@@ -14643,6 +14739,14 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
       if (smCloses === 0 && smCloseTarget > 0) {
         v('warning', 'sm-close-1', 'sm', w, null,
           `${names.sm}: Week ${w+1} has no closes (goal ${smCloseTarget} — close share is a preference on a two-person roster)`);
+      }
+    } else if (evenPeers && !amFixed) {
+      if (smCloses === 0 && smEven > 0) {
+        v('warning', 'sm-close-1', 'sm', w, null,
+          `${names.sm}: Week ${w+1} has no closes (goal ${smEven} — SM+AM close share is a preference)`);
+      } else if (Math.abs(smCloses - smEven) > 1) {
+        v('warning', 'sm-close-1', 'sm', w, null,
+          `${names.sm}: Week ${w+1} has ${smCloses} closes (goal ${smEven} — SM+AM close share is a preference)`);
       }
     } else if (smCloses !== smCloseTarget) {
       v(thinRoster ? 'warning' : 'error', 'sm-close-1', 'sm', w, null,
@@ -14668,7 +14772,9 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
     closerPool.forEach(r => {
       const closes = closeCounts[r];
       const closerIdx = closerPool.indexOf(r);
-      const target = getAmClosesPerWeekTarget(preferences, remainingCloses, closerCount, closerIdx, w);
+      const target = evenPeers && typeof getCloseTargetForRole === 'function'
+        ? getCloseTargetForRole(preferences, ROLES, mgrNights, r, w)
+        : getAmClosesPerWeekTarget(preferences, remainingCloses, closerCount, closerIdx, w);
       const minTarget = amFixed ? target : Math.max(0, target - (closerCount > 1 ? 0 : 0));
       const maxTarget = amFixed ? target : target;
       // Auto mode allows +1 slack for coverage; fixed mode is exact with +1 soft slack.
@@ -14817,7 +14923,10 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
 
   const isKcCloseNight = makeIsKcCloseNight(dkToDate, preferences);
   const mgrNights = getManagerNightsPerWeek(preferences);
-  const smCloseTarget = getSmClosesPerWeekTarget(preferences, mgrNights, closerPool.length === 0);
+  const evenPeersRepair = typeof shouldEvenSmAmCloses === 'function' && shouldEvenSmAmCloses(preferences, ROLES);
+  const smCloseTarget = evenPeersRepair && typeof getCloseTargetForRole === 'function'
+    ? getCloseTargetForRole(preferences, ROLES, mgrNights, 'sm', 0)
+    : getSmClosesPerWeekTarget(preferences, mgrNights, closerPool.length === 0);
   const remainingCloses = Math.max(0, mgrNights - (closerPool.length === 0 ? 0 : smCloseTarget));
 
   // Helper: count work+PTO days for role in week (matches Rule 1 / gen Step 3)
@@ -14990,7 +15099,10 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       const w = v.week;
       const weekDks = getWeekDks(w);
       const current = weekCloses('sm', w);
-      const smTarget = smCloseTarget;
+      const smTarget = evenPeersRepair && typeof getCloseTargetForRole === 'function'
+        ? getCloseTargetForRole(preferences, ROLES, mgrNights, 'sm', w)
+        : smCloseTarget;
+      const stripSlack = evenPeersRepair ? 1 : 0;
 
       if (current < smTarget) {
         // Need to add close(s) — non-KC-night work days, not input-locked, no dual closer
@@ -15005,7 +15117,7 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
           schedule.sm[dk] = 'close';
           needed--;
         }
-      } else if (closerPool.length > 0 && current > smTarget) {
+      } else if (closerPool.length > 0 && current > smTarget + stripSlack) {
         // Too many closes — convert excess to mid (never touch input-locked)
         const closes = weekDks.filter(dk => isClose(schedule.sm[dk]) && !isInputLocked('sm', dk));
         for (let i = smTarget; i < closes.length; i++) {
@@ -15030,7 +15142,9 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       const closerCountLocal = closerPool.length;
       if (closerCountLocal === 0) return;
       const closerIdx = closerPool.indexOf(closer);
-      const target = getAmClosesPerWeekTarget(preferences, remainingCloses, closerCountLocal, closerIdx, w);
+      const target = evenPeersRepair && typeof getCloseTargetForRole === 'function'
+        ? getCloseTargetForRole(preferences, ROLES, mgrNights, closer, w)
+        : getAmClosesPerWeekTarget(preferences, remainingCloses, closerCountLocal, closerIdx, w);
       const effectiveTarget = Math.min(target, mgrNightWork <= 3 ? Math.min(Math.max(1, target), target) : target);
 
       if (current < effectiveTarget) {
@@ -15529,8 +15643,15 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
   });
 
   // Weekend range is every named manager (same story as the WE chip / weekend tile).
-  // Close min/max stay AM-peer; the scaled period goal is shown so 5-5 is not a fake pass.
-  const peers = rows.filter((row) => row.role !== 'sm');
+  // Close min/max: AM-peer on a leftover SM-1 bench; SM+AM when 3+ AM even-share.
+  const nightsForPeers = typeof getManagerNightsPerWeek === 'function'
+    ? getManagerNightsPerWeek(preferences)
+    : 6;
+  const closeTargetsEarly = typeof getScaledCloseTargets === 'function'
+    ? getScaledCloseTargets(preferences, ROLES, nightsForPeers)
+    : null;
+  const evenPeersGlance = !!(closeTargetsEarly && closeTargetsEarly.evenPeers);
+  const peers = evenPeersGlance ? rows : rows.filter((row) => row.role !== 'sm');
   const peerPool = peers.length ? peers : rows;
   const weVals = rows.map((r) => r.we);
   const closeVals = peerPool.map((r) => r.closes);
@@ -15544,14 +15665,12 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
     const t = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(row.role) : 2;
     return row.we >= t;
   }).length;
-  const nights = typeof getManagerNightsPerWeek === 'function'
-    ? getManagerNightsPerWeek(preferences)
-    : 6;
+  const nights = nightsForPeers;
   const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : 4;
-  const closeTargets = typeof getScaledCloseTargets === 'function'
-    ? getScaledCloseTargets(preferences, ROLES, nights)
-    : null;
-  const amPeriodGoal = closeTargets && closeTargets.amTarget ? closeTargets.amTarget * weeks : 0;
+  const closeTargets = closeTargetsEarly;
+  const amPeriodGoal = closeTargets && closeTargets.evenPeers && closeTargets.peerCount
+    ? Math.floor(nights * weeks / closeTargets.peerCount)
+    : (closeTargets && closeTargets.amTarget ? closeTargets.amTarget * weeks : 0);
 
   // Coverage: every day has ≥1 open and ≥1 close (managers + non-mgr KC closes)
   // ALL_KC from generate is id strings; some callers pass {id} objects.
@@ -16049,6 +16168,11 @@ function jumpToRoleOnGrid(role) {
              (unless ?lang=), marketing 2 free builds, no stale store name, Build on.
              Named team keeps language override and remaining free count. SW cache 2.6.29.
              Rebuild-to-apply after a board exists does not spend a free seat.
+   v2.6.30 — Default Build evens closing-shift counts among named SM+AMs on a 4–5
+             person bench (1 SM + 3 AMs + named KC). Leftover SM-exactly-1 + AM leftover
+             pool no longer piles AM closes. KC-C nights stay on the named key carrier.
+             Thin 2-person 2.6.22 scale and week-4 AM pile fix stay. Clopen stays a
+             preference. SW cache 2.6.30.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -19072,7 +19196,15 @@ function computeCoverageAndFairnessStats() {
       if (workers === 0) emptyDays++;
     }
   });
-  ROLES.filter((r) => r !== 'sm').forEach((r) => {
+  const nightsEarly = typeof getManagerNightsPerWeek === 'function'
+    ? getManagerNightsPerWeek((report && report.prefs) || preferences)
+    : 6;
+  const closeTargetsEarly = (report && report.closeTargets) ||
+    (typeof getScaledCloseTargets === 'function'
+      ? getScaledCloseTargets((report && report.prefs) || preferences, ROLES, nightsEarly)
+      : null);
+  const evenPeersStats = !!(closeTargetsEarly && closeTargetsEarly.evenPeers);
+  ROLES.filter((r) => evenPeersStats || r !== 'sm').forEach((r) => {
     let closes = 0;
     if (report) {
       closes = report.closes[r] || 0;
@@ -19111,15 +19243,12 @@ function computeCoverageAndFairnessStats() {
   const weSpread = weMax - weMin;
   const thin = typeof isThinManagerRoster === 'function' ? isThinManagerRoster(ROLES) : ROLES.length <= 2;
   const coverWhy = !coverOk && thin ? twoPersonOffsCoverageNote(ROLES) : '';
-  const nights = typeof getManagerNightsPerWeek === 'function'
-    ? getManagerNightsPerWeek((report && report.prefs) || preferences)
-    : 6;
-  const closeTargets = (report && report.closeTargets) ||
-    (typeof getScaledCloseTargets === 'function'
-      ? getScaledCloseTargets((report && report.prefs) || preferences, ROLES, nights)
-      : null);
+  const nights = nightsEarly;
+  const closeTargets = closeTargetsEarly;
   const amWeeklyGoal = closeTargets ? closeTargets.amTarget : 0;
-  const amPeriodGoal = amWeeklyGoal * weeks;
+  const amPeriodGoal = closeTargets && closeTargets.evenPeers && closeTargets.peerCount
+    ? Math.floor(nights * weeks / closeTargets.peerCount)
+    : amWeeklyGoal * weeks;
   const amMetGoal = !peerCloses.length || amPeriodGoal <= 0 || cMin >= amPeriodGoal;
   const fairOk = cSpread <= 2 && weSpread <= 1 && clopens === 0 && amMetGoal && weMet === ROLES.length;
   return {

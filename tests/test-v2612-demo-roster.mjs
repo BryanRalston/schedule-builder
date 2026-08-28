@@ -206,7 +206,7 @@ async function main() {
   console.log('\n=== v2.6.12 demo must not overwrite a saved roster ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.29') pass('version.json', version.version);
+  if (version.version === '2.6.30') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const index = read('index.html');

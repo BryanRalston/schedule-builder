@@ -3,7 +3,7 @@
  * No named team → device language (or ?lang=), FREE · 2, Build enabled,
  * no stale store name. Named team keeps language override + remaining count.
  * Demo still does not consume a free build.
- * Keeps 2.6.12–2.6.28 behavior; version lock 2.6.29.
+ * Keeps 2.6.12–2.6.28 behavior; version lock 2.6.30.
  * Run: node tests/test-v2629-ux.mjs
  */
 import { createServer } from 'http';
@@ -113,15 +113,15 @@ async function main() {
   console.log('\n=== v2.6.29 first visit is not leftover tester chrome ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.29') pass('version.json', version.version);
+  if (version.version === '2.6.30') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.29'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.30'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('index.html');
-  if (index.includes("const APP_VERSION = '2.6.29'") && index.includes('id="app-version-label">v2.6.29')) {
+  if (index.includes("const APP_VERSION = '2.6.30'") && index.includes('id="app-version-label">v2.6.30')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -132,7 +132,7 @@ async function main() {
     && /function generateScheduleFromButton\(/.test(index)
     && /params\.get\('lang'\)/.test(index)) {
     pass('v2629-fns');
-  } else fail('v2629-fns', '2.6.29 first-visit helpers missing');
+  } else fail('v2629-fns', '2.6.30 first-visit helpers missing');
 
   if (/function formatFyPeriodLabel\(/.test(index)
     && /function localizeWarningMsg\(/.test(index)

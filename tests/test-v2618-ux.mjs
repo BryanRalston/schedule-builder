@@ -1,5 +1,6 @@
 /**
- * v2.6.18: tap-to-fix review chips + one-line why this cell.
+ * v2.6.18: tap-to-fix review chips + one-line why this cell,
+ * plus playtest extras — no phantom AM2, rebuild-to-apply hint, hide unnamed KC tabs.
  * Jumps reuse cell-flash. Auto-fixes stay buttons. Why is rule-based.
  * Keeps 2.6.12–2.6.17 behavior; version lock follows 2.6.18.
  * Run: node tests/test-v2618-ux.mjs
@@ -69,7 +70,7 @@ async function loadChromium() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.18 tap-to-fix + why this cell ===');
+  console.log('\n=== v2.6.18 tap-to-fix + why + playtest extras ===');
 
   const version = JSON.parse(read('version.json'));
   if (version.version === '2.6.18') pass('version.json', version.version);
@@ -152,6 +153,23 @@ async function main() {
   if (!/idioma|español|spanish|language picker|lang-picker/i.test(index)) {
     pass('no-language-picker');
   } else fail('no-language-picker', 'language picker added');
+
+  if (/function isNamedAssistant\(/.test(index)
+    && /Unnamed AM2 stays off the board/.test(index)
+    && /function getRequestTabIds\(/.test(index)
+    && /id="request-board-hint"/.test(index)
+    && /Rebuild to apply/.test(index)
+    && /function refreshRequestBoardHint\(/.test(index)
+    && /function hasLiveBuiltBoard\(/.test(index)) {
+    pass('playtest-extra-fns');
+  } else fail('playtest-extra-fns', 'phantom-AM / rebuild-hint / request-tab helpers missing');
+
+  const paintChunk = (index.match(/function paintRequestCell\([\s\S]*?\n\}/) || [''])[0];
+  const phraseChunk = (index.match(/function applyRequestPhraseFromBar\([\s\S]*?\n\}/) || [''])[0];
+  if (paintChunk && !/generateSchedule\s*\(/.test(paintChunk)
+    && phraseChunk && !/generateSchedule\s*\(/.test(phraseChunk)) {
+    pass('paint-does-not-autobuild');
+  } else fail('paint-does-not-autobuild', 'paint/phrase still calls generateSchedule');
 
   const whyChunk = (index.match(/v2\.6\.18 — tap-to-fix review chips[\s\S]*?function jumpToReviewChip/) || [''])[0];
   if (whyChunk
@@ -344,6 +362,121 @@ async function main() {
     });
     if (chipJump.hasPair && chipJump.flashed) pass('review-chip-jumps-to-cell', chipJump.role + ' ' + chipJump.dk);
     else fail('review-chip-jumps-to-cell', JSON.stringify(chipJump));
+
+    const phantom = await page.evaluate(() => {
+      const roles = typeof getRoles === 'function' ? getRoles() : [];
+      const ams = typeof getAMs === 'function' ? getAMs() : [];
+      const tabs = typeof getRequestTabIds === 'function' ? getRequestTabIds() : [];
+      const boardAm2 = document.querySelectorAll('#schedule-grid [data-role="am2"]').length;
+      const boardNames = [...document.querySelectorAll('#schedule-grid td.name-col')].map((el) => (el.textContent || '').trim());
+      const printHtml = (document.getElementById('print-schedule') || {}).innerHTML || '';
+      const excel = typeof buildExcelExportHtml === 'function' ? buildExcelExportHtml() : '';
+      const coverCells = [...document.querySelectorAll('#schedule-grid .coverage-row td')].map((el) => (el.textContent || '').trim());
+      const am2Days = schedule.am2 ? Object.keys(schedule.am2).length : 0;
+      const namedAm2 = typeof isNamedAssistant === 'function' ? isNamedAssistant(2) : null;
+      const am2Val = (document.getElementById('name-am2') || {}).value || '';
+      return {
+        roles,
+        ams,
+        tabs,
+        boardAm2,
+        boardNames,
+        printHasAm2: /AM2|Assistant Manager 2/i.test(printHtml),
+        excelHasAm2: /AM2|Assistant Manager 2/i.test(excel),
+        coverSample: coverCells.slice(0, 4),
+        am2Days,
+        namedAm2,
+        am2Val,
+        placeholder: typeof isPlaceholderManagerName === 'function' && isPlaceholderManagerName(am2Val || 'AM2'),
+      };
+    });
+    if (phantom.roles.join(',') === 'sm,am1'
+      && phantom.ams.join(',') === 'am1'
+      && !phantom.tabs.includes('am2')
+      && phantom.boardAm2 === 0
+      && !phantom.boardNames.some((n) => /AM2|Assistant Manager 2/i.test(n))
+      && !phantom.printHasAm2
+      && !phantom.excelHasAm2
+      && phantom.am2Days === 0
+      && phantom.namedAm2 === false
+      && phantom.placeholder) {
+      pass('no-phantom-am2-on-board-export', phantom.roles.join(','));
+    } else fail('no-phantom-am2-on-board-export', JSON.stringify(phantom));
+
+    const requests = await page.evaluate(() => {
+      switchTab('requests');
+      const hint = document.getElementById('request-board-hint');
+      const tabLabels = [...document.querySelectorAll('#input-tabs .input-tab')].map((el) => ({
+        text: (el.textContent || '').trim(),
+        role: el.dataset.role || '',
+      }));
+      const kcInput = document.getElementById('name-kc1');
+      const kcRow = kcInput && kcInput.closest('.manager-row');
+      const allDks = periodDates.map((d) => dateKey(d));
+      const dk = allDks.find((key) => {
+        const s = schedule.sm && schedule.sm[key];
+        return s && s !== 'off' && s !== 'pto' && s !== 'rto' && s !== 'loa';
+      }) || allDks[1];
+      const beforeShift = schedule.sm[dk];
+      const cellSel = '#schedule-grid td.shift-editable[data-role="sm"][data-dk="' + dk + '"] .cell-shift-txt';
+      const beforeCell = (document.querySelector(cellSel) || {}).textContent || '';
+      if (!inputs.sm) inputs.sm = {};
+      inputs.sm[dk] = 'pto';
+      if (typeof refreshRequestBoardHint === 'function') refreshRequestBoardHint();
+      const afterShift = schedule.sm[dk];
+      const afterCell = (document.querySelector(cellSel) || {}).textContent || '';
+      const hintAfterPaint = hint && !hint.hidden && /Rebuild to apply/.test(hint.textContent || '');
+      return {
+        hintText: hint ? (hint.textContent || '').trim() : '',
+        hintShown: !!(hint && !hint.hidden),
+        tabRoles: tabLabels.map((t) => t.role),
+        tabTexts: tabLabels.map((t) => t.text),
+        kcInDom: !!kcInput,
+        kcRowPlaceholder: !!(kcRow && kcRow.classList.contains('kc-row-placeholder')),
+        dk,
+        beforeShift,
+        afterShift,
+        beforeCell,
+        afterCell,
+        hintAfterPaint,
+      };
+    });
+    if (requests.hintShown && /Rebuild to apply/.test(requests.hintText)
+      && requests.afterShift === requests.beforeShift
+      && requests.afterCell === requests.beforeCell
+      && requests.hintAfterPaint) {
+      pass('requests-rebuild-hint-no-autobuild', requests.dk);
+    } else fail('requests-rebuild-hint-no-autobuild', JSON.stringify(requests));
+
+    if (!requests.tabRoles.includes('kc1') && !requests.tabRoles.includes('am2')
+      && requests.kcInDom && requests.kcRowPlaceholder
+      && requests.tabRoles.includes('sm') && requests.tabRoles.includes('am1')) {
+      pass('unnamed-kc-am-hidden-from-request-tabs', requests.tabRoles.join(','));
+    } else fail('unnamed-kc-am-hidden-from-request-tabs', JSON.stringify({
+      tabRoles: requests.tabRoles,
+      tabTexts: requests.tabTexts,
+      kcInDom: requests.kcInDom,
+      kcRowPlaceholder: requests.kcRowPlaceholder,
+    }));
+
+    const rebuilt = await page.evaluate((dk) => {
+      return new Promise((resolve) => {
+        generateSchedule({ skipFreeCount: true });
+        setTimeout(() => {
+          const cell = document.querySelector(
+            '#schedule-grid td.shift-editable[data-role="sm"][data-dk="' + dk + '"] .cell-shift-txt'
+          );
+          resolve({
+            shift: schedule.sm && schedule.sm[dk],
+            cell: cell ? (cell.textContent || '').trim() : '',
+            stillNoAm2: !document.querySelector('#schedule-grid [data-role="am2"]'),
+          });
+        }, 2000);
+      });
+    }, requests.dk);
+    if (rebuilt.shift === 'pto' && /PTO|VAC/i.test(rebuilt.cell) && rebuilt.stillNoAm2) {
+      pass('rebuild-applies-painted-request', rebuilt.cell);
+    } else fail('rebuild-applies-painted-request', JSON.stringify(rebuilt));
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

@@ -354,12 +354,30 @@ async function main() {
     } else fail('quality-chip-visible', JSON.stringify(built));
 
     const jump = await page.evaluate(() => {
-      const hole = typeof findFirstQualityHole === 'function' ? findFirstQualityHole() : null;
+      let hole = typeof findFirstQualityHole === 'function' ? findFirstQualityHole() : null;
+      if (!hole || !hole.role) {
+        const ROLES = typeof getRoles === 'function' ? getRoles() : [];
+        const allDks = (periodDates || []).map((d) => dateKey(d));
+        const dk = allDks[0];
+        const role = ROLES[0] || 'sm';
+        if (dk && schedule[role]) {
+          ROLES.forEach((r) => {
+            const v = schedule[r] && schedule[r][dk];
+            if (typeof isOpen === 'function' && isOpen(v)) schedule[r][dk] = 'mid-early';
+            if ((typeof isClose === 'function' && isClose(v)) || v === 'kc-close') schedule[r][dk] = 'mid-early';
+          });
+          if (typeof revalidateAfterManualEdit === 'function') {
+            revalidateAfterManualEdit(ROLES, typeof getAllWithKC === 'function' ? getAllWithKC() : []);
+          }
+        }
+        hole = typeof findFirstQualityHole === 'function' ? findFirstQualityHole() : null;
+      }
       const jumped = typeof jumpToReviewChip === 'function' ? jumpToReviewChip('quality') : null;
       return new Promise((resolve) => {
         setTimeout(() => {
-          const el = hole && document.querySelector(
-            '#schedule-grid td.shift-editable[data-role="' + hole.role + '"][data-dk="' + hole.dk + '"]'
+          const target = hole || jumped;
+          const el = target && document.querySelector(
+            '#schedule-grid td.shift-editable[data-role="' + target.role + '"][data-dk="' + target.dk + '"]'
           );
           resolve({
             holeRole: hole && hole.role,

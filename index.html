@@ -14300,6 +14300,40 @@ function findFirstQualityHole() {
   const issues = window._postingIssues || [];
   const withCell = issues.find(function (i) { return i && i.role; });
   if (withCell) return { role: withCell.role, dk: withCell.dk || null };
+  try {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const dks = (periodDates || []).map(function (d) { return typeof dateKey === 'function' ? dateKey(d) : null; });
+    for (let i = 0; i < dks.length; i++) {
+      if (!dks[i]) continue;
+      for (let r = 0; r < roles.length; r++) {
+        const why = typeof explainCellWhy === 'function' ? explainCellWhy(roles[r], dks[i]) : null;
+        if (!why || !why.kind) continue;
+        if (why.kind === 'coverage' || why.kind === 'clopen') {
+          return { role: roles[r], dk: dks[i] };
+        }
+        if (why.kind === 'weekend' && /short of weekend-off/i.test(why.text || '')) {
+          return { role: roles[r], dk: dks[i] };
+        }
+      }
+    }
+  } catch (e3) {}
+  try {
+    const report = window._lastGenReport;
+    const names = typeof getManagerNames === 'function' ? getManagerNames() : {};
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const unmet = (report && report.unmet) || [];
+    for (let u = 0; u < unmet.length; u++) {
+      const line = String(unmet[u] || '');
+      const role = roles.find(function (r) { return names[r] && line.indexOf(names[r]) !== -1; });
+      if (!role) continue;
+      const we = typeof findWeekendWorkDay === 'function' ? findWeekendWorkDay(role) : null;
+      if (we) return { role: role, dk: we };
+      const dks = (periodDates || []).map(function (d) { return typeof dateKey === 'function' ? dateKey(d) : null; });
+      for (let i = 0; i < dks.length; i++) {
+        if (dks[i] && schedule[role] && schedule[role][dks[i]]) return { role: role, dk: dks[i] };
+      }
+    }
+  } catch (e4) {}
   return null;
 }
 

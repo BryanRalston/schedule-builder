@@ -225,7 +225,8 @@ async function main() {
     if (firstOpen.welcome && firstOpen.tab === 'setup' && firstOpen.setupActive) {
       pass('first-run-lands-setup');
     } else fail('first-run-lands-setup', JSON.stringify(firstOpen));
-    if (/Nothing is uploaded/.test(firstOpen.privacy) && /No account/.test(firstOpen.privacy)) {
+    if (/Nothing is uploaded/.test(firstOpen.privacy) && /No account/.test(firstOpen.privacy)
+      && /no cloud roster/i.test(firstOpen.privacy)) {
       pass('welcome-privacy-pitch');
     } else fail('welcome-privacy-pitch', firstOpen.privacy);
     if (firstOpen.startPrimary && firstOpen.sampleSecondary
@@ -372,7 +373,7 @@ async function main() {
       pass('google-signin-stripped');
     } else fail('google-signin-stripped', JSON.stringify(identity));
     if (/Nothing is uploaded/.test(identity.sub) && /No account/.test(identity.sub)
-      && /this phone/.test(identity.sub)) {
+      && /this phone/.test(identity.sub) && /no cloud roster/i.test(identity.sub)) {
       pass('account-privacy-pitch');
     } else fail('account-privacy-pitch', identity.sub);
 

@@ -36,3 +36,20 @@ npm-debug.log*
 
 # media / walkthrough renders
 *.mp4
+
+# Stale staging app — do not publish on GitHub Pages
+staging/
+
+# Internal ops notes / Play console leftovers — never public
+PLAY_CONSOLE_NOW.md
+PLAY_REST_CHECKLIST.md
+PLAY_TWA.md
+HANDOFF.md
+CLI_PROMPT.txt
+GO_LIVE.md
+TESTER_INVITES.md
+RECRUIT_TESTERS.md
+FINISHED.md
+NEXT_ACTIONS.md
+ONTEST_HANDOFF.md
+PLAY_PAYMENT_AND_UPLOAD.md

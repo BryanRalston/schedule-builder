@@ -105,7 +105,7 @@
   --ink: #e8eef9;
   --ink-2: #c5d0e6;
   --ink-3: #8b9bb8;
-  --ink-4: #5c6b86;
+  --ink-4: #7e8dab;
   --paper: #070b14;
   --paper-2: #0c1220;
   --surface: rgba(16, 24, 40, 0.72);
@@ -1734,6 +1734,10 @@ input[type="radio"] { accent-color: var(--gold); }
   .kc-toggle-label { font-size: 12px; }
   .offline-pill { font-size: 12px; }
   .cal-cell .day-num, .cal-cell .cell-tag, .cal-header { font-size: 12px; }
+  .btn-cmdk { display: none !important; }
+}
+@media (pointer: coarse) {
+  .btn-cmdk { display: none !important; }
 }
 
 /* ========== MISC ========== */
@@ -2899,6 +2903,17 @@ input[type="radio"] { accent-color: var(--gold); }
   line-height: 1;
   min-width: auto;
 }
+.toast .toast-action {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--gold);
+  border: 1px solid rgba(61,220,255,0.35);
+  border-radius: 7px;
+  padding: 0.28rem 0.55rem;
+  min-height: 32px;
+  min-width: auto;
+}
 @keyframes toastIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -3110,6 +3125,16 @@ input[type="radio"] { accent-color: var(--gold); }
   color: var(--ink-3);
   line-height: 1.35;
   font-weight: 500;
+}
+.header-menu-sep {
+  margin: 0.4rem 0.75rem 0.15rem;
+  padding: 0.35rem 0 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 .header-menu-lang {
   display: flex;
@@ -5168,6 +5193,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" class="no-lock-hide" onclick="saveToStorage(); closeHeaderMenu()" data-i18n="Save">Save</button>
         <button type="button" class="no-lock-hide" onclick="openSavedSchedulesModal(); closeHeaderMenu()" data-i18n="Load">Load</button>
         <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore({explicit:true}); closeHeaderMenu()" title="Load sample store & generate" data-i18n="Load sample store" data-i18n-title="Load sample store & generate">Load sample store</button>
+        <div class="header-menu-sep" data-i18n="Export">Export</div>
         <button type="button" onclick="window.print(); closeHeaderMenu()" data-i18n="Print">Print</button>
         <button type="button" onclick="exportSchedule(); closeHeaderMenu()" data-i18n="Export Word">Export Word</button>
         <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()" data-i18n="Export Excel">Export Excel</button>
@@ -5175,15 +5201,18 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()" data-i18n="Backup JSON — new phone">Backup JSON — new phone</button>
         <button type="button" onclick="pickBackupFile(); closeHeaderMenu()" data-i18n="Import JSON backup">Import JSON backup</button>
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()" data-i18n="Copy summary">Copy summary</button>
+        <div class="header-menu-sep" data-i18n="View">View</div>
         <button type="button" onclick="setDensityMode('compact'); closeHeaderMenu()" data-i18n="Density: Compact">Density: Compact</button>
         <button type="button" onclick="setDensityMode('comfortable'); closeHeaderMenu()" data-i18n="Density: Comfortable">Density: Comfortable</button>
         <button type="button" onclick="setDensityMode('board'); closeHeaderMenu()" data-i18n="Density: Board">Density: Board</button>
         <button type="button" onclick="toggleHighContrast(); closeHeaderMenu()" data-i18n="Toggle high contrast">Toggle high contrast</button>
         <button type="button" onclick="togglePeakSeasonPref(); closeHeaderMenu()" data-i18n="Toggle peak season">Toggle peak season</button>
         <button type="button" onclick="startNextPeriodSameTeam(); closeHeaderMenu()" data-i18n="Next period same team">Next period same team</button>
+        <div class="header-menu-sep" data-i18n="Help">Help</div>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()" data-i18n="How it works">How it works</button>
         <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
         <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()" data-i18n="Take tour">Take tour</button>
+        <div class="header-menu-sep" data-i18n="Account">Account</div>
         <button type="button" onclick="openAccountPanel(); closeHeaderMenu()" data-i18n="Account & license">Account &amp; license</button>
         <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label data-twa-hide data-i18n="Buy Pro — $19.99">Buy Pro — $19.99</button>
         <a href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer" data-twa-hide onclick="closeHeaderMenu()">Google Play</a>
@@ -5525,7 +5554,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
           <button type="button" class="btn-success no-lock-hide" onclick="generateScheduleFromButton()" data-i18n="Build">Build</button>
           <button type="button" class="btn-secondary no-lock-hide" onclick="startNextPeriodSameTeam()" data-i18n="Next period">Next period</button>
           <button type="button" class="btn-outline" onclick="startOnboardingTour(true)" data-i18n="Tour">Tour</button>
-          <button type="button" class="btn-outline" onclick="openCommandPalette()">⌘K</button>
+          <button type="button" class="btn-outline btn-cmdk" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
       <div class="ready-checklist" id="ready-checklist"></div>
@@ -5546,7 +5575,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <span data-i18n="Name two managers on Setup, then Build. Requests and rules can wait.">Name two managers on Setup, then Build. Requests and rules can wait.</span>
         <div style="margin-top:0.85rem">
           <button type="button" class="btn-outline no-lock-hide" onclick="loadDemoStore({explicit:true})" data-i18n="Load sample store">Load sample store</button>
-          <button type="button" class="btn-outline" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
+          <button type="button" class="btn-outline btn-cmdk" style="margin-left:0.4rem" onclick="openCommandPalette()">⌘K</button>
         </div>
       </div>
       <div id="schedule-results" style="display:none">
@@ -5649,7 +5678,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.34</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.35</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -7875,6 +7904,18 @@ function twoPersonOffsCoverageNote(roles) {
   return msbT('Two people with days off cannot cover Open+Close every day.');
 }
 
+function twoManagerNoKcCoverageMessage() {
+  return msbT('This team cannot cover Open and Close every day. Add a key carrier or a third manager.');
+}
+
+/** 1–2 named managers and no named key carrier — one person cannot open and close. */
+function isTwoManagerNoKeyCarrierRoster(roles) {
+  const list = roles || (typeof getRoles === 'function' ? getRoles() : []);
+  if (!list || list.length === 0 || list.length > 2) return false;
+  const kcs = typeof namedNonManagerKcCount === 'function' ? namedNonManagerKcCount() : 0;
+  return kcs === 0;
+}
+
 function syncCloseTargetsToRoleRules() {
   if (typeof roleRules === 'undefined') return;
   if (roleRules.sm) {
@@ -7903,6 +7944,14 @@ function normalizeKcCloseDays(arr) {
 
 function getKcCloseDows(prefs) {
   return normalizeKcCloseDays((prefs || preferences || DEFAULT_PREFERENCES).kcCloseDays);
+}
+
+/** Unlocked extra closes from the end until total (locked+unlocked) <= cap. */
+function extraUnlockedClosesToStrip(unlockedDks, totalCloses, cap) {
+  const list = Array.isArray(unlockedDks) ? unlockedDks : [];
+  const toRemove = Math.max(0, (totalCloses | 0) - (cap | 0));
+  if (!toRemove) return [];
+  return list.slice(Math.max(0, list.length - toRemove));
 }
 
 /** Named non-manager KCs only. Empty / placeholder KC1 is not a closer bench. */
@@ -7965,9 +8014,11 @@ function isExpectedThinCoverageRemainder(v, roles) {
 
 /** Hard leftovers that are not clopens and not expected 2-person thin coverage. */
 function leftoverMustFixViolations(violations, roles) {
-  return (violations || []).filter((v) => {
+  const list = violations || [];
+  const filtered = list.filter((v) => {
     if (!v || v.severity !== 'error') return false;
     if (v.rule === 'no-clopen') return false;
+    if (v.rule === 'coverage-infeasible') return true;
     if (typeof isExpectedThinCoverageRemainder === 'function'
       && isExpectedThinCoverageRemainder(v, roles)) return false;
     // 2.6.30: leftover SM-exactly-1 is a preference on a 3+ AM bench, not must-fix.
@@ -7977,6 +8028,25 @@ function leftoverMustFixViolations(violations, roles) {
     }
     return true;
   });
+  if (typeof isTwoManagerNoKeyCarrierRoster === 'function' && isTwoManagerNoKeyCarrierRoster(roles)) {
+    const hasCover = list.some((v) => v && (v.rule === 'coverage-open' || v.rule === 'coverage-close'));
+    if (hasCover) {
+      const rest = filtered.filter((v) =>
+        v.rule !== 'coverage-open' && v.rule !== 'coverage-close' && v.rule !== 'coverage-infeasible');
+      rest.unshift({
+        severity: 'error',
+        rule: 'coverage-infeasible',
+        manager: null,
+        week: null,
+        day: null,
+        detail: typeof twoManagerNoKcCoverageMessage === 'function'
+          ? twoManagerNoKcCoverageMessage()
+          : 'This team cannot cover Open and Close every day. Add a key carrier or a third manager.'
+      });
+      return rest;
+    }
+  }
+  return filtered;
 }
 
 /**
@@ -7987,13 +8057,21 @@ function summarizeWarningsForDisplay(warnings, roles) {
   const list = Array.isArray(warnings) ? warnings.slice() : [];
   const thin = typeof isThinManagerRoster === 'function' && isThinManagerRoster(roles);
   if (!thin || !list.length) return list;
+  const twoMgrNoKc = typeof isTwoManagerNoKeyCarrierRoster === 'function'
+    && isTwoManagerNoKeyCarrierRoster(roles);
+  const infeasibleMsg = typeof twoManagerNoKcCoverageMessage === 'function'
+    ? twoManagerNoKcCoverageMessage()
+    : 'This team cannot cover Open and Close every day. Add a key carrier or a third manager.';
   const cover = [];
   const rest = [];
   list.forEach((w) => {
     const msg = (w && (w.msg || w.detail)) || '';
+    if (twoMgrNoKc && (w.rule === 'coverage-infeasible' || msg === infeasibleMsg)) {
+      rest.push(Object.assign({}, w, { type: 'error' }));
+      return;
+    }
     const thinNote = typeof isExpectedThinDayCoverageNote === 'function' && isExpectedThinDayCoverageNote(msg);
     if (thinNote) {
-      // Same story as posting: leftover 8/12 no-opener/closer is a note, not !! must-fix.
       const dk = w && (w.day || w.dk);
       let bothOff = false;
       if (dk && typeof schedule !== 'undefined' && schedule && typeof isWork === 'function') {
@@ -8001,7 +8079,7 @@ function summarizeWarningsForDisplay(warnings, roles) {
         bothOff = workers === 0;
       }
       if (!bothOff) {
-        cover.push(Object.assign({}, w, { type: 'info', severity: 'info' }));
+        cover.push(Object.assign({}, w, { type: twoMgrNoKc ? 'error' : 'info', severity: twoMgrNoKc ? 'error' : 'info' }));
         return;
       }
     }
@@ -8009,6 +8087,12 @@ function summarizeWarningsForDisplay(warnings, roles) {
   });
   if (cover.length < 2) {
     return rest.concat(cover);
+  }
+  if (twoMgrNoKc) {
+    if (!rest.some((w) => (w.msg || w.detail) === infeasibleMsg || w.rule === 'coverage-infeasible')) {
+      rest.unshift({ type: 'error', rule: 'coverage-infeasible', msg: infeasibleMsg });
+    }
+    return rest;
   }
   rest.unshift({
     type: 'info',
@@ -8384,7 +8468,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.34';
+const APP_VERSION = '2.6.35';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -8751,6 +8835,12 @@ const MSB_I18N_ES = {
   '{n} days missing open or close': '{n} días sin apertura o cierre',
   'Two people with days off cannot cover Open+Close every day.': 'Dos personas con días libres no cubren Apertura+Cierre todos los días.',
   'See the coverage chip — thin days are the two-person + offs tradeoff, not a failed Build.': 'Mira el chip de cobertura — los días delgados son el trueque de dos personas + libres, no un Armado fallido.',
+  'This team cannot cover Open and Close every day. Add a key carrier or a third manager.': 'Este equipo no puede cubrir apertura y cierre todos los días. Agrega un portallaves o un tercer gerente.',
+  'Update available — reload for the latest version.': 'Hay una actualización — recarga para la última versión.',
+  'Reload': 'Recargar',
+  'Export': 'Exportar',
+  'View': 'Ver',
+  'Account': 'Cuenta',
   'New phone? Export a JSON backup, then Load on the new device.': '¿Teléfono nuevo? Exporta un respaldo JSON y luego Cargar en el aparato nuevo.',
   'Store hours': 'Horario de tienda',
   'Hours override': 'Horario especial',
@@ -9388,7 +9478,22 @@ function showToast(message, type, extra) {
   el.className = 'toast ' + (type === 'success' ? 'success' : type === 'warn' ? 'warn' : type === 'error' ? 'error' : '');
   el.innerHTML = '<div class="toast-msg"></div><button type="button" aria-label="Dismiss">&times;</button>';
   el.querySelector('.toast-msg').textContent = message;
-  el.querySelector('button').onclick = () => el.remove();
+  const dismissBtn = el.querySelector('button');
+  dismissBtn.onclick = () => el.remove();
+  const extraObj = extra && typeof extra === 'object' ? extra : null;
+  const actionLabel = extraObj && extraObj.action;
+  const onAction = extraObj && extraObj.onAction;
+  if (actionLabel && typeof onAction === 'function') {
+    const act = document.createElement('button');
+    act.type = 'button';
+    act.className = 'toast-action';
+    act.textContent = actionLabel;
+    act.addEventListener('click', function (e) {
+      e.stopPropagation();
+      onAction();
+    });
+    el.insertBefore(act, dismissBtn);
+  }
   const onClick = extra && (typeof extra === 'function' ? extra : extra.onClick);
   if (typeof onClick === 'function') {
     el.classList.add('is-jump');
@@ -9401,7 +9506,9 @@ function showToast(message, type, extra) {
     });
   }
   host.appendChild(el);
-  setTimeout(() => { if (el.parentNode) el.remove(); }, 4200);
+  if (!(extraObj && extraObj.persist)) {
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 4200);
+  }
 }
 
 function dismissWelcome() {
@@ -10274,17 +10381,48 @@ function removeStoreHoursRange(rangeId) {
   showToast('Date range removed.', 'info');
 }
 
+/** Hours for a custom range like 9-5, 9a-5p, 10a-6, 9:00-17:00. */
+function estimateCustomLabelHours(label) {
+  if (!label) return null;
+  const m = String(label).match(/(\d{1,2}(?::\d{2})?\s*(?:[ap]m?)?)\s*[-–]\s*(\d{1,2}(?::\d{2})?\s*(?:[ap]m?)?)/i);
+  if (!m) return null;
+  const aRaw = m[1].replace(/\s/g, '');
+  const bRaw = m[2].replace(/\s/g, '');
+  const aHasAp = /[ap]/i.test(aRaw);
+  const bHasAp = /[ap]/i.test(bRaw);
+  let aStr = aRaw;
+  let bStr = bRaw;
+  const aH = parseInt(aRaw, 10);
+  const bH = parseInt(bRaw, 10);
+  if (!aHasAp && !bHasAp) {
+    const a24 = Number.isFinite(aH) && aH >= 13;
+    const b24 = Number.isFinite(bH) && bH >= 13;
+    if (!a24 && !b24 && Number.isFinite(aH) && Number.isFinite(bH)) {
+      // Retail: start AM / end PM, except close-shaped 2-10 → 2p–10p.
+      if (aH >= 1 && aH <= 7 && bH >= 8 && bH <= 11) {
+        aStr = aRaw + 'p';
+        bStr = bRaw + 'p';
+      } else {
+        if (aH >= 1 && aH <= 11) aStr = aRaw + 'a';
+        if (bH >= 1 && bH <= 11) bStr = bRaw + 'p';
+      }
+    }
+  } else {
+    if (aHasAp && !bHasAp && Number.isFinite(bH) && bH >= 1 && bH <= 11) bStr = bRaw + 'p';
+    if (!aHasAp && bHasAp && Number.isFinite(aH) && aH >= 1 && aH <= 11) aStr = aRaw + 'a';
+  }
+  const a = parseTimeToHour(aStr);
+  const b = parseTimeToHour(bStr);
+  if (a == null || b == null) return null;
+  const h = b > a ? b - a : (24 - a) + b;
+  return Math.round(Math.max(0, h) * 10) / 10;
+}
+
 function estimateShiftHours(shift) {
   if (!isWork(shift)) return 0;
   if (isCustomShift(shift)) {
-    // custom: "custom:10a-6p" style
-    const label = getCustomShiftLabel(shift);
-    const m = label.match(/(\d{1,2}(?::\d{2})?\s*[ap]m?)\s*[-–]\s*(\d{1,2}(?::\d{2})?\s*[ap]m?)/i);
-    if (m) {
-      const a = parseTimeToHour(m[1]), b = parseTimeToHour(m[2]);
-      if (a != null && b != null) return Math.max(0, b > a ? b - a : (24 - a) + b);
-    }
-    return 8; // fallback
+    const hrs = estimateCustomLabelHours(getCustomShiftLabel(shift));
+    return hrs != null ? hrs : 8;
   }
   const start = getShiftStartHour(shift);
   const end = getShiftEndHour(shift);
@@ -10488,7 +10626,9 @@ function buildPostingIssues(genReport, ROLES, warnings) {
         issues.push({
           sev: 'review',
           title: formatMissingDaysLong(missDays),
-          meta: twoPersonOffsCoverageNote(ROLES) || msbT('Thin days are expected on a two-person roster with offs.'),
+          meta: (typeof isTwoManagerNoKeyCarrierRoster === 'function' && isTwoManagerNoKeyCarrierRoster(ROLES)
+            ? twoManagerNoKcCoverageMessage()
+            : twoPersonOffsCoverageNote(ROLES)) || msbT('Thin days are expected on a two-person roster with offs.'),
           target: hole ? 'grid' : 'summary',
           role: hole && hole.role,
           dk: hole && hole.dk,
@@ -11116,6 +11256,7 @@ function buildSnapshotData() {
     inputs: inputs,
     schedule: schedule,
     holidayWeeks: holidayWeeks,
+    companyHolidayWeeks: companyHolidayWeeks,
     preferences: preferences,
     roleRules: roleRules,
     qualityScore: window._lastGenReport ? computeQualityScore(window._lastGenReport, getRoles()) : null,
@@ -11262,7 +11403,8 @@ function applyLoadedScheduleData(data) {
     const el = document.getElementById('name-' + kc.id);
     if (el) el.value = kc.name;
   });
-  holidayWeeks = data.holidayWeeks || {};
+  applyHolidayWeekStateFromData(data);
+  try { if (typeof syncFederalHolidaysToPeriod === 'function') syncFederalHolidaysToPeriod(); } catch (eH) {}
   if (data.preferences) {
     preferences = Object.assign({}, DEFAULT_PREFERENCES, data.preferences);
     if (typeof normalizeKcCloseDays === 'function') {
@@ -11642,13 +11784,20 @@ function getFiscalYearStart(year) {
   return new Date(year, 1, 1 + (7 - day));
 }
 
+function fiscalYearLengthWeeks(fy) {
+  const a = startOfLocalDay(getFiscalYearStart(fy));
+  const b = startOfLocalDay(getFiscalYearStart(fy + 1));
+  return Math.round((b.getTime() - a.getTime()) / (7 * 24 * 60 * 60 * 1000));
+}
+
 function getFiscalPeriods(fiscalYear) {
   const fyStart = getFiscalYearStart(fiscalYear);
+  const fyWeeks = fiscalYearLengthWeeks(fiscalYear);
   const periods = [];
   let currentDate = new Date(fyStart);
 
   for (let p = 0; p < 12; p++) {
-    const numWeeks = PERIOD_WEEKS[p];
+    const numWeeks = PERIOD_WEEKS[p] + ((p === 11 && fyWeeks >= 53) ? 1 : 0);
     const periodStart = new Date(currentDate);
     const weeks = [];
 
@@ -11701,7 +11850,27 @@ let currentPeriod = null; // the selected period object
 let periodDates = []; // flat array of Date objects for every day in the period
 let inputs = {}; // { 'sm': { 'YYYY-MM-DD': 'pto', ... }, ... }
 let schedule = {}; // same shape but final
-let holidayWeeks = {}; // { wIdx: true } — weeks with a company holiday (target 4 days)
+let holidayWeeks = {}; // union: federal-selected OR user company-holiday (4-day target)
+let companyHolidayWeeks = {}; // user-ticked Company Holiday
+let federalHolidayWeeks = {}; // weeks that currently contain a selected federal holiday
+
+function rebuildHolidayWeeks() {
+  holidayWeeks = {};
+  Object.keys(companyHolidayWeeks || {}).forEach((k) => {
+    if (companyHolidayWeeks[k]) holidayWeeks[k] = true;
+  });
+  Object.keys(federalHolidayWeeks || {}).forEach((k) => {
+    if (federalHolidayWeeks[k]) holidayWeeks[k] = true;
+  });
+}
+
+function applyHolidayWeekStateFromData(data) {
+  const src = (data && (data.companyHolidayWeeks || data.holidayWeeks)) || {};
+  companyHolidayWeeks = {};
+  Object.keys(src).forEach((k) => { if (src[k]) companyHolidayWeeks[k] = true; });
+  federalHolidayWeeks = {};
+  rebuildHolidayWeeks();
+}
 
 // Federal paid holidays (observed dates; 4-day week when in period)
 const MSB_FED_HOLIDAYS_KEY = 'msb_federal_holidays';
@@ -11802,18 +11971,20 @@ function syncFederalHolidaysToPeriod() {
       }
     });
   });
+  federalHolidayWeeks = {};
   if (currentPeriod.weeks) {
     currentPeriod.weeks.forEach((week, wIdx) => {
       for (let i = 0; i < 7; i++) {
         const d = new Date(week.start);
         d.setDate(d.getDate() + i);
         if (federalHolidayByDate[dateKey(d)]) {
-          holidayWeeks[wIdx] = true;
+          federalHolidayWeeks[wIdx] = true;
           break;
         }
       }
     });
   }
+  rebuildHolidayWeeks();
   renderFederalHolidaysUI();
 }
 function toggleFederalHoliday(id, checked) {
@@ -12105,6 +12276,8 @@ function loadPeriod() {
   currentPeriod = allPeriods[currentPeriodIndex];
   window._lastGenReport = null;
 
+  companyHolidayWeeks = {};
+  federalHolidayWeeks = {};
   holidayWeeks = {}; // reset when a new period is loaded
 
   // Build flat date list
@@ -12156,6 +12329,7 @@ function buildInputCalendar(role) {
   // Show each week in the period
   currentPeriod.weeks.forEach((week, wIdx) => {
     const isHoliday = !!holidayWeeks[wIdx];
+    const isCompanyHoliday = !!companyHolidayWeeks[wIdx];
     let fedName = '';
     for (let fi = 0; fi < 7; fi++) {
       const fd = new Date(week.start);
@@ -12166,7 +12340,7 @@ function buildInputCalendar(role) {
     const fedWeek = !!fedName;
     html += `<div class="input-week-label${isHoliday ? ' is-holiday-week' : ''}${fedWeek ? ' is-federal-holiday-week' : ''}">`;
     html += `<span>${formatWeekHeading(wIdx + 1)}: ${formatDate(week.start)} - ${formatDate(week.end)}${isHoliday ? ' · ' + msbT('Holiday (4-day)') : ''}${fedName ? ' · ' + esc(fedName) : ''}</span>`;
-    html += `<label class="holiday-week-toggle"><input type="checkbox" onchange="toggleHolidayWeek(${wIdx}, this.checked)"${isHoliday ? ' checked' : ''}> ${esc(msbT('Company Holiday'))}</label>`;
+    html += `<label class="holiday-week-toggle"><input type="checkbox" onchange="toggleHolidayWeek(${wIdx}, this.checked)"${isCompanyHoliday ? ' checked' : ''}> ${esc(msbT('Company Holiday'))}</label>`;
     html += `</div>`;
     html += '<div class="input-calendar">';
 
@@ -12375,8 +12549,9 @@ function closeCellMenu() {
 }
 
 function toggleHolidayWeek(wIdx, checked) {
-  if (checked) holidayWeeks[wIdx] = true;
-  else delete holidayWeeks[wIdx];
+  if (checked) companyHolidayWeeks[wIdx] = true;
+  else delete companyHolidayWeeks[wIdx];
+  rebuildHolidayWeeks();
   buildInputCalendar(activeTab);
 }
 
@@ -15064,7 +15239,15 @@ function _generateScheduleInner(opts) {
     warnings.unshift({ type: 'warn', msg: `${leftoverMust.length} hard constraint(s) remain after ${pass} repair passes.` });
     const rulesLeft = {};
     leftoverMust.forEach((v) => { rulesLeft[v.rule] = true; });
-    if (repairCycled || (rulesLeft['coverage-close'] && rulesLeft['no-kc-night-close'])) {
+    const infeasible = leftoverMust.find((v) => v.rule === 'coverage-infeasible');
+    if (infeasible) {
+      const msg = infeasible.detail || (typeof twoManagerNoKcCoverageMessage === 'function'
+        ? twoManagerNoKcCoverageMessage()
+        : 'This team cannot cover Open and Close every day. Add a key carrier or a third manager.');
+      if (!warnings.some((w) => (w.msg || w.detail) === msg)) {
+        warnings.unshift({ type: 'error', rule: 'coverage-infeasible', msg: msg });
+      }
+    } else if (repairCycled || (rulesLeft['coverage-close'] && rulesLeft['no-kc-night-close'])) {
       warnings.unshift({
         type: 'error',
         msg: 'Can’t cover a close night with the current team. Add a key carrier or uncheck that KC-close day under Rules — we stopped looping so your board stays readable.'
@@ -15676,11 +15859,12 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
           needed--;
         }
       } else if (closerPool.length > 0 && current > smTarget + stripSlack) {
-        // Too many closes — convert excess to mid (never touch input-locked)
+        // Strip unlocked extras from the end until total (locked+unlocked) <= cap.
+        const cap = smTarget + stripSlack;
         const closes = weekDks.filter(dk => isClose(schedule.sm[dk]) && !isInputLocked('sm', dk));
-        for (let i = smTarget; i < closes.length; i++) {
-          schedule.sm[closes[i]] = 'mid-early';
-        }
+        extraUnlockedClosesToStrip(closes, current, cap).forEach((dk) => {
+          schedule.sm[dk] = 'mid-early';
+        });
       }
     });
   }
@@ -15725,13 +15909,11 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
           needed--;
         }
       } else if (current > effectiveTarget + 1) {
-        // Remove excess closes
+        // Strip unlocked extras from the end; never touch input-locked closes.
         const closes = weekDks.filter(dk => isClose(schedule[closer][dk]) && !isInputLocked(closer, dk));
-        let toRemove = current - effectiveTarget;
-        for (let i = closes.length - 1; i >= 0 && toRemove > 0; i--) {
-          schedule[closer][closes[i]] = 'mid-early';
-          toRemove--;
-        }
+        extraUnlockedClosesToStrip(closes, current, effectiveTarget).forEach((dk) => {
+          schedule[closer][dk] = 'mid-early';
+        });
       }
     });
   }
@@ -17747,6 +17929,7 @@ function saveToStorage(opts) {
     inputs: inputs,
     schedule: schedule,
     holidayWeeks: holidayWeeks,
+    companyHolidayWeeks: companyHolidayWeeks,
     preferences: preferences,
     roleRules: roleRules,
     _savedAt: new Date().toISOString()
@@ -17871,8 +18054,9 @@ function loadFromStorage() {
     if (el) el.value = kc.name;
   });
 
-  // Restore holiday weeks
-  holidayWeeks = data.holidayWeeks || {};
+  // Restore holiday weeks (company ticks stay if federal is later unchecked)
+  applyHolidayWeekStateFromData(data);
+  try { if (typeof syncFederalHolidaysToPeriod === 'function') syncFederalHolidaysToPeriod(); } catch (eH) {}
 
   // Restore preferences + role rules
   if (data.preferences) {
@@ -18848,7 +19032,8 @@ function loadSavedSchedule(key) {
     });
   }
 
-  if (data.holidayWeeks) holidayWeeks = data.holidayWeeks;
+  applyHolidayWeekStateFromData(data);
+  try { if (typeof syncFederalHolidaysToPeriod === 'function') syncFederalHolidaysToPeriod(); } catch (eH) {}
   if (data.preferences) {
     preferences = Object.assign({}, DEFAULT_PREFERENCES, data.preferences);
     preferences.kcCloseDays = normalizeKcCloseDays(preferences.kcCloseDays);
@@ -19603,16 +19788,35 @@ function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
   // Only on http/https (not file://)
   if (!/^https?:$/.test(location.protocol)) return;
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    location.reload();
+  });
+  const promptReload = (reg) => {
+    showToast(msbT('Update available — reload for the latest version.'), 'info', {
+      action: msbT('Reload'),
+      persist: true,
+      onAction: () => {
+        try {
+          if (reg && reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+        } catch (eSw) {}
+        location.reload();
+      }
+    });
+  };
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
       .then((reg) => {
         console.log('[pwa] SW registered', reg.scope);
+        if (reg.waiting && navigator.serviceWorker.controller) promptReload(reg);
         reg.addEventListener('updatefound', () => {
           const worker = reg.installing;
           if (!worker) return;
           worker.addEventListener('statechange', () => {
             if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-              showToast('Update available — reload for the latest version.', 'info');
+              promptReload(reg);
             }
           });
         });
@@ -19922,7 +20126,11 @@ function computeCoverageAndFairnessStats() {
   const cSpread = cMax - cMin;
   const weSpread = weMax - weMin;
   const thin = typeof isThinManagerRoster === 'function' ? isThinManagerRoster(ROLES) : ROLES.length <= 2;
-  const coverWhy = !coverOk && thin ? twoPersonOffsCoverageNote(ROLES) : '';
+  const coverWhy = !coverOk && thin
+    ? ((typeof isTwoManagerNoKeyCarrierRoster === 'function' && isTwoManagerNoKeyCarrierRoster(ROLES))
+      ? twoManagerNoKcCoverageMessage()
+      : twoPersonOffsCoverageNote(ROLES))
+    : '';
   const nights = nightsEarly;
   const closeTargets = closeTargetsEarly;
   const amWeeklyGoal = closeTargets ? closeTargets.amTarget : 0;
@@ -20256,7 +20464,6 @@ function startNextPeriodSameTeam() {
   loadPeriod();
   inputs = {};
   schedule = {};
-  holidayWeeks = {};
   getAllPersonIds().forEach((r) => {
     inputs[r] = {};
   });

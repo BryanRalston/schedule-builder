@@ -1,6 +1,6 @@
 /* Manager Schedule Builder Pro — service worker
    Paths are relative to this script so GitHub project pages (/schedule-builder/) work. */
-const CACHE = 'msb-pro-v2.6.33';
+const CACHE = 'msb-pro-v2.6.34';
 const PRECACHE = [
   './',
   './index.html',
@@ -47,16 +47,31 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
 
-  // Network-first for navigations (HTML) with offline fallback
+  // Network-first for navigations (HTML) with offline fallback.
+  // Cache each navigation under its own URL. Only alias './index.html' for the app root.
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put('./index.html', copy)).catch(() => {});
+          if (res && res.ok) {
+            caches.open(CACHE).then((c) => {
+              c.put(req, res.clone()).catch(() => {});
+              try {
+                const path = new URL(req.url).pathname;
+                const file = path.substring(path.lastIndexOf('/') + 1);
+                if (!file || file === 'index.html') {
+                  c.put('./index.html', res.clone()).catch(() => {});
+                }
+              } catch (e) {}
+            }).catch(() => {});
+          }
           return res;
         })
-        .catch(() => caches.match('./index.html').then((r) => r || caches.match('./')))
+        .catch(() =>
+          caches.match(req).then((r) =>
+            r || caches.match('./index.html').then((r2) => r2 || caches.match('./'))
+          )
+        )
     );
     return;
   }

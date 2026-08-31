@@ -8,6 +8,16 @@
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" href="icons/favicon-32.png">
   <link rel="manifest" href="manifest.webmanifest">
+  <script>
+    (function () {
+      try {
+        if (document.referrer && document.referrer.indexOf('android-app://com.managerschedulebuilder.pro') === 0) {
+          localStorage.setItem('msb_twa', '1');
+        }
+        if (localStorage.getItem('msb_twa') === '1') document.documentElement.classList.add('twa');
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -209,6 +219,24 @@
     .msg { font-size: 0.85rem; margin-top: 0.45rem; min-height: 1.2em; }
     .msg.ok { color: #34d399; }
     .msg.err { color: #f87171; }
+    .twa-included {
+      display: none;
+      margin: 1rem 0 0;
+      padding: 1rem 1.05rem;
+      border-radius: 12px;
+      background: rgba(52,211,153,0.12);
+      border: 1px solid rgba(52,211,153,0.35);
+      color: #bbf7d0;
+      font-weight: 600;
+    }
+    html.twa .twa-included { display: block; }
+    html.twa .cta-col,
+    html.twa .unlock,
+    html.twa .setup-box,
+    html.twa .gp-badge,
+    html.twa .play-note,
+    html.twa .alt-price,
+    html.twa footer a[href*="play.google"] { display: none !important; }
     footer {
       margin-top: 2.5rem;
       padding-top: 1rem;
@@ -237,7 +265,6 @@
       <div>
         <div class="price-main" id="price-label">$19.99<span id="price-note-inline"> one-time</span></div>
         <div class="price-note" id="price-note">one-time · lifetime Pro unlock</div>
-        <div class="alt-price">Optional later: $12/mo subscription (not required now)</div>
       </div>
       <div class="cta-col">
         <a class="btn btn-buy" id="btn-buy" href="#setup">Buy &amp; unlock Pro</a>
@@ -246,6 +273,7 @@
         <p class="play-note">Android · $19.99 one-time on Google Play. Same price as web Pro.</p>
       </div>
     </div>
+    <div class="twa-included" id="twa-included">You’re on the Play version — Pro is included.</div>
 
     <h2>Why store managers pay once</h2>
     <ul class="benefits">
@@ -272,21 +300,17 @@
         <li>Open <a href="https://gumroad.com/" target="_blank" rel="noopener">Gumroad</a> → New product</li>
         <li>Title: <strong>Manager Schedule Builder Pro</strong></li>
         <li>Price: <strong>$19.99</strong> (one-time)</li>
-        <li>After purchase redirect / content URL:<br>
-          <code>https://bryanralston.github.io/schedule-builder/?pro=1</code>
-        </li>
+        <li>After purchase, buyers open the app and paste the Gumroad license key from their receipt.</li>
         <li>Also share the app link: <code>https://bryanralston.github.io/schedule-builder/</code></li>
-        <li>Optional: email license key — buyers paste it under “Unlock code” below (Gumroad license or an <code>MSB-PRO-</code> unlock code)</li>
+        <li>License keys: Gumroad receipt key, or an <code>MSB-PRO-…</code> unlock code. Enable license keys on the Gumroad product.</li>
       </ol>
       <p style="margin:0.65rem 0 0.25rem"><strong>Copy product description:</strong></p>
       <div class="copy-block" id="gumroad-copy">Manager Schedule Builder Pro — preference-driven retail manager scheduling.
 
 NRF 4-5-4 fiscal calendar, fair weekends, clopen-avoidance as a preference (not a guarantee), role rules, quality score, Word/Excel export. Works offline. Data stays on your device. Always review before you post.
 
-After purchase, open:
-https://bryanralston.github.io/schedule-builder/?pro=1
-
-Or open the app and enter your license/unlock code from the receipt.
+After purchase, open the app and enter the license key from your Gumroad receipt:
+https://bryanralston.github.io/schedule-builder/
 
 Free demo: https://bryanralston.github.io/schedule-builder/?demo=1
 Price: $19.99 one-time lifetime unlock.</div>
@@ -302,7 +326,7 @@ Price: $19.99 one-time lifetime unlock.</div>
       </div>
       <div class="msg" id="unlock-msg"></div>
       <p style="margin:0.55rem 0 0;font-size:0.82rem;color:var(--muted)">
-        After Gumroad redirect, this page also accepts <code>?pro=1</code> / <code>?license=…</code> automatically.
+        After checkout, paste the Gumroad license key from your receipt. A <code>?license=</code> link also unlocks automatically.
       </p>
     </div>
 
@@ -326,8 +350,23 @@ Price: $19.99 one-time lifetime unlock.</div>
       proFeatures: ['unlimited managers', 'Word export', 'Excel export', 'priority future updates']
     };
     const LICENSE_KEY = 'msb_pro_license';
+    const LICENSE_PENDING_KEY = 'msb_license_pending_verify';
+    const TWA_KEY = 'msb_twa';
+
+    function isTwaContext() {
+      try { return localStorage.getItem(TWA_KEY) === '1'; } catch (e) { return false; }
+    }
+
+    function persistAppStorage() {
+      try {
+        if (navigator.storage && typeof navigator.storage.persist === 'function') {
+          navigator.storage.persist().catch(() => {});
+        }
+      } catch (e) {}
+    }
 
     function isProUnlocked() {
+      if (isTwaContext()) return true;
       try {
         const raw = localStorage.getItem(LICENSE_KEY);
         if (!raw) return false;
@@ -336,22 +375,82 @@ Price: $19.99 one-time lifetime unlock.</div>
       } catch { return false; }
     }
 
-    function unlockPro(key) {
+    function unlockPro(key, pending) {
       const payload = {
         unlocked: true,
         key: String(key || 'url-unlock').slice(0, 120),
         at: new Date().toISOString()
       };
+      if (pending) payload.pendingVerify = true;
       localStorage.setItem(LICENSE_KEY, JSON.stringify(payload));
+      try {
+        if (pending) localStorage.setItem(LICENSE_PENDING_KEY, '1');
+        else localStorage.removeItem(LICENSE_PENDING_KEY);
+      } catch (e) {}
+      persistAppStorage();
       return payload;
+    }
+
+    function revokePro() {
+      try { localStorage.removeItem(LICENSE_KEY); } catch (e) {}
+      try { localStorage.removeItem(LICENSE_PENDING_KEY); } catch (e) {}
     }
 
     function validLicenseKey(k) {
       const s = String(k || '').trim();
       if (!s) return false;
-      if (/^MSB-PRO-[A-Z0-9]+(?:-[A-Z0-9]+)*$/i.test(s) && s.length >= 12) return true;
+      if (/^MSB-PRO-[A-Z0-9][A-Z0-9._-]{2,}$/i.test(s) && s.length >= 12) return true;
       if (/^[A-Z0-9]{6,8}(?:-[A-Z0-9]{6,8}){3}$/i.test(s)) return true;
+      if (/^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i.test(s)) return true;
       return false;
+    }
+
+    function isMsbUnlockCode(k) {
+      return /^MSB-PRO-/i.test(String(k || '').trim());
+    }
+
+    async function verifyGumroadLicense(key) {
+      const body = new URLSearchParams();
+      body.set('product_id', 'Jg_UrKcrhutlsyEloisAgA==');
+      body.set('product_permalink', 'pwplbc');
+      body.set('license_key', String(key || '').trim());
+      body.set('increment_uses_count', 'false');
+      try {
+        const r = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body
+        });
+        let data = null;
+        try { data = await r.json(); } catch (e) { data = null; }
+        if (!data || typeof data.success !== 'boolean') return { ok: null };
+        if (data.success === true) return { ok: true };
+        return { ok: false };
+      } catch (e) {
+        return { ok: null };
+      }
+    }
+
+    async function activateLicenseKey(key) {
+      const s = String(key || '').trim();
+      if (!validLicenseKey(s)) {
+        return { ok: false, message: 'Use the Gumroad key from your receipt, or an MSB-PRO-… code.' };
+      }
+      if (isMsbUnlockCode(s)) {
+        unlockPro(s, false);
+        return { ok: true, message: 'Pro unlocked. Opening the app…' };
+      }
+      unlockPro(s, true);
+      const v = await verifyGumroadLicense(s);
+      if (v.ok === true) {
+        unlockPro(s, false);
+        return { ok: true, message: 'Pro unlocked. Opening the app…' };
+      }
+      if (v.ok === false) {
+        revokePro();
+        return { ok: false, message: 'That license key isn’t valid for this product.' };
+      }
+      return { ok: true, message: 'Pro unlocked on this device. We’ll confirm the key next time you’re online.' };
     }
 
     function cleanUnlockParams() {
@@ -364,14 +463,15 @@ Price: $19.99 one-time lifetime unlock.</div>
 
     function applyUrlUnlock() {
       const params = new URLSearchParams(location.search);
-      const pro = params.get('pro') === '1' || params.get('unlocked') === '1';
       const lic = params.get('license') || params.get('key');
-      if (pro || (lic && validLicenseKey(lic))) {
-        unlockPro(lic || 'pro=1');
+      if (lic && validLicenseKey(lic)) {
         cleanUnlockParams();
-        return true;
+        return lic;
       }
-      return false;
+      if (params.get('pro') === '1' || params.get('unlocked') === '1') {
+        cleanUnlockParams();
+      }
+      return '';
     }
 
     async function loadMonetization() {
@@ -385,7 +485,17 @@ Price: $19.99 one-time lifetime unlock.</div>
     }
 
     (async function boot() {
-      const justUnlocked = applyUrlUnlock();
+      const urlKey = applyUrlUnlock();
+      let justUnlocked = false;
+      if (urlKey) {
+        const res = await activateLicenseKey(urlKey);
+        justUnlocked = !!(res && res.ok);
+        const msg0 = document.getElementById('unlock-msg');
+        if (msg0) {
+          msg0.className = 'msg ' + (justUnlocked ? 'ok' : 'err');
+          msg0.textContent = res.message || '';
+        }
+      }
       const m = await loadMonetization();
 
       document.getElementById('price-label').innerHTML =
@@ -399,7 +509,9 @@ Price: $19.99 one-time lifetime unlock.</div>
 
       const btn = document.getElementById('btn-buy');
       const setup = document.getElementById('setup-box');
-      if (m.checkoutUrl && String(m.checkoutUrl).trim()) {
+      if (isTwaContext()) {
+        setup.hidden = true;
+      } else if (m.checkoutUrl && String(m.checkoutUrl).trim()) {
         btn.href = m.checkoutUrl;
         btn.target = '_blank';
         btn.rel = 'noopener';
@@ -415,7 +527,9 @@ Price: $19.99 one-time lifetime unlock.</div>
         });
       }
 
-      if (isProUnlocked()) {
+      if (isProUnlocked()) persistAppStorage();
+
+      if (isProUnlocked() && !isTwaContext()) {
         const msg = document.getElementById('unlock-msg');
         msg.className = 'msg ok';
         msg.textContent = justUnlocked
@@ -424,18 +538,18 @@ Price: $19.99 one-time lifetime unlock.</div>
         if (justUnlocked) setTimeout(() => { location.href = './'; }, 900);
       }
 
-      document.getElementById('btn-unlock').addEventListener('click', () => {
+      document.getElementById('btn-unlock').addEventListener('click', async () => {
         const val = document.getElementById('license-input').value;
         const msg = document.getElementById('unlock-msg');
         if (!validLicenseKey(val)) {
           msg.className = 'msg err';
-          msg.textContent = 'Enter a Gumroad license or an MSB-PRO- unlock code.';
+          msg.textContent = 'Use the Gumroad key from your receipt, or an MSB-PRO-… code.';
           return;
         }
-        unlockPro(val.trim());
-        msg.className = 'msg ok';
-        msg.textContent = 'Pro unlocked. Redirecting to the app…';
-        setTimeout(() => { location.href = './'; }, 700);
+        const res = await activateLicenseKey(val.trim());
+        msg.className = 'msg ' + (res.ok ? 'ok' : 'err');
+        msg.textContent = res.message;
+        if (res.ok) setTimeout(() => { location.href = './'; }, 700);
       });
 
       document.getElementById('btn-copy-desc').addEventListener('click', async () => {

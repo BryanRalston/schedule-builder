@@ -163,7 +163,23 @@ async function runEngineScenarios(page) {
     function runGen(setup) {
       // Reset state
       amCount = setup.amCount || 3;
-      kcList = setup.kcList || [{ id: 'kc1', name: 'KC1', asManager: false }];
+      kcList = (setup.kcList || [{ id: 'kc1', name: 'Jordan Lee', asManager: false }]).map((kc) =>
+        Object.assign({}, kc, {
+          name: kc.name && !/^kc\d+$/i.test(kc.name) && !/^key carrier/i.test(kc.name) ? kc.name : 'Jordan Lee'
+        })
+      );
+      if (typeof renderAMRows === 'function') renderAMRows();
+      if (typeof renderKCRows === 'function') renderKCRows();
+      const smEl = document.getElementById('name-sm');
+      if (smEl) smEl.value = 'Pat Nguyen';
+      for (let i = 1; i <= amCount; i++) {
+        const el = document.getElementById('name-am' + i);
+        if (el) el.value = 'Assistant ' + i;
+      }
+      kcList.forEach((kc) => {
+        const el = document.getElementById('name-' + kc.id);
+        if (el) el.value = kc.name;
+      });
       periodDates = buildDays(2026, 8, 30, 35);
       // Fake currentPeriod weeks
       currentPeriod = {
@@ -228,7 +244,8 @@ async function runEngineScenarios(page) {
       return runGen({
         amCount: 3,
         inputs: ins,
-        prefs: { avoidClopening: true, targetWeekendDaysOff: 2 }
+        prefs: { avoidClopening: true, targetWeekendDaysOff: 2 },
+        allowClopens: true
       });
     });
 
@@ -489,42 +506,29 @@ async function runAuthTests(browser, base) {
     await page.close();
   }
 
-  // B3 Google/Microsoft preview modal (no real OAuth without client IDs)
+  // B3 Google/Microsoft: hide preview buttons when client IDs are empty
   {
     const page = await setupPage(browser, base);
     try {
       await page.waitForTimeout(600);
       await page.evaluate(() => {
         if (typeof showAuthShell === 'function') showAuthShell();
+        if (typeof updateAuthProviderButtons === 'function') updateAuthProviderButtons();
       });
-      await page.waitForSelector('#auth-google-btn, button:has-text("Google")', { timeout: 15000 });
-      const gText = await page.locator('#auth-google-btn, button:has-text("Google")').first().innerText();
-      pass('google-button-present', gText.replace(/\s+/g, ' ').trim().slice(0, 60));
-      await page.locator('#auth-google-btn, button:has-text("Google")').first().click();
-      await page.waitForTimeout(700);
-      const modal = page.locator('#provider-modal');
-      if (await modal.isVisible().catch(() => false)) {
-        pass('google-opens-provider-or-oauth-ui');
-        // Fill preview workspace with Bryan's email (device setup — not Google password)
-        if (await page.locator('#provider-email').isVisible().catch(() => false)) {
-          await page.fill('#provider-email', 'b.ralston62989@gmail.com');
-          await page.fill('#provider-name', 'Bryan Ralston');
-          await page.fill('#provider-org', 'Cortex Developments');
-          await page.locator('#provider-confirm-btn').click({ force: true });
-          await page.waitForTimeout(900);
-          const session = await page.evaluate(() => JSON.parse(localStorage.getItem('msb_session') || 'null'));
-          if (session && session.email === 'b.ralston62989@gmail.com' && (session.method === 'google' || String(session.method).includes('google'))) {
-            pass('google-preview-session-with-bryan-email', session.orgName || session.method);
-          } else {
-            fail('google-preview-session-with-bryan-email', JSON.stringify(session));
-          }
-        } else {
-          pass('google-oauth-ui-no-manual-fields', 'likely real GIS (or different UI)');
-        }
-      } else {
-        // Real OAuth popup might have opened — hard to automate without credentials
-        pass('google-click-no-modal', 'popup/oauth path or already configured');
-      }
+      const vis = await page.evaluate(() => {
+        const g = document.getElementById('auth-google-btn');
+        const m = document.getElementById('auth-microsoft-btn');
+        const shown = (el) => !!(el && el.offsetParent !== null && el.style.display !== 'none' && !el.hasAttribute('hidden'));
+        return {
+          google: shown(g),
+          microsoft: shown(m),
+          hasG: typeof hasGoogleOAuth === 'function' ? hasGoogleOAuth() : false,
+          hasM: typeof hasMicrosoftOAuth === 'function' ? hasMicrosoftOAuth() : false
+        };
+      });
+      if (!vis.hasG && vis.google) fail('google-hidden-when-unconfigured', JSON.stringify(vis));
+      else if (!vis.hasM && vis.microsoft) fail('microsoft-hidden-when-unconfigured', JSON.stringify(vis));
+      else pass('oauth-preview-hidden-when-unconfigured', JSON.stringify(vis));
     } catch (e) {
       fail('google-provider-flow', e.message);
     }

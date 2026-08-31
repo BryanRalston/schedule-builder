@@ -1641,7 +1641,7 @@ input[type="radio"] { accent-color: var(--gold); }
 
 /* ========== MOBILE RESPONSIVE ========== */
 @media (max-width: 600px) {
-  html { font-size: 13px; }
+  html { font-size: 16px; }
   .app-header {
     padding: 0.75rem 1rem;
     flex-direction: row;
@@ -1651,8 +1651,8 @@ input[type="radio"] { accent-color: var(--gold); }
   .app-header h1 { font-size: 1.2rem; }
   .header-actions { width: auto; justify-content: flex-end; }
   .header-actions button {
-    min-height: 36px;
-    min-width: 36px;
+    min-height: 44px;
+    min-width: 44px;
     padding: 0.4rem 0.55rem;
   }
   .container { padding: 0.75rem; }
@@ -1724,14 +1724,16 @@ input[type="radio"] { accent-color: var(--gold); }
   .summary-panel table { font-size: 0.7rem; }
   .summary-panel table th, .summary-panel table td { padding: 0.25rem 0.3rem; }
   .legend { gap: 0.4rem; }
-  .legend-item { font-size: 0.65rem; }
+  .legend-item { font-size: 12px; }
   button { min-height: 44px; }
-  .btn-round { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
+  .btn-round { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
   .btn-large { width: 100%; }
   .manager-row { gap: 0.4rem; }
-  .manager-row .role-badge { font-size: 0.6rem; padding: 0.15rem 0.35rem; min-width: 30px; }
+  .manager-row .role-badge { font-size: 12px; padding: 0.15rem 0.35rem; min-width: 30px; }
   .manager-row input[type="text"] { font-size: 0.8rem; padding: 0.4rem; }
-  .kc-toggle-label { font-size: 0.65rem; }
+  .kc-toggle-label { font-size: 12px; }
+  .offline-pill { font-size: 12px; }
+  .cal-cell .day-num, .cal-cell .cell-tag, .cal-header { font-size: 12px; }
 }
 
 /* ========== MISC ========== */
@@ -2021,6 +2023,11 @@ input[type="radio"] { accent-color: var(--gold); }
   outline: none;
   border-color: var(--gold);
   box-shadow: 0 0 0 2px rgba(61,220,255,0.2);
+}
+.shift-time-row input.is-invalid,
+.store-hours-panel input.is-invalid {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 2px rgba(248,113,113,0.25);
 }
 .shift-time-row .st-dash { color: var(--ink-4); font-weight: 700; }
 .shift-times-note {
@@ -3076,7 +3083,8 @@ input[type="radio"] { accent-color: var(--gold); }
   overscroll-behavior: contain;
 }
 .header-menu-panel[hidden] { display: none !important; }
-.header-menu-panel button {
+.header-menu-panel button,
+.header-menu-panel a {
   display: block;
   width: 100%;
   text-align: left;
@@ -3087,8 +3095,11 @@ input[type="radio"] { accent-color: var(--gold); }
   padding: 0.55rem 0.75rem;
   border-radius: 6px;
   border: none;
+  text-decoration: none;
+  box-sizing: border-box;
 }
-.header-menu-panel button:hover {
+.header-menu-panel button:hover,
+.header-menu-panel a:hover {
   background: rgba(61,220,255,0.1);
   color: #9ae8ff;
   filter: none;
@@ -3525,6 +3536,38 @@ input[type="radio"] { accent-color: var(--gold); }
 html.pwa-standalone .pwa-mode-badge { display: inline-flex; }
 html.pwa-standalone .install-banner { display: none !important; }
 html.pwa-standalone .welcome-play { display: none; }
+html.twa .install-banner { display: none !important; }
+html.twa .welcome-play { display: none !important; }
+html.twa [data-twa-hide] { display: none !important; }
+.welcome-play { display: none !important; }
+.pro-gate-reassure { color: var(--ink-2) !important; }
+.pro-gate-benefits {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.pro-gate-benefits li {
+  font-size: 0.88rem;
+  color: var(--ink-3);
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+.pro-gate-benefits li::before {
+  content: "✓";
+  color: #34d399;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.gen-free-left {
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--ink-2);
+  align-self: center;
+}
+.gen-free-left[hidden] { display: none !important; }
 .install-banner .gp-badge img { height: 48px; }
 @media print {
   .install-banner { display: none !important; }
@@ -5104,7 +5147,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </button>
       <span class="brand-status" id="brand-status">
         <span class="pro-badge is-free" id="license-badge" title="License status" hidden>Pro</span>
-        <span class="offline-pill" id="offline-pill" title="Works offline — data on this device" data-i18n-title="Works offline — data on this device"><span class="dot"></span><span class="pill-text" data-i18n="Offline"> Offline</span></span>
+        <span class="offline-pill" id="offline-pill" title="Works offline — data stays on this device" data-i18n-title="Works offline — data stays on this device"><span class="dot"></span><span class="pill-text" data-i18n="Works offline"> Works offline</span></span>
         <span class="local-status-pill" id="local-status-pill" title="Last local save" data-i18n-title="Last local save"><span class="pill-text" data-i18n="Saved">Saved</span></span>
       </span>
     </div>
@@ -5128,8 +5171,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" onclick="window.print(); closeHeaderMenu()" data-i18n="Print">Print</button>
         <button type="button" onclick="exportSchedule(); closeHeaderMenu()" data-i18n="Export Word">Export Word</button>
         <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()" data-i18n="Export Excel">Export Excel</button>
-        <p class="header-menu-hint" data-i18n="New phone? Export a JSON backup, then Load. No cloud — file stays yours.">New phone? Export a JSON backup, then Load. No cloud — file stays yours.</p>
+        <p class="header-menu-hint" data-i18n="New phone? Export a JSON backup, then Import that file here. No cloud — file stays yours.">New phone? Export a JSON backup, then Import that file here. No cloud — file stays yours.</p>
         <button type="button" onclick="exportBackupJSON(); closeHeaderMenu()" data-i18n="Backup JSON — new phone">Backup JSON — new phone</button>
+        <button type="button" onclick="pickBackupFile(); closeHeaderMenu()" data-i18n="Import JSON backup">Import JSON backup</button>
         <button type="button" onclick="copySummaryText(); closeHeaderMenu()" data-i18n="Copy summary">Copy summary</button>
         <button type="button" onclick="setDensityMode('compact'); closeHeaderMenu()" data-i18n="Density: Compact">Density: Compact</button>
         <button type="button" onclick="setDensityMode('comfortable'); closeHeaderMenu()" data-i18n="Density: Comfortable">Density: Comfortable</button>
@@ -5141,7 +5185,8 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
         <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()" data-i18n="Take tour">Take tour</button>
         <button type="button" onclick="openAccountPanel(); closeHeaderMenu()" data-i18n="Account & license">Account &amp; license</button>
-        <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label data-i18n="Buy Pro — $19.99">Buy Pro — $19.99</button>
+        <button type="button" onclick="location.href='buy.html'; closeHeaderMenu()" data-price-label data-twa-hide data-i18n="Buy Pro — $19.99">Buy Pro — $19.99</button>
+        <a href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer" data-twa-hide onclick="closeHeaderMenu()">Google Play</a>
       </div>
     </div>
   </div>
@@ -5187,9 +5232,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="welcome-actions">
       <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()" data-i18n="Start with my team">Start with my team</button>
       <div class="welcome-secondary">
-        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})" data-i18n="Load sample store">Load sample store</button>
-        <button type="button" class="btn-outline welcome-secondary-btn" onclick="startOnboardingTour(true)" data-i18n="Take tour">Take tour</button>
-        <button type="button" class="btn-outline welcome-secondary-btn" onclick="location.href='buy.html'" data-price-label data-i18n="Pro · $19.99">Pro · $19.99</button>
+        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})" data-i18n="See a sample">See a sample</button>
         <button type="button" class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)" data-i18n="Dismiss">Dismiss</button>
       </div>
     </div>
@@ -5490,6 +5533,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <div class="generate-actions" id="built-rebuild-row">
         <span class="built-pill" id="built-pill" hidden data-i18n="Built">Built</span>
         <button class="btn-success btn-large" id="btn-generate" data-tour="btn-generate" onclick="generateScheduleFromButton()" data-i18n="Build this period">Build this period</button>
+        <span class="gen-free-left" id="gen-free-left" hidden></span>
         <button class="btn-secondary no-lock-hide" id="btn-clear-board" onclick="clearSchedule()" data-i18n="Clear board">Clear board</button>
         <button class="btn-outline no-lock-hide" id="btn-sample-store" onclick="loadDemoStore({explicit:true})" data-i18n="Load sample store">Load sample store</button>
       </div>
@@ -5536,6 +5580,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
             <button type="button" onclick="exportScheduleExcel(); closeToolbarExportMenu()" data-i18n="Excel">Excel</button>
             <button type="button" onclick="copySummaryText(); closeToolbarExportMenu()" data-i18n="Copy summary">Copy summary</button>
             <button type="button" onclick="exportBackupJSON(); closeToolbarExportMenu()" data-i18n="Backup JSON — new phone">Backup JSON — new phone</button>
+            <button type="button" onclick="pickBackupFile(); closeToolbarExportMenu()" data-i18n="Import JSON backup">Import JSON backup</button>
           </div>
         </div>
         <span class="gen-timestamp" id="gen-timestamp"></span>
@@ -5604,12 +5649,12 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.33</span> · <span data-i18n="Offline">Offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.34</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
-    <button type="button" onclick="location.href='buy.html'" data-i18n="Buy Pro">Buy Pro</button>
-    <a href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Google Play</a>
+    <button type="button" onclick="location.href='buy.html'" data-twa-hide data-i18n="Buy Pro">Buy Pro</button>
+    <a href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer" data-twa-hide>Google Play</a>
     <button type="button" onclick="location.href='legal/privacy.html'" data-i18n="Privacy">Privacy</button>
   </div>
 </footer>
@@ -5619,9 +5664,15 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title" onpointerdown="if (event.target === this) { event.preventDefault(); event.stopPropagation(); closeProGate(); }">
   <div class="pro-gate-card" onpointerdown="event.stopPropagation()">
     <h3 id="pro-gate-title" data-i18n="Pro feature">Pro feature</h3>
-    <p id="pro-gate-body" data-i18n="Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.">Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.</p>
+    <p id="pro-gate-body" data-i18n="Unlock Pro for unlimited schedule builds and Word/Excel export.">Unlock Pro for unlimited schedule builds and Word/Excel export.</p>
+    <p class="pro-gate-reassure" data-i18n="Your schedules and edits stay — only new builds need Pro.">Your schedules and edits stay — only new builds need Pro.</p>
+    <ul class="pro-gate-benefits" id="pro-gate-benefits">
+      <li>unlimited schedule builds</li>
+      <li>Word export</li>
+      <li>Excel export</li>
+    </ul>
     <div class="pro-gate-actions">
-      <a class="pg-buy" href="buy.html" data-price-label data-i18n="Buy Pro — $19.99">Buy Pro — $19.99</a>
+      <a class="pg-buy" href="buy.html" data-price-label data-twa-hide data-i18n="Unlock Pro — $19.99 one-time">Unlock Pro — $19.99 one-time</a>
       <button type="button" class="pg-secondary" id="btn-pro-gate-license" onpointerdown="event.preventDefault(); event.stopPropagation(); promptLicenseUnlock();" onclick="event.stopPropagation(); promptLicenseUnlock();" data-i18n="Enter license">Enter license</button>
       <button type="button" class="pg-secondary" id="btn-pro-gate-not-now" onpointerdown="event.preventDefault(); event.stopPropagation(); closeProGate();" onclick="event.stopPropagation(); closeProGate();" data-i18n="Not now">Not now</button>
     </div>
@@ -5654,7 +5705,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <div class="ap-actions">
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()" data-i18n="Activate team license">Activate team license</button>
-      <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center" data-i18n="Manage billing">Manage billing</a>
+      <a class="ap-btn-secondary" href="buy.html" style="display:inline-flex;align-items:center" data-twa-hide data-i18n="Manage billing">Manage billing</a>
       <button type="button" class="ap-btn-secondary" onpointerdown="event.preventDefault(); event.stopPropagation(); closeAccountPanel();" onclick="event.stopPropagation(); closeAccountPanel();" data-i18n="Close panel">Close</button>
     </div>
     <div id="ap-leftover-session" hidden>
@@ -5673,7 +5724,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="license-modal no-print" id="license-modal" hidden role="dialog" aria-modal="true" aria-labelledby="license-modal-title">
   <div class="license-modal-card">
     <h3 id="license-modal-title" data-i18n="Activate team license">Activate team license</h3>
-    <p data-i18n="Enter your Gumroad license or an MSB-PRO- unlock code.">Enter your Gumroad license or an MSB-PRO- unlock code.</p>
+    <p data-i18n="Enter the Gumroad license key from your receipt, or an MSB-PRO-… unlock code.">Enter the Gumroad license key from your receipt, or an MSB-PRO-… unlock code.</p>
     <label>License / unlock code
       <input type="text" id="license-input" autocomplete="off" placeholder="Gumroad license or MSB-PRO-…" />
     </label>
@@ -5732,6 +5783,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div id="cell-inspector-portal"></div>
 <!-- Saved schedules modal (portal) -->
 <div id="saved-modal-portal"></div>
+<input type="file" id="backup-file-input" accept="application/json,.json" hidden>
 
 <!-- Command palette -->
 <div id="cmd-palette" class="no-print" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
@@ -5766,6 +5818,7 @@ function toggleHeaderMenu(e) {
   if (open) {
     panel.removeAttribute('hidden');
     if (btn) btn.setAttribute('aria-expanded', 'true');
+    msbPushUi('header-menu');
   } else {
     closeHeaderMenu();
   }
@@ -5773,9 +5826,57 @@ function toggleHeaderMenu(e) {
 function closeHeaderMenu() {
   const panel = document.getElementById('header-menu-panel');
   const btn = document.getElementById('header-more-btn');
+  const wasOpen = panel && !panel.hasAttribute('hidden');
   if (panel) panel.setAttribute('hidden', '');
   if (btn) btn.setAttribute('aria-expanded', 'false');
+  if (wasOpen) msbUiClosed('header-menu');
 }
+
+const _msbUiStack = [];
+let _msbIgnorePop = false;
+
+function msbPushUi(id) {
+  if (_msbUiStack[_msbUiStack.length - 1] === id) return;
+  _msbUiStack.push(id);
+  try { history.pushState({ msbUi: id, n: _msbUiStack.length }, ''); } catch (e) {}
+}
+
+function msbUiClosed(id) {
+  if (_msbIgnorePop) return;
+  if (_msbUiStack[_msbUiStack.length - 1] !== id) {
+    const i = _msbUiStack.lastIndexOf(id);
+    if (i >= 0) _msbUiStack.splice(i, 1);
+    return;
+  }
+  _msbUiStack.pop();
+  _msbIgnorePop = true;
+  try { history.back(); } catch (e) {}
+  setTimeout(() => { _msbIgnorePop = false; }, 80);
+}
+
+function msbCloseUiDom(id) {
+  if (id === 'header-menu') {
+    const panel = document.getElementById('header-menu-panel');
+    const btn = document.getElementById('header-more-btn');
+    if (panel) panel.setAttribute('hidden', '');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    return;
+  }
+  if (id === 'saved-schedules') {
+    const portal = document.getElementById('saved-modal-portal');
+    if (portal) portal.innerHTML = '';
+    return;
+  }
+  const el = document.getElementById(id);
+  if (el) el.setAttribute('hidden', '');
+}
+
+window.addEventListener('popstate', () => {
+  if (_msbIgnorePop) return;
+  const id = _msbUiStack.pop();
+  if (!id) return;
+  msbCloseUiDom(id);
+});
 document.addEventListener('click', (e) => {
   const menu = document.querySelector('.header-menu');
   if (menu && !menu.contains(e.target)) closeHeaderMenu();
@@ -5959,6 +6060,8 @@ let storeHoursApplyMode = 'day';
 
 // ── Monetization / Pro license (offline-first; soft gate) ──
 const MSB_LICENSE_KEY = 'msb_pro_license';
+const MSB_LICENSE_PENDING_KEY = 'msb_license_pending_verify';
+const MSB_TWA_KEY = 'msb_twa';
 const MSB_GEN_COUNT_KEY = 'msb_free_generate_count';
 const MSB_SESSION_KEY = 'msb_session';
 const MSB_WORKSPACE_KEY = 'msb_workspace';
@@ -5968,6 +6071,8 @@ let monetizationConfig = {
   priceLabel: '$19.99',
   priceNote: 'one-time · lifetime Pro unlock',
   checkoutUrl: '',
+  gumroadPermalink: 'pwplbc',
+  gumroadProductId: 'Jg_UrKcrhutlsyEloisAgA==',
   freeManagerLimit: 0,
   freeGenerateLimit: 2,
   supportEmail: 'b.ralston62989@gmail.com',
@@ -5987,7 +6092,49 @@ let msalPublicClient = null;
 let googleTokenClient = null;
 let googleGisReady = false;
 
+function persistAppStorage() {
+  try {
+    if (navigator.storage && typeof navigator.storage.persist === 'function') {
+      navigator.storage.persist().catch(() => {});
+    }
+  } catch (e) {}
+}
+
+function isTwaContext() {
+  try { return localStorage.getItem(MSB_TWA_KEY) === '1'; } catch (e) { return false; }
+}
+
+(function detectTwaContext() {
+  try {
+    if (document.referrer && document.referrer.startsWith('android-app://com.managerschedulebuilder.pro')) {
+      try { localStorage.setItem(MSB_TWA_KEY, '1'); } catch (e) {}
+    }
+    if (isTwaContext()) document.documentElement.classList.add('twa');
+  } catch (e) {}
+})();
+
+function setLicensePending(on) {
+  try {
+    if (on) localStorage.setItem(MSB_LICENSE_PENDING_KEY, '1');
+    else localStorage.removeItem(MSB_LICENSE_PENDING_KEY);
+  } catch (e) {}
+}
+
+function isLicensePending() {
+  try { return localStorage.getItem(MSB_LICENSE_PENDING_KEY) === '1'; } catch (e) { return false; }
+}
+
+function getStoredLicenseKey() {
+  try {
+    const raw = localStorage.getItem(MSB_LICENSE_KEY);
+    if (!raw) return '';
+    const j = JSON.parse(raw);
+    return j && j.key ? String(j.key) : '';
+  } catch (e) { return ''; }
+}
+
 function isProUnlocked() {
+  if (isTwaContext()) return true;
   try {
     const raw = localStorage.getItem(MSB_LICENSE_KEY);
     if (!raw) return false;
@@ -5996,14 +6143,17 @@ function isProUnlocked() {
   } catch (e) { return false; }
 }
 
-function setProUnlocked(key) {
+function setProUnlocked(key, opts) {
+  opts = opts || {};
   const payload = {
     unlocked: true,
     key: String(key || 'unlock').slice(0, 120),
     at: new Date().toISOString()
   };
+  if (opts.pending) payload.pendingVerify = true;
   try { localStorage.setItem(MSB_LICENSE_KEY, JSON.stringify(payload)); } catch (e) {}
-  // Keep session.plan in sync
+  setLicensePending(!!opts.pending);
+  persistAppStorage();
   try {
     const s = getSession();
     if (s) {
@@ -6013,7 +6163,23 @@ function setProUnlocked(key) {
   } catch (e) {}
   updateLicenseBadge();
   updateAccountChip();
+  if (typeof updateGenFreeLeft === 'function') updateGenFreeLeft();
   return payload;
+}
+
+function revokeProUnlock() {
+  try { localStorage.removeItem(MSB_LICENSE_KEY); } catch (e) {}
+  setLicensePending(false);
+  try {
+    const s = getSession();
+    if (s) {
+      s.plan = 'free';
+      saveSession(s);
+    }
+  } catch (e) {}
+  updateLicenseBadge();
+  updateAccountChip();
+  if (typeof updateGenFreeLeft === 'function') updateGenFreeLeft();
 }
 
 // ── Session / workspace / local accounts ──
@@ -7003,11 +7169,14 @@ function openAccountPanel() {
   if (wipe) wipe.checked = false;
   const modal = document.getElementById('account-modal');
   if (modal) modal.removeAttribute('hidden');
+  msbPushUi('account-modal');
 }
 
 function closeAccountPanel() {
   const modal = document.getElementById('account-modal');
+  const wasOpen = modal && !modal.hasAttribute('hidden');
   if (modal) modal.setAttribute('hidden', '');
+  if (wasOpen) msbUiClosed('account-modal');
 }
 
 function openLicenseModal() {
@@ -7018,30 +7187,41 @@ function openLicenseModal() {
   if (input) input.value = '';
   const modal = document.getElementById('license-modal');
   if (modal) modal.removeAttribute('hidden');
+  msbPushUi('license-modal');
   setTimeout(() => input?.focus(), 50);
 }
 
 function closeLicenseModal() {
   const modal = document.getElementById('license-modal');
+  const wasOpen = modal && !modal.hasAttribute('hidden');
   if (modal) modal.setAttribute('hidden', '');
+  if (wasOpen) msbUiClosed('license-modal');
 }
 
-function submitLicenseUnlock() {
+async function submitLicenseUnlock() {
   const input = document.getElementById('license-input');
   const err = document.getElementById('license-error');
   const key = (input && input.value) || '';
   if (!validLicenseKey(key)) {
     if (err) {
-      err.textContent = 'Enter a Gumroad license or an MSB-PRO- unlock code.';
+      err.textContent = 'Use the Gumroad key from your receipt, or an MSB-PRO-… code.';
       err.classList.add('show');
     }
     return;
   }
-  setProUnlocked(key.trim());
+  const res = await activateLicenseKey(key.trim());
+  if (!res || !res.ok) {
+    if (err) {
+      err.textContent = (res && res.message) || 'That key didn’t unlock Pro.';
+      err.classList.add('show');
+    }
+    return;
+  }
   closeLicenseModal();
   closeAccountPanel();
-  if (typeof showToast === 'function') showToast('Pro unlocked on this device.', 'success');
-  else alert('Pro unlocked on this device.');
+  closeProGate();
+  if (typeof showToast === 'function') showToast(res.message || 'Pro unlocked on this device.', 'success');
+  else alert(res.message || 'Pro unlocked on this device.');
 }
 
 function signOutSession() {
@@ -7115,11 +7295,85 @@ function openSignInFromApp() {
 function validLicenseKey(k) {
   const s = String(k || '').trim();
   if (!s) return false;
-  // Issued unlock codes (friend/tester and Play review). Bare "MSB-PRO-" is not enough.
-  if (/^MSB-PRO-[A-Z0-9]+(?:-[A-Z0-9]+)*$/i.test(s) && s.length >= 12) return true;
-  // Gumroad-issued keys stay on-device — no server verify. Typical 4 groups of 6–8.
+  if (/^MSB-PRO-[A-Z0-9][A-Z0-9._-]{2,}$/i.test(s) && s.length >= 12) return true;
   if (/^[A-Z0-9]{6,8}(?:-[A-Z0-9]{6,8}){3}$/i.test(s)) return true;
+  if (/^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i.test(s)) return true;
   return false;
+}
+
+function isMsbUnlockCode(k) {
+  return /^MSB-PRO-/i.test(String(k || '').trim());
+}
+
+async function verifyGumroadLicense(key) {
+  const productId = (monetizationConfig && monetizationConfig.gumroadProductId) || 'Jg_UrKcrhutlsyEloisAgA==';
+  const permalink = (monetizationConfig && monetizationConfig.gumroadPermalink) || 'pwplbc';
+  const body = new URLSearchParams();
+  if (productId) body.set('product_id', productId);
+  body.set('product_permalink', permalink);
+  body.set('license_key', String(key || '').trim());
+  body.set('increment_uses_count', 'false');
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => { try { ctrl.abort(); } catch (e) {} }, 12000) : null;
+  try {
+    const r = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body,
+      signal: ctrl ? ctrl.signal : undefined
+    });
+    let data = null;
+    try { data = await r.json(); } catch (e) { data = null; }
+    if (!data || typeof data.success !== 'boolean') return { ok: null, reason: 'network' };
+    if (data.success === true) return { ok: true, data: data };
+    return { ok: false, data: data };
+  } catch (e) {
+    return { ok: null, reason: 'network' };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function activateLicenseKey(key) {
+  const s = String(key || '').trim();
+  if (!validLicenseKey(s)) {
+    return { ok: false, message: 'Use the Gumroad key from your receipt, or an MSB-PRO-… code.' };
+  }
+  if (isMsbUnlockCode(s)) {
+    setProUnlocked(s, { pending: false });
+    return { ok: true, message: 'Pro unlocked on this device.' };
+  }
+  setProUnlocked(s, { pending: true });
+  const v = await verifyGumroadLicense(s);
+  if (v.ok === true) {
+    setProUnlocked(s, { pending: false });
+    return { ok: true, message: 'Pro unlocked on this device.' };
+  }
+  if (v.ok === false) {
+    revokeProUnlock();
+    return { ok: false, message: 'That license key isn’t valid for this product.' };
+  }
+  return { ok: true, pending: true, message: 'Pro unlocked on this device. We’ll confirm the key next time you’re online.' };
+}
+
+async function reverifyPendingLicense() {
+  if (typeof isTwaContext === 'function' && isTwaContext()) return;
+  if (!isLicensePending()) return;
+  const key = getStoredLicenseKey();
+  if (!key || isMsbUnlockCode(key)) {
+    setLicensePending(false);
+    return;
+  }
+  const v = await verifyGumroadLicense(key);
+  if (v.ok === true) {
+    setLicensePending(false);
+    persistAppStorage();
+  } else if (v.ok === false) {
+    revokeProUnlock();
+    if (typeof showToast === 'function') {
+      showToast('That license key is no longer valid. Your schedules are still here — enter a new key anytime.', 'warn');
+    }
+  }
 }
 
 function freeManagerLimit() {
@@ -7221,6 +7475,7 @@ function updateLicenseBadge() {
     }
   }
   if (typeof updateAccountChip === 'function') updateAccountChip();
+  if (typeof updateGenFreeLeft === 'function') updateGenFreeLeft();
 }
 
 function showProGate(message) {
@@ -7228,11 +7483,14 @@ function showProGate(message) {
   const body = document.getElementById('pro-gate-body');
   if (body && message) body.textContent = message;
   if (modal) modal.removeAttribute('hidden');
+  msbPushUi('pro-gate-modal');
 }
 
 function closeProGate() {
   const modal = document.getElementById('pro-gate-modal');
+  const wasOpen = modal && !modal.hasAttribute('hidden');
   if (modal) modal.setAttribute('hidden', '');
+  if (wasOpen) msbUiClosed('pro-gate-modal');
 }
 
 document.addEventListener('keydown', (e) => {
@@ -7297,18 +7555,44 @@ async function loadMonetizationConfig() {
 function applyUrlProUnlock() {
   try {
     const params = new URLSearchParams(location.search);
-    const pro = params.get('pro') === '1' || params.get('unlocked') === '1';
     const lic = params.get('license') || params.get('key');
-    if (pro || (lic && validLicenseKey(lic))) {
-      setProUnlocked(lic || 'pro=1');
+    const hadFakePro = params.get('pro') === '1' || params.get('unlocked') === '1';
+    if (lic && validLicenseKey(lic)) {
+      activateLicenseKey(lic).then((res) => {
+        if (typeof showToast === 'function') {
+          showToast(
+            (res && res.message) || (res && res.ok ? 'Pro unlocked — thanks for your support.' : 'Couldn’t unlock with that key.'),
+            res && res.ok ? 'success' : 'warn'
+          );
+        }
+      }).catch(() => {});
       const u = new URL(location.href);
       ['pro', 'license', 'unlocked', 'key'].forEach((p) => u.searchParams.delete(p));
       history.replaceState({}, '', u.pathname + u.search + u.hash);
-      if (typeof showToast === 'function') showToast('Pro unlocked — thanks for your support.', 'success');
       return true;
+    }
+    if (hadFakePro) {
+      const u = new URL(location.href);
+      ['pro', 'unlocked'].forEach((p) => u.searchParams.delete(p));
+      history.replaceState({}, '', u.pathname + u.search + u.hash);
     }
   } catch (e) {}
   return false;
+}
+
+function updateGenFreeLeft() {
+  const el = document.getElementById('gen-free-left');
+  if (!el) return;
+  if (isProUnlocked()) {
+    el.hidden = true;
+    el.textContent = '';
+    return;
+  }
+  const left = remainingFreeGenerates();
+  el.hidden = false;
+  el.textContent = left === 0
+    ? '0 free builds left'
+    : (left + ' free build' + (left === 1 ? '' : 's') + ' left');
 }
 
 function canAddManagerSeat() {
@@ -8100,7 +8384,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.33';
+const APP_VERSION = '2.6.34';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -10894,7 +11178,167 @@ function exportBackupJSON() {
   a.click();
   URL.revokeObjectURL(a.href);
   try { if (typeof markBackupNudgeDone === 'function') markBackupNudgeDone(); } catch (e) {}
-  showToast(msbT('Backup JSON downloaded. New phone? Load that file there.'), 'success');
+  showToast(msbT('Backup JSON downloaded. New phone? Import that file there.'), 'success');
+}
+
+function pickBackupFile() {
+  try { if (typeof closeHeaderMenu === 'function') closeHeaderMenu(); } catch (e) {}
+  try { if (typeof closeToolbarExportMenu === 'function') closeToolbarExportMenu(); } catch (e) {}
+  const el = document.getElementById('backup-file-input');
+  if (!el) {
+    showToast('Import isn’t available in this view.', 'warn');
+    return;
+  }
+  el.value = '';
+  el.click();
+}
+
+function parseBackupPayload(raw) {
+  let data;
+  try {
+    data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  } catch (e) {
+    return { ok: false, error: 'That file isn’t valid JSON. Nothing was changed.' };
+  }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return { ok: false, error: 'That backup looks empty. Nothing was changed.' };
+  }
+  if (!data.names && !data.inputs && !data.schedule && data.amCount == null && !data.kcList) {
+    return { ok: false, error: 'That file isn’t a Schedule Pro backup. Nothing was changed.' };
+  }
+  return { ok: true, data: data };
+}
+
+function applyLoadedScheduleData(data) {
+  if (!data || typeof data !== 'object') throw new Error('empty');
+  window._lastGenReport = null;
+  if (data.fiscalYear != null || data.periodIndex != null || data.periodNumber != null) {
+    const fy = parseInt(data.fiscalYear, 10);
+    if (Number.isFinite(fy) && fy > 1990) {
+      const yearEl = document.getElementById('pick-year');
+      if (yearEl) yearEl.value = fy;
+      fiscalYear = fy;
+      buildPeriodDropdown();
+    }
+    let pIdx = data.periodIndex;
+    if (pIdx == null && data.periodNumber != null) pIdx = parseInt(data.periodNumber, 10) - 1;
+    pIdx = parseInt(pIdx, 10);
+    if (Number.isFinite(pIdx) && pIdx >= 0) {
+      const sel = document.getElementById('pick-period');
+      if (sel) sel.value = pIdx;
+      currentPeriodIndex = pIdx;
+    }
+    loadPeriod();
+  }
+  if (data.amCount !== undefined) amCount = data.amCount;
+  if (data.kcList !== undefined) {
+    kcList = (data.kcList || []).map((kc) => ({
+      id: kc.id,
+      name: kc.name,
+      asManager: !!kc.asManager,
+      midDows: typeof normalizeKcMidDows === 'function' ? normalizeKcMidDows(kc.midDows) : (kc.midDows || [])
+    }));
+  }
+  if (data.storeNumber !== undefined) {
+    const sn = document.getElementById('store-number');
+    if (sn) sn.value = data.storeNumber;
+  }
+  if (data.storeName !== undefined && document.getElementById('store-name')) {
+    document.getElementById('store-name').value = data.storeName;
+  }
+  if (data.storeHours && typeof applyStoreHoursObject === 'function') {
+    applyStoreHoursObject(data.storeHours);
+    updateStoreHoursSummary();
+  }
+  renderAMRows();
+  renderKCRows();
+  const sm = document.getElementById('name-sm');
+  if (sm) sm.value = (data.names && data.names.sm) || 'Store Manager';
+  for (let i = 1; i <= amCount; i++) {
+    const el = document.getElementById('name-am' + i);
+    if (el && data.names && data.names['am' + i]) el.value = data.names['am' + i];
+  }
+  kcList.forEach((kc) => {
+    const el = document.getElementById('name-' + kc.id);
+    if (el) el.value = kc.name;
+  });
+  holidayWeeks = data.holidayWeeks || {};
+  if (data.preferences) {
+    preferences = Object.assign({}, DEFAULT_PREFERENCES, data.preferences);
+    if (typeof normalizeKcCloseDays === 'function') {
+      preferences.kcCloseDays = normalizeKcCloseDays(preferences.kcCloseDays);
+    }
+    renderPreferencesUI();
+  }
+  if (data.roleRules) {
+    roleRules = data.roleRules;
+    renderRoleRulesUI();
+  }
+  inputs = {};
+  if (data.inputs) {
+    Object.keys(data.inputs).forEach((r) => {
+      inputs[r] = {};
+      Object.keys(data.inputs[r] || {}).forEach((dk) => {
+        inputs[r][dk] = data.inputs[r][dk];
+      });
+    });
+  }
+  schedule = {};
+  if (data.schedule) {
+    Object.keys(data.schedule).forEach((r) => {
+      schedule[r] = {};
+      Object.keys(data.schedule[r] || {}).forEach((dk) => {
+        schedule[r][dk] = data.schedule[r][dk];
+      });
+    });
+  }
+  buildInputTabs();
+  buildInputCalendar(activeTab);
+  if (Object.keys(schedule).length > 0 && Object.keys(schedule.sm || {}).length > 0) {
+    const ROLES = getRoles();
+    const ALL_KC = getAllWithKC();
+    setScheduleResultsVisible(true);
+    renderSchedule([], ROLES, ALL_KC);
+    renderSummary([], ROLES, ALL_KC, null);
+    if (typeof renderFairnessUnderSchedule === 'function') renderFairnessUnderSchedule(ROLES, ALL_KC, null);
+    switchTab('schedule');
+  } else {
+    setScheduleResultsVisible(false);
+  }
+  persistManagerNames();
+  if (typeof persistStoreMeta === 'function') persistStoreMeta();
+  updateReadyChecklist();
+}
+
+function importBackupJSONFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onerror = () => {
+    showToast('Couldn’t read that file. Nothing was changed.', 'error');
+  };
+  reader.onload = () => {
+    const parsed = parseBackupPayload(reader.result);
+    if (!parsed.ok) {
+      showToast(parsed.error, 'error');
+      return;
+    }
+    if (!confirm('Replace the roster and schedule on this device with this backup? Export a copy first if you still need what’s here.')) {
+      return;
+    }
+    let live = null;
+    try { live = buildSnapshotData(); } catch (e) { live = null; }
+    try {
+      applyLoadedScheduleData(parsed.data);
+      try { if (typeof closeSavedSchedulesModal === 'function') closeSavedSchedulesModal(); } catch (e2) {}
+      showToast('Backup loaded. Your team is on this device.', 'success');
+    } catch (e) {
+      if (live) {
+        try { applyLoadedScheduleData(live); } catch (e2) {}
+      }
+      showToast('Couldn’t load that backup. Nothing was changed.', 'error');
+    }
+  };
+  reader.readAsText(file);
 }
 
 function copySummaryText() {
@@ -11024,7 +11468,7 @@ let customShiftTimes = JSON.parse(JSON.stringify(DEFAULT_SHIFT_TIMES));
 })();
 
 function saveShiftTimesToStorage() {
-  localStorage.setItem('schedule_shift_times', JSON.stringify(customShiftTimes));
+  writeLocalStorage('schedule_shift_times', JSON.stringify(customShiftTimes));
 }
 
 function getShiftTimeStr(key) {
@@ -11176,6 +11620,19 @@ function exportPaintForCell(role, dk) {
 }
 
 // ── NRF 4-5-4 Fiscal Calendar ──
+function startOfLocalDay(d) {
+  const x = d instanceof Date ? d : new Date(d);
+  return new Date(x.getFullYear(), x.getMonth(), x.getDate());
+}
+
+function nrfFiscalYearForDate(d) {
+  const now = d instanceof Date ? d : new Date();
+  const y = now.getFullYear();
+  const fyStart = startOfLocalDay(getFiscalYearStart(y));
+  const t = startOfLocalDay(now);
+  return t < fyStart ? y - 1 : y;
+}
+
 function getFiscalYearStart(year) {
   // NRF fiscal year starts on the Sunday closest to Feb 1
   const feb1 = new Date(year, 1, 1); // Feb 1
@@ -11237,7 +11694,7 @@ function formatDateFull(d) {
 }
 
 // ── State ──
-let fiscalYear = new Date().getFullYear();
+let fiscalYear = nrfFiscalYearForDate(new Date());
 let currentPeriodIndex = 0; // 0-based
 let allPeriods = [];
 let currentPeriod = null; // the selected period object
@@ -11567,11 +12024,13 @@ function rebuildAfterConfigChange() {
   renderKCRows();
   buildPeriodDropdown();
 
-  // Try to auto-select the current period
-  const today = new Date();
+  // Try to auto-select the current period (date-only so last Saturday still matches)
+  const today = startOfLocalDay(new Date());
   let foundPeriod = false;
   for (let i = 0; i < allPeriods.length; i++) {
-    if (today >= allPeriods[i].start && today <= allPeriods[i].end) {
+    const start = startOfLocalDay(allPeriods[i].start);
+    const end = startOfLocalDay(allPeriods[i].end);
+    if (today >= start && today <= end) {
       currentPeriodIndex = i;
       document.getElementById('pick-period').value = i;
       foundPeriod = true;
@@ -11644,6 +12103,7 @@ function loadPeriod() {
   fiscalYear = parseInt(document.getElementById('pick-year').value);
   allPeriods = getFiscalPeriods(fiscalYear);
   currentPeriod = allPeriods[currentPeriodIndex];
+  window._lastGenReport = null;
 
   holidayWeeks = {}; // reset when a new period is loaded
 
@@ -12230,15 +12690,14 @@ function _generateScheduleInner(opts) {
     }
   });
 
-  // All managers (ROLES) work on KC-close nights — remove offs/RTO (unless PTO/LOA kept)
+  // Managers work on KC-close nights. Soft offs can be pulled; requested RTO/off stay (hard).
   ROLES.forEach(r => {
     allDks.forEach(dk => {
-      if (isKcCloseNight(dk)) {
-        const s = schedule[r][dk];
-        if (s === 'off' || s === 'rto') {
-          delete schedule[r][dk];
-        }
-      }
+      if (!isKcCloseNight(dk)) return;
+      const s = schedule[r][dk];
+      if (s !== 'off' && s !== 'rto') return;
+      if (isInputLocked(r, dk) && (inputs[r][dk] === 'rto' || inputs[r][dk] === 'off')) return;
+      delete schedule[r][dk];
     });
   });
 
@@ -13408,6 +13867,8 @@ function _generateScheduleInner(opts) {
   let lastErrorCount = Infinity;
   let staleCount = 0;
   let lastErrorSig = '';
+  const errorSigSeen = [];
+  let repairCycled = false;
 
   while (pass < maxPasses) {
     const violations = validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDkMonday, isDkSaturday, isDkSunday, isDkWeekend, dkDow, allWeekendPairs, names, ROLES, ALL_KC, AMS, closerPool);
@@ -13422,6 +13883,12 @@ function _generateScheduleInner(opts) {
       staleCount = 0;
     }
     lastErrorSig = errorSig;
+    if (errorSigSeen.indexOf(errorSig) >= 0 && pass >= 3) {
+      repairCycled = true;
+      break;
+    }
+    errorSigSeen.push(errorSig);
+    if (errorSigSeen.length > 8) errorSigSeen.shift();
 
     // Use aggressive mode after 5 passes or if stuck for 3 passes
     const aggressive = pass >= 5 || staleCount >= 2;
@@ -14595,6 +15062,14 @@ function _generateScheduleInner(opts) {
     warnings.unshift({ type: 'info', msg: `All hard constraints satisfied. (${pass} repair pass${pass !== 1 ? 'es' : ''})` });
   } else {
     warnings.unshift({ type: 'warn', msg: `${leftoverMust.length} hard constraint(s) remain after ${pass} repair passes.` });
+    const rulesLeft = {};
+    leftoverMust.forEach((v) => { rulesLeft[v.rule] = true; });
+    if (repairCycled || (rulesLeft['coverage-close'] && rulesLeft['no-kc-night-close'])) {
+      warnings.unshift({
+        type: 'error',
+        msg: 'Can’t cover a close night with the current team. Add a key carrier or uncheck that KC-close day under Rules — we stopped looping so your board stays readable.'
+      });
+    }
   }
 
   // Build generation quality report
@@ -14772,12 +15247,10 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
       const availDays = 7 - rtos - loaDays;
       const targetDays = holidayWeeks[w] ? 4 : 5;
       const target = Math.min(targetDays, availDays);
-      // Count work + PTO only (NOT LOA — LOA already excluded via availDays)
-      let sched = 0;
-      weekDks.forEach(dk => {
-        const s = schedule[r][dk];
-        if (isWork(s) || isPto(s)) sched++;
-      });
+      const ptos = weekDks.filter(dk => isPto(schedule[r][dk])).length;
+      const workDays = weekDks.filter(dk => isWork(schedule[r][dk])).length;
+      if (ptos >= target && workDays === 0) return;
+      const sched = workDays + ptos;
       if (sched !== target) {
         v('error', 'five-day-week', r, w, null,
           `${names[r]}: Week ${w+1} has ${sched} scheduled days (target ${target}${holidayWeeks[w] ? ', holiday week' : ''}${loaDays ? ', LOA ' + loaDays : ''})`);
@@ -14792,10 +15265,10 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
     const dayName = DAY_NAMES_FULL[dkToDate(dk).getDay()] || 'day';
     ROLES.forEach(r => {
       const s = schedule[r][dk];
-      if (!isWork(s) && !isPto(s) && !isLoa(s)) {
-        v('error', 'kc-night-all', r, null, dk,
-          `${names[r]}: Not working on KC-close night ${dayName} ${formatDate(dkToDate(dk))}`);
-      }
+      if (isWork(s) || isPto(s) || isLoa(s) || isRto(s)) return;
+      if (inputs[r] && inputs[r][dk] === 'off') return;
+      v('error', 'kc-night-all', r, null, dk,
+        `${names[r]}: Not working on KC-close night ${dayName} ${formatDate(dkToDate(dk))}`);
     });
   });
 
@@ -15079,8 +15552,10 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       const w = weekOf(dk);
       const weekDks = getWeekDks(w);
 
-      // Never override input-locked PTO/LOA
-      if (isInputLocked(r, dk) && (isPto(inputs[r][dk]) || isLoa(inputs[r][dk]))) return;
+      if (isInputLocked(r, dk)) {
+        const locked = inputs[r][dk];
+        if (isPto(locked) || isLoa(locked) || isRto(locked) || locked === 'off') return;
+      }
 
       // Remove this night's off/rto (unless input-locked)
       if (!isInputLocked(r, dk) && (schedule[r][dk] === 'off' || schedule[r][dk] === 'rto')) {
@@ -15120,6 +15595,9 @@ function repairViolations(schedule, violations, allDks, numWeeks, getWeekDks, dk
       const weekDks = getWeekDks(w);
       const target = weekTarget(r, w);
       let sched = weekWorkPto(r, w);
+      const weekPto = weekDks.filter(dk => isPto(schedule[r][dk])).length;
+      const weekWork = weekDks.filter(dk => isWork(schedule[r][dk])).length;
+      if (weekPto >= target && weekWork === 0) return;
 
       if (sched > target) {
         // Too many scheduled days — convert work days to off (not KC night, not input-locked)
@@ -17274,9 +17752,10 @@ function saveToStorage(opts) {
     _savedAt: new Date().toISOString()
   };
   const key = `schedule_FY${fiscalYear}-P${p.number}`;
-  localStorage.setItem(key, JSON.stringify(data));
-  localStorage.setItem('schedule_last', key);
-  try { localStorage.setItem('msb_last_saved_at', data._savedAt || new Date().toISOString()); } catch (e) {}
+  const payload = JSON.stringify(data);
+  if (!writeLocalStorage(key, payload)) return;
+  writeLocalStorage('schedule_last', key);
+  writeLocalStorage('msb_last_saved_at', data._savedAt || new Date().toISOString());
   try { if (typeof updateLocalStatusPill === 'function') updateLocalStatusPill(); } catch (e) {}
   if (!opts.quiet) {
     showToast(`Saved FY${fiscalYear} Period ${p.number} (${p.approxMonth})`, 'success');
@@ -17301,16 +17780,49 @@ function persistLiveSchedule() {
   }
 }
 
+function writeLocalStorage(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    const quota = e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014);
+    if (typeof showToast === 'function') {
+      showToast(
+        quota
+          ? 'Couldn’t save — this device is out of storage. Export a JSON backup, then delete an old saved period.'
+          : 'Couldn’t save on this device.',
+        'error'
+      );
+    }
+    return false;
+  }
+}
+
 function loadFromStorage() {
   const p = currentPeriod;
+  if (!p) {
+    showToast('Load a fiscal period first.', 'warn');
+    return;
+  }
   const key = `schedule_FY${fiscalYear}-P${p.number}`;
   const raw = localStorage.getItem(key);
   if (!raw) {
     showToast(`No saved schedule for FY${fiscalYear} Period ${p.number}`, 'warn');
     return;
   }
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    showToast('Saved schedule is damaged — nothing was loaded. Try a JSON backup if you have one.', 'error');
+    return;
+  }
+  if (!data || typeof data !== 'object') {
+    showToast('Saved schedule is damaged — nothing was loaded.', 'error');
+    return;
+  }
   try { if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot('load'); } catch (e) {}
-  const data = JSON.parse(raw);
+  window._lastGenReport = null;
 
   // Restore AM count and KC list
   if (data.amCount !== undefined) {
@@ -18188,12 +18700,13 @@ function openSavedSchedulesModal() {
   let html = '<div class="saved-modal-overlay" onclick="closeSavedSchedulesModal(event)">';
   html += '<div class="saved-modal" onclick="event.stopPropagation()">';
   html += '<div class="saved-modal-header"><h3>Saved Schedules</h3>';
+  html += '<button class="btn-secondary" onclick="pickBackupFile()" style="font-size:0.8rem;padding:0.3rem 0.6rem">Import file</button>';
   html += '<button class="btn-secondary" onclick="closeSavedSchedulesModal()" style="font-size:0.8rem;padding:0.3rem 0.6rem">Close</button>';
   html += '</div>';
   html += '<div class="saved-modal-body">';
 
   if (keys.length === 0) {
-    html += '<p class="empty-msg">No saved schedules found.<br>Use the Save button to save your current schedule.</p>';
+    html += '<p class="empty-msg">No saved schedules on this device.<br>New phone? Import the JSON backup you exported.</p>';
   } else {
     keys.forEach(key => {
       let data = null;
@@ -18239,18 +18752,33 @@ function openSavedSchedulesModal() {
 
   html += '</div></div></div>';
   portal.innerHTML = html;
+  msbPushUi('saved-schedules');
 }
 
 function closeSavedSchedulesModal(e) {
   // Close if called with no args, or if clicking overlay background
   if (e && e.target && e.target.classList && !e.target.classList.contains('saved-modal-overlay')) return;
-  document.getElementById('saved-modal-portal').innerHTML = '';
+  const portal = document.getElementById('saved-modal-portal');
+  const wasOpen = portal && portal.innerHTML.trim() !== '';
+  if (portal) portal.innerHTML = '';
+  if (wasOpen) msbUiClosed('saved-schedules');
 }
 
 function loadSavedSchedule(key) {
   const raw = localStorage.getItem(key);
-  if (!raw) { alert('Schedule not found.'); return; }
-  const data = JSON.parse(raw);
+  if (!raw) { showToast('Schedule not found.', 'warn'); return; }
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    showToast('That saved schedule is damaged — nothing was loaded.', 'error');
+    return;
+  }
+  if (!data || typeof data !== 'object') {
+    showToast('That saved schedule is damaged — nothing was loaded.', 'error');
+    return;
+  }
+  window._lastGenReport = null;
 
   // Extract FY and period from key
   const match = key.match(/^schedule_FY(\d+)-P(\d+)$/);
@@ -18391,7 +18919,7 @@ function persistManagerNames() {
     const el = document.getElementById('name-am' + i);
     names.ams['am' + i] = el ? el.value : ('AM' + i);
   }
-  localStorage.setItem('schedule_manager_names', JSON.stringify(names));
+  writeLocalStorage('schedule_manager_names', JSON.stringify(names));
   try { if (typeof buildInputTabs === 'function') buildInputTabs(); } catch (eTabs) {}
 }
 
@@ -19015,9 +19543,9 @@ function renderShiftTimesGrid() {
     const t = customShiftTimes[key] || DEFAULT_SHIFT_TIMES[key];
     html += `<div class="shift-time-row">`;
     html += `<span class="st-label">${shiftNames[key]}</span>`;
-    html += `<input type="text" value="${t.start}" id="st-start-${key}" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
+    html += `<input type="text" inputmode="text" placeholder="9a" title="Examples: 9a, 6p, 12:30p" value="${t.start}" id="st-start-${key}" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
     html += `<span class="st-dash">-</span>`;
-    html += `<input type="text" value="${t.end}" id="st-end-${key}" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
+    html += `<input type="text" inputmode="text" placeholder="6p" title="Examples: 9a, 6p, 12:30p" value="${t.end}" id="st-end-${key}" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
     html += `</div>`;
   });
   grid.innerHTML = html;
@@ -19029,12 +19557,24 @@ function updateShiftTime(key) {
   if (!startEl || !endEl) return;
   const start = startEl.value.trim();
   const end = endEl.value.trim();
-  if (start && end) {
-    customShiftTimes[key] = { start, end };
-    saveShiftTimesToStorage();
-    // Refresh input calendar to show updated labels
-    buildInputCalendar(activeTab);
+  const startOk = parseTimeToHour(start) != null;
+  const endOk = parseTimeToHour(end) != null;
+  startEl.classList.toggle('is-invalid', !startOk);
+  endEl.classList.toggle('is-invalid', !endOk);
+  if (!startOk || !endOk) {
+    showToast('Use times like 9a, 6p, or 12:30p.', 'warn');
+    const prev = customShiftTimes[key] || DEFAULT_SHIFT_TIMES[key];
+    if (prev) {
+      if (!startOk) startEl.value = prev.start;
+      if (!endOk) endEl.value = prev.end;
+      startEl.classList.remove('is-invalid');
+      endEl.classList.remove('is-invalid');
+    }
+    return;
   }
+  customShiftTimes[key] = { start, end };
+  saveShiftTimesToStorage();
+  buildInputCalendar(activeTab);
 }
 
 function resetShiftTimes() {
@@ -20436,6 +20976,7 @@ function getCommandPaletteCommands() {
     { id: 'export-x', label: 'Export Excel', group: 'Export', run: () => exportScheduleExcel() },
     { id: 'copy-sum', label: 'Copy summary', group: 'Export', run: () => copySummaryText() },
     { id: 'backup-json', label: 'Backup JSON — new phone', group: 'Export', run: () => exportBackupJSON() },
+    { id: 'import-json', label: 'Import JSON backup', group: 'Export', run: () => pickBackupFile() },
     { id: 'clear', label: 'Clear schedule', group: 'Schedule', run: () => clearSchedule() },
     {
       id: 'offline-info',
@@ -20736,12 +21277,30 @@ registerServiceWorker();
 setupInstallPrompt();
 ensureAuthOnBoot();
 updateLicenseBadge();
+if (isProUnlocked()) persistAppStorage();
+reverifyPendingLicense();
 loadMonetizationConfig().then(() => {
   updateLicenseBadge();
   applyPriceLabels();
   updateAuthSupportNote();
+  if (typeof updateGenFreeLeft === 'function') updateGenFreeLeft();
 });
 applyPriceLabels();
+
+function updateOfflinePill() {
+  const el = document.getElementById('offline-pill');
+  if (!el) return;
+  const text = el.querySelector('.pill-text');
+  const online = navigator.onLine !== false;
+  el.classList.toggle('is-offline', !online);
+  el.title = online
+    ? 'Works offline — data stays on this device'
+    : 'You’re offline — everything still works on this device';
+  if (text) text.textContent = ' Works offline';
+}
+window.addEventListener('online', updateOfflinePill);
+window.addEventListener('offline', updateOfflinePill);
+
 // After DOM boot
 function bootUi() {
   try { if (typeof bootUiLang === 'function') bootUiLang(); } catch (eLangBoot) {}
@@ -20750,6 +21309,8 @@ function bootUi() {
   handleLaunchQuery();
   ensureAuthOnBoot();
   updateAccountChip();
+  if (typeof updateGenFreeLeft === 'function') updateGenFreeLeft();
+  if (typeof updateOfflinePill === 'function') updateOfflinePill();
   personalizeWelcome();
   try { if (typeof updateLocalStatusPill === 'function') updateLocalStatusPill(); } catch (e) {}
   try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
@@ -20790,6 +21351,16 @@ document.addEventListener('click', (e) => {
     }
   });
 });
+
+(function bindBackupFileInput() {
+  const el = document.getElementById('backup-file-input');
+  if (!el || el._msbBound) return;
+  el._msbBound = true;
+  el.addEventListener('change', (ev) => {
+    const file = ev.target && ev.target.files && ev.target.files[0];
+    if (file) importBackupJSONFile(file);
+  });
+})();
 
 restoreRoleTitles();
 const _hadRestoredNames = !!restoreManagerNames();

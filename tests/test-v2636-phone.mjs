@@ -1,5 +1,5 @@
 /**
- * v2.6.36 phone UI smoke (360px): native time, 12px floor, 44px taps,
+ * v2.6.37 phone UI smoke (360px): native time, 12px floor, 44px taps,
  * welcome two actions, Works offline label, cmdk hidden.
  * Run: node tests/test-v2636-phone.mjs
  */
@@ -57,7 +57,7 @@ async function loadChromium() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.36 phone UI smoke ===');
+  console.log('\n=== v2.6.37 phone UI smoke ===');
   const { server, base } = await startStaticServer();
   const chromium = await loadChromium();
   const browser = await chromium.launch({ headless: true });
@@ -87,6 +87,15 @@ async function main() {
       const btns = actions ? [...actions.querySelectorAll('button')].map((b) => (b.textContent || '').trim()) : [];
       const x = document.querySelector('.welcome-dismiss-x');
       const dismissInRow = btns.some((t) => /^dismiss$/i.test(t));
+      const h1 = document.querySelector('.app-header h1');
+      const more = document.getElementById('header-more-btn');
+      const h1r = h1 ? h1.getBoundingClientRect() : { width: 0, height: 0, right: 0, bottom: 0 };
+      const moreR = more ? more.getBoundingClientRect() : { width: 0, height: 0, left: 0, top: 0 };
+      const overlap = h1 && more
+        && h1r.right > moreR.left + 8
+        && h1r.bottom > moreR.top + 8
+        && moreR.right > h1r.left + 8
+        && moreR.bottom > h1r.top + 8;
       return {
         version: (document.getElementById('app-version-label') || {}).textContent,
         cmdkDisplay: cmdkCs.display,
@@ -97,10 +106,14 @@ async function main() {
         hasX: !!x,
         dismissInRow,
         xH: x ? x.getBoundingClientRect().height : 0,
+        wordmark: (h1 && h1.textContent || '').trim(),
+        moreW: moreR.width,
+        moreH: moreR.height,
+        overlap,
       };
     });
 
-    if (/v2\.6\.36/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.37/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
     if (boot.cmdkDisplay === 'none' || boot.cmdkW === 0) pass('cmdk-hidden', boot.cmdkDisplay);
     else fail('cmdk-hidden', JSON.stringify(boot));
@@ -114,6 +127,11 @@ async function main() {
     } else fail('welcome-two-actions', JSON.stringify(boot));
     if (boot.xH >= 44) pass('welcome-x-44', boot.xH + 'px');
     else fail('welcome-x-44', boot.xH + 'px');
+    if (/Manager Schedule Builder/i.test(boot.wordmark || '') && !/^Schedule Pro$/i.test(boot.wordmark || '')) {
+      pass('header-wordmark', boot.wordmark);
+    } else fail('header-wordmark', boot.wordmark);
+    if (boot.moreW >= 40 && boot.moreH >= 40 && !boot.overlap) pass('more-tappable', boot.moreW + 'x' + boot.moreH);
+    else fail('more-tappable', JSON.stringify({ w: boot.moreW, h: boot.moreH, overlap: boot.overlap }));
 
     await page.evaluate(() => {
       try { if (typeof toggleShiftTimesPanel === 'function') toggleShiftTimesPanel(); } catch (e) {}
@@ -167,6 +185,18 @@ async function main() {
     const floorOk = [paint.tagPx, paint.dayPx, paint.headPx].every((n) => n == null || n >= 12);
     if (floorOk && (paint.tagPx != null || paint.dayPx != null)) pass('type-12px-floor', JSON.stringify(paint));
     else fail('type-12px-floor', JSON.stringify(paint));
+
+    await page.goto(base + '/buy.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const buyBrand = await page.evaluate(() => {
+      const el = document.querySelector('.brand');
+      return {
+        text: (el && el.textContent || '').replace(/\s+/g, ' ').trim(),
+        title: document.title,
+      };
+    });
+    if (/Manager Schedule Builder Pro/i.test(buyBrand.text) && /Manager Schedule Builder Pro/i.test(buyBrand.title)) {
+      pass('buy-brand', buyBrand.text);
+    } else fail('buy-brand', JSON.stringify(buyBrand));
   } finally {
     await browser.close();
     server.close();

@@ -98,7 +98,7 @@
 <meta property="og:description" content="Fair retail schedules in minutes. NRF 4-5-4, PTO, role rules. Names, time off, and the board stay on this device — nothing is uploaded. No account. Always review before you post.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icons/icon-512.png">
-<title>Schedule Pro · Manager Shifts</title>
+<title>Manager Schedule Builder Pro</title>
 <style>
 /* ========== DESIGN TOKENS (high-tech ops console) ========== */
 :root {
@@ -189,6 +189,10 @@ body::before {
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
 }
+.app-header > div:first-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
 .app-header h1 {
   font-family: var(--display);
   font-size: 1.45rem;
@@ -199,6 +203,9 @@ body::before {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  white-space: normal;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 .app-header .subtitle {
   font-size: 0.72rem;
@@ -209,7 +216,7 @@ body::before {
   text-transform: uppercase;
   font-family: var(--mono);
 }
-.header-actions { display: flex; gap: 0.45rem; align-items: center; }
+.header-actions { display: flex; gap: 0.45rem; align-items: center; flex-shrink: 0; }
 
 .container { max-width: 1140px; margin: 0 auto; padding: 1.75rem 1.5rem 2.5rem; }
 
@@ -1650,8 +1657,8 @@ input[type="radio"] { accent-color: var(--gold); }
     align-items: center;
     gap: 0.5rem;
   }
-  .app-header h1 { font-size: 1.2rem; }
-  .header-actions { width: auto; justify-content: flex-end; }
+  .app-header h1 { font-size: 1.05rem; line-height: 1.2; }
+  .header-actions { width: auto; justify-content: flex-end; flex-shrink: 0; align-self: center; }
   .header-actions button {
     min-height: 44px;
     min-width: 44px;
@@ -3727,14 +3734,16 @@ html.auth-locked .toast-host { z-index: 20050; }
 }
 .auth-logo h1 {
   font-family: var(--display);
-  font-size: 1.45rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   background: linear-gradient(120deg, #fff 0%, #b8e9ff 45%, #a78bfa 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  line-height: 1.15;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 .auth-subtitle {
   font-family: var(--mono);
@@ -5174,7 +5183,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-logo-mark" aria-hidden="true">SP</div>
-      <h1 id="auth-title">Schedule Pro</h1>
+      <h1 id="auth-title">Manager Schedule Builder Pro</h1>
     </div>
     <p class="auth-subtitle">Workforce scheduling for retail operations</p>
     <div id="google-btn-host" class="google-btn-host" hidden aria-hidden="true"></div>
@@ -5228,7 +5237,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <header class="app-header">
   <div>
     <div class="brand-row">
-      <h1>Schedule Pro</h1>
+      <h1 data-i18n="Manager Schedule Builder">Manager Schedule Builder</h1>
       <button type="button" class="account-chip" id="account-chip" onclick="openAccountPanel()" title="Account" data-i18n-title="Account">
         <span class="account-chip-avatar" id="account-chip-avatar">?</span>
         <span class="account-chip-meta">
@@ -5309,7 +5318,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="install-banner no-print" id="install-banner" role="region" aria-label="Install app">
     <div class="ib-icon" aria-hidden="true"><img src="icons/icon-192.png" alt="" width="40" height="40"></div>
     <div class="ib-text">
-      <strong data-i18n="Install Schedule Pro">Install Schedule Pro</strong>
+      <strong data-i18n="Install Manager Schedule Builder Pro">Install Manager Schedule Builder Pro</strong>
       <span data-i18n="Add to your home screen, or get the Android app on Google Play — $19.99 one-time.">Add to your home screen, or get the Android app on Google Play — $19.99 one-time.</span>
     </div>
     <div class="ib-actions">
@@ -5742,7 +5751,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.36</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.37</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -8532,7 +8541,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.36';
+const APP_VERSION = '2.6.37';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -8582,7 +8591,10 @@ const MSB_I18N_ES = {
   'Review issues': 'Revisar problemas',
   'Suggestions': 'Sugerencias',
   'Next period': 'Siguiente período',
-  'Install Schedule Pro': 'Instalar Schedule Pro',
+  'Install Schedule Pro': 'Instalar Manager Schedule Builder Pro',
+  'Install Manager Schedule Builder Pro': 'Instalar Manager Schedule Builder Pro',
+  'Manager Schedule Builder': 'Manager Schedule Builder',
+  'Manager Schedule Builder Pro': 'Manager Schedule Builder Pro',
   'Add to your home screen, or get the Android app on Google Play — $19.99 one-time.': 'Agrégala a la pantalla de inicio, o la app Android en Google Play — $19.99 de una vez.',
   'Install': 'Instalar',
   'Not now': 'Ahora no',
@@ -8806,7 +8818,8 @@ const MSB_I18N_ES = {
   'Must-fix rules look good — check the posting board before you hang this.': 'Las reglas a corregir se ven bien — mira la revisión antes de colgar esto.',
   'Must-fix issues remain — review before you post to the team.': 'Aún hay que corregir — revisa antes de publicar al equipo.',
   'Must-fix rules OK; some preferences not fully met. Review before you post.': 'Reglas a corregir OK; algunas preferencias no se cumplieron del todo. Revisa antes de publicar.',
-  'Welcome to Schedule Pro': 'Bienvenido a Schedule Pro',
+  'Welcome to Schedule Pro': 'Bienvenido a Manager Schedule Builder Pro',
+  'Welcome to Manager Schedule Builder Pro': 'Bienvenido a Manager Schedule Builder Pro',
   'Build fair manager schedules fully offline. Use the tabs to set up your team, lock requests, tune rules, then generate. No account required.': 'Arma horarios justos de gerentes, todo en este teléfono. Usa las pestañas para el equipo, candados, reglas y luego arma. Sin cuenta.',
   'Setup — team & store': 'Equipo — gente y tienda',
   'Enter SM / AM / KC names, store name & number, and store hours. Save a Team template so next period you load the roster in one tap. Load a fiscal period before generating.': 'Pon nombres de SM / AM / KC, tienda y horario. Guarda una plantilla de equipo para el siguiente período. Carga un período fiscal antes de armar.',
@@ -11413,7 +11426,7 @@ function parseBackupPayload(raw) {
     return { ok: false, error: 'That backup looks empty. Nothing was changed.' };
   }
   if (!data.names && !data.inputs && !data.schedule && data.amCount == null && !data.kcList) {
-    return { ok: false, error: 'That file isn’t a Schedule Pro backup. Nothing was changed.' };
+    return { ok: false, error: 'That file isn’t a Manager Schedule Builder Pro backup. Nothing was changed.' };
   }
   return { ok: true, data: data };
 }
@@ -19503,7 +19516,7 @@ const TOUR_STEPS = [
   {
     tab: 'setup',
     highlight: 'app-tabs',
-    title: 'Welcome to Schedule Pro',
+    title: 'Welcome to Manager Schedule Builder Pro',
     body: 'Build fair manager schedules fully offline. Use the tabs to set up your team, lock requests, tune rules, then generate. No account required.'
   },
   {
@@ -19950,7 +19963,7 @@ function setupInstallPrompt() {
   window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
     hideInstallBanner();
-    showToast('Installed! Open Schedule Pro from your home screen.', 'success');
+    showToast('Installed! Open Manager Schedule Builder Pro from your home screen.', 'success');
     try { localStorage.setItem('msb_pwa_installed', '1'); } catch (e) {}
   });
   // iOS / browsers without beforeinstallprompt — show soft instructions once

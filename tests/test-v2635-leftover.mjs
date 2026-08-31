@@ -1,5 +1,5 @@
 /**
- * v2.6.36 leftovers: holiday uncheck, custom 9-5 hours, 53-week P12,
+ * v2.6.37 leftovers: holiday uncheck, custom 9-5 hours, 53-week P12,
  * SM extra-close strip, two-manager coverage message, chrome/SW pins.
  * Run: node tests/test-v2635-leftover.mjs
  */
@@ -68,13 +68,13 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const money = JSON.parse(read('monetization.json'));
 
-  if (ver.version === '2.6.36') pass('version.json', ver.version);
+  if (ver.version === '2.6.37') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.36'") && sw.includes("msb-pro-v2.6.36")
-    && index.includes('id="app-version-label">v2.6.36')) {
+  if (index.includes("APP_VERSION = '2.6.37'") && sw.includes("msb-pro-v2.6.37")
+    && index.includes('id="app-version-label">v2.6.37')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.36');
+  } else fail('app-sw-version', 'expected 2.6.37');
 
   if (/--ink-4:\s*#7e8dab/.test(index)) pass('ink-4-contrast');
   else fail('ink-4-contrast', 'expected --ink-4: #7e8dab');
@@ -153,6 +153,22 @@ function staticChecks() {
     && !/\.offline-pill \.pill-text,\s*\n\s*\.local-status-pill \.pill-text \{ display: none; \}/.test(index)) {
     pass('offline-pill-keeps-text');
   } else fail('offline-pill-keeps-text', '900px still hides Works offline');
+
+  const man = JSON.parse(read('manifest.webmanifest'));
+  if (man.short_name === 'Schedule Pro' && /application-name" content="Schedule Pro"/.test(index)
+    && /apple-mobile-web-app-title" content="Schedule Pro"/.test(index)
+    && man.name === 'Manager Schedule Builder Pro') {
+    pass('launcher-short-name-kept');
+  } else fail('launcher-short-name-kept', man.short_name + ' / ' + man.name);
+
+  if (/<h1[^>]*>Manager Schedule Builder<\/h1>/.test(index)
+    && index.includes('<title>Manager Schedule Builder Pro</title>')
+    && index.includes('id="auth-title">Manager Schedule Builder Pro</h1>')
+    && buy.includes('Manager Schedule Builder Pro')
+    && !/<h1>Schedule Pro<\/h1>/.test(index)
+    && !/<title>Schedule Pro/.test(index)) {
+    pass('canonical-product-name');
+  } else fail('canonical-product-name', 'header/title/buy still short-only Schedule Pro');
 }
 
 async function engineChecks(page) {
@@ -324,7 +340,7 @@ async function engineChecks(page) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.36 leftover integrity ===');
+  console.log('\n=== v2.6.37 leftover integrity ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();

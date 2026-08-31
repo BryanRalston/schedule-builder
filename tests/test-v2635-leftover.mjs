@@ -1,5 +1,5 @@
 /**
- * v2.6.35 leftovers: holiday uncheck, custom 9-5 hours, 53-week P12,
+ * v2.6.36 leftovers: holiday uncheck, custom 9-5 hours, 53-week P12,
  * SM extra-close strip, two-manager coverage message, chrome/SW pins.
  * Run: node tests/test-v2635-leftover.mjs
  */
@@ -68,13 +68,13 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const money = JSON.parse(read('monetization.json'));
 
-  if (ver.version === '2.6.35') pass('version.json', ver.version);
+  if (ver.version === '2.6.36') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.35'") && sw.includes("msb-pro-v2.6.35")
-    && index.includes('id="app-version-label">v2.6.35')) {
+  if (index.includes("APP_VERSION = '2.6.36'") && sw.includes("msb-pro-v2.6.36")
+    && index.includes('id="app-version-label">v2.6.36')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.35');
+  } else fail('app-sw-version', 'expected 2.6.36');
 
   if (/--ink-4:\s*#7e8dab/.test(index)) pass('ink-4-contrast');
   else fail('ink-4-contrast', 'expected --ink-4: #7e8dab');
@@ -132,6 +132,27 @@ function staticChecks() {
   if (!/android-twa\/twa-manifest\.json/.test(index)) {
     pass('no-play-apk-bump-in-index');
   }
+
+  if (index.includes('function toHtmlTime') && index.includes('function fromHtmlTime')
+    && /id="st-start-\$\{key\}"/.test(index) === false
+    && index.includes('type="time"')
+    && index.includes("id=\"st-start-${key}\"")) {
+    pass('native-time-inputs');
+  } else if (index.includes('type="time"') && index.includes('function toHtmlTime')) {
+    pass('native-time-inputs');
+  } else fail('native-time-inputs', 'type=time / toHtmlTime missing');
+
+  if (index.includes('welcome-dismiss-x')
+    && index.includes('id="btn-start-with-team"')
+    && index.includes('id="btn-tour-sample"')
+    && !/<button type="button" class="welcome-dismiss"/.test(index)) {
+    pass('welcome-two-actions');
+  } else fail('welcome-two-actions', 'welcome should be primary+sample, Dismiss as X');
+
+  if (/offline-pill \.pill-text \{ display: inline; \}/.test(index)
+    && !/\.offline-pill \.pill-text,\s*\n\s*\.local-status-pill \.pill-text \{ display: none; \}/.test(index)) {
+    pass('offline-pill-keeps-text');
+  } else fail('offline-pill-keeps-text', '900px still hides Works offline');
 }
 
 async function engineChecks(page) {
@@ -174,6 +195,30 @@ async function engineChecks(page) {
     scenario('hours-named-open-early', () => {
       const h = estimateShiftHours('open-early');
       return { ok: h === 10, detail: String(h) };
+    });
+
+    scenario('toHtmlTime-9a', () => {
+      const v = toHtmlTime('9a');
+      return { ok: v === '09:00', detail: String(v) };
+    });
+    scenario('fromHtmlTime-0900', () => {
+      const v = fromHtmlTime('09:00');
+      return { ok: v === '9a', detail: String(v) };
+    });
+    scenario('time-roundtrip-6p', () => {
+      const html = toHtmlTime('6p');
+      const back = fromHtmlTime(html);
+      return { ok: html === '18:00' && back === '6p', detail: html + '→' + back };
+    });
+    scenario('time-roundtrip-1230p', () => {
+      const html = toHtmlTime('12:30p');
+      const back = fromHtmlTime(html);
+      return { ok: html === '12:30' && back === '12:30p', detail: html + '→' + back };
+    });
+    scenario('time-roundtrip-12a', () => {
+      const html = toHtmlTime('12a');
+      const back = fromHtmlTime(html);
+      return { ok: html === '00:00' && back === '12a', detail: html + '→' + back };
     });
 
     scenario('nrf-2028-53-p12', () => {
@@ -279,7 +324,7 @@ async function engineChecks(page) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.35 leftover integrity ===');
+  console.log('\n=== v2.6.36 leftover integrity ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();

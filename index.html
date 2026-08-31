@@ -1189,8 +1189,10 @@ input[type="radio"] { accent-color: var(--gold); }
   margin-bottom: 0.3rem;
 }
 .store-hours-panel .sh-row label { font-size: 0.75rem; font-weight: 600; color: var(--ink-3); }
-.store-hours-panel input[type="text"] {
+.store-hours-panel input[type="text"],
+.store-hours-panel input[type="time"] {
   width: 100%;
+  min-width: 5.8rem;
   padding: 0.25rem 0.4rem;
   border-radius: 5px;
   border: 1px solid var(--line);
@@ -1690,12 +1692,12 @@ input[type="radio"] { accent-color: var(--gold); }
     min-height: 48px;
     padding: 0.2rem;
   }
-  .cal-cell .day-num { font-size: 0.65rem; }
-  .cal-cell .cell-tag { font-size: 0.55rem; padding: 1px 2px; }
-  .cal-header { font-size: 0.65rem; padding: 0.3rem 0; }
-  .week-table { font-size: 0.7rem; min-width: 500px; }
+  .cal-cell .day-num { font-size: 12px; }
+  .cal-cell .cell-tag { font-size: 12px; padding: 1px 2px; }
+  .cal-header { font-size: 12px; padding: 0.3rem 0; }
+  .week-table { font-size: 12px; min-width: 500px; }
   .week-table th, .week-table td { padding: 0.25rem 0.15rem; }
-  .week-table .name-col { width: 100px; min-width: 100px; padding-left: 0.25rem; font-size: 0.7rem; }
+  .week-table .name-col { width: 100px; min-width: 100px; padding-left: 0.25rem; font-size: 12px; }
   /* Horizontal scroll for wide schedule tables */
   #schedule-grid {
     overflow-x: auto;
@@ -1706,7 +1708,7 @@ input[type="radio"] { accent-color: var(--gold); }
   #schedule-grid::after {
     content: 'Swipe sideways to see full week →';
     display: block;
-    font-size: 0.7rem;
+    font-size: 12px;
     color: var(--ink-4);
     margin-top: 0.35rem;
     font-weight: 600;
@@ -1717,11 +1719,11 @@ input[type="radio"] { accent-color: var(--gold); }
     cursor: wait;
   }
   .week-header { font-size: 0.85rem; padding: 0.4rem 0.5rem; flex-wrap: wrap; gap: 0.25rem; }
-  .week-header .week-dates { font-size: 0.7rem; }
+  .week-header .week-dates { font-size: 12px; }
   .summary-grid {
     grid-template-columns: 1fr;
   }
-  .summary-panel table { font-size: 0.7rem; }
+  .summary-panel table { font-size: 12px; }
   .summary-panel table th, .summary-panel table td { padding: 0.25rem 0.3rem; }
   .legend { gap: 0.4rem; }
   .legend-item { font-size: 12px; }
@@ -1734,10 +1736,46 @@ input[type="radio"] { accent-color: var(--gold); }
   .kc-toggle-label { font-size: 12px; }
   .offline-pill { font-size: 12px; }
   .cal-cell .day-num, .cal-cell .cell-tag, .cal-header { font-size: 12px; }
+  .day-hours,
+  html[data-density="compact"] .day-hours,
+  .week-table thead th .day-hours,
+  .week-table thead th .dh-date,
+  .week-table thead th .fh-day-label { font-size: 12px; }
   .btn-cmdk { display: none !important; }
 }
 @media (pointer: coarse) {
   .btn-cmdk { display: none !important; }
+}
+
+/* Phone / touch: 44px tap targets. Desktop compact density stays tight. */
+@media (max-width: 600px), (pointer: coarse) {
+  .pgs-actions button,
+  #post-gen-strip .pgs-primary,
+  #post-gen-strip .pgs-chip,
+  button.pgs-chip,
+  .welcome-secondary-btn,
+  .welcome-dismiss,
+  .welcome-dismiss-x,
+  .welcome-primary,
+  .saved-entry-actions button,
+  .custom-input-row button,
+  .store-hours-panel button,
+  .store-hours-chip button,
+  .store-hours-panel .sh-mode-seg button,
+  .team-templates-bar button,
+  .backup-nudge .bn-actions button,
+  .sug-chip button,
+  .density-seg button {
+    min-height: 44px !important;
+    min-width: 44px;
+  }
+  .pgs-chip,
+  button.pgs-chip {
+    min-height: 44px;
+    padding: 0.4rem 0.7rem;
+  }
+  .month-chip { min-height: 44px; }
+  .cell-menu-group { font-size: 12px; }
 }
 
 /* ========== MISC ========== */
@@ -2013,8 +2051,10 @@ input[type="radio"] { accent-color: var(--gold); }
   min-width: 70px;
   color: var(--ink-2);
 }
-.shift-time-row input[type="text"] {
-  width: 60px;
+.shift-time-row input[type="text"],
+.shift-time-row input[type="time"] {
+  width: 7.2rem;
+  min-width: 6.5rem;
   padding: 0.25rem 0.4rem;
   border: 1px solid var(--line-strong);
   border-radius: 4px;
@@ -2023,7 +2063,8 @@ input[type="radio"] { accent-color: var(--gold); }
   background: rgba(8,12,22,0.9);
   color: var(--ink);
 }
-.shift-time-row input[type="text"]:focus {
+.shift-time-row input[type="text"]:focus,
+.shift-time-row input[type="time"]:focus {
   outline: none;
   border-color: var(--gold);
   box-shadow: 0 0 0 2px rgba(61,220,255,0.2);
@@ -2067,8 +2108,10 @@ input[type="radio"] { accent-color: var(--gold); }
   gap: 0.3rem;
   padding: 0.3rem 0.6rem;
 }
-.custom-input-row input[type="text"] {
-  width: 52px;
+.custom-input-row input[type="text"],
+.custom-input-row input[type="time"] {
+  width: 6.6rem;
+  min-width: 5.8rem;
   padding: 0.25rem 0.35rem;
   border: 1px solid var(--line-strong);
   border-radius: 4px;
@@ -2077,7 +2120,8 @@ input[type="radio"] { accent-color: var(--gold); }
   background: rgba(8,12,22,0.9);
   color: var(--ink);
 }
-.custom-input-row input[type="text"]:focus {
+.custom-input-row input[type="text"]:focus,
+.custom-input-row input[type="time"]:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(124,92,255,0.25);
@@ -2610,6 +2654,25 @@ input[type="radio"] { accent-color: var(--gold); }
   padding: 0.28rem 0.65rem;
   min-height: auto;
 }
+.welcome-dismiss-x {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none !important;
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 1.45rem;
+  line-height: 1;
+  font-weight: 500;
+  cursor: pointer;
+}
+.welcome-dismiss-x:hover { color: #fff; }
 .welcome-play {
   display: flex;
   flex-wrap: wrap;
@@ -3411,7 +3474,7 @@ input[type="radio"] { accent-color: var(--gold); }
 
 /* Compact welcome */
 .welcome-card {
-  padding: 1rem 1.25rem;
+  padding: 1rem 2.8rem 1rem 1.25rem;
   margin-bottom: 1rem;
 }
 .welcome-card.compact .welcome-steps { display: none; }
@@ -4089,12 +4152,15 @@ html.view-locked .ap-btn-danger { display: none !important; }
 .offline-pill .pill-text { display: inline; }
 .local-status-pill .pill-text { display: inline; }
 @media (max-width: 900px) {
-  .offline-pill .pill-text,
-  .local-status-pill .pill-text { display: none; }
-  .offline-pill, .local-status-pill {
-    min-width: 1.65rem; min-height: 1.65rem; justify-content: center;
-    padding: 0.2rem 0.35rem; max-width: none;
+  .offline-pill .pill-text { display: inline; }
+  .local-status-pill .pill-text { display: inline; }
+  .brand-status .offline-pill,
+  .brand-status .local-status-pill {
+    max-width: none;
+    min-width: 0;
+    padding: 0.2rem 0.45rem;
   }
+  .brand-status { max-width: 100%; }
   .pwa-mode-badge { display: none !important; }
 }
 
@@ -4992,7 +5058,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 @media (max-width: 640px) {
   .week-table tbody td.shift-editable { min-height: 44px; min-width: 44px; }
   .mw-person { min-height: 44px; padding: 0.35rem 0.4rem; }
-  .month-chip { min-height: 36px; }
+  .month-chip { min-height: 44px; }
   .sched-edit-menu {
     position: absolute !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
     top: auto !important; width: 100% !important; max-width: 100% !important; min-width: 100% !important;
@@ -5255,15 +5321,13 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
   <!-- WELCOME / ONBOARDING -->
   <div class="welcome-card no-print compact" id="welcome-card">
+    <button type="button" class="welcome-dismiss-x" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)" aria-label="Dismiss" data-i18n-aria="Dismiss" title="Dismiss" data-i18n-title="Dismiss">&times;</button>
     <h2 id="welcome-title" data-i18n="Build the period. Post with confidence.">Build the period. Post with confidence.</h2>
     <p id="welcome-body" data-i18n="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
     <p id="welcome-privacy" class="welcome-privacy" data-i18n="Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
     <div class="welcome-actions">
       <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()" data-i18n="Start with my team">Start with my team</button>
-      <div class="welcome-secondary">
-        <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})" data-i18n="See a sample">See a sample</button>
-        <button type="button" class="welcome-dismiss" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)" data-i18n="Dismiss">Dismiss</button>
-      </div>
+      <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})" data-i18n="See a sample">See a sample</button>
     </div>
     <div class="welcome-play" id="welcome-play">
       <a class="gp-badge" id="welcome-play-link" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Get it on Google Play</a>
@@ -5678,7 +5742,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.35</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Schedule Pro</strong> · <span id="app-version-label">v2.6.36</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -8468,7 +8532,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.35';
+const APP_VERSION = '2.6.36';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -10177,8 +10241,8 @@ function renderStoreHoursPanel() {
   for (let d = 0; d <= 6; d++) {
     html += '<div class="sh-row">';
     html += '<label>' + msbT(DAY_NAMES[d]) + '</label>';
-    html += '<input type="text" id="sh-open-' + d + '" value="' + esc(by[d].open) + '" placeholder="' + esc(msbT('open (hours)')) + '" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
-    html += '<input type="text" id="sh-close-' + d + '" value="' + esc(by[d].close) + '" placeholder="' + esc(msbT('close (hours)')) + '" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
+    html += '<input type="time" step="60" id="sh-open-' + d + '" value="' + esc(toHtmlTime(by[d].open)) + '" aria-label="' + esc(msbT('open (hours)')) + '" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
+    html += '<input type="time" step="60" id="sh-close-' + d + '" value="' + esc(toHtmlTime(by[d].close)) + '" aria-label="' + esc(msbT('close (hours)')) + '" onchange="updateStoreHoursDow(' + d + ')" onblur="updateStoreHoursDow(' + d + ')">';
     html += '</div>';
   }
   html += '<div class="sh-actions">';
@@ -10208,8 +10272,8 @@ function renderStoreHoursPanel() {
     }
     html += '</div>';
     html += '<div class="sh-row" style="grid-template-columns:1fr 1fr auto;margin-top:0.35rem">';
-    html += '<input type="text" id="sh-ov-open" placeholder="' + esc(msbT('open (hours)')) + '" value="' + openDef + '">';
-    html += '<input type="text" id="sh-ov-close" placeholder="' + esc(msbT('close (hours)')) + '" value="' + closeDef + '">';
+    html += '<input type="time" step="60" id="sh-ov-open" aria-label="' + esc(msbT('open (hours)')) + '" value="' + esc(toHtmlTime(openDef)) + '">';
+    html += '<input type="time" step="60" id="sh-ov-close" aria-label="' + esc(msbT('close (hours)')) + '" value="' + esc(toHtmlTime(closeDef)) + '">';
     html += '<button type="button" class="btn-primary" style="font-size:0.7rem;padding:0.25rem 0.45rem;min-height:auto" onclick="addStoreHoursDateRange()">Apply range</button>';
     html += '</div>';
     html += '<div class="sh-note">Applies the same open–close to every calendar day in the range (e.g. holiday week 12/20–12/26).</div>';
@@ -10220,8 +10284,8 @@ function renderStoreHoursPanel() {
     } else {
       html += '<input type="text" id="sh-ov-date" placeholder="YYYY-MM-DD">';
     }
-    html += '<input type="text" id="sh-ov-open" placeholder="' + esc(msbT('open (hours)')) + '" value="' + openDef + '">';
-    html += '<input type="text" id="sh-ov-close" placeholder="' + esc(msbT('close (hours)')) + '" value="' + closeDef + '">';
+    html += '<input type="time" step="60" id="sh-ov-open" aria-label="' + esc(msbT('open (hours)')) + '" value="' + esc(toHtmlTime(openDef)) + '">';
+    html += '<input type="time" step="60" id="sh-ov-close" aria-label="' + esc(msbT('close (hours)')) + '" value="' + esc(toHtmlTime(closeDef)) + '">';
     html += '<button type="button" class="btn-primary" style="font-size:0.7rem;padding:0.25rem 0.45rem;min-height:auto" onclick="addStoreHoursOverride()">Apply day</button>';
     html += '</div>';
     html += '<div class="sh-note">One calendar day only (e.g. Christmas Eve). Use Date range for multi-day stretches.</div>';
@@ -10259,9 +10323,13 @@ function updateStoreHoursDow(d) {
   const o = document.getElementById('sh-open-' + d);
   const c = document.getElementById('sh-close-' + d);
   if (!o || !c) return;
-  const open = (o.value || '').trim();
-  const close = (c.value || '').trim();
+  const open = readAppTimeInput(o);
+  const close = readAppTimeInput(c);
   if (!open || !close) return;
+  if (parseTimeToHour(open) == null || parseTimeToHour(close) == null) {
+    showToast('Use times like 9a, 6p, or 12:30p.', 'warn');
+    return;
+  }
   if (!storeHours.byDow) storeHours.byDow = {};
   storeHours.byDow[d] = { open, close };
   persistStoreMeta();
@@ -10287,9 +10355,9 @@ function addStoreHoursOverride() {
     showToast('Use a date like 2026-12-24.', 'warn');
     return;
   }
-  const open = (openEl.value || '').trim();
-  const close = (closeEl.value || '').trim();
-  if (!open || !close) {
+  const open = readAppTimeInput(openEl);
+  const close = readAppTimeInput(closeEl);
+  if (!open || !close || parseTimeToHour(open) == null || parseTimeToHour(close) == null) {
     showToast('Enter open and close times.', 'warn');
     return;
   }
@@ -10326,9 +10394,9 @@ function addStoreHoursDateRange() {
   if (start > end) {
     const t = start; start = end; end = t;
   }
-  const open = (openEl.value || '').trim();
-  const close = (closeEl.value || '').trim();
-  if (!open || !close) {
+  const open = readAppTimeInput(openEl);
+  const close = readAppTimeInput(closeEl);
+  if (!open || !close || parseTimeToHour(open) == null || parseTimeToHour(close) == null) {
     showToast('Enter open and close times.', 'warn');
     return;
   }
@@ -11556,6 +11624,44 @@ function parseTimeToHour(str) {
   return h + mins / 60;
 }
 
+/** App time ("9a", "6p", "12:30p") → HTML time input "HH:MM". */
+function toHtmlTime(str) {
+  if (str == null || str === '') return '';
+  const s = String(str).trim();
+  if (/^\d{2}:\d{2}$/.test(s)) return s;
+  const hours = parseTimeToHour(s);
+  if (hours == null || !Number.isFinite(hours)) return '';
+  let h = Math.floor(hours);
+  let mins = Math.round((hours - h) * 60);
+  if (mins === 60) { h += 1; mins = 0; }
+  h = ((h % 24) + 24) % 24;
+  return String(h).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
+}
+
+/** HTML time "HH:MM" → app time ("9a", "6p", "12:30p"). */
+function fromHtmlTime(str) {
+  if (str == null || str === '') return '';
+  const s = String(str).trim();
+  const m = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return s;
+  let h = parseInt(m[1], 10);
+  const mins = parseInt(m[2], 10);
+  if (!Number.isFinite(h) || !Number.isFinite(mins) || h < 0 || h > 23 || mins < 0 || mins > 59) return '';
+  const ap = h >= 12 ? 'p' : 'a';
+  let h12 = h % 12;
+  if (h12 === 0) h12 = 12;
+  if (mins === 0) return h12 + ap;
+  return h12 + ':' + String(mins).padStart(2, '0') + ap;
+}
+
+function readAppTimeInput(el) {
+  if (!el) return '';
+  const raw = (el.value || '').trim();
+  if (!raw) return '';
+  if (el.type === 'time' || /^\d{1,2}:\d{2}$/.test(raw)) return fromHtmlTime(raw) || '';
+  return raw;
+}
+
 function getShiftEndHour(shift) {
   if (isCustomShift(shift)) return null;
   const key = shift;
@@ -12499,9 +12605,9 @@ function openCellMenu(e, role, dk) {
         html += `<button onclick="showCustomInputInCellMenu('${role}','${dk}'); event.stopPropagation();" style="color:#7e22ce;font-weight:600">${o.label}</button>`;
         html += `<div id="cell-custom-input-${role}-${dk}" style="display:none">`;
         html += `<div class="custom-input-row">`;
-        html += `<input type="text" id="cell-custom-start-${role}-${dk}" placeholder="10a">`;
+        html += `<input type="time" step="60" id="cell-custom-start-${role}-${dk}" aria-label="Start">`;
         html += `<span class="ci-dash">-</span>`;
-        html += `<input type="text" id="cell-custom-end-${role}-${dk}" placeholder="6p">`;
+        html += `<input type="time" step="60" id="cell-custom-end-${role}-${dk}" aria-label="End">`;
         html += `<button class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onclick="applyCustomCellValue('${role}','${dk}'); event.stopPropagation();">OK</button>`;
         html += `</div></div>`;
       } else if (o.value === '__loa__') {
@@ -12532,9 +12638,12 @@ function showCustomInputInCellMenu(role, dk) {
 }
 
 function applyCustomCellValue(role, dk) {
-  const startVal = (document.getElementById('cell-custom-start-' + role + '-' + dk).value || '').trim();
-  const endVal = (document.getElementById('cell-custom-end-' + role + '-' + dk).value || '').trim();
-  if (!startVal || !endVal) return;
+  const startVal = readAppTimeInput(document.getElementById('cell-custom-start-' + role + '-' + dk));
+  const endVal = readAppTimeInput(document.getElementById('cell-custom-end-' + role + '-' + dk));
+  if (!startVal || !endVal || parseTimeToHour(startVal) == null || parseTimeToHour(endVal) == null) {
+    showToast('Use times like 9a, 6p, or 12:30p.', 'warn');
+    return;
+  }
   const customVal = 'custom:' + startVal + '-' + endVal;
   setCellValue(role, dk, customVal);
 }
@@ -18184,9 +18293,9 @@ function openSchedEditMenu(e, role, dk, weekIdx, isKCRole) {
       html += `</button>`;
       html += `<div id="sched-custom-input-${role}-${dk}" style="display:none">`;
       html += `<div class="custom-input-row">`;
-      html += `<input type="text" id="sched-custom-start-${role}-${dk}" placeholder="10a">`;
+      html += `<input type="time" step="60" id="sched-custom-start-${role}-${dk}" aria-label="Start">`;
       html += `<span class="ci-dash">-</span>`;
-      html += `<input type="text" id="sched-custom-end-${role}-${dk}" placeholder="6p">`;
+      html += `<input type="time" step="60" id="sched-custom-end-${role}-${dk}" aria-label="End">`;
       html += `<button type="button" class="btn-primary" style="padding:0.2rem 0.5rem;font-size:0.7rem;min-height:auto" onpointerdown="schedEditStop(event); applySchedCustom('${role}','${dk}',${weekIdx});" onclick="schedEditStop(event); applySchedCustom('${role}','${dk}',${weekIdx});">OK</button>`;
       html += `</div></div>`;
     } else {
@@ -18224,9 +18333,12 @@ function showSchedCustomInput(role, dk, weekIdx) {
 }
 
 function applySchedCustom(role, dk, weekIdx) {
-  const startVal = (document.getElementById('sched-custom-start-' + role + '-' + dk).value || '').trim();
-  const endVal = (document.getElementById('sched-custom-end-' + role + '-' + dk).value || '').trim();
-  if (!startVal || !endVal) return;
+  const startVal = readAppTimeInput(document.getElementById('sched-custom-start-' + role + '-' + dk));
+  const endVal = readAppTimeInput(document.getElementById('sched-custom-end-' + role + '-' + dk));
+  if (!startVal || !endVal || parseTimeToHour(startVal) == null || parseTimeToHour(endVal) == null) {
+    showToast('Use times like 9a, 6p, or 12:30p.', 'warn');
+    return;
+  }
   const customVal = 'custom:' + startVal + '-' + endVal;
   applySchedEdit(role, dk, weekIdx, customVal);
 }
@@ -19728,9 +19840,9 @@ function renderShiftTimesGrid() {
     const t = customShiftTimes[key] || DEFAULT_SHIFT_TIMES[key];
     html += `<div class="shift-time-row">`;
     html += `<span class="st-label">${shiftNames[key]}</span>`;
-    html += `<input type="text" inputmode="text" placeholder="9a" title="Examples: 9a, 6p, 12:30p" value="${t.start}" id="st-start-${key}" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
+    html += `<input type="time" step="60" value="${esc(toHtmlTime(t.start))}" id="st-start-${key}" aria-label="${esc(shiftNames[key])} start" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
     html += `<span class="st-dash">-</span>`;
-    html += `<input type="text" inputmode="text" placeholder="6p" title="Examples: 9a, 6p, 12:30p" value="${t.end}" id="st-end-${key}" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
+    html += `<input type="time" step="60" value="${esc(toHtmlTime(t.end))}" id="st-end-${key}" aria-label="${esc(shiftNames[key])} end" onblur="updateShiftTime('${key}')" onchange="updateShiftTime('${key}')">`;
     html += `</div>`;
   });
   grid.innerHTML = html;
@@ -19740,8 +19852,8 @@ function updateShiftTime(key) {
   const startEl = document.getElementById('st-start-' + key);
   const endEl = document.getElementById('st-end-' + key);
   if (!startEl || !endEl) return;
-  const start = startEl.value.trim();
-  const end = endEl.value.trim();
+  const start = readAppTimeInput(startEl);
+  const end = readAppTimeInput(endEl);
   const startOk = parseTimeToHour(start) != null;
   const endOk = parseTimeToHour(end) != null;
   startEl.classList.toggle('is-invalid', !startOk);
@@ -19750,8 +19862,8 @@ function updateShiftTime(key) {
     showToast('Use times like 9a, 6p, or 12:30p.', 'warn');
     const prev = customShiftTimes[key] || DEFAULT_SHIFT_TIMES[key];
     if (prev) {
-      if (!startOk) startEl.value = prev.start;
-      if (!endOk) endEl.value = prev.end;
+      if (!startOk) startEl.value = toHtmlTime(prev.start);
+      if (!endOk) endEl.value = toHtmlTime(prev.end);
       startEl.classList.remove('is-invalid');
       endEl.classList.remove('is-invalid');
     }

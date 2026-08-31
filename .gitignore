@@ -33,3 +33,6 @@ android-twa/*.idsig
 # Logs
 *.log
 npm-debug.log*
+
+# media / walkthrough renders
+*.mp4

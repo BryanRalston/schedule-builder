@@ -53,10 +53,17 @@ function read(rel) {
 }
 
 async function loadChromium() {
-  const spec = join(ROOT, 'scripts/browser-ops/node_modules/playwright/index.mjs');
-  if (!existsSync(spec)) throw new Error('Playwright not installed');
-  const mod = await import(pathToFileURL(spec).href);
-  return mod.chromium;
+  const candidates = [
+    join(ROOT, 'scripts/browser-ops/node_modules/playwright/index.mjs'),
+    '/tmp/msb-pw/node_modules/playwright-core/index.mjs',
+    '/tmp/node_modules/playwright-core/index.mjs',
+  ];
+  for (const spec of candidates) {
+    if (!existsSync(spec)) continue;
+    const mod = await import(pathToFileURL(spec).href);
+    if (mod.chromium) return mod.chromium;
+  }
+  throw new Error('Playwright not installed');
 }
 
 function staticChecks() {
@@ -159,10 +166,22 @@ async function main() {
       pass('install-hidden-before-build');
     } else fail('install-hidden-before-build', JSON.stringify(boot));
 
-    await page.evaluate(() => {
-      if (typeof startWithMyTeam === 'function') startWithMyTeam();
+    await page.click('#btn-start-with-team');
+    await page.waitForTimeout(300);
+    const afterStart = await page.evaluate(() => {
+      const welcome = document.getElementById('welcome-card');
+      const banner = document.getElementById('install-banner');
+      const sm = document.getElementById('name-sm');
+      return {
+        welcomeHidden: !welcome || welcome.hasAttribute('hidden') || getComputedStyle(welcome).display === 'none',
+        bannerShow: !!(banner && banner.classList.contains('show')),
+        tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
+        smVisible: !!(sm && sm.offsetHeight > 0),
+      };
     });
-    await page.waitForTimeout(200);
+    if (afterStart.welcomeHidden && !afterStart.bannerShow && afterStart.tab === 'setup' && afterStart.smVisible) {
+      pass('start-with-team-no-install', afterStart.tab);
+    } else fail('start-with-team-no-install', JSON.stringify(afterStart));
 
     const planModal = await page.evaluate(() => {
       if (typeof openAccountPanel === 'function') openAccountPanel();
@@ -173,28 +192,21 @@ async function main() {
     if (/Free · 2 of 2 builds left/i.test(planModal)) pass('account-plan-row', planModal);
     else fail('account-plan-row', planModal);
 
+    await page.fill('#name-sm', 'Pat Nguyen');
+    await page.fill('#name-am1', 'Chris Ortiz');
+    await page.click('#btn-build-from-setup');
+    await page.waitForTimeout(1800);
     const built = await page.evaluate(() => {
-      document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
-      const sm = document.getElementById('name-sm');
-      const am1 = document.getElementById('name-am1');
-      if (sm) sm.value = 'Pat Nguyen';
-      if (am1) am1.value = 'Chris Ortiz';
-      if (typeof persistManagerNames === 'function') persistManagerNames();
-      if (typeof buildFromSetup === 'function') buildFromSetup();
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const banner = document.getElementById('install-banner');
-          const plan = document.getElementById('account-chip-plan');
-          resolve({
-            cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
-            bannerShow: !!(banner && banner.classList.contains('show')),
-            planText: (plan && plan.textContent || '').trim(),
-            remaining: typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null,
-            hasBuilt: typeof hasBuiltOnceForInstall === 'function' ? hasBuiltOnceForInstall() : null,
-            lsBuilt: localStorage.getItem('msb_has_built_once'),
-          });
-        }, 1800);
-      });
+      const banner = document.getElementById('install-banner');
+      const plan = document.getElementById('account-chip-plan');
+      return {
+        cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+        bannerShow: !!(banner && banner.classList.contains('show')),
+        planText: (plan && plan.textContent || '').trim(),
+        remaining: typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null,
+        hasBuilt: typeof hasBuiltOnceForInstall === 'function' ? hasBuiltOnceForInstall() : null,
+        lsBuilt: localStorage.getItem('msb_has_built_once'),
+      };
     });
     if (built.cells > 20 && built.hasBuilt && built.lsBuilt === '1') pass('first-build-marks-once', built.cells + ' cells');
     else fail('first-build-marks-once', JSON.stringify(built));

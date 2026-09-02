@@ -3556,6 +3556,13 @@ input[type="radio"] { accent-color: var(--gold); }
   flex-wrap: wrap;
 }
 .tab-footer-nav button { font-size: 0.85rem; }
+.setup-build-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 #tab-setup .tab-footer-nav .btn-success { min-width: 10.5rem; }
 
 @media (max-width: 640px) {
@@ -3567,6 +3574,7 @@ input[type="radio"] { accent-color: var(--gold); }
   }
   #tab-setup .tab-footer-nav .btn-success,
   #tab-setup .tab-footer-nav .btn-secondary { width: 100%; }
+  #tab-setup .tab-footer-nav .setup-build-cluster { width: 100%; }
 }
 @media print {
   .app-tabs, .tab-footer-nav, .empty-schedule, .sub-tabs { display: none !important; }
@@ -4101,9 +4109,14 @@ html.auth-locked .toast-host { z-index: 20050; }
 .license-error.show, .provider-error.show { display: block; }
 
 @media (max-width: 520px) {
-  .account-chip-name { max-width: 72px; }
-  .account-chip-meta { display: none; }
-  .account-chip { padding: 0.2rem; }
+  .account-chip-name { display: none; }
+  .account-chip-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .account-chip-plan { font-size: 0.58rem; letter-spacing: 0.04em; }
+  .account-chip { padding: 0.2rem 0.42rem 0.2rem 0.22rem; }
 }
 
 
@@ -5242,7 +5255,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <span class="account-chip-avatar" id="account-chip-avatar">?</span>
         <span class="account-chip-meta">
           <span class="account-chip-name" id="account-chip-name">Account</span>
-          <span class="account-chip-plan is-free" id="account-chip-plan">Free</span>
+          <span class="account-chip-plan is-free" id="account-chip-plan">Free · 2</span>
         </span>
       </button>
       <span class="brand-status" id="brand-status">
@@ -5511,7 +5524,10 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </div>
       <div class="tab-footer-nav">
         <button type="button" class="btn-secondary" onclick="switchTab('requests')" data-i18n="Requests (optional)">Requests (optional)</button>
-        <button type="button" class="btn-success" id="btn-build-from-setup" onclick="buildFromSetup()" data-i18n="Build this period">Build this period</button>
+        <div class="setup-build-cluster">
+          <button type="button" class="btn-success" id="btn-build-from-setup" onclick="buildFromSetup()" data-i18n="Build this period">Build this period</button>
+          <span class="gen-free-left" id="setup-gen-free-left" hidden></span>
+        </div>
       </div>
     </div>
 
@@ -5751,7 +5767,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.37</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.38</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -5802,7 +5818,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     </div>
     <div class="ap-rows">
       <div class="ap-row"><span data-i18n="Store">Store</span><span id="ap-store">This device</span></div>
-      <div class="ap-row"><span data-i18n="Plan">Plan</span><span id="ap-plan">Free</span></div>
+      <div class="ap-row"><span data-i18n="Plan">Plan</span><span id="ap-plan">Free · 2 of 2 builds left</span></div>
     </div>
     <div class="ap-actions">
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
@@ -6165,6 +6181,8 @@ const MSB_LICENSE_KEY = 'msb_pro_license';
 const MSB_LICENSE_PENDING_KEY = 'msb_license_pending_verify';
 const MSB_TWA_KEY = 'msb_twa';
 const MSB_GEN_COUNT_KEY = 'msb_free_generate_count';
+const MSB_INSTALL_DISMISSED_KEY = 'msb_install_dismissed';
+const MSB_HAS_BUILT_ONCE_KEY = 'msb_has_built_once';
 const MSB_SESSION_KEY = 'msb_session';
 const MSB_WORKSPACE_KEY = 'msb_workspace';
 const MSB_LOCAL_ACCOUNTS_KEY = 'msb_local_accounts';
@@ -7211,18 +7229,34 @@ function formatSignInRow(s) {
   return method;
 }
 
+function formatFreeChipLabel() {
+  const left = remainingFreeGenerates();
+  return left === 0 ? msbT('Free · 0') : msbT('Free · {n}', { n: left });
+}
+
+function formatFreePlanDetail() {
+  const left = remainingFreeGenerates();
+  const total = typeof freeGenerateLimit === 'function' ? freeGenerateLimit() : 2;
+  return msbT('Free · {n} of {total} builds left', { n: left, total: total });
+}
+
+function formatFreeBuildsLeftLabel() {
+  const left = remainingFreeGenerates();
+  if (left === 0) return msbT('0 free builds left');
+  return left === 1
+    ? msbT('{n} free build left', { n: left })
+    : msbT('{n} free builds left', { n: left });
+}
+
 function updateAccountChip() {
   const avatar = document.getElementById('account-chip-avatar');
   const nameEl = document.getElementById('account-chip-name');
   const planEl = document.getElementById('account-chip-plan');
+  const chip = document.getElementById('account-chip');
   const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : { label: msbT('This device') };
   const pro = isProUnlocked();
-  const planText = pro
-    ? msbT('Pro')
-    : (function () {
-        const left = remainingFreeGenerates();
-        return left === 0 ? msbT('Free · 0') : msbT('Free · {n}', { n: left });
-      })();
+  const planText = pro ? msbT('Pro') : formatFreeChipLabel();
+  const planDetail = pro ? msbT('Pro') : formatFreePlanDetail();
   const initial = (id.label || msbT('This device')).trim().charAt(0).toUpperCase() || 'T';
   if (avatar) avatar.textContent = initial;
   if (nameEl) nameEl.textContent = id.label || msbT('This device');
@@ -7230,6 +7264,7 @@ function updateAccountChip() {
     planEl.textContent = planText;
     planEl.classList.toggle('is-pro', pro);
   }
+  if (chip) chip.title = planDetail;
 }
 
 function formatSignInMethod(s) {
@@ -7259,7 +7294,7 @@ function openAccountPanel() {
   set('ap-name', id.label || 'This device');
   set('ap-email', '—');
   set('ap-method', 'This device');
-  set('ap-plan', isProUnlocked() ? msbT('Pro') : msbT('Free'));
+  set('ap-plan', isProUnlocked() ? msbT('Pro') : formatFreePlanDetail());
   const signInBtn = document.getElementById('ap-signin-btn');
   if (signInBtn) {
     signInBtn.hidden = true;
@@ -7336,6 +7371,8 @@ function signOutSession() {
         MSB_LOCAL_ACCOUNTS_KEY,
         MSB_LICENSE_KEY,
         MSB_GEN_COUNT_KEY,
+        MSB_INSTALL_DISMISSED_KEY,
+        MSB_HAS_BUILT_ONCE_KEY,
         'msb_install_dismissed',
         'msb_pwa_installed'
       ]);
@@ -7683,18 +7720,20 @@ function applyUrlProUnlock() {
 }
 
 function updateGenFreeLeft() {
-  const el = document.getElementById('gen-free-left');
-  if (!el) return;
+  const els = document.querySelectorAll('.gen-free-left');
+  if (!els.length) return;
   if (isProUnlocked()) {
-    el.hidden = true;
-    el.textContent = '';
+    els.forEach((el) => {
+      el.hidden = true;
+      el.textContent = '';
+    });
     return;
   }
-  const left = remainingFreeGenerates();
-  el.hidden = false;
-  el.textContent = left === 0
-    ? '0 free builds left'
-    : (left + ' free build' + (left === 1 ? '' : 's') + ' left');
+  const label = formatFreeBuildsLeftLabel();
+  els.forEach((el) => {
+    el.hidden = false;
+    el.textContent = label;
+  });
 }
 
 function canAddManagerSeat() {
@@ -8541,7 +8580,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.37';
+const APP_VERSION = '2.6.38';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -8746,6 +8785,8 @@ const MSB_I18N_ES = {
   'Welcome · {store}': 'Bienvenido · {store}',
   'Free · {n}': 'Gratis · {n}',
   'Free · 0': 'Gratis · 0',
+  'Free · {n} of {total} builds left': 'Gratis · {n} de {total} armados restantes',
+  '0 free builds left': '0 armados gratis restantes',
   'Posting check': 'Revisión para publicar',
   'Ready to post': 'Listo para publicar',
   'Not ready': 'No listo',
@@ -15403,6 +15444,8 @@ function _generateScheduleInner(opts) {
   });
   try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
   try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
+  try { if (typeof markHasBuiltOnce === 'function') markHasBuiltOnce(); } catch (eBuilt) {}
+  try { if (typeof maybeOfferInstall === 'function') maybeOfferInstall(); } catch (eInst) {}
   try {
     if (typeof computeScheduleDiff === 'function') {
       window._lastScheduleDiff = computeScheduleDiff(window._prevScheduleSnap || {}, schedule);
@@ -19950,6 +19993,51 @@ function registerServiceWorker() {
   });
 }
 
+let installBannerDismissedMem = false;
+
+function isInstallBannerDismissed() {
+  if (installBannerDismissedMem) return true;
+  try {
+    if (sessionStorage.getItem(MSB_INSTALL_DISMISSED_KEY) === '1') return true;
+    if (localStorage.getItem(MSB_INSTALL_DISMISSED_KEY) === '1') return true;
+    if (localStorage.getItem('msb_install_dismissed') === '1') return true;
+  } catch (e) {}
+  return false;
+}
+
+function persistInstallBannerDismissed() {
+  installBannerDismissedMem = true;
+  try { sessionStorage.setItem(MSB_INSTALL_DISMISSED_KEY, '1'); } catch (e) {}
+  try { localStorage.setItem(MSB_INSTALL_DISMISSED_KEY, '1'); } catch (e) {}
+}
+
+function hasBuiltOnceForInstall() {
+  try {
+    if (localStorage.getItem(MSB_HAS_BUILT_ONCE_KEY) === '1') return true;
+    if (sessionStorage.getItem(MSB_HAS_BUILT_ONCE_KEY) === '1') return true;
+  } catch (e) {}
+  try {
+    if (typeof hasLiveBuiltBoard === 'function' && hasLiveBuiltBoard()) return true;
+  } catch (e2) {}
+  try {
+    if (typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule()) return true;
+  } catch (e3) {}
+  return false;
+}
+
+function markHasBuiltOnce() {
+  try { localStorage.setItem(MSB_HAS_BUILT_ONCE_KEY, '1'); } catch (e) {}
+  try { sessionStorage.setItem(MSB_HAS_BUILT_ONCE_KEY, '1'); } catch (e2) {}
+}
+
+function maybeOfferInstall() {
+  if (isStandalonePwa()) return;
+  if (isInstallBannerDismissed()) return;
+  if (!hasBuiltOnceForInstall()) return;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  showInstallBanner(isIOS && !deferredInstallPrompt);
+}
+
 function setupInstallPrompt() {
   if (isStandalonePwa()) {
     document.documentElement.classList.add('pwa-standalone');
@@ -19958,33 +20046,29 @@ function setupInstallPrompt() {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    showInstallBanner();
+    maybeOfferInstall();
   });
   window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
     hideInstallBanner();
+    persistInstallBannerDismissed();
     showToast('Installed! Open Manager Schedule Builder Pro from your home screen.', 'success');
     try { localStorage.setItem('msb_pwa_installed', '1'); } catch (e) {}
   });
-  // iOS / browsers without beforeinstallprompt — show soft instructions once
+  // iOS / browsers without beforeinstallprompt — after first Build only
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const dismissed = (() => { try { return localStorage.getItem('msb_install_dismissed') === '1'; } catch(e) { return false; } })();
-  if (!dismissed && (isIOS || !window.matchMedia('(display-mode: browser)').matches === false)) {
-    // soft show after delay on mobile
-    if (isIOS && window.innerWidth < 900) {
-      setTimeout(() => {
-        if (!deferredInstallPrompt && !isStandalonePwa()) showInstallBanner(true);
-      }, 4000);
-    }
+  if (isIOS && window.innerWidth < 900 && !isInstallBannerDismissed()) {
+    setTimeout(() => {
+      if (!deferredInstallPrompt && !isStandalonePwa()) maybeOfferInstall();
+    }, 4000);
   }
 }
 
 function showInstallBanner(iosHint) {
   const el = document.getElementById('install-banner');
   if (!el || isStandalonePwa()) return;
-  try {
-    if (localStorage.getItem('msb_install_dismissed') === '1') return;
-  } catch(e) {}
+  if (isInstallBannerDismissed()) return;
+  if (!hasBuiltOnceForInstall()) return;
   el.classList.add('show');
   if (iosHint) {
     const span = el.querySelector('.ib-text span');
@@ -20000,7 +20084,7 @@ function hideInstallBanner() {
 
 function dismissInstallBanner() {
   hideInstallBanner();
-  try { localStorage.setItem('msb_install_dismissed', '1'); } catch(e) {}
+  persistInstallBannerDismissed();
 }
 
 async function promptPwaInstall() {

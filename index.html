@@ -5767,7 +5767,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.38</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.39</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -7576,7 +7576,7 @@ function shouldRecordFreeGenerate(opts) {
   return true;
 }
 
-/** Rebuild after a board already exists (Ask / paint iterate) does not spend a free seat. */
+/** Rebuild of the current board (Ask / paint iterate) does not decrement a free build. First generate of a new board does. */
 function generateScheduleFromButton() {
   const skip = typeof hasLiveBuiltBoard === 'function' && hasLiveBuiltBoard();
   generateSchedule(skip ? { skipFreeCount: true } : {});
@@ -8580,7 +8580,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.38';
+const APP_VERSION = '2.6.39';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -11416,6 +11416,8 @@ function maybeShowBackupNudge() {
   if (!el) return;
   el.hidden = false;
   el.classList.add('show');
+  // One chrome block: hold Install/Play while this first-build backup nudge is up.
+  try { if (typeof hideInstallBanner === 'function') hideInstallBanner(); } catch (e) {}
 }
 
 function dismissBackupNudge() {
@@ -20030,10 +20032,20 @@ function markHasBuiltOnce() {
   try { sessionStorage.setItem(MSB_HAS_BUILT_ONCE_KEY, '1'); } catch (e2) {}
 }
 
+function shouldHoldInstallForBackupNudge() {
+  try {
+    return typeof backupNudgeIsDone === 'function' && !backupNudgeIsDone();
+  } catch (e) {
+    return false;
+  }
+}
+
 function maybeOfferInstall() {
   if (isStandalonePwa()) return;
   if (isInstallBannerDismissed()) return;
   if (!hasBuiltOnceForInstall()) return;
+  // Backup nudge uses msb_backup_nudge_done. Hold Install until that persist is set (save or Not now).
+  if (shouldHoldInstallForBackupNudge()) return;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   showInstallBanner(isIOS && !deferredInstallPrompt);
 }
@@ -20069,6 +20081,7 @@ function showInstallBanner(iosHint) {
   if (!el || isStandalonePwa()) return;
   if (isInstallBannerDismissed()) return;
   if (!hasBuiltOnceForInstall()) return;
+  if (shouldHoldInstallForBackupNudge()) return;
   el.classList.add('show');
   if (iosHint) {
     const span = el.querySelector('.ib-text span');

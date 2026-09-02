@@ -1,7 +1,8 @@
 /**
- * v2.6.38 first-minute: phone Free · N + install banner after first Build.
- * v2.6.39: do not stack Install with the backup nudge on that first board.
- * Run: node tests/test-v2638-first-minute.mjs
+ * v2.6.39 first-minute: extend 2.6.38 Free · N / deferred install.
+ * After first Build, backup nudge and Install/Play do not stack.
+ * Rebuild of the current board does not spend a second free build.
+ * Run: node tests/test-v2639-first-minute.mjs
  */
 import { createServer } from 'http';
 import { readFileSync, existsSync } from 'fs';
@@ -99,14 +100,31 @@ function staticChecks() {
     && index.includes('function hasBuiltOnceForInstall(')
     && index.includes('function persistInstallBannerDismissed(')
     && index.includes('MSB_HAS_BUILT_ONCE_KEY')
-    && index.includes('function shouldHoldInstallForBackupNudge(')
     && /showInstallBanner\(\);\s*\}\);/.test(index) === false) {
     pass('install-gated-and-persisted');
   } else fail('install-gated-and-persisted', 'install still shown from beforeinstallprompt immediately');
+
+  if (index.includes('function shouldHoldInstallForBackupNudge(')
+    && index.includes('shouldHoldInstallForBackupNudge()')
+    && /maybeShowBackupNudge[\s\S]{0,400}hideInstallBanner/.test(index)
+    && index.includes("MSB_BACKUP_NUDGE_KEY = 'msb_backup_nudge_done'")) {
+    pass('install-holds-for-backup-persist');
+  } else fail('install-holds-for-backup-persist', 'missing backup-first hold');
+
+  if (/Rebuild of the current board[\s\S]{0,80}does not decrement a free build/.test(index)
+    && /generateScheduleFromButton[\s\S]{0,180}skipFreeCount: true/.test(index)) {
+    pass('rebuild-does-not-decrement-comment');
+  } else fail('rebuild-does-not-decrement-comment', 'rebuild skipFreeCount comment missing');
+
+  if (index.includes("'Save a backup now': 'Guarda un respaldo ahora'")
+    && index.includes("'Not now': 'Ahora no'")
+    && index.includes("'Install Manager Schedule Builder Pro': 'Instalar Manager Schedule Builder Pro'")) {
+    pass('spanish-chrome-strings');
+  } else fail('spanish-chrome-strings', 'missing ES backup/install chrome');
 }
 
 async function main() {
-  console.log('\n=== v2.6.39 first-minute phone (2.6.38 path) ===');
+  console.log('\n=== v2.6.39 first-minute phone ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();
@@ -119,7 +137,7 @@ async function main() {
 
   try {
     const context = await browser.newContext({
-      viewport: { width: 360, height: 740 },
+      viewport: { width: 412, height: 915 },
       isMobile: true,
       hasTouch: true,
     });
@@ -199,57 +217,89 @@ async function main() {
     await page.click('#btn-build-from-setup');
     await page.waitForTimeout(1800);
     const built = await page.evaluate(() => {
-      const banner = document.getElementById('install-banner');
-      const nudge = document.getElementById('backup-nudge');
-      const ncs = nudge ? getComputedStyle(nudge) : null;
       const plan = document.getElementById('account-chip-plan');
-      const bannerShow = !!(banner && banner.classList.contains('show'));
-      const backupShow = !!(nudge && !nudge.hidden && nudge.classList.contains('show') && ncs && ncs.display !== 'none');
+      const chrome = (() => {
+        const banner = document.getElementById('install-banner');
+        const nudge = document.getElementById('backup-nudge');
+        const bcs = banner ? getComputedStyle(banner) : null;
+        const ncs = nudge ? getComputedStyle(nudge) : null;
+        const bannerShow = !!(banner && banner.classList.contains('show') && bcs && bcs.display !== 'none');
+        const backupShow = !!(nudge && !nudge.hidden && nudge.classList.contains('show') && ncs && ncs.display !== 'none');
+        const notNows = [...document.querySelectorAll('button')].filter((b) => {
+          const t = (b.textContent || '').trim();
+          if (!/^(Not now|Ahora no)$/i.test(t)) return false;
+          const cs = getComputedStyle(b);
+          return cs.display !== 'none' && cs.visibility !== 'hidden' && b.offsetHeight > 0;
+        }).length;
+        return { bannerShow, backupShow, notNows, stacked: bannerShow && backupShow };
+      })();
       return {
         cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
-        bannerShow,
-        backupShow,
-        stacked: bannerShow && backupShow,
         planText: (plan && plan.textContent || '').trim(),
         remaining: typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null,
         hasBuilt: typeof hasBuiltOnceForInstall === 'function' ? hasBuiltOnceForInstall() : null,
         lsBuilt: localStorage.getItem('msb_has_built_once'),
+        backupDone: localStorage.getItem('msb_backup_nudge_done'),
+        ...chrome,
       };
     });
     if (built.cells > 20 && built.hasBuilt && built.lsBuilt === '1') pass('first-build-marks-once', built.cells + ' cells');
     else fail('first-build-marks-once', JSON.stringify(built));
-    if (built.backupShow && !built.bannerShow && !built.stacked) pass('install-after-first-build', 'held behind backup');
-    else fail('install-after-first-build', JSON.stringify(built));
+    if (built.backupShow && !built.bannerShow && !built.stacked && built.notNows === 1) {
+      pass('backup-first-no-stack', 'notNows=' + built.notNows);
+    } else fail('backup-first-no-stack', JSON.stringify(built));
     if (/Free · 1/i.test(built.planText) && built.remaining === 1) pass('chip-after-spend', built.planText);
     else fail('chip-after-spend', JSON.stringify(built));
 
     const afterBackupDismiss = await page.evaluate(() => {
       if (typeof dismissBackupNudge === 'function') dismissBackupNudge();
-      if (typeof maybeOfferInstall === 'function') maybeOfferInstall();
-      const banner = document.getElementById('install-banner');
-      return {
-        bannerShow: !!(banner && banner.classList.contains('show')),
-        backupDone: localStorage.getItem('msb_backup_nudge_done'),
-      };
-    });
-    if (!afterBackupDismiss.bannerShow && afterBackupDismiss.backupDone === '1') {
-      pass('one-not-now-same-board');
-    } else fail('one-not-now-same-board', JSON.stringify(afterBackupDismiss));
-
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(700);
-    const installAfterBackup = await page.evaluate(() => {
       if (typeof showInstallBanner === 'function') showInstallBanner();
       if (typeof maybeOfferInstall === 'function') maybeOfferInstall();
       const banner = document.getElementById('install-banner');
       const nudge = document.getElementById('backup-nudge');
+      const bcs = banner ? getComputedStyle(banner) : null;
+      const ncs = nudge ? getComputedStyle(nudge) : null;
+      const bannerShow = !!(banner && banner.classList.contains('show') && bcs && bcs.display !== 'none');
+      const backupShow = !!(nudge && !nudge.hidden && nudge.classList.contains('show') && ncs && ncs.display !== 'none');
+      const notNows = [...document.querySelectorAll('button')].filter((b) => {
+        const t = (b.textContent || '').trim();
+        if (!/^(Not now|Ahora no)$/i.test(t)) return false;
+        const cs = getComputedStyle(b);
+        return cs.display !== 'none' && cs.visibility !== 'hidden' && b.offsetHeight > 0;
+      }).length;
       return {
-        bannerShow: !!(banner && banner.classList.contains('show')),
-        backupShow: !!(nudge && !nudge.hidden && nudge.classList.contains('show')),
+        bannerShow,
+        backupShow,
+        notNows,
+        backupDone: localStorage.getItem('msb_backup_nudge_done'),
       };
     });
-    if (installAfterBackup.bannerShow && !installAfterBackup.backupShow) pass('install-after-backup-handled');
-    else fail('install-after-backup-handled', JSON.stringify(installAfterBackup));
+    if (!afterBackupDismiss.backupShow && !afterBackupDismiss.bannerShow && afterBackupDismiss.notNows === 0
+      && afterBackupDismiss.backupDone === '1') {
+      pass('one-not-now-same-board');
+    } else fail('one-not-now-same-board', JSON.stringify(afterBackupDismiss));
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+    const afterReloadInstall = await page.evaluate(() => {
+      if (typeof showInstallBanner === 'function') showInstallBanner();
+      if (typeof maybeOfferInstall === 'function') maybeOfferInstall();
+      const banner = document.getElementById('install-banner');
+      const nudge = document.getElementById('backup-nudge');
+      const bcs = banner ? getComputedStyle(banner) : null;
+      const ncs = nudge ? getComputedStyle(nudge) : null;
+      const bannerShow = !!(banner && banner.classList.contains('show') && bcs && bcs.display !== 'none');
+      const backupShow = !!(nudge && !nudge.hidden && nudge.classList.contains('show') && ncs && ncs.display !== 'none');
+      return {
+        bannerShow,
+        backupShow,
+        stacked: bannerShow && backupShow,
+        remaining: typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null,
+      };
+    });
+    if (afterReloadInstall.bannerShow && !afterReloadInstall.backupShow && !afterReloadInstall.stacked) {
+      pass('install-after-backup-handled', 'reload');
+    } else fail('install-after-backup-handled', JSON.stringify(afterReloadInstall));
 
     const dismissed = await page.evaluate(() => {
       if (typeof dismissInstallBanner === 'function') dismissInstallBanner();
@@ -264,6 +314,7 @@ async function main() {
     else fail('not-now-persists', JSON.stringify(dismissed));
 
     const rebuilt = await page.evaluate(() => {
+      const before = typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null;
       if (typeof generateScheduleFromButton === 'function') generateScheduleFromButton();
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -271,13 +322,18 @@ async function main() {
           if (typeof showInstallBanner === 'function') showInstallBanner();
           resolve({
             show: !!(banner && banner.classList.contains('show')),
+            before,
             remaining: typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null,
+            hasBoard: typeof hasLiveBuiltBoard === 'function' ? hasLiveBuiltBoard() : null,
           });
         }, 1600);
       });
     });
     if (!rebuilt.show && rebuilt.remaining === 1) pass('not-now-survives-rebuild');
     else fail('not-now-survives-rebuild', JSON.stringify(rebuilt));
+    if (rebuilt.hasBoard && rebuilt.before === 1 && rebuilt.remaining === 1) {
+      pass('rebuild-does-not-decrement', 'stayed at 1');
+    } else fail('rebuild-does-not-decrement', JSON.stringify(rebuilt));
 
     const nextP = await page.evaluate(() => {
       if (typeof startNextPeriodSameTeam === 'function') startNextPeriodSameTeam();
@@ -327,11 +383,27 @@ async function main() {
       const ap = (document.getElementById('ap-plan') || {}).textContent || '';
       const setup = (document.getElementById('setup-gen-free-left') || {}).textContent || '';
       if (typeof closeAccountPanel === 'function') closeAccountPanel();
-      return { chip: chip.trim(), ap: ap.trim(), setup: setup.trim() };
+      const backupTitle = (document.querySelector('#backup-nudge [data-i18n="Save a backup now"]') || {}).textContent || '';
+      const backupNotNow = (document.getElementById('bn-dismiss') || {}).textContent || '';
+      const installTitle = (document.querySelector('#install-banner [data-i18n="Install Manager Schedule Builder Pro"]') || {}).textContent || '';
+      const installNotNow = ([...document.querySelectorAll('#install-banner button')].find((b) => /ahora no|not now/i.test(b.textContent || '')) || {}).textContent || '';
+      return {
+        chip: chip.trim(),
+        ap: ap.trim(),
+        setup: setup.trim(),
+        backupTitle: backupTitle.trim(),
+        backupNotNow: backupNotNow.trim(),
+        installTitle: installTitle.trim(),
+        installNotNow: installNotNow.trim(),
+      };
     });
     if (/Gratis · 1/i.test(es.chip) && /Gratis · 1 de 2 armados restantes/i.test(es.ap)) {
       pass('spanish-plan', es.ap);
     } else fail('spanish-plan', JSON.stringify(es));
+    if (/Guarda un respaldo ahora/i.test(es.backupTitle) && /Ahora no/i.test(es.backupNotNow)
+      && /Instalar Manager Schedule Builder Pro/i.test(es.installTitle) && /Ahora no/i.test(es.installNotNow)) {
+      pass('spanish-backup-install-chrome');
+    } else fail('spanish-backup-install-chrome', JSON.stringify(es));
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);
   } finally {

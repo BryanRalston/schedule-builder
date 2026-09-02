@@ -253,8 +253,6 @@ async function main() {
 
     const afterBackupDismiss = await page.evaluate(() => {
       if (typeof dismissBackupNudge === 'function') dismissBackupNudge();
-      if (typeof showInstallBanner === 'function') showInstallBanner();
-      if (typeof maybeOfferInstall === 'function') maybeOfferInstall();
       const banner = document.getElementById('install-banner');
       const nudge = document.getElementById('backup-nudge');
       const bcs = banner ? getComputedStyle(banner) : null;

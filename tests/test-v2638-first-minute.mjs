@@ -225,7 +225,6 @@ async function main() {
 
     const afterBackupDismiss = await page.evaluate(() => {
       if (typeof dismissBackupNudge === 'function') dismissBackupNudge();
-      if (typeof maybeOfferInstall === 'function') maybeOfferInstall();
       const banner = document.getElementById('install-banner');
       return {
         bannerShow: !!(banner && banner.classList.contains('show')),

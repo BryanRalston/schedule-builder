@@ -725,6 +725,27 @@ input[type="radio"] { accent-color: var(--gold); }
   color: var(--ink-3);
   letter-spacing: 0.02em;
 }
+.week-header-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.week-holiday-tag {
+  display: inline-block;
+  max-width: 100%;
+  font-family: var(--font);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #ffd78a;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .week-table {
   width: 100%;
@@ -806,8 +827,17 @@ input[type="radio"] { accent-color: var(--gold); }
   font-weight: 600;
   font-size: 0.88rem;
 }
+.mw-day-head { flex-wrap: wrap; }
 .mw-day-head .mw-date { font-size: 0.75rem; font-weight: 500; color: var(--ink-3); }
 .mw-day-head.weekend { background: rgba(124,92,255,0.14); }
+.mw-holiday {
+  flex: 1 1 100%;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffd78a;
+  margin-top: 0.12rem;
+  line-height: 1.2;
+}
 .mw-person {
   display: flex;
   align-items: center;
@@ -1553,6 +1583,23 @@ input[type="radio"] { accent-color: var(--gold); }
   background: #fff;
   color: #000;
 }
+.print-schedule .print-week-holiday {
+  font-size: 8pt;
+  font-weight: 700;
+  margin: 0 0 3px;
+  color: #111;
+  line-height: 1.25;
+}
+.print-schedule .print-week th.print-holiday-day {
+  background: #f7f1e4;
+}
+.print-schedule .print-fh {
+  display: block;
+  font-size: 7pt;
+  font-weight: 600;
+  line-height: 1.15;
+  margin-top: 1px;
+}
 .print-schedule .print-week .we-label-col {
   text-align: left;
   padding-left: 6px;
@@ -1727,6 +1774,7 @@ input[type="radio"] { accent-color: var(--gold); }
   }
   .week-header { font-size: 0.85rem; padding: 0.4rem 0.5rem; flex-wrap: wrap; gap: 0.25rem; }
   .week-header .week-dates { font-size: 12px; }
+  .week-holiday-tag { font-size: 12px; }
   .summary-grid {
     grid-template-columns: 1fr;
   }
@@ -5767,7 +5815,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.39</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.40</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -8580,7 +8628,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.39';
+const APP_VERSION = '2.6.40';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -8998,6 +9046,8 @@ const MSB_I18N_ES = {
   'Good': 'Bien',
   'Fair': 'Regular',
   'Needs work': 'Hay que pulir',
+  'Needs attention': 'Requiere atención',
+  '{name} · 4-day week': '{name} · semana de 4 días',
   '1 must-fix issue remains (coverage, hours, or role rules). Fix those first.': 'Queda 1 cosa que corregir (cobertura, horas o reglas de puesto). Eso primero.',
   '{n} must-fix issues remain (coverage, hours, or role rules). Fix those first.': 'Quedan {n} cosas que corregir (cobertura, horas o reglas de puesto). Eso primero.',
   '{n} clopen(s) remain (close then open the next day). Preference — review those pairs before you post.': 'Quedan {n} clopen(s) (cierre y apertura al día siguiente). Preferencia — revisa esos pares antes de publicar.',
@@ -9369,10 +9419,13 @@ function formatFyPeriodLabel(year, p) {
 }
 
 function formatScheduleReadyToast(q, left, leftoverClopens, isPro) {
-  let toastMsg = msbT('Schedule ready · Quality {score}/100 ({grade})', {
-    score: q && q.score,
-    grade: localizeQualityGrade(q && q.grade)
-  });
+  const grade = localizeQualityGrade(qualityVerdictGrade(q), q);
+  let toastMsg = qualityHasMustFix(q)
+    ? msbT('Quality {score} · {grade}', { score: q && q.score, grade: grade })
+    : msbT('Schedule ready · Quality {score}/100 ({grade})', {
+      score: q && q.score,
+      grade: grade
+    });
   if (!isPro) {
     toastMsg += left === 0
       ? ' · ' + msbT('Free builds used (edits still free)')
@@ -9529,7 +9582,31 @@ function localizeWarningMsg(msg) {
   return s;
 }
 
-function localizeQualityGrade(grade) {
+const QUALITY_BLOCKED_GRADE = 'Needs attention';
+
+/** Must-fix leftovers block a positive Quality verdict (Good / Strong / Excellent). */
+function qualityHasMustFix(q, genReport) {
+  if (q && typeof q.mustFixCount === 'number') return q.mustFixCount > 0;
+  const report = genReport || (typeof window !== 'undefined' ? window._lastGenReport : null);
+  return typeof countMustFixErrors === 'function' && countMustFixErrors(report) > 0;
+}
+
+function qualityVerdictGrade(q, genReport) {
+  if (qualityHasMustFix(q, genReport)) return QUALITY_BLOCKED_GRADE;
+  return (q && q.grade) || 'Needs work';
+}
+
+function qualityChipTone(q, genReport) {
+  if (qualityHasMustFix(q, genReport)) return 'bad';
+  if (!q || q.score == null) return '';
+  if (q.score >= 85) return 'ok';
+  if (q.score >= 55) return 'warn';
+  return 'bad';
+}
+
+function localizeQualityGrade(grade, genReport) {
+  if (qualityHasMustFix(null, genReport)) return msbT(QUALITY_BLOCKED_GRADE);
+  if (grade === QUALITY_BLOCKED_GRADE) return msbT(QUALITY_BLOCKED_GRADE);
   return msbT(grade || 'Needs work');
 }
 
@@ -10611,12 +10688,14 @@ function computeQualityScore(genReport, ROLES) {
   const softOnly = Math.max(0, (genReport.unmet || []).length - hard - (cl > 0 && avoidOn ? 1 : 0));
   parts.soft = softOnly === 0 ? 10 : Math.max(0, 10 - softOnly * 2);
   const score = Math.max(0, Math.min(100, parts.hard + parts.clopen + parts.weekend + parts.streak + parts.soft));
+  const mustFixCount = typeof countMustFixErrors === 'function' ? countMustFixErrors(genReport) : 0;
   let grade = 'Needs work';
-  if (score >= 95) grade = 'Excellent';
+  if (mustFixCount > 0) grade = QUALITY_BLOCKED_GRADE;
+  else if (score >= 95) grade = 'Excellent';
   else if (score >= 85) grade = 'Strong';
   else if (score >= 70) grade = 'Good';
   else if (score >= 55) grade = 'Fair';
-  return { score, parts, grade, hard, cl, met, over, softOnly, avoidOn, maxLim };
+  return { score, parts, grade, mustFixCount, hard, cl, met, over, softOnly, avoidOn, maxLim };
 }
 
 function explainQualityScore(q, genReport, ROLES) {
@@ -10658,10 +10737,17 @@ function explainQualityScore(q, genReport, ROLES) {
   if ((q.parts.soft || 0) < 10) {
     tips.push(msbT('Some shift preferences could not be fully honored (optional polish).'));
   }
-  if (q.score >= 95) tips.unshift(msbT('Ready to post — strong enough for the breakroom.'));
-  else if (q.score >= 85) tips.unshift(msbT('Nearly ready — only small preference polish left.'));
-  else if (q.score >= 70) tips.unshift(msbT('Usable baseline — clear must-fix issues before posting.'));
-  else tips.unshift(msbT('Not ready to post yet — start with must-fix issues, then weekends.'));
+  if (mustFix > 0) {
+    tips.unshift(msbT('Not ready to post yet — start with must-fix issues, then weekends.'));
+  } else if (q.score >= 95) {
+    tips.unshift(msbT('Ready to post — strong enough for the breakroom.'));
+  } else if (q.score >= 85) {
+    tips.unshift(msbT('Nearly ready — only small preference polish left.'));
+  } else if (q.score >= 70) {
+    tips.unshift(msbT('Usable baseline — clear must-fix issues before posting.'));
+  } else {
+    tips.unshift(msbT('Not ready to post yet — start with must-fix issues, then weekends.'));
+  }
   return tips.slice(0, 6);
 }
 
@@ -10824,10 +10910,10 @@ function renderPostingBoard(issues, q) {
     badgeText = msbT('Review first');
     blurb = msbT('Schedule is usable — glance at the notes below, then post.');
   }
-  if (!issues.length && q && q.score >= 85) {
+  if (!issues.length && q && q.score >= 85 && !qualityHasMustFix(q)) {
     blurb = msbT('Looks solid. Score {score}/100 · {grade}.', {
       score: q.score,
-      grade: localizeQualityGrade(q.grade)
+      grade: localizeQualityGrade(qualityVerdictGrade(q), q)
     });
   }
 
@@ -10874,7 +10960,8 @@ function jumpToPostingIssue(idx) {
 function scoreRingSVG(score) {
   const r = 40, c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(100, score)) / 100;
-  const color = score >= 85 ? '#3dde8c' : score >= 70 ? '#3ddcff' : score >= 55 ? '#ffc857' : '#ff5c7a';
+  const blocked = qualityHasMustFix();
+  const color = blocked ? '#ff5c7a' : (score >= 85 ? '#3dde8c' : score >= 70 ? '#3ddcff' : score >= 55 ? '#ffc857' : '#ff5c7a');
   const dash = (pct * c).toFixed(1);
   return `<svg viewBox="0 0 96 96" aria-hidden="true">
     <circle cx="48" cy="48" r="${r}" fill="none" stroke="rgba(92,107,134,0.4)" stroke-width="8"/>
@@ -11622,7 +11709,7 @@ function copySummaryText() {
   let lines = [];
   lines.push(msbT('MANAGER SCHEDULE SUMMARY'));
   lines.push(`${storeName || msbT('Store')}${storeNum ? ' #' + storeNum : ''} · FY${fiscalYear} ${msbT('Period')} ${currentPeriod.number}`);
-  lines.push(msbT('Quality score: {score}/100 ({grade})', { score: q.score, grade: localizeQualityGrade(q.grade) }));
+  lines.push(msbT('Quality score: {score}/100 ({grade})', { score: q.score, grade: localizeQualityGrade(qualityVerdictGrade(q), q) }));
   lines.push(msbT('Labor: {hours} hrs · {shifts} shifts · ~{avg} hrs/week', {
     hours: labor.totalHours,
     shifts: labor.totalShifts,
@@ -12109,6 +12196,61 @@ function getFederalHolidayForDate(dateOrDk) {
   if (typeof dateOrDk === 'string') dk = dateOrDk;
   else if (dateOrDk instanceof Date) dk = dateKey(dateOrDk);
   return (dk && federalHolidayByDate[dk]) || null;
+}
+
+/** Selected paid holidays only — never invents unchecked federal dates. */
+function listSelectedPaidHolidaysForDates(dates) {
+  const out = [];
+  const seen = {};
+  (dates || []).forEach((d) => {
+    const fh = getFederalHolidayForDate(d);
+    if (!fh || !fh.name) return;
+    const id = fh.id || fh.name;
+    if (seen[id]) return;
+    seen[id] = true;
+    let dt = null;
+    if (d instanceof Date) dt = d;
+    else if (typeof d === 'string' && d.indexOf('-') > 0) {
+      const parts = d.split('-');
+      dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 12, 0, 0);
+    }
+    out.push({
+      id: fh.id,
+      name: fh.name,
+      date: dt,
+      dk: dt && typeof dateKey === 'function' ? dateKey(dt) : (typeof d === 'string' ? d : '')
+    });
+  });
+  return out;
+}
+
+function formatPaidHolidayWeekLabel(name) {
+  return msbT('{name} · 4-day week', { name: name });
+}
+
+function formatPaidHolidayPrintCaption(holidays) {
+  return (holidays || []).map((h) => {
+    let bit = formatPaidHolidayWeekLabel(h.name);
+    if (h.date && !isNaN(h.date.getTime())) {
+      const dow = typeof DAY_NAMES !== 'undefined' ? msbT(DAY_NAMES[h.date.getDay()]) : '';
+      bit += ' · ' + (dow ? dow + ' ' : '') + formatDate(h.date);
+    }
+    return bit;
+  }).join(' · ');
+}
+
+function weekPaidHolidayTagHtml(weekDates) {
+  const hols = listSelectedPaidHolidaysForDates(weekDates);
+  if (!hols.length) return '';
+  const label = hols.map((h) => formatPaidHolidayWeekLabel(h.name)).join(' · ');
+  return '<span class="week-holiday-tag">' + esc(label) + '</span>';
+}
+
+function formatPaidHolidayExportSuffix(weekDates, wIdx) {
+  const hols = listSelectedPaidHolidaysForDates(weekDates);
+  if (hols.length) return ' — ' + hols.map((h) => formatPaidHolidayWeekLabel(h.name)).join(' · ');
+  if (typeof holidayWeeks !== 'undefined' && holidayWeeks[wIdx]) return ' — ' + msbT('Company Holiday');
+  return '';
 }
 function syncFederalHolidaysToPeriod() {
   federalHolidayByDate = {};
@@ -16299,7 +16441,8 @@ function renderDayCardsHtml(weekDates, wIdx, names, ALL_KC) {
     const isWe = dow === 0 || dow === 6;
     let opens = 0, mids = 0, closes = 0;
     html += `<div class="mw-day">`;
-    html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${msbT(DAY_NAMES_FULL[dow])}</span><span class="mw-date">${formatDate(wd)}</span></div>`;
+    const fhCard = typeof getFederalHolidayForDate === 'function' ? getFederalHolidayForDate(dk) : null;
+    html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${msbT(DAY_NAMES_FULL[dow])}</span><span class="mw-date">${formatDate(wd)}</span>${fhCard ? '<span class="mw-holiday">' + esc(formatPaidHolidayWeekLabel(fhCard.name)) + '</span>' : ''}</div>`;
     ALL_KC.forEach((r) => {
       const isKC = r.startsWith('kc');
       const s = schedule[r] && schedule[r][dk];
@@ -16343,7 +16486,7 @@ function renderWeekTableHtml(weekDates, wIdx, names, ALL_KC) {
         }
       }
     } catch (e) {}
-    const fedLab = fhH ? '<span class="fh-day-label" title="' + esc(fhH.name) + '">' + esc(fhH.name) + '</span>' : '';
+    const fedLab = fhH ? '<span class="fh-day-label" title="' + esc(formatPaidHolidayWeekLabel(fhH.name)) + '">' + esc(fhH.name) + '</span>' : '';
     html += '<th class="' + cls + '"><span class="dh-day">' + esc(msbT(DAY_NAMES[dow])) + '</span>' +
       '<span class="dh-date">' + formatDate(wd) + '</span>' + hoursHtml + fedLab + '</th>';
   });
@@ -16410,7 +16553,8 @@ function renderMonthViewHtml(p, names, ALL_KC) {
       const dow = wd.getDay();
       const isWe = dow === 0 || dow === 6;
       html += `<div class="month-day-cell${isWe ? ' weekend' : ''}">`;
-      html += `<div class="md-date">${msbT(DAY_NAMES[dow])} ${formatDate(wd)}</div>`;
+      const fhM = typeof getFederalHolidayForDate === 'function' ? getFederalHolidayForDate(dk) : null;
+      html += `<div class="md-date">${msbT(DAY_NAMES[dow])} ${formatDate(wd)}${fhM ? ' · ' + esc(fhM.name) : ''}</div>`;
       ALL_KC.forEach((r) => {
         const isKC = r.startsWith('kc');
         const s = schedule[r] && schedule[r][dk];
@@ -16457,7 +16601,7 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
       const weekDates = getWeekDatesForIndex(week, wIdx);
       html += '<div class="week-table-wrapper" id="week-wrap-' + wIdx + '">';
       html += `<div class="week-header">`;
-      html += `<span>${formatWeekHeading(wIdx + 1)}</span>`;
+      html += `<div class="week-header-main"><span>${formatWeekHeading(wIdx + 1)}</span>${weekPaidHolidayTagHtml(weekDates)}</div>`;
       html += `<span class="week-dates">${formatWeekDateRange(weekDates[0], weekDates[6])}</span>`;
       html += `</div>`;
       if (mode === 'day') {
@@ -17513,8 +17657,17 @@ function renderPrintSchedule(ROLES, ALL_KC) {
 
     // Week ending = Saturday date
     const satDate = weekDates[6]; // Saturday is always the last day
+    const weekHols = typeof listSelectedPaidHolidaysForDates === 'function'
+      ? listSelectedPaidHolidaysForDates(weekDates)
+      : [];
     const weLabel = 'W/E: ' + (satDate.getMonth() + 1) + '/' + satDate.getDate() +
-      (holidayWeeks[wIdx] ? ' (Holiday)' : '');
+      (weekHols.length ? '' : (holidayWeeks[wIdx] ? ' (Holiday)' : ''));
+    const holCaption = weekHols.length && typeof formatPaidHolidayPrintCaption === 'function'
+      ? formatPaidHolidayPrintCaption(weekHols)
+      : '';
+    if (holCaption) {
+      html += '<div class="print-week-holiday">' + esc(holCaption) + '</div>';
+    }
 
     html += '<table class="print-week">';
 
@@ -17527,11 +17680,13 @@ function renderPrintSchedule(ROLES, ALL_KC) {
     });
     html += '</tr>';
 
-    // Header row 2: date numbers only
+    // Header row 2: date numbers — name the selected paid holiday day
     html += '<tr>';
     html += '<th class="we-label-col"></th>';
     weekDates.forEach(wd => {
-      html += '<th>' + wd.getDate() + '</th>';
+      const fhP = typeof getFederalHolidayForDate === 'function' ? getFederalHolidayForDate(wd) : null;
+      html += '<th' + (fhP ? ' class="print-holiday-day"' : '') + '>' + wd.getDate() +
+        (fhP ? '<span class="print-fh">' + esc(fhP.name) + '</span>' : '') + '</th>';
     });
     html += '</tr>';
     html += '</thead>';
@@ -17653,7 +17808,7 @@ function exportSchedule() {
     const sat = weekDates[6];
     const weLabel = msbT('Week Ending Saturday') + ' ' +
       (sat.getMonth() + 1) + '/' + sat.getDate() + '/' + sat.getFullYear() +
-      (holidayWeeks[wIdx] ? ' — ' + msbT('Company Holiday') : '');
+      formatPaidHolidayExportSuffix(weekDates, wIdx);
 
     body += '<table style="border-collapse:collapse;width:100%;table-layout:fixed;margin-bottom:14px;font-family:Arial,sans-serif;">';
 
@@ -17757,7 +17912,7 @@ function buildExcelExportHtml() {
     const d = new Date(week.start);
     for (let i = 0; i < 7; i++) { weekDates.push(new Date(d)); d.setDate(d.getDate() + 1); }
     const sat = weekDates[6];
-    const weLabel = 'W/E ' + (sat.getMonth() + 1) + '/' + sat.getDate() + (holidayWeeks[wIdx] ? '  Hol' : '');
+    const weLabel = 'W/E ' + (sat.getMonth() + 1) + '/' + sat.getDate() + formatPaidHolidayExportSuffix(weekDates, wIdx);
 
     body += '<tr><td colspan="8" style="font-weight:700;background:#1a1a2e;color:#fff">' + esc(weLabel) + '</td></tr>';
     body += '<tr><td style="' + thStyle + '"></td>';
@@ -17873,7 +18028,7 @@ function renderSummary(warnings, ROLES, ALL_KC, genReport) {
       return `<div class="score-bar-row"><span>${label}</span><div class="score-bar-track"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div><span>${pts}/${max}</span></div>`;
     };
     html += `<div class="score-hero is-jump" id="quality-score-hero" role="button" tabindex="0" title="Tap to jump to a hole on the board" onclick="jumpToReviewChip('quality')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();jumpToReviewChip('quality');}">
-      <div class="score-ring-wrap">${scoreRingSVG(q.score)}<div class="score-num">${q.score}<span class="score-label">${esc(localizeQualityGrade(q.grade))}</span></div></div>
+      <div class="score-ring-wrap">${scoreRingSVG(q.score)}<div class="score-num">${q.score}<span class="score-label">${esc(localizeQualityGrade(qualityVerdictGrade(q), q))}</span></div></div>
       <div class="score-details">
         <h3>${esc(msbT('Schedule Quality Score'))}</h3>
         <p>${bannerText}</p>
@@ -18729,8 +18884,8 @@ function playPostGenStripArrival(token) {
     if (quality) {
       const q = (window._lastGenReport && (window._lastGenReport.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(window._lastGenReport, st.ROLES || []) : null))) || null;
       if (q && q.score != null) {
-        quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: localizeQualityGrade(q.grade) });
-        quality.className = 'pgs-chip ' + (q.score >= 85 ? 'ok' : q.score >= 55 ? 'warn' : 'bad');
+        quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: localizeQualityGrade(qualityVerdictGrade(q), q) });
+        quality.className = 'pgs-chip ' + qualityChipTone(q);
       }
     }
     if (p < 1) requestAnimationFrame(tick);
@@ -20478,8 +20633,8 @@ function updatePostGenStrip() {
   if (quality) {
     const q = (window._lastGenReport && (window._lastGenReport.quality || (typeof computeQualityScore === 'function' ? computeQualityScore(window._lastGenReport, st.ROLES || []) : null))) || null;
     if (q && q.score != null) {
-      quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: localizeQualityGrade(q.grade) });
-      quality.className = 'pgs-chip ' + (q.score >= 85 ? 'ok' : q.score >= 55 ? 'warn' : 'bad');
+      quality.textContent = msbT('Quality {score} · {grade}', { score: q.score, grade: localizeQualityGrade(qualityVerdictGrade(q), q) });
+      quality.className = 'pgs-chip ' + qualityChipTone(q);
     } else {
       quality.textContent = msbT('Quality');
       quality.className = 'pgs-chip';

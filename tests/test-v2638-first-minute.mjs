@@ -1,6 +1,6 @@
 /**
  * v2.6.38 first-minute: phone Free · N + install banner after first Build.
- * v2.6.39: do not stack Install with the backup nudge on that first board.
+ * v2.6.40: do not stack Install with the backup nudge on that first board.
  * Run: node tests/test-v2638-first-minute.mjs
  */
 import { createServer } from 'http';
@@ -73,13 +73,13 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.39') pass('version.json', ver.version);
+  if (ver.version === '2.6.40') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.39'") && sw.includes("msb-pro-v2.6.39")
-    && index.includes('id="app-version-label">v2.6.39')) {
+  if (index.includes("APP_VERSION = '2.6.40'") && sw.includes("msb-pro-v2.6.40")
+    && index.includes('id="app-version-label">v2.6.40')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.39');
+  } else fail('app-sw-version', 'expected 2.6.40');
 
   if (index.includes("function formatFreePlanDetail(")
     && index.includes("msbT('Free · {n} of {total} builds left'")
@@ -106,7 +106,7 @@ function staticChecks() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.39 first-minute phone (2.6.38 path) ===');
+  console.log('\n=== v2.6.40 first-minute phone (2.6.38 path) ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();

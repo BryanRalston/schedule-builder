@@ -1,5 +1,5 @@
 /**
- * v2.6.39 first-minute: extend 2.6.38 Free · N / deferred install.
+ * v2.6.40 first-minute: extend 2.6.38 Free · N / deferred install.
  * After first Build, backup nudge and Install/Play do not stack.
  * Rebuild of the current board does not spend a second free build.
  * Run: node tests/test-v2639-first-minute.mjs
@@ -74,13 +74,13 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.39') pass('version.json', ver.version);
+  if (ver.version === '2.6.40') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.39'") && sw.includes("msb-pro-v2.6.39")
-    && index.includes('id="app-version-label">v2.6.39')) {
+  if (index.includes("APP_VERSION = '2.6.40'") && sw.includes("msb-pro-v2.6.40")
+    && index.includes('id="app-version-label">v2.6.40')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.39');
+  } else fail('app-sw-version', 'expected 2.6.40');
 
   if (index.includes("function formatFreePlanDetail(")
     && index.includes("msbT('Free · {n} of {total} builds left'")
@@ -124,7 +124,7 @@ function staticChecks() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.39 first-minute phone ===');
+  console.log('\n=== v2.6.40 first-minute phone ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();

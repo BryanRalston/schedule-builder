@@ -68,13 +68,13 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const money = JSON.parse(read('monetization.json'));
 
-  if (ver.version === '2.6.40') pass('version.json', ver.version);
+  if (ver.version === '2.6.41') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.40'") && sw.includes("msb-pro-v2.6.40")
-    && index.includes('id="app-version-label">v2.6.40')) {
+  if (index.includes("APP_VERSION = '2.6.41'") && sw.includes("msb-pro-v2.6.41")
+    && index.includes('id="app-version-label">v2.6.41')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.40');
+  } else fail('app-sw-version', 'expected 2.6.41');
 
   if (/--ink-4:\s*#7e8dab/.test(index)) pass('ink-4-contrast');
   else fail('ink-4-contrast', 'expected --ink-4: #7e8dab');

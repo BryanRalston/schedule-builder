@@ -174,7 +174,7 @@ async function main() {
       };
     });
 
-    if (/v2\.6\.40/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.41/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
     if (/Free · 2/i.test(boot.planText) && boot.planDisplay !== 'none' && boot.metaDisplay !== 'none') {
       pass('phone-chip-free-n', boot.planText + ' display=' + boot.planDisplay);

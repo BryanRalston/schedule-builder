@@ -5815,7 +5815,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.40</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.41</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -8628,7 +8628,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.40';
+const APP_VERSION = '2.6.41';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -9342,10 +9342,18 @@ function refreshUiLangChrome() {
 
 function setUiLang(lang) {
   const next = lang === 'es' ? 'es' : 'en';
+  const heldMiss = (typeof window !== 'undefined' && typeof window._lastBoardMissDays === 'number')
+    ? window._lastBoardMissDays
+    : null;
+  if (heldMiss != null) window._msbHoldMissDays = heldMiss;
   currentUiLang = next;
   try { localStorage.setItem(MSB_LANG_KEY, next); } catch (e) {}
   try { document.documentElement.lang = next; } catch (e2) {}
   refreshUiLangChrome();
+  if (heldMiss != null) {
+    window._msbHoldMissDays = null;
+    window._lastBoardMissDays = heldMiss;
+  }
   return next;
 }
 
@@ -12358,10 +12366,60 @@ let openMenu = null;
 
 // Convert Date to key string
 function dateKey(d) {
+  if (d == null) return '';
+  if (typeof d === 'string') {
+    const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+    if (iso) return iso[1] + '-' + iso[2] + '-' + iso[3];
+    d = new Date(d);
+  }
+  if (!(d instanceof Date) || isNaN(d.getTime())) return '';
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${dd}`;
+}
+
+/** Local calendar dates only — never UTC ISO (that slips a day and recounts coverage). */
+function localBoardDate(d) {
+  if (d instanceof Date && !isNaN(d.getTime())) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  if (typeof d === 'string') {
+    const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+    if (iso) return new Date(+iso[1], +iso[2] - 1, +iso[3]);
+  }
+  const x = new Date(d);
+  if (isNaN(x.getTime())) return null;
+  return new Date(x.getFullYear(), x.getMonth(), x.getDate());
+}
+
+/**
+ * One missDays integer from the live board. EN/ES formatters only change words.
+ * Does not use locale weekday names, toLocaleDateString, or UTC date-only ISO.
+ */
+function countBoardMissDays(sched, dates, roles, allKc) {
+  const board = sched || {};
+  const roleIds = (roles || []).filter(Boolean);
+  const kcIds = (allKc || []).map((kc) => (typeof kc === 'string' ? kc : kc && kc.id)).filter(Boolean);
+  const keys = (dates || []).map((d) => dateKey(localBoardDate(d) || d)).filter(Boolean);
+  let missDays = 0;
+  keys.forEach((dk) => {
+    let opens = 0;
+    let closes = 0;
+    roleIds.forEach((r) => {
+      const s = board[r] && board[r][dk];
+      if (isOpen(s)) opens++;
+      if (isClose(s)) closes++;
+    });
+    kcIds.forEach((id) => {
+      if (roleIds.indexOf(id) !== -1) return;
+      const s = board[id] && board[id][dk];
+      if (s === 'kc-close' || isClose(s)) closes++;
+      if (isOpen(s)) opens++;
+    });
+    if (opens < 1 || closes < 1) missDays++;
+  });
+  return missDays;
 }
 
 // ── Dynamic Manager/KC UI ──
@@ -16728,29 +16786,12 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
     ? Math.floor(nights * weeks / closeTargets.peerCount)
     : (closeTargets && closeTargets.amTarget ? closeTargets.amTarget * weeks : 0);
 
-  // Coverage: every day has ≥1 open and ≥1 close (managers + non-mgr KC closes)
-  // ALL_KC from generate is id strings; some callers pass {id} objects.
-  const kcIds = (ALL_KC || []).map((kc) => (typeof kc === 'string' ? kc : kc && kc.id)).filter(Boolean);
-  let coverOk = true;
-  let missDays = 0;
-  allDks.forEach((dk) => {
-    let opens = 0, closes = 0;
-    ROLES.forEach((r) => {
-      const s = schedule[r] && schedule[r][dk];
-      if (isOpen(s)) opens++;
-      if (isClose(s)) closes++;
-    });
-    kcIds.forEach((id) => {
-      if (ROLES.includes(id)) return;
-      const s = schedule[id] && schedule[id][dk];
-      if (s === 'kc-close' || isClose(s)) closes++;
-      if (isOpen(s)) opens++;
-    });
-    if (opens < 1 || closes < 1) {
-      coverOk = false;
-      missDays++;
-    }
-  });
+  // Coverage: one board missDays integer — formatters only change words (v2.6.41).
+  const missDays = typeof countBoardMissDays === 'function'
+    ? countBoardMissDays(schedule, periodDates, ROLES, ALL_KC)
+    : 0;
+  const coverOk = missDays === 0;
+  if (typeof window !== 'undefined') window._lastBoardMissDays = missDays;
 
   rows.forEach((row) => {
     const notes = [];
@@ -19959,6 +20000,8 @@ function applyTourStep(idx) {
 }
 
 function startOnboardingTour(force) {
+  // Review / Review issues must never kick off the tour. Explicit Take tour / Tour still can (force).
+  if (!force && (window._msbOpeningReview || document.body.classList.contains('review-sheet-open'))) return;
   if (!force && isTourDone()) return;
   if (document.documentElement.classList.contains('auth-locked')) return;
   try {
@@ -20422,7 +20465,7 @@ function computeCoverageAndFairnessStats() {
   const ROLES = typeof getRoles === 'function' ? getRoles() : [];
   const ALL_KC = typeof getAllWithKC === 'function' ? getAllWithKC() : ROLES;
   const report = window._lastGenReport || null;
-  const allDks = (periodDates || []).map((d) => dateKey(d));
+  const allDks = (periodDates || []).map((d) => dateKey(typeof localBoardDate === 'function' ? (localBoardDate(d) || d) : d));
   const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : Math.max(1, Math.ceil(allDks.length / 7));
   let missDays = 0;
   let emptyDays = 0;
@@ -20436,6 +20479,13 @@ function computeCoverageAndFairnessStats() {
     const dow = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getDay();
     return dow === 0 || dow === 6;
   };
+  if (typeof window !== 'undefined' && typeof window._msbHoldMissDays === 'number') {
+    missDays = window._msbHoldMissDays;
+  } else {
+    missDays = typeof countBoardMissDays === 'function'
+      ? countBoardMissDays(schedule, periodDates, ROLES, ALL_KC)
+      : 0;
+  }
   allDks.forEach((dk, i) => {
     let opens = 0, closes = 0;
     ROLES.forEach((r) => {
@@ -20452,11 +20502,12 @@ function computeCoverageAndFairnessStats() {
     });
     if (opens < 1 || closes < 1) {
       coverOk = false;
-      missDays++;
       const workers = ROLES.filter((r) => schedule[r] && typeof isWork === 'function' && isWork(schedule[r][dk])).length;
       if (workers === 0) emptyDays++;
     }
   });
+  coverOk = missDays === 0;
+  if (typeof window !== 'undefined') window._lastBoardMissDays = missDays;
   const nightsEarly = typeof getManagerNightsPerWeek === 'function'
     ? getManagerNightsPerWeek((report && report.prefs) || preferences)
     : 6;
@@ -20546,10 +20597,13 @@ function formatCoverageChip(st) {
   if (st.coverOk) {
     return { text: msbT('Open+close ✓'), cls: 'ok', title: msbT('Every day has an opener and a closer.') };
   }
+  const n = (st && typeof st.missDays === 'number')
+    ? st.missDays
+    : (typeof window !== 'undefined' && typeof window._lastBoardMissDays === 'number' ? window._lastBoardMissDays : 0);
   const why = st.coverWhy || '';
-  const text = formatMissingDaysShort(st.missDays) + (why ? ' · ' + msbT('2 people + offs') : '');
+  const text = formatMissingDaysShort(n) + (why ? ' · ' + msbT('2 people + offs') : '');
   const cls = st.emptyDays > 0 ? 'bad' : (st.thin ? 'warn' : 'bad');
-  return { text, cls, title: why || formatMissingDaysLong(st.missDays) };
+  return { text, cls, title: why || formatMissingDaysLong(n) };
 }
 
 function formatAmCloseChip(st) {
@@ -20764,21 +20818,41 @@ function dockBuiltRebuildRow(dock) {
 }
 
 function openReviewSheet() {
-  switchTab('schedule');
-  const sheet = document.getElementById('review-sheet');
-  if (!sheet) return;
-  sheet.hidden = false;
-  sheet.classList.add('open');
-  document.body.classList.add('review-sheet-open');
-  const sec = document.getElementById('summary-section');
-  if (sec) {
-    sec.style.display = '';
-    sec.classList.add('analytics-expanded');
-    sec.classList.remove('analytics-collapsed');
-    const body = document.getElementById('summary-body') || sec.querySelector('.section-body');
-    const head = sec.querySelector('.section-header');
-    if (body) body.style.removeProperty('display');
-    if (head) head.style.removeProperty('display');
+  const langAtOpen = currentUiLang;
+  window._msbOpeningReview = true;
+  try {
+    switchTab('schedule');
+    const sheet = document.getElementById('review-sheet');
+    if (!sheet) return;
+    sheet.hidden = false;
+    sheet.classList.add('open');
+    document.body.classList.add('review-sheet-open');
+    const sec = document.getElementById('summary-section');
+    if (sec) {
+      sec.style.display = '';
+      sec.classList.add('analytics-expanded');
+      sec.classList.remove('analytics-collapsed');
+      const body = document.getElementById('summary-body') || sec.querySelector('.section-body');
+      const head = sec.querySelector('.section-header');
+      if (body) body.style.removeProperty('display');
+      if (head) head.style.removeProperty('display');
+    }
+    // Review never flips locale and never starts the tour (v2.6.41).
+    if (currentUiLang !== langAtOpen) {
+      currentUiLang = langAtOpen;
+      try { document.documentElement.lang = langAtOpen; } catch (eLang) {}
+      try { if (typeof applyStaticI18n === 'function') applyStaticI18n(); } catch (eI18n) {}
+      try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (eStrip) {}
+    }
+    const tour = document.getElementById('onboarding-tour');
+    if (tour && !tour.hasAttribute('hidden') && typeof endOnboardingTour === 'function') {
+      endOnboardingTour(false);
+    }
+    if (typeof currentAppTab !== 'undefined' && currentAppTab !== 'schedule') {
+      switchTab('schedule');
+    }
+  } finally {
+    window._msbOpeningReview = false;
   }
 }
 

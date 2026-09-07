@@ -413,7 +413,7 @@ async function main() {
         downloads: window._wordDownloads || 0
       };
     });
-    if (cleanWord.shown === false && !cleanWord.confirmOpen && cleanWord.proOpen && cleanWord.downloads === 0) {
+    if (cleanWord.shown === true && !cleanWord.confirmOpen && cleanWord.proOpen && cleanWord.downloads === 0) {
       pass('free-zero-mustfix-pro-gate');
     } else fail('free-zero-mustfix-pro-gate', JSON.stringify(cleanWord));
   } catch (e) {

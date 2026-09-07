@@ -5839,7 +5839,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.42</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.43</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -5857,7 +5857,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     <p id="mustfix-export-body"></p>
     <div class="pro-gate-actions">
       <button type="button" class="pg-buy" id="mustfix-export-proceed" onclick="event.stopPropagation(); proceedMustFixExportConfirm();">Print anyway</button>
-      <button type="button" class="pg-secondary" id="mustfix-export-review" onclick="event.stopPropagation(); reviewMustFixExportConfirm();">Open Review</button>
+      <button type="button" class="pg-secondary" id="mustfix-export-review" onpointerdown="event.preventDefault(); event.stopPropagation();" onclick="event.preventDefault(); event.stopPropagation(); reviewMustFixExportConfirm(); return false;">Open Review</button>
     </div>
   </div>
 </div>
@@ -6050,6 +6050,11 @@ function msbUiClosed(id) {
     return;
   }
   _msbUiStack.pop();
+  // Only consume our own pushState. A stray history.back() can leave
+  // schedule-builder for whatever was previously in the tab (v2.6.43).
+  let ownState = false;
+  try { ownState = !!(history.state && history.state.msbUi === id); } catch (eOwn) {}
+  if (!ownState) return;
   _msbIgnorePop = true;
   try { history.back(); } catch (e) {}
   setTimeout(() => { _msbIgnorePop = false; }, 80);
@@ -8664,7 +8669,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.42';
+const APP_VERSION = '2.6.43';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -9689,7 +9694,9 @@ function proceedMustFixExportConfirm() {
 
 function reviewMustFixExportConfirm() {
   closeMustFixExportConfirm();
-  if (typeof openReviewSheet === 'function') openReviewSheet();
+  // Same in-app path as "Review issues". Never assign location / href.
+  if (typeof jumpToIssuesPanel === 'function') jumpToIssuesPanel();
+  else if (typeof openReviewSheet === 'function') openReviewSheet();
 }
 
 function showMustFixExportConfirm(kind, n, onProceed) {
@@ -17928,7 +17935,6 @@ function renderPrintSchedule(ROLES, ALL_KC) {
 
 // ── Export formatted Word document (.doc via Word HTML) ──
 function exportSchedule() {
-  if (!requirePro('Word export')) return;
   if (!currentPeriod) {
     alert(msbT('Please load a period first.'));
     return;
@@ -17938,7 +17944,10 @@ function exportSchedule() {
     alert(msbT('Please generate the schedule first before exporting.'));
     return;
   }
-  return confirmMustFixExport('word', downloadWordExport);
+  return confirmMustFixExport('word', function () {
+    if (!requirePro('Word export')) return;
+    downloadWordExport();
+  });
 }
 
 function buildWordExportHtml() {
@@ -18167,7 +18176,6 @@ function buildExcelExportHtml() {
 }
 
 function exportScheduleExcel() {
-  if (!requirePro('Excel export')) return;
   if (!currentPeriod) {
     alert(msbT('Please load a period first.'));
     return;
@@ -18177,7 +18185,10 @@ function exportScheduleExcel() {
     alert(msbT('Please generate the schedule first before exporting.'));
     return;
   }
-  return confirmMustFixExport('excel', downloadExcelExport);
+  return confirmMustFixExport('excel', function () {
+    if (!requirePro('Excel export')) return;
+    downloadExcelExport();
+  });
 }
 
 function downloadExcelExport() {

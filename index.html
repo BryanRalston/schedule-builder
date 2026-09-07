@@ -1562,6 +1562,24 @@ input[type="radio"] { accent-color: var(--gold); }
   font-weight: 700;
   margin-bottom: 2px;
 }
+.print-schedule .print-readiness {
+  font-size: 9pt;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-align: center;
+  margin: 0.35rem 0 0.4rem;
+  padding: 0.28rem 0.4rem;
+  border: 2px solid #111;
+  background: #fff3cd;
+  color: #111;
+  line-height: 1.25;
+}
+@media (max-width: 520px) {
+  .print-schedule .print-readiness {
+    font-size: 8pt;
+    padding: 0.22rem 0.32rem;
+  }
+}
 
 .print-schedule .print-week {
   width: 100%;
@@ -1685,9 +1703,15 @@ input[type="radio"] { accent-color: var(--gold); }
   .print-schedule,
   .print-schedule table,
   .print-schedule th,
-  .print-schedule td {
+  .print-schedule td,
+  .print-schedule .print-readiness {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+  .print-schedule .print-readiness {
+    font-size: 8pt;
+    padding: 0.2rem 0.35rem;
+    margin: 0.25rem 0 0.35rem;
   }
 
   .container { padding: 0.25rem; max-width: 100%; }
@@ -5330,7 +5354,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" class="no-lock-hide" onclick="openSavedSchedulesModal(); closeHeaderMenu()" data-i18n="Load">Load</button>
         <button type="button" id="header-menu-demo" class="no-lock-hide" onclick="loadDemoStore({explicit:true}); closeHeaderMenu()" title="Load sample store & generate" data-i18n="Load sample store" data-i18n-title="Load sample store & generate">Load sample store</button>
         <div class="header-menu-sep" data-i18n="Export">Export</div>
-        <button type="button" onclick="window.print(); closeHeaderMenu()" data-i18n="Print">Print</button>
+        <button type="button" onclick="printPostingSheet(); closeHeaderMenu()" data-i18n="Print">Print</button>
         <button type="button" onclick="exportSchedule(); closeHeaderMenu()" data-i18n="Export Word">Export Word</button>
         <button type="button" onclick="exportScheduleExcel(); closeHeaderMenu()" data-i18n="Export Excel">Export Excel</button>
         <p class="header-menu-hint" data-i18n="New phone? Export a JSON backup, then Import that file here. No cloud — file stays yours.">New phone? Export a JSON backup, then Import that file here. No cloud — file stays yours.</p>
@@ -5741,7 +5765,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <div class="toolbar-menu">
           <button type="button" class="btn-secondary" id="toolbar-export-btn" style="font-size:0.75rem;padding:0.35rem 0.65rem" onclick="toggleToolbarExportMenu(event)" aria-haspopup="true" aria-expanded="false" data-i18n="Export ▾">Export ▾</button>
           <div class="toolbar-menu-panel" id="toolbar-export-panel" hidden>
-            <button type="button" onclick="window.print(); closeToolbarExportMenu()" data-i18n="Print posting sheet">Print posting sheet</button>
+            <button type="button" onclick="printPostingSheet(); closeToolbarExportMenu()" data-i18n="Print posting sheet">Print posting sheet</button>
             <button type="button" onclick="exportSchedule(); closeToolbarExportMenu()" data-i18n="Word">Word</button>
             <button type="button" onclick="exportScheduleExcel(); closeToolbarExportMenu()" data-i18n="Excel">Excel</button>
             <button type="button" onclick="copySummaryText(); closeToolbarExportMenu()" data-i18n="Copy summary">Copy summary</button>
@@ -5815,7 +5839,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </div>
 
 <footer class="app-footer no-print">
-  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.41</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
+  <div><strong>Manager Schedule Builder Pro</strong> · <span id="app-version-label">v2.6.42</span> · <span data-i18n="Works offline">Works offline</span> · <span data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</span> · <a href="buy.html" style="color:inherit;font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
@@ -5826,6 +5850,17 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </footer>
 
 </div><!-- /#app-root -->
+
+<div class="pro-gate-modal no-print" id="mustfix-export-modal" hidden role="dialog" aria-modal="true" aria-labelledby="mustfix-export-title" data-mustfix-count="0" onpointerdown="if (event.target === this) { event.preventDefault(); event.stopPropagation(); closeMustFixExportConfirm(); }">
+  <div class="pro-gate-card mustfix-export-card" onpointerdown="event.stopPropagation()">
+    <h3 id="mustfix-export-title">NOT READY</h3>
+    <p id="mustfix-export-body"></p>
+    <div class="pro-gate-actions">
+      <button type="button" class="pg-buy" id="mustfix-export-proceed" onclick="event.stopPropagation(); proceedMustFixExportConfirm();">Print anyway</button>
+      <button type="button" class="pg-secondary" id="mustfix-export-review" onclick="event.stopPropagation(); reviewMustFixExportConfirm();">Open Review</button>
+    </div>
+  </div>
+</div>
 
 <div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title" onpointerdown="if (event.target === this) { event.preventDefault(); event.stopPropagation(); closeProGate(); }">
   <div class="pro-gate-card" onpointerdown="event.stopPropagation()">
@@ -7687,6 +7722,7 @@ document.addEventListener('keydown', (e) => {
     e.stopImmediatePropagation();
     return;
   }
+  if (typeof closeMustFixExportConfirm === 'function') closeMustFixExportConfirm();
   closeProGate();
   closeHeaderMenu();
   if (typeof closeLicenseModal === 'function') closeLicenseModal();
@@ -8628,7 +8664,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.41';
+const APP_VERSION = '2.6.42';
 
 // ── UI language (English source + Spanish local dictionary) ──
 const MSB_LANG_KEY = 'msb_ui_lang';
@@ -9060,6 +9096,15 @@ const MSB_I18N_ES = {
   'Nearly ready — only small preference polish left.': 'Casi listo — solo queda pulir preferencias.',
   'Usable baseline — clear must-fix issues before posting.': 'Base usable — corrige lo que hay que corregir antes de publicar.',
   'Not ready to post yet — start with must-fix issues, then weekends.': 'Aún no está listo — empieza por lo que hay que corregir, luego los fines.',
+  'NOT READY · {n} must-fix — do not hang until fixed': 'NO LISTO · {n} a corregir — no lo cuelgues hasta arreglarlo',
+  'NOT READY': 'NO LISTO',
+  '{n} must-fix still open. You can still print after you see this.': 'Quedan {n} a corregir. Aún puedes imprimir después de ver esto.',
+  '{n} must-fix still open. You can still export Word after you see this.': 'Quedan {n} a corregir. Aún puedes exportar Word después de ver esto.',
+  '{n} must-fix still open. You can still export Excel after you see this.': 'Quedan {n} a corregir. Aún puedes exportar Excel después de ver esto.',
+  'Print anyway': 'Imprimir igual',
+  'Export Word anyway': 'Exportar Word igual',
+  'Export Excel anyway': 'Exportar Excel igual',
+  'Open Review': 'Abrir Revisión',
   'Weekend days off': 'Libres de fin',
   'met target (avg {avg}, range {min}-{max}, goal {goal})': 'cumplieron la meta (prom. {avg}, rango {min}-{max}, meta {goal})',
   'Avoid-clopen preference ON': 'Preferencia evitar clopen SÍ',
@@ -9597,6 +9642,98 @@ function qualityHasMustFix(q, genReport) {
   if (q && typeof q.mustFixCount === 'number') return q.mustFixCount > 0;
   const report = genReport || (typeof window !== 'undefined' ? window._lastGenReport : null);
   return typeof countMustFixErrors === 'function' && countMustFixErrors(report) > 0;
+}
+
+function currentMustFixCount(genReport) {
+  const report = genReport || (typeof window !== 'undefined' ? window._lastGenReport : null);
+  const q = report && report.quality;
+  if (q && typeof q.mustFixCount === 'number') return q.mustFixCount;
+  if (report && typeof report.mustFixCount === 'number') return report.mustFixCount;
+  return typeof countMustFixErrors === 'function' ? (countMustFixErrors(report) || 0) : 0;
+}
+
+function formatExportReadinessLine(n) {
+  const count = Number(n);
+  if (!(count > 0)) return '';
+  return msbT('NOT READY · {n} must-fix — do not hang until fixed', { n: count });
+}
+
+function exportReadinessBannerHtml() {
+  const line = formatExportReadinessLine(currentMustFixCount());
+  if (!line) return '';
+  return '<div class="export-readiness" style="text-align:center;font-size:10pt;font-weight:700;margin:0 0 10px;padding:6px 8px;border:2px solid #111;background:#fff3cd;color:#111;">'
+    + esc(line) + '</div>';
+}
+
+let _mustFixExportProceed = null;
+
+function closeMustFixExportConfirm() {
+  const modal = document.getElementById('mustfix-export-modal');
+  const wasOpen = modal && !modal.hasAttribute('hidden');
+  if (modal) {
+    modal.setAttribute('hidden', '');
+    modal.setAttribute('data-mustfix-count', '0');
+  }
+  _mustFixExportProceed = null;
+  if (wasOpen) msbUiClosed('mustfix-export-modal');
+}
+
+function proceedMustFixExportConfirm() {
+  const go = _mustFixExportProceed;
+  closeMustFixExportConfirm();
+  if (typeof go === 'function') go();
+}
+
+function reviewMustFixExportConfirm() {
+  closeMustFixExportConfirm();
+  if (typeof openReviewSheet === 'function') openReviewSheet();
+}
+
+function showMustFixExportConfirm(kind, n, onProceed) {
+  const modal = document.getElementById('mustfix-export-modal');
+  const title = document.getElementById('mustfix-export-title');
+  const body = document.getElementById('mustfix-export-body');
+  const proceedBtn = document.getElementById('mustfix-export-proceed');
+  const reviewBtn = document.getElementById('mustfix-export-review');
+  const count = Number(n) || 0;
+  _mustFixExportProceed = onProceed;
+  if (title) title.textContent = msbT('NOT READY');
+  let bodyKey = '{n} must-fix still open. You can still print after you see this.';
+  let proceedLabel = msbT('Print anyway');
+  if (kind === 'word') {
+    bodyKey = '{n} must-fix still open. You can still export Word after you see this.';
+    proceedLabel = msbT('Export Word anyway');
+  } else if (kind === 'excel') {
+    bodyKey = '{n} must-fix still open. You can still export Excel after you see this.';
+    proceedLabel = msbT('Export Excel anyway');
+  }
+  if (body) body.textContent = msbT(bodyKey, { n: count });
+  if (proceedBtn) proceedBtn.textContent = proceedLabel;
+  if (reviewBtn) reviewBtn.textContent = msbT('Open Review');
+  if (modal) {
+    modal.setAttribute('data-mustfix-count', String(count));
+    modal.setAttribute('data-export-kind', kind || 'print');
+    modal.removeAttribute('hidden');
+  }
+  msbPushUi('mustfix-export-modal');
+}
+
+function confirmMustFixExport(kind, onProceed) {
+  const n = currentMustFixCount();
+  if (!(n > 0)) {
+    if (typeof onProceed === 'function') onProceed();
+    return true;
+  }
+  showMustFixExportConfirm(kind, n, onProceed);
+  return false;
+}
+
+function printPostingSheet() {
+  if (typeof closeHeaderMenu === 'function') closeHeaderMenu();
+  if (typeof closeToolbarExportMenu === 'function') closeToolbarExportMenu();
+  return confirmMustFixExport('print', function () {
+    window.print();
+  });
 }
 
 function qualityVerdictGrade(q, genReport) {
@@ -17670,6 +17807,10 @@ function renderPrintSchedule(ROLES, ALL_KC) {
   html += 'Period ' + p.number + ' · FY' + fiscalYear + ' · ' + esc(p.approxMonth);
   html += ' · ' + formatDate(p.start) + ' – ' + formatDate(p.end);
   html += '</div>';
+  const printReady = formatExportReadinessLine(currentMustFixCount());
+  if (printReady) {
+    html += '<div class="print-readiness">' + esc(printReady) + '</div>';
+  }
   try {
     const sum = typeof summarizeStoreHours === 'function' ? summarizeStoreHours() : '';
     if (sum) html += '<div class="print-hours-line">' + esc(msbT('Store hours · {sum}', { sum: sum })) + '</div>';
@@ -17787,17 +17928,16 @@ function exportSchedule() {
     alert(msbT('Please generate the schedule first before exporting.'));
     return;
   }
+  return confirmMustFixExport('word', downloadWordExport);
+}
 
+function buildWordExportHtml() {
   const names = getManagerNames();
   const p = currentPeriod;
   const storeNum = document.getElementById('store-number').value || '';
   const ROLES = getRoles();
   const nonMgrKCs = getNonManagerKCs();
   const DAY_HDR = ['SUN', 'MON', 'TUES', 'WED', 'THURS', 'FRI', 'SAT'];
-
-  let filename = 'Manager_Schedule';
-  if (storeNum) filename += '_Store' + storeNum;
-  filename += '_P' + String(p.number).padStart(2, '0') + '_' + fiscalYear + '.doc';
 
   // Shared cell styles for Word
   const tdBase = 'border:1px solid #333;padding:4px 6px;text-align:center;vertical-align:middle;font-size:9pt;';
@@ -17818,7 +17958,9 @@ function exportSchedule() {
   subParts.push(esc(p.approxMonth));
   subParts.push(formatDate(p.start) + ' – ' + formatDate(p.end));
   body += subParts.join(' &nbsp;|&nbsp; ');
-  body += '</div></div>';
+  body += '</div>';
+  body += exportReadinessBannerHtml();
+  body += '</div>';
 
   // Color legend
   const legendItems = [
@@ -17918,6 +18060,15 @@ function exportSchedule() {
     '</head>\n' +
     '<body>\n' + body + '\n</body>\n</html>';
 
+  return html;
+}
+
+function downloadWordExport() {
+  const storeNum = document.getElementById('store-number').value || '';
+  let filename = 'Manager_Schedule';
+  if (storeNum) filename += '_Store' + storeNum;
+  filename += '_P' + String(currentPeriod.number).padStart(2, '0') + '_' + fiscalYear + '.doc';
+  const html = buildWordExportHtml();
   const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -17946,6 +18097,10 @@ function buildExcelExportHtml() {
   let subtitle = msbT('Period') + ' ' + p.number + '  FY' + fiscalYear + '  ' + esc(p.approxMonth);
   if (storeNum) subtitle = msbT('Store') + ': ' + esc(storeNum) + '     ' + subtitle;
   body += '<tr><td colspan="8">' + subtitle + '</td></tr>';
+  const excelReady = formatExportReadinessLine(currentMustFixCount());
+  if (excelReady) {
+    body += '<tr><td colspan="8" class="export-readiness" style="font-weight:700;background:#fff3cd;border:2px solid #111;padding:6px 8px">' + esc(excelReady) + '</td></tr>';
+  }
   body += '<tr><td colspan="8"></td></tr>';
 
   p.weeks.forEach((week, wIdx) => {
@@ -18012,7 +18167,10 @@ function exportScheduleExcel() {
     alert(msbT('Please generate the schedule first before exporting.'));
     return;
   }
+  return confirmMustFixExport('excel', downloadExcelExport);
+}
 
+function downloadExcelExport() {
   const storeNum = (document.getElementById('store-number') || {}).value || '';
   let filename = 'Manager_Schedule';
   if (storeNum) filename += '_Store' + storeNum;
@@ -21650,7 +21808,7 @@ function getCommandPaletteCommands() {
     },
     { id: 'undo', label: 'Undo', group: 'Edit', run: () => undoSchedEdit() },
     { id: 'redo', label: 'Redo', group: 'Edit', run: () => redoSchedEdit() },
-    { id: 'print', label: 'Print posting sheet', group: 'Export', run: () => window.print() }
+    { id: 'print', label: 'Print posting sheet', group: 'Export', run: () => printPostingSheet() }
   ];
 }
 

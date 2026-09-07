@@ -232,7 +232,7 @@ async function main() {
     const boot = await page.evaluate(() => ({
       version: (document.getElementById('app-version-label') || {}).textContent,
     }));
-    if (/v2\.6\.42/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.43/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const setup = await setupHuntBoard(page);

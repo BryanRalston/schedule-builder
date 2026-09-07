@@ -9098,8 +9098,11 @@ const MSB_I18N_ES = {
   'Not ready to post yet — start with must-fix issues, then weekends.': 'Aún no está listo — empieza por lo que hay que corregir, luego los fines.',
   'NOT READY · {n} must-fix — do not hang until fixed': 'NO LISTO · {n} a corregir — no lo cuelgues hasta arreglarlo',
   'NOT READY': 'NO LISTO',
+  '1 must-fix still open. You can still print after you see this.': 'Queda 1 a corregir. Aún puedes imprimir después de ver esto.',
   '{n} must-fix still open. You can still print after you see this.': 'Quedan {n} a corregir. Aún puedes imprimir después de ver esto.',
+  '1 must-fix still open. You can still export Word after you see this.': 'Queda 1 a corregir. Aún puedes exportar Word después de ver esto.',
   '{n} must-fix still open. You can still export Word after you see this.': 'Quedan {n} a corregir. Aún puedes exportar Word después de ver esto.',
+  '1 must-fix still open. You can still export Excel after you see this.': 'Queda 1 a corregir. Aún puedes exportar Excel después de ver esto.',
   '{n} must-fix still open. You can still export Excel after you see this.': 'Quedan {n} a corregir. Aún puedes exportar Excel después de ver esto.',
   'Print anyway': 'Imprimir igual',
   'Export Word anyway': 'Exportar Word igual',
@@ -9698,13 +9701,20 @@ function showMustFixExportConfirm(kind, n, onProceed) {
   const count = Number(n) || 0;
   _mustFixExportProceed = onProceed;
   if (title) title.textContent = msbT('NOT READY');
-  let bodyKey = '{n} must-fix still open. You can still print after you see this.';
+  const one = count === 1;
+  let bodyKey = one
+    ? '1 must-fix still open. You can still print after you see this.'
+    : '{n} must-fix still open. You can still print after you see this.';
   let proceedLabel = msbT('Print anyway');
   if (kind === 'word') {
-    bodyKey = '{n} must-fix still open. You can still export Word after you see this.';
+    bodyKey = one
+      ? '1 must-fix still open. You can still export Word after you see this.'
+      : '{n} must-fix still open. You can still export Word after you see this.';
     proceedLabel = msbT('Export Word anyway');
   } else if (kind === 'excel') {
-    bodyKey = '{n} must-fix still open. You can still export Excel after you see this.';
+    bodyKey = one
+      ? '1 must-fix still open. You can still export Excel after you see this.'
+      : '{n} must-fix still open. You can still export Excel after you see this.';
     proceedLabel = msbT('Export Excel anyway');
   }
   if (body) body.textContent = msbT(bodyKey, { n: count });

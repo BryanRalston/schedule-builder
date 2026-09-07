@@ -116,7 +116,8 @@ function staticChecks() {
   if (index.includes("'NOT READY · {n} must-fix — do not hang until fixed': 'NO LISTO · {n} a corregir — no lo cuelgues hasta arreglarlo'")
     && index.includes("'Print anyway': 'Imprimir igual'")
     && index.includes("'Open Review': 'Abrir Revisión'")
-    && index.includes("'{n} must-fix still open. You can still print after you see this.': 'Quedan {n} a corregir. Aún puedes imprimir después de ver esto.'")) {
+    && index.includes("'{n} must-fix still open. You can still print after you see this.': 'Quedan {n} a corregir. Aún puedes imprimir después de ver esto.'")
+    && index.includes("'1 must-fix still open. You can still print after you see this.': 'Queda 1 a corregir. Aún puedes imprimir después de ver esto.'")) {
     pass('spanish-print-gate');
   } else fail('spanish-print-gate', 'missing ES confirm / readiness strings');
 }
@@ -165,24 +166,29 @@ async function setupHuntBoard(page) {
   });
 }
 
-const PAGE_HELPERS = `function installPrintSpy() {
-  window._printCalls = 0;
-  window.print = function () { window._printCalls += 1; };
+function inPage(body) {
+  return `(() => {
+    function installPrintSpy() {
+      window._printCalls = 0;
+      window.print = function () { window._printCalls += 1; };
+    }
+    function modalState() {
+      const modal = document.getElementById('mustfix-export-modal');
+      const open = !!(modal && !modal.hasAttribute('hidden'));
+      return {
+        open: open,
+        count: modal ? modal.getAttribute('data-mustfix-count') : null,
+        kind: modal ? modal.getAttribute('data-export-kind') : null,
+        title: ((document.getElementById('mustfix-export-title') || {}).textContent || '').trim(),
+        body: ((document.getElementById('mustfix-export-body') || {}).textContent || '').trim(),
+        proceed: ((document.getElementById('mustfix-export-proceed') || {}).textContent || '').trim(),
+        review: ((document.getElementById('mustfix-export-review') || {}).textContent || '').trim(),
+        printCalls: window._printCalls || 0
+      };
+    }
+    ${body}
+  })()`;
 }
-function modalState() {
-  const modal = document.getElementById('mustfix-export-modal');
-  const open = !!(modal && !modal.hasAttribute('hidden'));
-  return {
-    open: open,
-    count: modal ? modal.getAttribute('data-mustfix-count') : null,
-    kind: modal ? modal.getAttribute('data-export-kind') : null,
-    title: ((document.getElementById('mustfix-export-title') || {}).textContent || '').trim(),
-    body: ((document.getElementById('mustfix-export-body') || {}).textContent || '').trim(),
-    proceed: ((document.getElementById('mustfix-export-proceed') || {}).textContent || '').trim(),
-    review: ((document.getElementById('mustfix-export-review') || {}).textContent || '').trim(),
-    printCalls: window._printCalls || 0
-  };
-}`;
 
 async function main() {
   console.log('\n=== v2.6.42 soft-gate Print / Word / Excel ===');
@@ -266,18 +272,18 @@ async function main() {
     if (built.excelHasReady) pass('excel-readiness-on-mustfix');
     else fail('excel-readiness-on-mustfix', 'Excel HTML missing readiness line');
 
-    const printGate = await page.evaluate(PAGE_HELPERS + `
+    const printGate = await page.evaluate(inPage(`
       installPrintSpy();
       const immediate = printPostingSheet();
       return Object.assign({ immediate: immediate }, modalState());
-    `);
+    `));
     if (printGate.immediate === false && printGate.open && printGate.printCalls === 0
       && String(printGate.count) === String(built.must) && /NOT READY/.test(printGate.title)
       && printGate.body.indexOf(String(built.must)) !== -1) {
       pass('print-confirm-on-mustfix', printGate.body);
     } else fail('print-confirm-on-mustfix', JSON.stringify(printGate));
 
-    const afterReview = await page.evaluate(PAGE_HELPERS + `
+    const afterReview = await page.evaluate(inPage(`
       reviewMustFixExportConfirm();
       const sheet = document.getElementById('review-sheet');
       return {
@@ -285,7 +291,7 @@ async function main() {
         reviewOpen: !!(sheet && sheet.classList.contains('open') && !sheet.hidden),
         modalOpen: modalState().open
       };
-    `);
+    `));
     if (afterReview.printCalls === 0 && afterReview.reviewOpen && !afterReview.modalOpen) {
       pass('confirm-can-jump-review');
     } else fail('confirm-can-jump-review', JSON.stringify(afterReview));
@@ -294,34 +300,34 @@ async function main() {
       if (typeof closeReviewSheet === 'function') closeReviewSheet();
     });
 
-    const afterPrint = await page.evaluate(PAGE_HELPERS + `
+    const afterPrint = await page.evaluate(inPage(`
       installPrintSpy();
       printPostingSheet();
       proceedMustFixExportConfirm();
       return { printCalls: window._printCalls || 0, modalOpen: modalState().open };
-    `);
+    `));
     if (afterPrint.printCalls === 1 && !afterPrint.modalOpen) pass('print-anyway-proceeds');
     else fail('print-anyway-proceeds', JSON.stringify(afterPrint));
 
-    const wordGate = await page.evaluate(PAGE_HELPERS + `
+    const wordGate = await page.evaluate(inPage(`
       const shown = confirmMustFixExport('word', function () { window._wordProceeded = true; });
       window._wordProceeded = window._wordProceeded || false;
       const mid = modalState();
       proceedMustFixExportConfirm();
       return { shown: shown, mid: mid, proceeded: window._wordProceeded === true };
-    `);
+    `));
     if (wordGate.shown === false && wordGate.mid.open && wordGate.mid.kind === 'word'
       && wordGate.proceeded && /Word/i.test(wordGate.mid.proceed)) {
       pass('word-confirm-then-proceed', wordGate.mid.body);
     } else fail('word-confirm-then-proceed', JSON.stringify(wordGate));
 
-    const excelGate = await page.evaluate(PAGE_HELPERS + `
+    const excelGate = await page.evaluate(inPage(`
       const shown = confirmMustFixExport('excel', function () { window._excelProceeded = true; });
       window._excelProceeded = window._excelProceeded || false;
       const mid = modalState();
       proceedMustFixExportConfirm();
       return { shown: shown, mid: mid, proceeded: window._excelProceeded === true };
-    `);
+    `));
     if (excelGate.shown === false && excelGate.mid.open && excelGate.mid.kind === 'excel'
       && excelGate.proceeded) {
       pass('excel-confirm-then-proceed', excelGate.mid.body);
@@ -335,7 +341,7 @@ async function main() {
     });
     await page.waitForTimeout(300);
 
-    const es = await page.evaluate(PAGE_HELPERS + `
+    const es = await page.evaluate(inPage(`
       const ready = ((document.querySelector('#print-schedule .print-readiness') || {}).textContent || '').trim();
       const word = typeof buildWordExportHtml === 'function' ? buildWordExportHtml() : '';
       const excel = typeof buildExcelExportHtml === 'function' ? buildExcelExportHtml() : '';
@@ -344,7 +350,7 @@ async function main() {
       const mid = modalState();
       closeMustFixExportConfirm();
       return { ready: ready, wordEs: /NO LISTO/.test(word), excelEs: /NO LISTO/.test(excel), mid: mid };
-    `);
+    `));
     if (/NO LISTO/.test(es.ready) && /a corregir/.test(es.ready) && !/NOT READY/.test(es.ready)) {
       pass('spanish-print-readiness', es.ready);
     } else fail('spanish-print-readiness', es.ready);
@@ -368,7 +374,7 @@ async function main() {
       }
     });
 
-    const clean = await page.evaluate(PAGE_HELPERS + `
+    const clean = await page.evaluate(inPage(`
       const must = currentMustFixCount();
       const print = document.getElementById('print-schedule');
       const ready = print ? print.querySelector('.print-readiness') : null;
@@ -394,7 +400,7 @@ async function main() {
         cleanExcel: window._cleanExcel === true,
         printCalls: window._printCalls || 0
       };
-    `);
+    `));
     if (clean.must === 0 && !clean.hasReadyEl && !clean.printHasNotReady
       && !clean.wordHasReady && !clean.excelHasReady) {
       pass('zero-mustfix-sheets-unchanged');

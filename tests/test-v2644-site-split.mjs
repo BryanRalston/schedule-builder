@@ -1,5 +1,5 @@
 /**
- * v2.6.44: thin landing at / ; builder at /app/ ; PWA/TWA still launch the builder.
+ * v2.6.45: thin landing at / ; builder at /app/ ; PWA/TWA still launch the builder.
  * Run: node tests/test-v2644-site-split.mjs
  */
 import { createServer } from 'http';
@@ -82,16 +82,16 @@ function staticChecks() {
   if (cname === 'managerschedulepro.com') pass('cname', cname);
   else fail('cname', cname);
 
-  if (ver.version === '2.6.44') pass('version.json', ver.version);
+  if (ver.version === '2.6.45') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.44'") && sw.includes('msb-pro-v2.6.44')
-    && app.includes('id="app-version-label">v2.6.44')) {
+  if (app.includes("APP_VERSION = '2.6.45'") && sw.includes('msb-pro-v2.6.45')
+    && app.includes('id="app-version-label">v2.6.45')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.44 in app + sw');
+  } else fail('app-sw-version', 'expected 2.6.45 in app + sw');
 
   if (twa.startUrl === '/schedule-builder/app/?source=pwa'
-    && twa.appVersion === '2.6.44'
+    && twa.appVersion === '2.6.45'
     && /launchUrl: '\/schedule-builder\/app\/\?source=pwa'/.test(gradle)) {
     pass('twa-start-url', twa.startUrl);
   } else fail('twa-start-url', twa.startUrl);
@@ -178,7 +178,7 @@ async function browserChecks(base, chromium) {
       store: !!document.getElementById('store-name'),
       version: (document.getElementById('app-version-label') || {}).textContent || ''
     }));
-    if (/\/app\/?/.test(opened.path) && opened.setup && opened.store && /v2\.6\.44/.test(opened.version)) {
+    if (/\/app\/?/.test(opened.path) && opened.setup && opened.store && /v2\.6\.45/.test(opened.version)) {
       pass('open-app-builder', opened.path + ' ' + opened.version);
     } else fail('open-app-builder', JSON.stringify(opened));
 
@@ -258,7 +258,7 @@ async function browserChecks(base, chromium) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.44 site split: landing / + builder /app/ ===');
+  console.log('\n=== v2.6.45 site split: landing / + builder /app/ ===');
   staticChecks();
 
   let server;

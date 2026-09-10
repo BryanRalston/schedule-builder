@@ -1,5 +1,5 @@
 /**
- * v2.6.45: severity-gate Quality + name the selected paid holiday on the board
+ * v2.6.46: severity-gate Quality + name the selected paid holiday on the board
  * and posting sheet. Extends 2.6.38 / 2.6.39 first-minute suites (keep those green).
  * Run: node tests/test-v2640-quality-holiday.mjs
  */
@@ -77,13 +77,13 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.45') pass('version.json', ver.version);
+  if (ver.version === '2.6.46') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.45'") && sw.includes("msb-pro-v2.6.45")
-    && index.includes('id="app-version-label">v2.6.45')) {
+  if (index.includes("APP_VERSION = '2.6.46'") && sw.includes("msb-pro-v2.6.46")
+    && index.includes('id="app-version-label">v2.6.46')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.45');
+  } else fail('app-sw-version', 'expected 2.6.46');
 
   if (index.includes("QUALITY_BLOCKED_GRADE = 'Needs attention'")
     && index.includes('function qualityHasMustFix(')
@@ -113,7 +113,7 @@ function staticChecks() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.45 quality gate + named paid holiday ===');
+  console.log('\n=== v2.6.46 quality gate + named paid holiday ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();

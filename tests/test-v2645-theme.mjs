@@ -1,5 +1,5 @@
 /**
- * v2.6.45: light appearance is the default; dark stays an on-device option.
+ * v2.6.46: light appearance is the default; dark stays an on-device option.
  * Logo maroon + gold replace purple/cyan brand splashes in app + landing.
  * Run: node tests/test-v2645-theme.mjs
  */
@@ -77,13 +77,13 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const manifest = JSON.parse(read('manifest.webmanifest'));
 
-  if (ver.version === '2.6.45') pass('version.json', ver.version);
+  if (ver.version === '2.6.46') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.45'") && sw.includes('msb-pro-v2.6.45')
-    && app.includes('id="app-version-label">v2.6.45')) {
+  if (app.includes("APP_VERSION = '2.6.46'") && sw.includes('msb-pro-v2.6.46')
+    && app.includes('id="app-version-label">v2.6.46')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.45');
+  } else fail('app-sw-version', 'expected 2.6.46');
 
   if (app.includes("msb_appearance") && app.includes("MSB_THEME_KEY")
     && app.includes('function setAppearance') && app.includes("return 'light'")) {
@@ -207,7 +207,7 @@ async function browserChecks(base, chromium) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.45 light default + logo accents ===');
+  console.log('\n=== v2.6.46 light default + logo accents ===');
   staticChecks();
 
   let server;

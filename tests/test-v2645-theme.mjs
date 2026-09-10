@@ -152,7 +152,7 @@ async function browserChecks(base, chromium) {
     const paperLight = /#f4f6fa/i.test(first.paper);
     const brand = /#701030/i.test(first.accent) && /#e0b020/i.test(first.gold);
     if (first.theme === 'light' && (first.stored == null || first.stored === 'light')
-      && paperLight && brand && first.moreVal === 'light' && /v2\.6\.45/.test(first.version)) {
+      && paperLight && brand && first.moreVal === 'light' && /v2\.6\.46/.test(first.version)) {
       pass('default-light', JSON.stringify({ theme: first.theme, paper: first.paper, accent: first.accent }));
     } else fail('default-light', JSON.stringify(first));
 

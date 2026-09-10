@@ -178,7 +178,7 @@ async function browserChecks(base, chromium) {
       store: !!document.getElementById('store-name'),
       version: (document.getElementById('app-version-label') || {}).textContent || ''
     }));
-    if (/\/app\/?/.test(opened.path) && opened.setup && opened.store && /v2\.6\.45/.test(opened.version)) {
+    if (/\/app\/?/.test(opened.path) && opened.setup && opened.store && /v2\.6\.46/.test(opened.version)) {
       pass('open-app-builder', opened.path + ' ' + opened.version);
     } else fail('open-app-builder', JSON.stringify(opened));
 

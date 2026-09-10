@@ -90,9 +90,9 @@ if (
 } else fail('landing-logo-accents', 'landing CTAs must use maroon + gold, not purple/cyan');
 
 const app = read('app/index.html');
-if (app.includes("APP_VERSION = '2.6.45'") && !app.includes('id="features"')) {
+if (app.includes("APP_VERSION = '2.6.46'") && !app.includes('id="features"')) {
   pass('app-stays-builder');
-} else fail('app-stays-builder', 'builder must stay at /app/ as 2.6.45');
+} else fail('app-stays-builder', 'builder must stay at /app/ as 2.6.46');
 
 for (const rel of SHOTS) {
   if (!landing.includes(rel) && !landing.includes('/' + rel)) {

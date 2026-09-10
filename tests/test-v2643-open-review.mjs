@@ -1,5 +1,5 @@
 /**
- * v2.6.43: Open Review stays on schedule-builder; Word/Excel soft-confirm
+ * v2.6.44: Open Review stays on schedule-builder; Word/Excel soft-confirm
  * runs before the Pro unlock gate when must-fix remains.
  * Extends 2.6.38–2.6.42 (keep those green).
  * Run: node tests/test-v2643-open-review.mjs
@@ -78,20 +78,20 @@ function sliceFn(src, name) {
 
 function staticChecks() {
   console.log('\n=== static ===');
-  const index = read('index.html');
+  const index = read('app/index.html');
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.43') pass('version.json', ver.version);
+  if (ver.version === '2.6.44') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.43'") && sw.includes('msb-pro-v2.6.43')
-    && index.includes('id="app-version-label">v2.6.43')) {
+  if (index.includes("APP_VERSION = '2.6.44'") && sw.includes('msb-pro-v2.6.44')
+    && index.includes('id="app-version-label">v2.6.44')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.43');
+  } else fail('app-sw-version', 'expected 2.6.44');
 
-  if (twa.appVersion === '2.6.43' && twa.appVersionName === '2.6.43') pass('twa-manifest-version');
+  if (twa.appVersion === '2.6.44' && twa.appVersionName === '2.6.44') pass('twa-manifest-version');
   else fail('twa-manifest-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   const reviewTag = (index.match(/<button[^>]*id="mustfix-export-review"[^>]*>/) || [])[0] || '';
@@ -210,7 +210,7 @@ function foreignUrl(href) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.43 Open Review stays in MSP + Word/Excel confirm-before-Pro ===');
+  console.log('\n=== v2.6.44 Open Review stays in MSP + Word/Excel confirm-before-Pro ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();
@@ -228,7 +228,7 @@ async function main() {
       hasTouch: true,
     });
     const page = await context.newPage();
-    const startUrl = base + '/index.html';
+    const startUrl = base + '/app/index.html';
     await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -243,7 +243,7 @@ async function main() {
     const boot = await page.evaluate(() => ({
       version: (document.getElementById('app-version-label') || {}).textContent,
     }));
-    if (/v2\.6\.43/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.44/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const setup = await setupHuntBoard(page, { unlockPro: true });

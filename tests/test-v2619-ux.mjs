@@ -121,7 +121,7 @@ async function main() {
   if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
@@ -204,7 +204,7 @@ async function main() {
 
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await seedNamedRoster(page);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(700);

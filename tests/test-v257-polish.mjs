@@ -63,7 +63,7 @@ async function main() {
   const page = await browser.newPage();
 
   try {
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       try {
         localStorage.clear();

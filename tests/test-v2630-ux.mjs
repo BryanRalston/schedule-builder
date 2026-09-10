@@ -95,7 +95,7 @@ async function main() {
   if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
@@ -164,7 +164,7 @@ async function main() {
       locale: 'en-US',
     });
     await dirty.addInitScript(seedDirtyTesterChrome);
-    await dirty.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await dirty.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await dirty.waitForTimeout(900);
     const firstVisit = await dirty.evaluate(() => {
       const btn = document.getElementById('btn-generate');
@@ -188,7 +188,7 @@ async function main() {
     await dirty.close();
 
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();

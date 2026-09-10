@@ -62,19 +62,19 @@ async function loadChromium() {
 
 function staticChecks() {
   console.log('\n=== static ===');
-  const index = read('index.html');
+  const index = read('app/index.html');
   const buy = read('buy.html');
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
   const money = JSON.parse(read('monetization.json'));
 
-  if (ver.version === '2.6.43') pass('version.json', ver.version);
+  if (ver.version === '2.6.44') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.43'") && sw.includes("msb-pro-v2.6.43")
-    && index.includes('id="app-version-label">v2.6.43')) {
+  if (index.includes("APP_VERSION = '2.6.44'") && sw.includes("msb-pro-v2.6.44")
+    && index.includes('id="app-version-label">v2.6.44')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.43');
+  } else fail('app-sw-version', 'expected 2.6.44');
 
   if (/--ink-4:\s*#7e8dab/.test(index)) pass('ink-4-contrast');
   else fail('ink-4-contrast', 'expected --ink-4: #7e8dab');
@@ -367,7 +367,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       try {
         localStorage.setItem('msb_tour_done', '1');

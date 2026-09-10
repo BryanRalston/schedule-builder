@@ -87,7 +87,7 @@ async function main() {
   if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   const feedback = read('feedback.html');
   const terms = read('legal/terms.html');
   const privacy = read('legal/privacy.html');
@@ -147,7 +147,7 @@ async function main() {
 
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();

@@ -73,7 +73,7 @@ async function main() {
   if (version.version === '2.6.33') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (/function startWithMyTeam\(/.test(index) && /function buildFromSetup\(/.test(index)) {
     pass('first-run-fns');
   } else fail('first-run-fns', 'missing startWithMyTeam / buildFromSetup');
@@ -107,7 +107,7 @@ async function main() {
 
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -181,7 +181,7 @@ async function main() {
     } else fail('build-from-setup-named', JSON.stringify(built));
 
     const desk = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await desk.goto(base + '/index.html?pro=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await desk.goto(base + '/app/index.html?pro=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await desk.evaluate(() => {
       localStorage.clear();
       localStorage.setItem('msb_tour_done', '1');

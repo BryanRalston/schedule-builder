@@ -73,7 +73,7 @@ async function main() {
   if (sw.includes("'./feedback.html'") || sw.includes('"./feedback.html"')) pass('sw-precache-feedback');
   else fail('sw-precache-feedback', 'feedback.html missing from PRECACHE');
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   const buy = read('buy.html');
   const manifest = read('manifest.webmanifest');
   const feedback = read('feedback.html');
@@ -183,7 +183,7 @@ async function main() {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 
   try {
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       try {
         localStorage.clear();

@@ -120,7 +120,7 @@ async function main() {
   if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
@@ -168,7 +168,7 @@ async function main() {
       locale: 'en-US',
     });
     await dirty.addInitScript(seedDirtyTesterChrome);
-    await dirty.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await dirty.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await dirty.waitForTimeout(900);
 
     const dirtyState = await dirty.evaluate(() => {
@@ -219,7 +219,7 @@ async function main() {
       locale: 'en-US',
     });
     await harborPage.addInitScript(seedHarborEastChrome);
-    await harborPage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await harborPage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await harborPage.waitForTimeout(800);
     const harbor = await harborPage.evaluate(() => ({
       lang: document.documentElement.lang,
@@ -240,7 +240,7 @@ async function main() {
       locale: 'en-US',
     });
     await qEn.addInitScript(seedDirtyTesterChrome);
-    await qEn.goto(base + '/index.html?lang=en', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await qEn.goto(base + '/app/index.html?lang=en', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await qEn.waitForTimeout(800);
     const qEnState = await qEn.evaluate(() => ({
       lang: document.documentElement.lang,
@@ -261,7 +261,7 @@ async function main() {
       locale: 'en-US',
     });
     await real.addInitScript(seedRealRoster);
-    await real.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await real.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await real.waitForTimeout(900);
     const realState = await real.evaluate(() => ({
       lang: document.documentElement.lang,
@@ -291,7 +291,7 @@ async function main() {
       viewport: { width: 1280, height: 800 },
       locale: 'en-US',
     });
-    await demoPage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await demoPage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await demoPage.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();

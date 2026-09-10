@@ -206,10 +206,10 @@ async function main() {
   console.log('\n=== v2.6.12 demo must not overwrite a saved roster ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.43') pass('version.json', version.version);
+  if (version.version === '2.6.44') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (/function hasSavedUserRoster\(/.test(index) && /function wantsDemoLaunch\(/.test(index)) {
     pass('guard-fns');
   } else fail('guard-fns', 'missing hasSavedUserRoster / wantsDemoLaunch');
@@ -258,7 +258,7 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
     // Empty session + ?source=pwa → blank team, no Harbor East
-    await page.goto(base + '/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await clearSession(page);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(900);
@@ -279,9 +279,9 @@ async function main() {
     else fail('empty-start-with-my-team', JSON.stringify(welcome));
 
     // Leftover Harbor East persist (Bryan's phone after Demo overwrite) → blank on ?source=pwa
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await seedLeftoverDemo(page);
-    await page.goto(base + '/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(700);
     const leftoverPwa = await readRoster(page);
     if (!isHarborEast(leftoverPwa) && !/alex morgan/i.test(leftoverPwa.storedSm || '')) {
@@ -289,9 +289,9 @@ async function main() {
     } else fail('leftover-demo-cleared-on-pwa', JSON.stringify(leftoverPwa));
 
     // Same leftover persist on / must also go blank (not treat demo as his roster)
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await seedLeftoverDemo(page);
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(700);
     const leftoverRoot = await readRoster(page);
     if (!isHarborEast(leftoverRoot) && !/alex morgan/i.test(leftoverRoot.storedSm || '')) {
@@ -300,7 +300,7 @@ async function main() {
 
     // Empty session + ?demo=1 → Harbor East sample
     await clearSession(page);
-    await page.goto(base + '/index.html?demo=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html?demo=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(1400);
     const emptyDemo = await readRoster(page);
     if (/harbor east/i.test(emptyDemo.store) && /alex morgan/i.test(emptyDemo.sm)) {
@@ -310,9 +310,9 @@ async function main() {
     else fail('demo-1-stripped-after-apply', emptyDemo.search);
 
     // Existing roster + ?source=pwa → keep real team
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await seedRealRoster(page);
-    await page.goto(base + '/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(900);
     const keptPwa = await readRoster(page);
     if (isRealRoster(keptPwa) && !isHarborEast(keptPwa)) pass('source-pwa-keeps-roster', keptPwa.store);
@@ -327,7 +327,7 @@ async function main() {
 
     // Existing roster + leftover ?demo=1 (TWA last-URL) → do NOT overwrite
     await seedRealRoster(page);
-    await page.goto(base + '/index.html?demo=1&source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html?demo=1&source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(900);
     const keptDemo = await readRoster(page);
     if (isRealRoster(keptDemo) && !isHarborEast(keptDemo)) pass('demo-1-does-not-overwrite', keptDemo.store);

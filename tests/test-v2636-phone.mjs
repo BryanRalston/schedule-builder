@@ -68,7 +68,7 @@ async function main() {
       hasTouch: true,
     });
     const page = await context.newPage();
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       try {
         localStorage.setItem('msb_tour_done', '1');

@@ -1,6 +1,6 @@
 /**
  * v2.6.38 first-minute: phone Free · N + install banner after first Build.
- * v2.6.43: do not stack Install with the backup nudge on that first board.
+ * v2.6.44: do not stack Install with the backup nudge on that first board.
  * Run: node tests/test-v2638-first-minute.mjs
  */
 import { createServer } from 'http';
@@ -69,17 +69,17 @@ async function loadChromium() {
 
 function staticChecks() {
   console.log('\n=== static ===');
-  const index = read('index.html');
+  const index = read('app/index.html');
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.43') pass('version.json', ver.version);
+  if (ver.version === '2.6.44') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.43'") && sw.includes("msb-pro-v2.6.43")
-    && index.includes('id="app-version-label">v2.6.43')) {
+  if (index.includes("APP_VERSION = '2.6.44'") && sw.includes("msb-pro-v2.6.44")
+    && index.includes('id="app-version-label">v2.6.44')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.43');
+  } else fail('app-sw-version', 'expected 2.6.44');
 
   if (index.includes("function formatFreePlanDetail(")
     && index.includes("msbT('Free · {n} of {total} builds left'")
@@ -106,7 +106,7 @@ function staticChecks() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.43 first-minute phone (2.6.38 path) ===');
+  console.log('\n=== v2.6.44 first-minute phone (2.6.38 path) ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();
@@ -124,7 +124,7 @@ async function main() {
       hasTouch: true,
     });
     const page = await context.newPage();
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -156,7 +156,7 @@ async function main() {
       };
     });
 
-    if (/v2\.6\.43/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.44/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
     if (/Free · 2/i.test(boot.planText) && boot.planDisplay !== 'none' && boot.metaDisplay !== 'none') {
       pass('phone-chip-free-n', boot.planText + ' display=' + boot.planDisplay);

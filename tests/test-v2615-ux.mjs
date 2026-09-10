@@ -78,7 +78,7 @@ async function main() {
   if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
@@ -223,7 +223,7 @@ async function main() {
 
   try {
     const firstRun = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await firstRun.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await firstRun.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await firstRun.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -258,7 +258,7 @@ async function main() {
     await firstRun.close();
 
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -585,7 +585,7 @@ async function main() {
     } else fail('unnamed-kc1-not-on-board', JSON.stringify(kcBoard));
 
     const freePage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await freePage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await freePage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await freePage.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();

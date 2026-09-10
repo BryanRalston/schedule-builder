@@ -1,9 +1,11 @@
 /* Manager Schedule Builder Pro — service worker
-   Paths are relative to this script so GitHub project pages (/schedule-builder/) work. */
-const CACHE = 'msb-pro-v2.6.43';
+   Paths are relative to this script so GitHub project pages (/schedule-builder/) work.
+   App shell lives under ./app/; landing at ./ is network-first and not used as the offline fallback. */
+const CACHE = 'msb-pro-v2.6.44';
+const APP_SHELL = './app/index.html';
 const PRECACHE = [
-  './',
-  './index.html',
+  './app/',
+  './app/index.html',
   './buy.html',
   './feedback.html',
   './monetization.json',
@@ -18,6 +20,10 @@ const PRECACHE = [
   './favicon.ico',
   'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'
 ];
+
+function isAppPath(pathname) {
+  return /\/app\/?$/.test(pathname) || /\/app\/index\.html$/.test(pathname);
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -47,8 +53,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
 
-  // Network-first for navigations (HTML) with offline fallback.
-  // Cache each navigation under its own URL. Only alias './index.html' for the app root.
+  // Network-first for navigations (HTML) with offline fallback to the builder only.
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       fetch(req)
@@ -57,10 +62,8 @@ self.addEventListener('fetch', (event) => {
             caches.open(CACHE).then((c) => {
               c.put(req, res.clone()).catch(() => {});
               try {
-                const path = new URL(req.url).pathname;
-                const file = path.substring(path.lastIndexOf('/') + 1);
-                if (!file || file === 'index.html') {
-                  c.put('./index.html', res.clone()).catch(() => {});
+                if (isAppPath(new URL(req.url).pathname)) {
+                  c.put(APP_SHELL, res.clone()).catch(() => {});
                 }
               } catch (e) {}
             }).catch(() => {});
@@ -68,9 +71,15 @@ self.addEventListener('fetch', (event) => {
           return res;
         })
         .catch(() =>
-          caches.match(req).then((r) =>
-            r || caches.match('./index.html').then((r2) => r2 || caches.match('./'))
-          )
+          caches.match(req).then((r) => {
+            if (r) return r;
+            try {
+              if (isAppPath(url.pathname)) {
+                return caches.match(APP_SHELL).then((r2) => r2 || caches.match('./app/'));
+              }
+            } catch (e) {}
+            return undefined;
+          })
         )
     );
     return;

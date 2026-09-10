@@ -77,7 +77,7 @@ async function main() {
   try {
     // 1 setup desktop
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded' });
     await prep(page);
     await page.evaluate(() => {
       if (typeof switchTab === 'function') switchTab('setup');
@@ -184,7 +184,7 @@ async function main() {
 
     // 9 lock mode
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(base + '/index.html?view=board&lock=1', { waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/app/index.html?view=board&lock=1', { waitUntil: 'domcontentloaded' });
     await prep(page);
     await page.evaluate(() => {
       if (typeof loadDemoStore === 'function') loadDemoStore();

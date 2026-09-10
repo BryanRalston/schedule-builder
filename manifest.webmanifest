@@ -1,9 +1,9 @@
 {
-  "id": "./",
-  "name": "Manager Schedule Pro",
+  "id": "./app/",
+  "name": "Manager Schedule Builder Pro",
   "short_name": "Schedule Pro",
   "description": "Preference-driven retail manager scheduling. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Works offline. Always review before you post.",
-  "start_url": "./?source=pwa",
+  "start_url": "./app/?source=pwa",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
@@ -30,13 +30,13 @@
       "name": "Generate schedule",
       "short_name": "Generate",
       "description": "Open the Schedule tab",
-      "url": "./?tab=schedule",
+      "url": "./app/?tab=schedule",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Try demo",
       "short_name": "Demo",
-      "url": "./?demo=1",
+      "url": "./app/?demo=1",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ],

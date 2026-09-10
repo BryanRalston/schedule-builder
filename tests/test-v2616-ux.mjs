@@ -168,7 +168,7 @@ async function main() {
   if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
@@ -242,7 +242,7 @@ async function main() {
 
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -318,7 +318,7 @@ async function main() {
     } else fail('phone-close-label-applies', JSON.stringify(phoneClose));
 
     const desk = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await desk.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await desk.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await desk.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -344,7 +344,7 @@ async function main() {
     await desk.close();
 
     const fresh = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await fresh.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await fresh.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await fresh.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -440,7 +440,7 @@ async function main() {
     } else fail('returning-setup-is-full', JSON.stringify(returningSetup));
 
     const leftoverPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await leftoverPage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await leftoverPage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await leftoverPage.evaluate((payload) => {
       localStorage.clear();
       sessionStorage.clear();
@@ -474,7 +474,7 @@ async function main() {
       if (store) store.value = payload.meta.storeName;
       if (num) num.value = payload.meta.storeNumber;
     }, DEMO_LEFTOVER);
-    await leftoverPage.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await leftoverPage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await leftoverPage.waitForTimeout(800);
     const leftover = await leftoverPage.evaluate(() => ({
       tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',

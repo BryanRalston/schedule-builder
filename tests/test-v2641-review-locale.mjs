@@ -1,5 +1,5 @@
 /**
- * v2.6.43: Review must not flip locale or start the tour; missDays is one
+ * v2.6.44: Review must not flip locale or start the tour; missDays is one
  * locale-invariant integer. Extends 2.6.38 / 2.6.39 / 2.6.40 (keep those green).
  * Run: node tests/test-v2641-review-locale.mjs
  */
@@ -77,20 +77,20 @@ function sliceFn(src, name) {
 
 function staticChecks() {
   console.log('\n=== static ===');
-  const index = read('index.html');
+  const index = read('app/index.html');
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.43') pass('version.json', ver.version);
+  if (ver.version === '2.6.44') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.43'") && sw.includes('msb-pro-v2.6.43')
-    && index.includes('id="app-version-label">v2.6.43')) {
+  if (index.includes("APP_VERSION = '2.6.44'") && sw.includes('msb-pro-v2.6.44')
+    && index.includes('id="app-version-label">v2.6.44')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.43');
+  } else fail('app-sw-version', 'expected 2.6.44');
 
-  if (twa.appVersion === '2.6.43' && twa.appVersionName === '2.6.43') pass('twa-manifest-version');
+  if (twa.appVersion === '2.6.44' && twa.appVersionName === '2.6.44') pass('twa-manifest-version');
   else fail('twa-manifest-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   if (index.includes('function countBoardMissDays(')
@@ -199,7 +199,7 @@ function snapshotReviewSurface() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.43 Review locale + stable missDays ===');
+  console.log('\n=== v2.6.44 Review locale + stable missDays ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();
@@ -218,7 +218,7 @@ async function main() {
       locale: 'en-US',
     });
     const page = await context.newPage();
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -232,7 +232,7 @@ async function main() {
     const boot = await page.evaluate(() => ({
       version: (document.getElementById('app-version-label') || {}).textContent,
     }));
-    if (/v2\.6\.43/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.44/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const setup = await setupHuntBoard(page);

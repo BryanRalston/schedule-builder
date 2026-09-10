@@ -1,5 +1,5 @@
 /**
- * v2.6.43: severity-gate Quality + name the selected paid holiday on the board
+ * v2.6.44: severity-gate Quality + name the selected paid holiday on the board
  * and posting sheet. Extends 2.6.38 / 2.6.39 first-minute suites (keep those green).
  * Run: node tests/test-v2640-quality-holiday.mjs
  */
@@ -72,17 +72,17 @@ const POSITIVE_ES = /\b(Bien|Fuerte|Excelente)\b/;
 
 function staticChecks() {
   console.log('\n=== static ===');
-  const index = read('index.html');
+  const index = read('app/index.html');
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.43') pass('version.json', ver.version);
+  if (ver.version === '2.6.44') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.43'") && sw.includes("msb-pro-v2.6.43")
-    && index.includes('id="app-version-label">v2.6.43')) {
+  if (index.includes("APP_VERSION = '2.6.44'") && sw.includes("msb-pro-v2.6.44")
+    && index.includes('id="app-version-label">v2.6.44')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.43');
+  } else fail('app-sw-version', 'expected 2.6.44');
 
   if (index.includes("QUALITY_BLOCKED_GRADE = 'Needs attention'")
     && index.includes('function qualityHasMustFix(')
@@ -112,7 +112,7 @@ function staticChecks() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.43 quality gate + named paid holiday ===');
+  console.log('\n=== v2.6.44 quality gate + named paid holiday ===');
   staticChecks();
 
   const { server, base } = await startStaticServer();
@@ -130,7 +130,7 @@ async function main() {
       hasTouch: true,
     });
     const page = await context.newPage();
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -144,7 +144,7 @@ async function main() {
         version: (document.getElementById('app-version-label') || {}).textContent,
       };
     });
-    if (/v2\.6\.43/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.44/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const scoreGate = await page.evaluate(() => {

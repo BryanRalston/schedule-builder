@@ -60,7 +60,7 @@ function startStaticServer() {
 async function setupPage(browser, base) {
   const page = await browser.newPage();
   // Clear storage so auth shell appears
-  await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.evaluate(() => {
     try {
       localStorage.clear();

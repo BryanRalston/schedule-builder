@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#070b14",
   "enableNotifications": true,
-  "startUrl": "/schedule-builder/?source=pwa",
+  "startUrl": "/schedule-builder/app/?source=pwa",
   "iconUrl": "https://bryanralston.github.io/schedule-builder/icons/icon-512.png",
   "maskableIconUrl": "https://bryanralston.github.io/schedule-builder/icons/icon-512-maskable.png",
   "splashScreenFadeOutDuration": 300,
@@ -20,19 +20,19 @@
     "path": "C:\\Users\\bryma\\schedule-builder-secrets\\android.keystore",
     "alias": "schedule-pro"
   },
-  "appVersionName": "2.6.43",
-  "appVersionCode": 2643,
+  "appVersionName": "2.6.44",
+  "appVersionCode": 2644,
   "shortcuts": [
     {
       "name": "Generate schedule",
       "shortName": "Generate",
-      "url": "https://bryanralston.github.io/schedule-builder/?tab=schedule",
+      "url": "https://bryanralston.github.io/schedule-builder/app/?tab=schedule",
       "chosenIconUrl": "https://bryanralston.github.io/schedule-builder/icons/icon-192.png"
     },
     {
       "name": "Try demo",
       "shortName": "Demo",
-      "url": "https://bryanralston.github.io/schedule-builder/?demo=1",
+      "url": "https://bryanralston.github.io/schedule-builder/app/?demo=1",
       "chosenIconUrl": "https://bryanralston.github.io/schedule-builder/icons/icon-192.png"
     }
   ],
@@ -56,5 +56,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "2.6.43"
+  "appVersion": "2.6.44"
 }

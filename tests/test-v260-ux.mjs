@@ -73,7 +73,7 @@ async function main() {
   const page = await browser.newPage();
 
   try {
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       try {
         localStorage.clear();
@@ -190,7 +190,7 @@ async function main() {
     else fail('schedule-diff', diffRt.detail);
 
     // view=lock
-    await page.goto(base + '/index.html?lock=1', { waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/app/index.html?lock=1', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     await dismissChrome(page);
     const lockRt = await page.evaluate(() => {
@@ -203,7 +203,7 @@ async function main() {
     else fail('view-lock', lockRt.detail);
 
     // Hours in header after demo gen
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       try {
         localStorage.clear();

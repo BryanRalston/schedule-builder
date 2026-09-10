@@ -119,6 +119,13 @@ function staticChecks() {
     pass('landing-is-brief');
   } else fail('landing-is-brief', 'root index.html is not a thin product brief');
 
+  if (landing.includes('assets/landing/feature-team.png')
+    && landing.includes('assets/landing/feature-review.png')
+    && landing.includes('assets/landing/feature-export.png')
+    && (landing.match(/href="app\/"/g) || []).length >= 2) {
+    pass('landing-feature-shots');
+  } else fail('landing-feature-shots', 'expected three desktop feature PNGs and a second Open app');
+
   if (landing.includes('href="https://managerschedulepro.com/"')
     && landing.includes('content="https://managerschedulepro.com/"')
     && landing.includes('https://managerschedulepro.com/icons/icon-512.png')

@@ -76,6 +76,57 @@ body {
   margin: auto;
   padding: 1.5rem 0 1.25rem;
 }
+.features {
+  width: min(72rem, calc(100% - 2rem));
+  margin: 0 auto 1.5rem;
+  padding-top: 0.25rem;
+}
+.features-head {
+  margin: 1.75rem 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.feature {
+  margin: 1.35rem 0 1.85rem;
+}
+.feature h2 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.2rem, 2.4vw, 1.55rem);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.feature p {
+  color: var(--ink-2);
+  font-size: 0.98rem;
+  line-height: 1.5;
+  max-width: 40rem;
+  margin-bottom: 0.85rem;
+}
+.shot {
+  display: block;
+  margin: 0;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0a101c;
+  border: 1px solid rgba(120, 180, 255, 0.16);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(61, 220, 255, 0.06);
+}
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+.features-cta {
+  display: flex;
+  justify-content: center;
+  margin: 0.25rem 0 0.5rem;
+}
+.features-cta .btn { min-width: min(100%, 16rem); }
 .brand {
   display: flex;
   align-items: center;
@@ -173,7 +224,7 @@ h1 {
   font-size: 0.88rem;
 }
 footer {
-  width: min(40rem, calc(100% - 2rem));
+  width: min(72rem, calc(100% - 2rem));
   margin: 0 auto 1.1rem;
   padding-top: 0.85rem;
   border-top: 1px solid var(--line);
@@ -213,6 +264,37 @@ footer a:hover { text-decoration: underline; }
       </div>
     </div>
   </main>
+  <section class="features" id="features" aria-labelledby="features-head">
+    <p class="features-head" id="features-head">Features</p>
+
+    <article class="feature">
+      <h2>Name the team, load the NRF period</h2>
+      <p>Put assistant managers and key carriers on the roster, load this 4-5-4 period, then build. The Harbor East demo is there to try — your real names stay on this device.</p>
+      <figure class="shot">
+        <img src="assets/landing/feature-team.png" width="1400" height="900" alt="Setup screen with Harbor East demo roster, AM and key-carrier names, and the NRF period loaded.">
+      </figure>
+    </article>
+
+    <article class="feature">
+      <h2>Review before you post</h2>
+      <p>Quality chips and Review Issues flag coverage, clopens, and weekend fairness before anything goes on the wall. You stay in charge of what posts.</p>
+      <figure class="shot">
+        <img src="assets/landing/feature-review.png" width="1400" height="900" alt="Filled week schedule board with quality chips and Review Issues across the top.">
+      </figure>
+    </article>
+
+    <article class="feature">
+      <h2>Print or export the board</h2>
+      <p>From More: Print the posting sheet, or export Word or Excel — same board, ready for the break room.</p>
+      <figure class="shot">
+        <img src="assets/landing/feature-export.png" width="1400" height="900" alt="More menu open over the schedule board showing Print, Export Word, and Export Excel.">
+      </figure>
+    </article>
+
+    <div class="features-cta">
+      <a class="btn btn-primary" href="app/">Open app</a>
+    </div>
+  </section>
   <footer>
     <div>Cortex Developments · <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a></div>
     <div><a href="legal/privacy.html">Privacy</a></div>

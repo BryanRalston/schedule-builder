@@ -4,7 +4,7 @@
  */
 import { chromium } from '../scripts/browser-ops/node_modules/playwright/index.mjs';
 import { createServer } from 'http';
-import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, statSync, mkdirSync, writeFileSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -25,9 +25,10 @@ function startStaticServer() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       let p = decodeURIComponent((req.url || '/').split('?')[0]);
-      if (p === '/') p = '/index.html';
+      if (p.endsWith('/')) p += 'index.html';
+      if (p === '/app') p = '/app/index.html';
       const file = join(ROOT, p.replace(/^\//, ''));
-      if (!file.startsWith(ROOT) || !existsSync(file)) {
+      if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) {
         res.writeHead(404);
         res.end('not found');
         return;
@@ -77,7 +78,7 @@ async function main() {
   try {
     // 1 setup desktop
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded' });
     await prep(page);
     await page.evaluate(() => {
       if (typeof switchTab === 'function') switchTab('setup');
@@ -184,7 +185,7 @@ async function main() {
 
     // 9 lock mode
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto(base + '/index.html?view=board&lock=1', { waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/app/index.html?view=board&lock=1', { waitUntil: 'domcontentloaded' });
     await prep(page);
     await page.evaluate(() => {
       if (typeof loadDemoStore === 'function') loadDemoStore();

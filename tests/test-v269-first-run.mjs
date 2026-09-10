@@ -3,7 +3,7 @@
  * Run: node tests/test-v269-first-run.mjs
  */
 import { createServer } from 'http';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -33,9 +33,10 @@ function startStaticServer() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       let p = decodeURIComponent((req.url || '/').split('?')[0]);
-      if (p === '/') p = '/index.html';
+      if (p.endsWith('/')) p += 'index.html';
+      if (p === '/app') p = '/app/index.html';
       const file = join(ROOT, p.replace(/^\//, ''));
-      if (!file.startsWith(ROOT) || !existsSync(file)) {
+      if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) {
         res.writeHead(404);
         res.end('not found');
         return;
@@ -73,7 +74,7 @@ async function main() {
   if (version.version === '2.6.33') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (/function startWithMyTeam\(/.test(index) && /function buildFromSetup\(/.test(index)) {
     pass('first-run-fns');
   } else fail('first-run-fns', 'missing startWithMyTeam / buildFromSetup');
@@ -107,7 +108,7 @@ async function main() {
 
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -181,7 +182,7 @@ async function main() {
     } else fail('build-from-setup-named', JSON.stringify(built));
 
     const desk = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await desk.goto(base + '/index.html?pro=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await desk.goto(base + '/app/index.html?pro=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await desk.evaluate(() => {
       localStorage.clear();
       localStorage.setItem('msb_tour_done', '1');

@@ -7,7 +7,7 @@
  * Run: node tests/test-v2632-ux.mjs
  */
 import { createServer } from 'http';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { createHash } from 'crypto';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -38,9 +38,10 @@ function startStaticServer() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       let p = decodeURIComponent((req.url || '/').split('?')[0]);
-      if (p === '/') p = '/index.html';
+      if (p.endsWith('/')) p += 'index.html';
+      if (p === '/app') p = '/app/index.html';
       const file = join(ROOT, p.replace(/^\//, ''));
-      if (!file.startsWith(ROOT) || !existsSync(file)) {
+      if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) {
         res.writeHead(404);
         res.end('not found');
         return;
@@ -105,7 +106,7 @@ async function main() {
   if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
@@ -157,7 +158,7 @@ async function main() {
       locale: 'en-US',
     });
     await dirty.addInitScript(seedDirtyTesterChrome);
-    await dirty.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await dirty.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await dirty.waitForTimeout(900);
     const firstVisit = await dirty.evaluate(() => {
       const resultsEl = document.getElementById('schedule-results');
@@ -181,7 +182,7 @@ async function main() {
     await dirty.close();
 
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();

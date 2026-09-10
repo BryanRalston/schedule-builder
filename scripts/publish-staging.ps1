@@ -26,9 +26,12 @@ if (Test-Path $Staging) {
 }
 New-Item -ItemType Directory -Path $Staging | Out-Null
 
-# --- copy root app files ---
+# --- copy app + shared files (staging stays a flat builder sandbox) ---
+$appIndex = Join-Path $Root 'app/index.html'
+if (-not (Test-Path $appIndex)) { throw "Missing required file: app/index.html" }
+Copy-Item -Path $appIndex -Destination (Join-Path $Staging 'index.html') -Force
+
 $files = @(
-  'index.html',
   'sw.js',
   'buy.html',
   'feedback.html',
@@ -70,9 +73,30 @@ function Get-Utf8Text {
   return [System.IO.File]::ReadAllText($Path)
 }
 
+# --- flatten /app/ relative paths (staging is a self-contained builder copy) ---
+$stgIndex = Join-Path $Staging 'index.html'
+$stgIndexHtml = Get-Utf8Text $stgIndex
+$stgIndexHtml = $stgIndexHtml.Replace('../manifest.webmanifest', 'manifest.webmanifest')
+$stgIndexHtml = $stgIndexHtml.Replace('../favicon.ico', 'favicon.ico')
+$stgIndexHtml = $stgIndexHtml.Replace('../icons/', 'icons/')
+$stgIndexHtml = $stgIndexHtml.Replace('../legal/', 'legal/')
+$stgIndexHtml = $stgIndexHtml.Replace('../buy.html', 'buy.html')
+$stgIndexHtml = $stgIndexHtml.Replace('../monetization.json', 'monetization.json')
+$stgIndexHtml = $stgIndexHtml.Replace('../feedback.html', 'feedback.html')
+$stgIndexHtml = $stgIndexHtml.Replace("register('../sw.js')", "register('./sw.js')")
+$stgIndexHtml = $stgIndexHtml.Replace('https://managerschedulepro.com/app/', 'https://managerschedulepro.com/staging/')
+Set-Utf8NoBom $stgIndex $stgIndexHtml
+Write-Host "Flattened app/ relative paths in staging index.html"
+
 # --- isolation: service worker cache name ---
 $swPath = Join-Path $Staging 'sw.js'
 $sw = Get-Utf8Text $swPath
+$sw = $sw.Replace('./app/index.html', './index.html')
+$sw = $sw.Replace('./app/', './')
+$sw = $sw.Replace(
+  'return /\/app\/?$/.test(pathname) || /\/app\/index\.html$/.test(pathname);',
+  'return true;'
+)
 $stagingCache = "msb-pro-staging-v$version"
 if ($sw -notmatch "const CACHE\s*=\s*'[^']+'") {
   throw 'Could not find CACHE constant in sw.js'
@@ -196,8 +220,24 @@ $manifestText = $manifestText.Replace(
   '"short_name": "Schedule Pro Staging"'
 )
 $manifestText = $manifestText.Replace(
+  '"id": "./app/"',
+  '"id": "./staging/"'
+)
+$manifestText = $manifestText.Replace(
   '"id": "./"',
   '"id": "./staging"'
+)
+$manifestText = $manifestText.Replace(
+  '"start_url": "./app/?source=pwa"',
+  '"start_url": "./?source=pwa"'
+)
+$manifestText = $manifestText.Replace(
+  '"url": "./app/?tab=schedule"',
+  '"url": "./?tab=schedule"'
+)
+$manifestText = $manifestText.Replace(
+  '"url": "./app/?demo=1"',
+  '"url": "./?demo=1"'
 )
 Set-Utf8NoBom $manifestPath $manifestText
 Write-Host "manifest.webmanifest updated for staging"
@@ -230,7 +270,7 @@ powershell -File scripts/publish-staging.ps1
 
 ## URLs
 - **Staging (safe sandbox):** $StagingUrl
-- **Production (closed testers):** https://bryanralston.github.io/schedule-builder/
+- **Production builder:** https://managerschedulepro.com/app/
 
 ## Isolation
 - localStorage keys use ``msb_stg_*`` (production uses ``msb_*``)

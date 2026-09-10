@@ -5,7 +5,7 @@
  */
 import { chromium } from '../scripts/browser-ops/node_modules/playwright/index.mjs';
 import { createServer } from 'http';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -35,9 +35,10 @@ function startStaticServer() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       let p = decodeURIComponent((req.url || '/').split('?')[0]);
-      if (p === '/') p = '/index.html';
+      if (p.endsWith('/')) p += 'index.html';
+      if (p === '/app') p = '/app/index.html';
       const file = join(ROOT, p.replace(/^\//, ''));
-      if (!file.startsWith(ROOT) || !existsSync(file)) {
+      if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) {
         res.writeHead(404);
         res.end('not found');
         return;
@@ -73,7 +74,7 @@ async function main() {
   if (sw.includes("'./feedback.html'") || sw.includes('"./feedback.html"')) pass('sw-precache-feedback');
   else fail('sw-precache-feedback', 'feedback.html missing from PRECACHE');
 
-  const index = read('index.html');
+  const index = read('app/index.html');
   const buy = read('buy.html');
   const manifest = read('manifest.webmanifest');
   const feedback = read('feedback.html');
@@ -183,7 +184,7 @@ async function main() {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 
   try {
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       try {
         localStorage.clear();

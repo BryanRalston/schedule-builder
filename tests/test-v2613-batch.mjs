@@ -3,7 +3,7 @@
  * Run: node tests/test-v2613-batch.mjs
  */
 import { createServer } from 'http';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -32,9 +32,10 @@ function startStaticServer() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       let p = decodeURIComponent((req.url || '/').split('?')[0]);
-      if (p === '/') p = '/index.html';
+      if (p.endsWith('/')) p += 'index.html';
+      if (p === '/app') p = '/app/index.html';
       const file = join(ROOT, p.replace(/^\//, ''));
-      if (!file.startsWith(ROOT) || !existsSync(file)) {
+      if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) {
         res.writeHead(404);
         res.end('not found');
         return;
@@ -61,17 +62,17 @@ async function loadChromium() {
 
 function staticChecks() {
   console.log('\n=== static ===');
-  const index = read('index.html');
+  const index = read('app/index.html');
   const buy = read('buy.html');
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.43') pass('version.json', ver.version);
+  if (ver.version === '2.6.44') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.43'") && sw.includes("msb-pro-v2.6.43")) {
+  if (index.includes("APP_VERSION = '2.6.44'") && sw.includes("msb-pro-v2.6.44")) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.43');
+  } else fail('app-sw-version', 'expected 2.6.44');
 
   if (/s\.length >= 6/.test(index) || /any key 6/.test(index)) {
     fail('index-license-format', 'still accepts any 6+ chars');
@@ -250,7 +251,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       try {
         localStorage.setItem('msb_tour_done', '1');

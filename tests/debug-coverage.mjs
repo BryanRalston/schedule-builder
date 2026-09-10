@@ -1,6 +1,6 @@
 import { chromium } from '../scripts/browser-ops/node_modules/playwright/index.mjs';
 import { createServer } from 'http';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
 const ROOT = 'C:/Users/bryma/schedule-builder';
@@ -13,7 +13,8 @@ const MIME = {
 };
 const server = createServer((req, res) => {
   let p = decodeURIComponent((req.url || '/').split('?')[0]);
-  if (p === '/') p = '/index.html';
+  if (p.endsWith('/')) p += 'index.html';
+      if (p === '/app') p = '/app/index.html';
   const f = join(ROOT, p.slice(1));
   if (!existsSync(f)) {
     res.writeHead(404);

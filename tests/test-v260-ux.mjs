@@ -4,7 +4,7 @@
  */
 import { chromium } from '../scripts/browser-ops/node_modules/playwright/index.mjs';
 import { createServer } from 'http';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -34,9 +34,10 @@ function startStaticServer() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       let p = decodeURIComponent((req.url || '/').split('?')[0]);
-      if (p === '/') p = '/index.html';
+      if (p.endsWith('/')) p += 'index.html';
+      if (p === '/app') p = '/app/index.html';
       const file = join(ROOT, p.replace(/^\//, ''));
-      if (!file.startsWith(ROOT) || !existsSync(file)) {
+      if (!file.startsWith(ROOT) || !existsSync(file) || !statSync(file).isFile()) {
         res.writeHead(404);
         res.end('not found');
         return;
@@ -73,7 +74,7 @@ async function main() {
   const page = await browser.newPage();
 
   try {
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       try {
         localStorage.clear();
@@ -190,7 +191,7 @@ async function main() {
     else fail('schedule-diff', diffRt.detail);
 
     // view=lock
-    await page.goto(base + '/index.html?lock=1', { waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/app/index.html?lock=1', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(600);
     await dismissChrome(page);
     const lockRt = await page.evaluate(() => {
@@ -203,7 +204,7 @@ async function main() {
     else fail('view-lock', lockRt.detail);
 
     // Hours in header after demo gen
-    await page.goto(base + '/index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       try {
         localStorage.clear();

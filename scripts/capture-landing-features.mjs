@@ -86,6 +86,7 @@ async function dismissChrome(page) {
       hide('ready-checklist');
       hide('view-lock-banner');
       hide('auth-shell');
+      hide('backup-nudge');
       const ib = document.getElementById('install-banner');
       if (ib) ib.classList.remove('show');
       const host = document.getElementById('toast-host');
@@ -163,7 +164,7 @@ async function main() {
       return demo || cells;
     }, { timeout: 25000 });
     await page.evaluate(() => {
-      if (typeof setProUnlocked === 'function') setProUnlocked('MSB-PRO-PLAY-REVIEW');
+      // Match Bryan's marketing shots: Free demo, not unlocked Pro.
       if (typeof generateSchedule === 'function') {
         const grid = document.getElementById('schedule-grid');
         if (!grid || !grid.children.length) {
@@ -207,14 +208,12 @@ async function main() {
     await page.evaluate(() => {
       if (typeof switchTab === 'function') switchTab('schedule');
       if (typeof setScheduleViewMode === 'function') setScheduleViewMode('week');
-      if (typeof setDensityMode === 'function') setDensityMode('board');
+      if (typeof setDensityMode === 'function') setDensityMode('board', true);
       if (typeof syncAppShell === 'function') syncAppShell();
       if (typeof updatePostGenStrip === 'function') updatePostGenStrip();
       const strip = document.getElementById('post-gen-strip');
       if (strip) strip.hidden = false;
       window.scrollTo(0, 0);
-      const results = document.getElementById('schedule-results');
-      if (results) results.scrollIntoView({ block: 'start' });
     });
     await page.waitForFunction(() => {
       const grid = document.getElementById('schedule-grid');
@@ -231,21 +230,10 @@ async function main() {
       if (typeof closeReviewSheet === 'function') closeReviewSheet();
       if (typeof switchTab === 'function') switchTab('schedule');
       if (typeof setScheduleViewMode === 'function') setScheduleViewMode('week');
-      if (typeof setDensityMode === 'function') setDensityMode('board');
+      if (typeof setDensityMode === 'function') setDensityMode('board', true);
       const btn = document.getElementById('header-more-btn');
       const panel = document.getElementById('header-menu-panel');
       if (panel) {
-        // Marketing crop: keep language + save/load + Print/Word/Excel in view.
-        let pastExport = false;
-        Array.from(panel.children).forEach((el) => {
-          const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
-          if (/Backup JSON|Import JSON|Copy summary|Density:|Toggle |Next period|How it works|Send feedback|Take tour|Account|Buy Pro|Google Play/i.test(text)) {
-            el.style.display = 'none';
-          }
-          if (el.classList.contains('header-menu-hint')) el.style.display = 'none';
-          if (pastExport && el.classList.contains('header-menu-sep')) el.style.display = 'none';
-          if (/Export Excel/i.test(text)) pastExport = true;
-        });
         panel.removeAttribute('hidden');
         if (btn) btn.setAttribute('aria-expanded', 'true');
         panel.scrollTop = 0;

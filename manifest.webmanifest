@@ -1,6 +1,6 @@
 {
   "id": "./",
-  "name": "Manager Schedule Builder Pro",
+  "name": "Manager Schedule Pro",
   "short_name": "Schedule Pro",
   "description": "Preference-driven retail manager scheduling. NRF 4-5-4 calendar, fair weekends, clopen-avoidance as a preference, role rules, labor hours, Word/Excel export. Works offline. Always review before you post.",
   "start_url": "./?source=pwa",

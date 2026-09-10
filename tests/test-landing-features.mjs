@@ -77,10 +77,22 @@ if (
   pass('landing-is-light');
 } else fail('landing-is-light', 'root landing must be light marketing, not the dark ops console');
 
+if (
+  /--accent:\s*#701030/.test(landing) &&
+  /--accent-2:\s*#e0b020/.test(landing) &&
+  landing.includes('rgba(112, 16, 48') &&
+  landing.includes('rgba(224, 176, 32') &&
+  !landing.includes('#6d4dff') &&
+  !landing.includes('#7c5cff') &&
+  !/--cyan:\s*#1aa7c2/.test(landing)
+) {
+  pass('landing-logo-accents');
+} else fail('landing-logo-accents', 'landing CTAs must use maroon + gold, not purple/cyan');
+
 const app = read('app/index.html');
-if (app.includes("APP_VERSION = '2.6.44'") && !app.includes('id="features"')) {
-  pass('app-theme-untouched');
-} else fail('app-theme-untouched', 'do not change /app/ in this packaging PR');
+if (app.includes("APP_VERSION = '2.6.45'") && !app.includes('id="features"')) {
+  pass('app-stays-builder');
+} else fail('app-stays-builder', 'builder must stay at /app/ as 2.6.45');
 
 for (const rel of SHOTS) {
   if (!landing.includes(rel) && !landing.includes('/' + rel)) {

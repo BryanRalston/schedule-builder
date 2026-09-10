@@ -1,7 +1,8 @@
 /**
  * Desktop marketing shots for the thin landing feature strip.
  * Run: node scripts/capture-landing-features.mjs
- * Serves this branch locally and captures /app/?demo=1 at a laptop viewport.
+ * Serves this branch locally and captures /app/?demo=1 at a laptop viewport
+ * in the default light appearance (maroon + gold brand).
  */
 import { createServer } from 'http';
 import { readFileSync, existsSync, mkdirSync, writeFileSync, statSync } from 'fs';
@@ -66,6 +67,7 @@ async function dismissChrome(page) {
       localStorage.setItem('msb_tour_done', '1');
       localStorage.setItem('msb_welcome_dismissed', '1');
       localStorage.setItem('msb_install_dismissed', '1');
+      localStorage.setItem('msb_appearance', 'light');
       if (typeof continueOffline === 'function') continueOffline();
       if (typeof hideAuthShell === 'function') hideAuthShell();
       document.documentElement.classList.remove('auth-locked');
@@ -139,7 +141,7 @@ async function main() {
     deviceScaleFactor: 2,
     isMobile: false,
     hasTouch: false,
-    colorScheme: 'dark',
+    colorScheme: 'light',
     serviceWorkers: 'block',
   });
   const page = await context.newPage();
@@ -153,6 +155,8 @@ async function main() {
         localStorage.setItem('msb_tour_done', '1');
         localStorage.setItem('msb_welcome_dismissed', '1');
         localStorage.setItem('msb_install_dismissed', '1');
+        localStorage.setItem('msb_appearance', 'light');
+        if (typeof applyAppearance === 'function') applyAppearance('light', true);
       } catch (e) {}
     });
     await dismissChrome(page);

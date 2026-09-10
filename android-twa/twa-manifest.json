@@ -4,13 +4,13 @@
   "name": "Manager Schedule Builder Pro",
   "launcherName": "Schedule Pro",
   "display": "standalone",
-  "themeColor": "#070b14",
+  "themeColor": "#f4f6fa",
   "themeColorDark": "#000000",
   "navigationColor": "#000000",
   "navigationColorDark": "#000000",
   "navigationDividerColor": "#000000",
   "navigationDividerColorDark": "#000000",
-  "backgroundColor": "#070b14",
+  "backgroundColor": "#f4f6fa",
   "enableNotifications": true,
   "startUrl": "/schedule-builder/app/?source=pwa",
   "iconUrl": "https://bryanralston.github.io/schedule-builder/icons/icon-512.png",
@@ -20,8 +20,8 @@
     "path": "C:\\Users\\bryma\\schedule-builder-secrets\\android.keystore",
     "alias": "schedule-pro"
   },
-  "appVersionName": "2.6.44",
-  "appVersionCode": 2644,
+  "appVersionName": "2.6.45",
+  "appVersionCode": 2645,
   "shortcuts": [
     {
       "name": "Generate schedule",
@@ -56,5 +56,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "2.6.44"
+  "appVersion": "2.6.45"
 }

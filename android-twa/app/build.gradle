@@ -26,13 +26,13 @@ def twaManifest = [
     launchUrl: '/schedule-builder/app/?source=pwa', // The start path for the TWA. Must be relative to the domain.
     name: 'Manager Schedule Builder Pro', // The application name.
     launcherName: 'Schedule Pro', // The name shown on the Android Launcher.
-    themeColor: '#070b14', // The color used for the status bar.
+    themeColor: '#f4f6fa', // The color used for the status bar.
     themeColorDark: '#000000', // The color used for the dark status bar.
     navigationColor: '#000000', // The color used for the navigation bar.
     navigationColorDark: '#000000', // The color used for the dark navbar.
     navigationDividerColor: '#000000', // The navbar divider color.
     navigationDividerColorDark: '#000000', // The dark navbar divider color.
-    backgroundColor: '#070b14', // The color used for the splash screen background.
+    backgroundColor: '#f4f6fa', // The color used for the splash screen background.
     enableNotifications: true, // Set to true to enable notification delegation.
     // Every shortcut must include the following fields:
     // - name: String that will show up in the shortcut.
@@ -57,8 +57,8 @@ android {
         applicationId "com.managerschedulebuilder.pro"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 2644
-        versionName "2.6.44"
+        versionCode 2645
+        versionName "2.6.45"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

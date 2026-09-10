@@ -155,20 +155,39 @@ function staticChecks() {
   } else fail('offline-pill-keeps-text', '900px still hides Works offline');
 
   const man = JSON.parse(read('manifest.webmanifest'));
-  if (man.short_name === 'Schedule Pro' && /application-name" content="Schedule Pro"/.test(index)
-    && /apple-mobile-web-app-title" content="Schedule Pro"/.test(index)
-    && man.name === 'Manager Schedule Builder Pro') {
+  if (man.short_name === 'Schedule Pro'
+    && /application-name" content="Manager Schedule Pro"/.test(index)
+    && /apple-mobile-web-app-title" content="Manager Schedule Pro"/.test(index)
+    && man.name === 'Manager Schedule Pro') {
     pass('launcher-short-name-kept');
   } else fail('launcher-short-name-kept', man.short_name + ' / ' + man.name);
 
-  if (/<h1[^>]*>Manager Schedule Builder<\/h1>/.test(index)
-    && index.includes('<title>Manager Schedule Builder Pro</title>')
-    && index.includes('id="auth-title">Manager Schedule Builder Pro</h1>')
+  if (/<h1[^>]*>Manager Schedule Pro<\/h1>/.test(index)
+    && index.includes('<title>Manager Schedule Pro</title>')
+    && index.includes('id="auth-title">Manager Schedule Pro</h1>')
     && buy.includes('Manager Schedule Builder Pro')
     && !/<h1>Schedule Pro<\/h1>/.test(index)
     && !/<title>Schedule Pro/.test(index)) {
     pass('canonical-product-name');
-  } else fail('canonical-product-name', 'header/title/buy still short-only Schedule Pro');
+  } else fail('canonical-product-name', 'header/title/auth chrome should be Manager Schedule Pro');
+
+  if (index.includes('property="og:url" content="https://managerschedulepro.com/"')
+    && index.includes('property="og:image" content="https://managerschedulepro.com/icons/icon-512.png"')
+    && index.includes('property="og:site_name" content="Manager Schedule Pro"')
+    && index.includes('name="twitter:card" content="summary"')
+    && index.includes('name="twitter:image" content="https://managerschedulepro.com/icons/icon-512.png"')) {
+    pass('og-absolute-share-urls');
+  } else fail('og-absolute-share-urls', 'og/twitter share tags missing absolute managerschedulepro.com URLs');
+
+  if (index.includes('class="app-footer')
+    && index.includes('mailto:b.ralston62989@gmail.com')
+    && index.includes('Cortex Developments')
+    && index.includes('https://ralstonia5.gumroad.com/l/pwplbc')
+    && index.includes('https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro')
+    && /<strong>Manager Schedule Pro<\/strong>/.test(index)
+    && index.includes('Names, time off, and the board stay on this device · nothing uploaded')) {
+    pass('business-footer');
+  } else fail('business-footer', 'footer missing product name, privacy, support, publisher, or store links');
 }
 
 async function engineChecks(page) {

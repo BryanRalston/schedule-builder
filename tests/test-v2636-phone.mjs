@@ -127,7 +127,7 @@ async function main() {
     } else fail('welcome-two-actions', JSON.stringify(boot));
     if (boot.xH >= 44) pass('welcome-x-44', boot.xH + 'px');
     else fail('welcome-x-44', boot.xH + 'px');
-    if (/Manager Schedule Builder/i.test(boot.wordmark || '') && !/^Schedule Pro$/i.test(boot.wordmark || '')) {
+    if (/Manager Schedule Pro/i.test(boot.wordmark || '') && !/^Schedule Pro$/i.test(boot.wordmark || '')) {
       pass('header-wordmark', boot.wordmark);
     } else fail('header-wordmark', boot.wordmark);
     if (boot.moreW >= 40 && boot.moreH >= 40 && !boot.overlap) pass('more-tappable', boot.moreW + 'x' + boot.moreH);

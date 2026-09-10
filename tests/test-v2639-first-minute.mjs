@@ -118,7 +118,7 @@ function staticChecks() {
 
   if (index.includes("'Save a backup now': 'Guarda un respaldo ahora'")
     && index.includes("'Not now': 'Ahora no'")
-    && index.includes("'Install Manager Schedule Builder Pro': 'Instalar Manager Schedule Builder Pro'")) {
+    && index.includes("'Install Manager Schedule Pro': 'Instalar Manager Schedule Pro'")) {
     pass('spanish-chrome-strings');
   } else fail('spanish-chrome-strings', 'missing ES backup/install chrome');
 }
@@ -383,7 +383,7 @@ async function main() {
       if (typeof closeAccountPanel === 'function') closeAccountPanel();
       const backupTitle = (document.querySelector('#backup-nudge [data-i18n="Save a backup now"]') || {}).textContent || '';
       const backupNotNow = (document.getElementById('bn-dismiss') || {}).textContent || '';
-      const installTitle = (document.querySelector('#install-banner [data-i18n="Install Manager Schedule Builder Pro"]') || {}).textContent || '';
+      const installTitle = (document.querySelector('#install-banner [data-i18n="Install Manager Schedule Pro"]') || {}).textContent || '';
       const installNotNow = ([...document.querySelectorAll('#install-banner button')].find((b) => /ahora no|not now/i.test(b.textContent || '')) || {}).textContent || '';
       return {
         chip: chip.trim(),
@@ -399,7 +399,7 @@ async function main() {
       pass('spanish-plan', es.ap);
     } else fail('spanish-plan', JSON.stringify(es));
     if (/Guarda un respaldo ahora/i.test(es.backupTitle) && /Ahora no/i.test(es.backupNotNow)
-      && /Instalar Manager Schedule Builder Pro/i.test(es.installTitle) && /Ahora no/i.test(es.installNotNow)) {
+      && /Instalar Manager Schedule Pro/i.test(es.installTitle) && /Ahora no/i.test(es.installNotNow)) {
       pass('spanish-backup-install-chrome');
     } else fail('spanish-backup-install-chrome', JSON.stringify(es));
   } catch (e) {

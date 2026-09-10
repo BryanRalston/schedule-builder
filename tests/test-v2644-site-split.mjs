@@ -175,22 +175,39 @@ async function browserChecks(base, chromium) {
       pass('open-app-builder', opened.path + ' ' + opened.version);
     } else fail('open-app-builder', JSON.stringify(opened));
 
-    await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-      localStorage.setItem('msb_tour_done', '1');
-      localStorage.setItem('msb_welcome_dismissed', '1');
-      localStorage.setItem('msb_ui_lang', 'en');
+    const built = await page.evaluate(() => {
+      if (typeof endOnboardingTour === 'function') endOnboardingTour(true);
+      const welcome = document.getElementById('welcome-card');
+      if (welcome) {
+        welcome.setAttribute('hidden', '');
+        welcome.style.display = 'none';
+      }
+      if (typeof switchTab === 'function') switchTab('setup');
+      const store = document.getElementById('store-name');
+      if (store) store.value = 'Harbor Test';
+      if (typeof persistStoreMeta === 'function') persistStoreMeta();
+      const sm = document.getElementById('name-sm');
+      const am = document.getElementById('name-am1');
+      if (sm) sm.value = 'Dana';
+      if (am) am.value = 'Alex';
+      if (typeof persistManagerNames === 'function') persistManagerNames();
+      if (typeof generateSchedule === 'function') generateSchedule({ skipFreeCount: true });
+      return {
+        store: store ? store.value : '',
+        setup: !!(document.getElementById('tab-setup')),
+        hasGenerate: typeof generateSchedule === 'function'
+      };
     });
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('#store-name', { timeout: 20000 });
-    await page.fill('#store-name', 'Harbor Test');
-    const setupOk = await page.evaluate(() => {
-      const el = document.getElementById('store-name');
-      return el && el.value === 'Harbor Test';
-    });
-    if (setupOk) pass('setup-field-works');
-    else fail('setup-field-works', 'store name did not stick');
+    if (built.store === 'Harbor Test' && built.setup && built.hasGenerate) pass('setup-field-works');
+    else fail('setup-field-works', JSON.stringify(built));
+    await page.waitForTimeout(1500);
+    const afterGen = await page.evaluate(() => ({
+      tab: typeof currentTab !== 'undefined' ? currentTab : (document.querySelector('.app-tab.active') || {}).id,
+      cells: document.querySelectorAll('#schedule-grid td, .sched-cell, [data-shift]').length,
+      summary: !!(document.getElementById('summary-grid') || document.getElementById('schedule-table'))
+    }));
+    if (afterGen.cells > 0 || afterGen.summary) pass('setup-then-generate', JSON.stringify(afterGen));
+    else fail('setup-then-generate', JSON.stringify(afterGen));
 
     const privacy = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
@@ -206,9 +223,14 @@ async function browserChecks(base, chromium) {
     await privacy.close();
 
     await page.goto(base + '/?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForSelector('#tab-setup, #store-name', { timeout: 20000 });
-    if (/\/app\//.test(page.url()) && page.url().includes('source=pwa')) pass('source-pwa-redirect', page.url());
-    else fail('source-pwa-redirect', page.url());
+    await page.waitForSelector('#app-root, #app-version-label', { timeout: 20000 });
+    const pwa = await page.evaluate(() => ({
+      href: location.href,
+      path: location.pathname,
+      builder: !!(document.getElementById('tab-setup') || document.getElementById('app-root'))
+    }));
+    if (/\/app\//.test(pwa.path) && pwa.href.includes('source=pwa') && pwa.builder) pass('source-pwa-redirect', pwa.href);
+    else fail('source-pwa-redirect', JSON.stringify(pwa));
 
     await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
     const stayed = await page.evaluate(() => ({

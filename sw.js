@@ -4,7 +4,6 @@
 const CACHE = 'msb-pro-v2.6.44';
 const APP_SHELL = './app/index.html';
 const PRECACHE = [
-  './app/',
   './app/index.html',
   './buy.html',
   './feedback.html',

@@ -4,7 +4,7 @@
  * Keeps generate suites 2.6.12–2.6.30; version lock 2.6.33.
  * Run: node tests/test-v2631-ux.mjs
  */
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { createHash } from 'crypto';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';

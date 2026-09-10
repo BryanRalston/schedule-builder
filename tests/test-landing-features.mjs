@@ -67,6 +67,21 @@ if (!/phone-bezel|device-frame|390×844|390x844/i.test(landing)) {
   pass('no-phone-frame-chrome');
 } else fail('no-phone-frame-chrome', 'landing still frames shots as phones');
 
+if (
+  landing.includes('content="light"') &&
+  landing.includes('color-scheme: light') &&
+  /--ink:\s*#152033/.test(landing) &&
+  !landing.includes('color-scheme: dark') &&
+  !landing.includes('content="dark"')
+) {
+  pass('landing-is-light');
+} else fail('landing-is-light', 'root landing must be light marketing, not the dark ops console');
+
+const app = read('app/index.html');
+if (app.includes("APP_VERSION = '2.6.44'") && !app.includes('id="features"')) {
+  pass('app-theme-untouched');
+} else fail('app-theme-untouched', 'do not change /app/ in this packaging PR');
+
 for (const rel of SHOTS) {
   if (!landing.includes(rel) && !landing.includes('/' + rel)) {
     fail('landing-refs-' + rel, 'index.html missing ' + rel);

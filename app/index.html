@@ -177,6 +177,14 @@
   --body-base: linear-gradient(180deg, #fbfcfe 0%, #f4f6fa 42%, #eef1f6 100%);
   --grid-line: rgba(112, 16, 48, 0.05);
   --name-col-alt: #f0f3f8;
+  --name-col-bg: #f7f8fb;
+  --name-col-shadow: 6px 0 12px rgba(21, 32, 51, 0.06);
+  --table-head-bg: linear-gradient(180deg, #802030, #701030);
+  --table-head-ink: #fff8ec;
+  --table-head-2-bg: #5a1c30;
+  --table-head-2-ink: rgba(255, 248, 236, 0.78);
+  --table-weekend-bg: #4a1830;
+  --table-monday-bg: #3a2430;
   --pill-bg: rgba(112, 16, 48, 0.08);
   --pill-ink: #152033;
   --pill-line: rgba(112, 16, 48, 0.16);
@@ -267,6 +275,14 @@ html[data-theme="dark"] {
   --body-base: linear-gradient(180deg, #050810 0%, #070b14 40%, #0a101c 100%);
   --grid-line: rgba(224, 176, 32, 0.04);
   --name-col-alt: rgba(16, 26, 46, 0.98);
+  --name-col-bg: rgba(14, 22, 40, 0.95);
+  --name-col-shadow: 6px 0 16px rgba(0,0,0,0.35);
+  --table-head-bg: linear-gradient(180deg, #0e1628, #0a1220);
+  --table-head-ink: #fff8ec;
+  --table-head-2-bg: #0c1424;
+  --table-head-2-ink: rgba(255, 248, 236, 0.65);
+  --table-weekend-bg: #1a1020;
+  --table-monday-bg: #0c1830;
   --pill-bg: rgba(255, 255, 255, 0.12);
   --pill-ink: rgba(255, 255, 255, 0.9);
   --pill-line: rgba(255, 255, 255, 0.18);
@@ -923,8 +939,8 @@ input[type="radio"] { accent-color: var(--gold); }
   vertical-align: middle;
 }
 .week-table thead tr:first-child th {
-  background: linear-gradient(180deg, #0e1628, #0a1220);
-  color: #c5e8ff;
+  background: var(--table-head-bg);
+  color: var(--table-head-ink);
   font-weight: 600;
   font-size: 0.68rem;
   letter-spacing: 0.1em;
@@ -932,16 +948,16 @@ input[type="radio"] { accent-color: var(--gold); }
   font-family: var(--mono);
 }
 .week-table thead tr:nth-child(2) th {
-  background: #0c1424;
-  color: rgba(197,232,255,0.65);
+  background: var(--table-head-2-bg);
+  color: var(--table-head-2-ink);
   font-weight: 500;
   font-size: 0.7rem;
   font-family: var(--mono);
 }
-.week-table thead th.weekend-col { background: #12102a; }
-.week-table thead tr:nth-child(2) th.weekend-col { background: #16132e; }
-.week-table thead th.monday-col { background: #0c1830; }
-.week-table thead tr:nth-child(2) th.monday-col { background: #0e1c36; }
+.week-table thead th.weekend-col { background: var(--table-weekend-bg); }
+.week-table thead tr:nth-child(2) th.weekend-col { background: var(--table-weekend-bg); }
+.week-table thead th.monday-col { background: var(--table-monday-bg); }
+.week-table thead tr:nth-child(2) th.monday-col { background: var(--table-monday-bg); }
 
 .week-table .name-col {
   width: 140px;
@@ -949,25 +965,22 @@ input[type="radio"] { accent-color: var(--gold); }
   text-align: left;
   padding-left: 0.65rem;
   font-weight: 600;
-  background: rgba(14, 22, 40, 0.95);
+  background: var(--name-col-bg);
   color: var(--ink-2);
   position: sticky;
   left: 0;
   z-index: 2;
-  box-shadow: 6px 0 16px rgba(0,0,0,0.35);
+  box-shadow: var(--name-col-shadow);
 }
 .week-table thead .name-col {
   text-align: center;
   z-index: 4;
-  background: #0a1220;
-  color: #c5e8ff;
+  background: var(--table-head-bg);
+  color: var(--table-head-ink);
 }
 .week-table thead tr:nth-child(2) .name-col {
-  background: #0c1424;
-  color: rgba(197,232,255,0.65);
-}
-.week-table tbody tr:nth-child(even) td.name-col {
-  background: rgba(16, 26, 46, 0.98);
+  background: var(--table-head-2-bg);
+  color: var(--table-head-2-ink);
 }
 
 /* Day view cards (any width when Day view is selected) */

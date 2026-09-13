@@ -45,6 +45,15 @@ if (landing.includes('>Open app<') && !landing.includes('id="tab-setup"') && !la
 } else fail('landing-stays-thin', 'root index.html picked up builder markup');
 
 if (
+  landing.includes('href="https://maidensail.com/startup/schedule-manager-pro"') &&
+  landing.includes('src="https://maidensail.com/badge/schedule-manager-pro.svg"') &&
+  landing.includes('alt="Featured on Maidensail"') &&
+  landing.includes('rel="dofollow"')
+) {
+  pass('maidensail-badge-on-landing');
+} else fail('maidensail-badge-on-landing', 'root landing missing Featured on Maidensail badge');
+
+if (
   landing.includes('Name the team, load the NRF period') &&
   landing.includes('Review before you post') &&
   landing.includes('Print or export the board') &&
@@ -93,6 +102,10 @@ const app = read('app/index.html');
 if (app.includes("APP_VERSION = '2.6.46'") && !app.includes('id="features"')) {
   pass('app-stays-builder');
 } else fail('app-stays-builder', 'builder must stay at /app/ as 2.6.46');
+
+if (!app.includes('maidensail.com/badge/schedule-manager-pro.svg')) {
+  pass('maidensail-badge-not-in-app');
+} else fail('maidensail-badge-not-in-app', 'badge must stay off /app/');
 
 for (const rel of SHOTS) {
   if (!landing.includes(rel) && !landing.includes('/' + rel)) {

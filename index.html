@@ -226,6 +226,25 @@ h1 {
   background: transparent;
   font-size: 0.88rem;
 }
+.badge-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: min(72rem, calc(100% - 2rem));
+  margin: 0.85rem auto 0.15rem;
+  padding: 0.35rem 0 0.55rem;
+}
+.badge-row a {
+  display: inline-flex;
+  line-height: 0;
+  opacity: 0.92;
+}
+.badge-row a:hover { opacity: 1; }
+.badge-row img {
+  display: block;
+  height: 44px;
+  width: auto;
+}
 footer {
   width: min(72rem, calc(100% - 2rem));
   margin: 0 auto 1.1rem;
@@ -298,6 +317,9 @@ footer a:hover { text-decoration: underline; }
       <a class="btn btn-primary" href="app/">Open app</a>
     </div>
   </section>
+  <div class="badge-row">
+    <a href="https://maidensail.com/startup/schedule-manager-pro" rel="dofollow"><img src="https://maidensail.com/badge/schedule-manager-pro.svg" alt="Featured on Maidensail" height="44"></a>
+  </div>
   <footer>
     <div>Cortex Developments · <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a></div>
     <div><a href="legal/privacy.html">Privacy</a></div>

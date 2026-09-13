@@ -45,13 +45,12 @@ if (landing.includes('>Open app<') && !landing.includes('id="tab-setup"') && !la
 } else fail('landing-stays-thin', 'root index.html picked up builder markup');
 
 if (
-  landing.includes('href="https://maidensail.com/startup/schedule-manager-pro"') &&
-  landing.includes('src="https://maidensail.com/badge/schedule-manager-pro.svg"') &&
-  landing.includes('alt="Featured on Maidensail"') &&
-  landing.includes('rel="dofollow"')
+  !landing.includes('maidensail.com') &&
+  !landing.includes('badge-row') &&
+  !landing.includes('Featured on Maidensail')
 ) {
-  pass('maidensail-badge-on-landing');
-} else fail('maidensail-badge-on-landing', 'root landing missing Featured on Maidensail badge');
+  pass('maidensail-badge-off-landing');
+} else fail('maidensail-badge-off-landing', 'root landing must not include Featured on Maidensail badge');
 
 if (
   landing.includes('Name the team, load the NRF period') &&

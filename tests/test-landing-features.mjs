@@ -98,9 +98,9 @@ if (
 } else fail('landing-logo-accents', 'landing CTAs must use maroon + gold, not purple/cyan');
 
 const app = read('app/index.html');
-if (app.includes("APP_VERSION = '2.6.48'") && !app.includes('id="features"')) {
+if (app.includes("APP_VERSION = '2.6.49'") && !app.includes('id="features"')) {
   pass('app-stays-builder');
-} else fail('app-stays-builder', 'builder must stay at /app/ as 2.6.48');
+} else fail('app-stays-builder', 'builder must stay at /app/ as 2.6.49');
 
 if (!app.includes('maidensail.com/badge/schedule-manager-pro.svg')) {
   pass('maidensail-badge-not-in-app');

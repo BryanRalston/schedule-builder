@@ -67,12 +67,12 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.48') pass('version.json', ver.version);
+  if (ver.version === '2.6.49') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.48'") && sw.includes("msb-pro-v2.6.48")) {
+  if (index.includes("APP_VERSION = '2.6.49'") && sw.includes("msb-pro-v2.6.49")) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.48');
+  } else fail('app-sw-version', 'expected 2.6.49');
 
   if (/s\.length >= 6/.test(index) || /any key 6/.test(index)) {
     fail('index-license-format', 'still accepts any 6+ chars');

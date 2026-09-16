@@ -76,15 +76,15 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.48') pass('version.json', ver.version);
+  if (ver.version === '2.6.49') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.48'") && sw.includes('msb-pro-v2.6.48')
-    && app.includes('id="app-version-label">v2.6.48')) {
+  if (app.includes("APP_VERSION = '2.6.49'") && sw.includes('msb-pro-v2.6.49')
+    && app.includes('id="app-version-label">v2.6.49')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.48');
+  } else fail('app-sw-version', 'expected 2.6.49');
 
-  if (twa.appVersion === '2.6.48' && twa.appVersionName === '2.6.48') pass('twa-version');
+  if (twa.appVersion === '2.6.49' && twa.appVersionName === '2.6.49') pass('twa-version');
   else fail('twa-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   if (app.includes('--headline-color:') && app.includes('--headline-fill:')
@@ -200,7 +200,7 @@ async function browserChecks(base, chromium) {
       };
     });
 
-    if (light.theme === 'light' && /v2\.6\.48/.test(light.version)) {
+    if (light.theme === 'light' && /v2\.6\.49/.test(light.version)) {
       pass('default-light-version', light.version);
     } else fail('default-light-version', JSON.stringify({ theme: light.theme, version: light.version }));
 

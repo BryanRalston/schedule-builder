@@ -6144,7 +6144,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 <footer class="app-footer no-print">
   <div class="footer-brand">
-    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.48</span> · <span data-i18n="Works offline">Works offline</span></div>
+    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.49</span> · <span data-i18n="Works offline">Works offline</span></div>
     <p class="footer-privacy" data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</p>
     <p class="footer-pub"><span data-i18n="Support">Support</span>: <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a> · Cortex Developments · <a href="../buy.html" style="font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></p>
   </div>
@@ -9092,7 +9092,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.48';
+const APP_VERSION = '2.6.49';
 
 // ── Appearance (light default; dark optional, on-device) ──
 const MSB_THEME_KEY = 'msb_appearance';
@@ -10141,6 +10141,7 @@ function currentMustFixCount(genReport) {
   return typeof countMustFixErrors === 'function' ? (countMustFixErrors(report) || 0) : 0;
 }
 
+/** In-app copy only. Never inject this line into print / Word / Excel payloads. */
 function formatExportReadinessLine(n) {
   const count = Number(n);
   if (!(count > 0)) return '';
@@ -17941,6 +17942,10 @@ function jumpToRoleOnGrid(role) {
    v2.6.48 — Real Office Open XML exports: Word is .docx and Excel is
              .xlsx (browser-side ZIP, no HTML-as-.doc). Soft-confirm /
              NOT READY banners stay. SW cache 2.6.48.
+   v2.6.49 — Readiness / NOT READY hang banner is UI-only. Soft-confirm
+             still gates Print / Word / Excel when must-fix remains.
+             Exported .docx / .xlsx and the print sheet stay clean.
+             SW cache 2.6.49.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -18322,10 +18327,6 @@ function renderPrintSchedule(ROLES, ALL_KC) {
   html += 'Period ' + p.number + ' · FY' + fiscalYear + ' · ' + esc(p.approxMonth);
   html += ' · ' + formatDate(p.start) + ' – ' + formatDate(p.end);
   html += '</div>';
-  const printReady = formatExportReadinessLine(currentMustFixCount());
-  if (printReady) {
-    html += '<div class="print-readiness">' + esc(printReady) + '</div>';
-  }
   try {
     const sum = typeof summarizeStoreHours === 'function' ? summarizeStoreHours() : '';
     if (sum) html += '<div class="print-hours-line">' + esc(msbT('Store hours · {sum}', { sum: sum })) + '</div>';
@@ -18481,7 +18482,6 @@ function buildExportModel() {
     title: msbT('MANAGEMENT SCHEDULE'),
     subtitle: subParts.join(' | '),
     excelSubtitle: excelSubtitle,
-    readiness: formatExportReadinessLine(currentMustFixCount()),
     nameHeader: msbT('Name'),
     legend: [
       { bg: '#d1fae5', label: msbT('Open') },
@@ -18563,7 +18563,6 @@ function buildWordExportHtml() {
   subParts.push(formatDate(p.start) + ' – ' + formatDate(p.end));
   body += subParts.join(' &nbsp;|&nbsp; ');
   body += '</div>';
-  body += exportReadinessBannerHtml();
   body += '</div>';
 
   // Color legend
@@ -18693,10 +18692,6 @@ function buildExcelExportHtml() {
   let subtitle = msbT('Period') + ' ' + p.number + '  FY' + fiscalYear + '  ' + esc(p.approxMonth);
   if (storeNum) subtitle = msbT('Store') + ': ' + esc(storeNum) + '     ' + subtitle;
   body += '<tr><td colspan="8">' + subtitle + '</td></tr>';
-  const excelReady = formatExportReadinessLine(currentMustFixCount());
-  if (excelReady) {
-    body += '<tr><td colspan="8" class="export-readiness" style="font-weight:700;background:#fff3cd;border:2px solid #111;padding:6px 8px">' + esc(excelReady) + '</td></tr>';
-  }
   body += '<tr><td colspan="8"></td></tr>';
 
   p.weeks.forEach((week, wIdx) => {

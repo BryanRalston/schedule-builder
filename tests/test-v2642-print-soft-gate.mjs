@@ -1,6 +1,7 @@
 /**
  * v2.6.46: soft-gate Print / Word / Excel when must-fix remains.
- * Must-fix board: confirm + readiness line. Zero must-fix: unchanged.
+ * Must-fix board: confirm stays in-app. Hang banner is UI-only (2.6.49).
+ * Zero must-fix: unchanged.
  * Extends 2.6.38 / 2.6.39 / 2.6.40 / 2.6.41 (keep those green).
  * Run: node tests/test-v2642-print-soft-gate.mjs
  */
@@ -76,15 +77,15 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.48') pass('version.json', ver.version);
+  if (ver.version === '2.6.49') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.48'") && sw.includes('msb-pro-v2.6.48')
-    && index.includes('id="app-version-label">v2.6.48')) {
+  if (index.includes("APP_VERSION = '2.6.49'") && sw.includes('msb-pro-v2.6.49')
+    && index.includes('id="app-version-label">v2.6.49')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.48');
+  } else fail('app-sw-version', 'expected 2.6.49');
 
-  if (twa.appVersion === '2.6.48' && twa.appVersionName === '2.6.48') pass('twa-manifest-version');
+  if (twa.appVersion === '2.6.49' && twa.appVersionName === '2.6.49') pass('twa-manifest-version');
   else fail('twa-manifest-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   if (index.includes('function currentMustFixCount(')
@@ -108,11 +109,18 @@ function staticChecks() {
     pass('word-excel-gated');
   } else fail('word-excel-gated', 'Word/Excel never call confirmMustFixExport');
 
-  if (index.includes('class="print-readiness"')
-    && index.includes('class="export-readiness"')
-    && index.includes("msbT('NOT READY · {n} must-fix — do not hang until fixed'")) {
+  const printFn = index.slice(index.indexOf('function renderPrintSchedule('), index.indexOf('function renderPrintSchedule(') + 2500);
+  const wordFn = index.slice(index.indexOf('function buildWordExportHtml('), index.indexOf('function buildWordExportHtml(') + 1800);
+  const excelFn = index.slice(index.indexOf('function buildExcelExportHtml('), index.indexOf('function buildExcelExportHtml(') + 1800);
+  const modelFn = index.slice(index.indexOf('function buildExportModel('), index.indexOf('function buildExportModel(') + 2200);
+  if (index.includes('function formatExportReadinessLine(')
+    && index.includes("msbT('NOT READY · {n} must-fix — do not hang until fixed'")
+    && !/print-readiness|exportReadinessBannerHtml|excelReady/.test(printFn)
+    && !/exportReadinessBannerHtml|export-readiness/.test(wordFn)
+    && !/export-readiness|excelReady/.test(excelFn)
+    && !/readiness:\s*formatExportReadinessLine/.test(modelFn)) {
     pass('readiness-line-hooks');
-  } else fail('readiness-line-hooks', 'print/export readiness line missing');
+  } else fail('readiness-line-hooks', 'readiness helper missing or still injected into export/print');
 
   if (index.includes("'NOT READY · {n} must-fix — do not hang until fixed': 'NO LISTO · {n} a corregir — no lo cuelgues hasta arreglarlo'")
     && index.includes("'Print anyway': 'Imprimir igual'")
@@ -224,7 +232,7 @@ async function main() {
     const boot = await page.evaluate(() => ({
       version: (document.getElementById('app-version-label') || {}).textContent,
     }));
-    if (/v2\.6\.48/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.49/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const helpers = await page.evaluate(() => {
@@ -256,22 +264,22 @@ async function main() {
       const excel = typeof buildExcelExportHtml === 'function' ? buildExcelExportHtml() : '';
       return {
         must,
-        printHasReady: !!(ready && /NOT READY/.test(ready.textContent || '') && String(must).length && ready.textContent.indexOf(String(must)) !== -1),
+        printHasReady: !!(ready && /NOT READY|NO LISTO/.test(ready.textContent || '')),
         printLine: ready ? ready.textContent.trim() : '',
-        printHasHang: /do not hang/i.test(printText),
-        wordHasReady: /export-readiness/.test(word) && /NOT READY/.test(word) && word.indexOf(String(must)) !== -1,
-        excelHasReady: /export-readiness/.test(excel) && /NOT READY/.test(excel) && excel.indexOf(String(must)) !== -1,
+        printHasHang: /do not hang|must-fix|NOT READY|NO LISTO|no lo cuelgues/i.test(printText),
+        wordHasReady: /export-readiness|NOT READY|NO LISTO|do not hang|must-fix/i.test(word),
+        excelHasReady: /export-readiness|NOT READY|NO LISTO|do not hang|must-fix/i.test(excel),
       };
     });
     if (setup.periodNumber === 8 && built.must > 0) pass('two-person-has-mustfix', 'mustFix=' + built.must);
     else fail('two-person-has-mustfix', JSON.stringify({ setup, built }));
 
-    if (built.printHasReady && built.printHasHang) pass('print-readiness-on-mustfix', built.printLine);
-    else fail('print-readiness-on-mustfix', JSON.stringify(built));
-    if (built.wordHasReady) pass('word-readiness-on-mustfix');
-    else fail('word-readiness-on-mustfix', 'Word HTML missing readiness line');
-    if (built.excelHasReady) pass('excel-readiness-on-mustfix');
-    else fail('excel-readiness-on-mustfix', 'Excel HTML missing readiness line');
+    if (!built.printHasReady && !built.printHasHang) pass('print-no-readiness-on-mustfix');
+    else fail('print-no-readiness-on-mustfix', JSON.stringify(built));
+    if (!built.wordHasReady) pass('word-no-readiness-on-mustfix');
+    else fail('word-no-readiness-on-mustfix', 'Word HTML leaked readiness hang banner');
+    if (!built.excelHasReady) pass('excel-no-readiness-on-mustfix');
+    else fail('excel-no-readiness-on-mustfix', 'Excel HTML leaked readiness hang banner');
 
     const printGate = await page.evaluate(inPage(`
       installPrintSpy();
@@ -352,11 +360,8 @@ async function main() {
       closeMustFixExportConfirm();
       return { ready: ready, wordEs: /NO LISTO/.test(word), excelEs: /NO LISTO/.test(excel), mid: mid };
     `));
-    if (/NO LISTO/.test(es.ready) && /a corregir/.test(es.ready) && !/NOT READY/.test(es.ready)) {
-      pass('spanish-print-readiness', es.ready);
-    } else fail('spanish-print-readiness', es.ready);
-    if (es.wordEs && es.excelEs) pass('spanish-export-readiness');
-    else fail('spanish-export-readiness', JSON.stringify({ word: es.wordEs, excel: es.excelEs }));
+    if (!es.ready && !es.wordEs && !es.excelEs) pass('spanish-no-print-export-readiness');
+    else fail('spanish-no-print-export-readiness', JSON.stringify({ ready: es.ready, word: es.wordEs, excel: es.excelEs }));
     if (es.mid.open && /NO LISTO/.test(es.mid.title) && /Imprimir igual/.test(es.mid.proceed)
       && /Abrir Revisión/.test(es.mid.review) && es.mid.printCalls === 0) {
       pass('spanish-print-confirm', es.mid.body);

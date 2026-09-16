@@ -266,11 +266,7 @@
     let body = '';
     body += wP(wText(m.title || 'MANAGEMENT SCHEDULE', { bold: true, sz: 32 }), { jc: 'center', after: 80 });
     if (m.subtitle) body += wP(wText(m.subtitle, { sz: 22 }), { jc: 'center', after: 80 });
-    if (m.readiness) {
-      body += wP(wText(m.readiness, { bold: true, sz: 20 }), {
-        jc: 'center', shd: '#FFF3CD', borders: true, after: 160
-      });
-    }
+    // Readiness / NOT READY is UI-only — never write it into .docx bytes.
     const legend = m.legend || [];
     if (legend.length) {
       let runs = '';
@@ -476,7 +472,6 @@
     const styles = new StyleBook();
     const titleXf = styles.xf(1, 0, 'left', 0);
     const subXf = styles.xf(2, 0, 'left', 0);
-    const readyXf = styles.xf(3, 5, 'left', 1);
     const bannerXf = styles.xf(4, 4, 'left', 1);
     const headXf = styles.xf(5, 2, 'center', 1);
     const nameXf = styles.xf(5, 3, 'left', 1);
@@ -488,10 +483,7 @@
       rows.push({ r: r, cells: [inlineCell('A' + r, m.excelSubtitle || m.subtitle, subXf)] });
       r += 1;
     }
-    if (m.readiness) {
-      rows.push({ r: r, cells: [inlineCell('A' + r, m.readiness, readyXf)] });
-      r += 1;
-    }
+    // Readiness / NOT READY is UI-only — never write it into .xlsx bytes.
     r += 1;
     const days = m.dayHeaders || ['SUN', 'MON', 'TUES', 'WED', 'THURS', 'FRI', 'SAT'];
     (m.weeks || []).forEach((week) => {

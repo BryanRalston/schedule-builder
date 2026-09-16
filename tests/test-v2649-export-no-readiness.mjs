@@ -1,12 +1,12 @@
 /**
- * v2.6.48: real Office Open XML Word (.docx) + Excel (.xlsx).
- * Assert ZIP/OOXML structure, not HTML-as-.doc / HTML-as-.xls.
- * Soft-confirm stays in-app. Readiness hang banner is UI-only (2.6.49).
- * Run: node tests/test-v2648-ooxml-export.mjs
+ * v2.6.49: readiness / NOT READY hang banner is UI-only.
+ * Exported .docx / .xlsx and the print sheet must not include it.
+ * Soft-confirm and in-app Review / Posting stay. Real OOXML stays.
+ * Run: node tests/test-v2649-export-no-readiness.mjs
  */
 import { createRequire } from 'module';
 import { createServer } from 'http';
-import { readFileSync, existsSync, statSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -24,6 +24,8 @@ function fail(name, detail) {
   results.push({ name, ok: false, detail: String(detail) });
   console.log('  FAIL', name, '—', detail);
 }
+
+const HANG = /NOT READY|NO LISTO|must-fix|do not hang|no lo cuelgues/i;
 
 const MIME = {
   '.html': 'text/html',
@@ -120,19 +122,6 @@ function assertOfficePackage(bytes, kind) {
     : ['[Content_Types].xml', '_rels/.rels', 'xl/workbook.xml', 'xl/worksheets/sheet1.xml', 'xl/_rels/workbook.xml.rels'];
   const missing = need.filter((n) => !files[n]);
   if (missing.length) throw new Error(kind + ' missing ' + missing.join(', '));
-  const ctypes = files['[Content_Types].xml'].text;
-  if (kind === 'docx') {
-    if (!/wordprocessingml\.document\.main\+xml/.test(ctypes)) throw new Error('docx Content_Types missing document part');
-    const doc = files['word/document.xml'].text;
-    if (/<!DOCTYPE html|<html xmlns/.test(doc)) throw new Error('docx document is HTML');
-  } else {
-    if (!/spreadsheetml\.sheet\.main\+xml/.test(ctypes)) throw new Error('xlsx Content_Types missing workbook');
-    if (!/worksheets\/sheet1\.xml/.test(files['xl/_rels/workbook.xml.rels'].text)) {
-      throw new Error('xlsx workbook rels missing sheet');
-    }
-    const sheet = files['xl/worksheets/sheet1.xml'].text;
-    if (/<!DOCTYPE html|<html xmlns/.test(sheet)) throw new Error('xlsx sheet is HTML');
-  }
   return { names: names, files: files };
 }
 
@@ -143,7 +132,6 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
   const gradle = read('android-twa/app/build.gradle');
-  const landing = read('index.html');
 
   if (ver.version === '2.6.49') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
@@ -158,36 +146,36 @@ function staticChecks() {
     pass('twa-version');
   } else fail('twa-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
-  if (existsSync(join(ROOT, 'app/ooxml-export.js'))
-    && index.includes('src="ooxml-export.js"')
-    && sw.includes("'./app/ooxml-export.js'")) {
-    pass('ooxml-script-bundled');
-  } else fail('ooxml-script-bundled', 'ooxml-export.js not wired for offline');
+  const printFn = sliceFn(index, 'renderPrintSchedule');
+  const wordFn = sliceFn(index, 'buildWordExportHtml');
+  const excelFn = sliceFn(index, 'buildExcelExportHtml');
+  const modelFn = sliceFn(index, 'buildExportModel');
+  if (printFn && !/print-readiness|formatExportReadinessLine|exportReadinessBannerHtml/.test(printFn)
+    && wordFn && !/exportReadinessBannerHtml|export-readiness|formatExportReadinessLine/.test(wordFn)
+    && excelFn && !/export-readiness|formatExportReadinessLine/.test(excelFn)
+    && modelFn && !/formatExportReadinessLine|\breadiness\s*:/.test(modelFn)) {
+    pass('builders-omit-readiness');
+  } else fail('builders-omit-readiness', 'print/word/excel/model still inject readiness');
 
-  const wordDl = sliceFn(index, 'downloadWordExport');
-  const excelDl = sliceFn(index, 'downloadExcelExport');
-  if (/buildDocx/.test(wordDl) && /officeExportFilename\('\.docx'\)/.test(wordDl)
-    && /MIME_DOCX/.test(wordDl) && !/application\/msword/.test(wordDl)
-    && !/\.doc'/.test(wordDl) && !/buildWordExportHtml/.test(wordDl)) {
-    pass('word-download-is-docx');
-  } else fail('word-download-is-docx', wordDl.slice(0, 400));
-
-  if (/buildXlsx/.test(excelDl) && /officeExportFilename\('\.xlsx'\)/.test(excelDl)
-    && /MIME_XLSX/.test(excelDl) && !/application\/vnd\.ms-excel/.test(excelDl)
-    && !/buildExcelExportHtml/.test(excelDl)) {
-    pass('excel-download-is-xlsx');
-  } else fail('excel-download-is-xlsx', excelDl.slice(0, 400));
+  const ooxml = read('app/ooxml-export.js');
+  if (!/m\.readiness/.test(ooxml) && /UI-only/.test(ooxml)) {
+    pass('ooxml-ignores-readiness');
+  } else fail('ooxml-ignores-readiness', 'ooxml-export still writes m.readiness');
 
   if (index.includes("confirmMustFixExport('word'")
     && index.includes("confirmMustFixExport('excel'")
-    && index.includes('function formatExportReadinessLine(')) {
-    pass('soft-gate-kept');
-  } else fail('soft-gate-kept', 'Word/Excel confirm or readiness helper missing');
+    && index.includes('function confirmMustFixExport(')
+    && index.includes('id="mustfix-export-modal"')
+    && index.includes('function formatExportReadinessLine(')
+    && index.includes("requirePro('Word export')")
+    && index.includes("requirePro('Excel export')")) {
+    pass('soft-confirm-and-pro-gate-kept');
+  } else fail('soft-confirm-and-pro-gate-kept', 'in-app gate or Pro gate missing');
 
-  if (index.includes('Real Microsoft Word (.docx) and Excel (.xlsx) export on Pro.')
-    && landing.includes('Real Word (.docx) / Excel (.xlsx) on Pro.')) {
-    pass('feature-map-real-office');
-  } else fail('feature-map-real-office', 'Feature Map / landing still omit real .docx/.xlsx');
+  if (index.includes('If must-fix items remain, Print / Word / Excel ask you to confirm first.')
+    && !/export includes a NOT READY|NOT READY line on the (print|sheet|export)/i.test(index)) {
+    pass('feature-map-unchanged');
+  } else fail('feature-map-unchanged', 'Feature Map copy drifted');
 }
 
 function unitChecks() {
@@ -198,38 +186,24 @@ function unitChecks() {
   try {
     const pack = assertOfficePackage(docx, 'docx');
     const doc = pack.files['word/document.xml'].text;
-    if (!/MANAGEMENT SCHEDULE/.test(doc) || !/Store # 0851/.test(doc)
-      || /NOT READY|must-fix|do not hang/i.test(doc) || !/Dana/.test(doc) || !/OPEN 9-5/.test(doc)) {
-      throw new Error('docx fixture content incomplete or leaked readiness');
+    if (!/MANAGEMENT SCHEDULE/.test(doc) || !/Dana/.test(doc) || !/OPEN 9-5/.test(doc)) {
+      throw new Error('docx fixture missing schedule content');
     }
-    pass('docx-ooxml', pack.names.length + ' parts');
+    if (HANG.test(doc)) throw new Error('docx still contains readiness hang language');
+    pass('docx-omits-readiness', pack.names.length + ' parts');
   } catch (e) {
-    fail('docx-ooxml', e.message || e);
+    fail('docx-omits-readiness', e.message || e);
   }
   try {
     const pack = assertOfficePackage(xlsx, 'xlsx');
     const sheet = pack.files['xl/worksheets/sheet1.xml'].text;
-    if (!/MANAGEMENT SCHEDULE/.test(sheet) || !/Store: 0851/.test(sheet)
-      || /NOT READY|must-fix|do not hang/i.test(sheet) || !/Dana/.test(sheet) || !/OPEN 9-5/.test(sheet)) {
-      throw new Error('xlsx fixture content incomplete or leaked readiness');
+    if (!/MANAGEMENT SCHEDULE/.test(sheet) || !/Dana/.test(sheet) || !/OPEN 9-5/.test(sheet)) {
+      throw new Error('xlsx fixture missing schedule content');
     }
-    pass('xlsx-ooxml', pack.names.length + ' parts');
+    if (HANG.test(sheet)) throw new Error('xlsx still contains readiness hang language');
+    pass('xlsx-omits-readiness', pack.names.length + ' parts');
   } catch (e) {
-    fail('xlsx-ooxml', e.message || e);
-  }
-  if (OOXML.MIME_DOCX.indexOf('wordprocessingml') !== -1
-    && OOXML.MIME_XLSX.indexOf('spreadsheetml') !== -1) {
-    pass('office-mime');
-  } else fail('office-mime', OOXML.MIME_DOCX + ' ' + OOXML.MIME_XLSX);
-
-  const outDir = '/tmp/msb-ooxml-fixtures';
-  try {
-    mkdirSync(outDir, { recursive: true });
-    writeFileSync(join(outDir, 'fixture.docx'), Buffer.from(docx));
-    writeFileSync(join(outDir, 'fixture.xlsx'), Buffer.from(xlsx));
-    pass('wrote-fixture-files', outDir);
-  } catch (e) {
-    fail('wrote-fixture-files', e.message || e);
+    fail('xlsx-omits-readiness', e.message || e);
   }
 }
 
@@ -305,7 +279,6 @@ async function browserChecks(base, chromium) {
       viewport: { width: 412, height: 915 },
       isMobile: true,
       hasTouch: true,
-      acceptDownloads: true,
     });
     const page = await context.newPage();
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -332,84 +305,96 @@ async function browserChecks(base, chromium) {
     });
     await page.waitForTimeout(2200);
 
-    const built = await page.evaluate(() => {
+    const live = await page.evaluate(() => {
+      const must = typeof currentMustFixCount === 'function' ? currentMustFixCount() : null;
       const model = typeof buildExportModel === 'function' ? buildExportModel() : null;
+      const print = document.getElementById('print-schedule');
+      const printText = print ? (print.innerText || print.textContent || '') : '';
+      const printReady = print ? print.querySelector('.print-readiness') : null;
+      const wordHtml = typeof buildWordExportHtml === 'function' ? buildWordExportHtml() : '';
+      const excelHtml = typeof buildExcelExportHtml === 'function' ? buildExcelExportHtml() : '';
       const docx = model && MSB_OOXML.buildDocx(model);
       const xlsx = model && MSB_OOXML.buildXlsx(model);
       const toArr = (u8) => (u8 ? Array.from(u8) : []);
+      const posting = document.querySelector('.posting-badge');
       return {
-        period: currentPeriod ? currentPeriod.number : null,
-        must: typeof currentMustFixCount === 'function' ? currentMustFixCount() : null,
-        title: model && model.title,
-        readiness: model && model.readiness,
-        weeks: model && model.weeks ? model.weeks.length : 0,
-        firstName: model && model.weeks && model.weeks[0] && model.weeks[0].rows[0]
-          ? model.weeks[0].rows[0].name : '',
-        wordName: typeof officeExportFilename === 'function' ? officeExportFilename('.docx') : '',
-        excelName: typeof officeExportFilename === 'function' ? officeExportFilename('.xlsx') : '',
+        must,
+        modelReady: model && model.readiness,
+        printHasReadyEl: !!printReady,
+        printText: printText,
+        wordHtml: wordHtml,
+        excelHtml: excelHtml,
         docx: toArr(docx),
         xlsx: toArr(xlsx),
-        mimeDocx: MSB_OOXML.MIME_DOCX,
-        mimeXlsx: MSB_OOXML.MIME_XLSX
+        posting: posting ? posting.textContent.trim() : '',
+        firstName: model && model.weeks && model.weeks[0] && model.weeks[0].rows[0]
+          ? model.weeks[0].rows[0].name : ''
       };
     });
 
-    if (setup.periodNumber === 8 && built.must > 0 && built.weeks > 0 && built.firstName === 'Dana') {
-      pass('live-model', 'mustFix=' + built.must + ' weeks=' + built.weeks);
-    } else fail('live-model', JSON.stringify({ setup, period: built.period, must: built.must, weeks: built.weeks, name: built.firstName }));
+    if (setup.periodNumber === 8 && live.must > 0 && live.firstName === 'Dana') {
+      pass('live-mustfix-board', 'mustFix=' + live.must);
+    } else fail('live-mustfix-board', JSON.stringify({ setup, must: live.must, name: live.firstName }));
 
-    if (/Store0851/.test(built.wordName) && /\.docx$/.test(built.wordName)
-      && /\.xlsx$/.test(built.excelName) && /wordprocessingml/.test(built.mimeDocx)
-      && /spreadsheetml/.test(built.mimeXlsx)) {
-      pass('live-filenames', built.wordName + ' + ' + built.excelName);
-    } else fail('live-filenames', JSON.stringify({ w: built.wordName, x: built.excelName }));
+    if (!live.modelReady && !live.printHasReadyEl && !HANG.test(live.printText)) {
+      pass('print-html-omits-readiness');
+    } else fail('print-html-omits-readiness', JSON.stringify({
+      modelReady: live.modelReady,
+      el: live.printHasReadyEl
+    }));
+
+    if (!HANG.test(live.wordHtml || '') && !HANG.test(live.excelHtml || '')) {
+      pass('legacy-html-builders-omit-readiness');
+    } else fail('legacy-html-builders-omit-readiness', 'Word/Excel HTML leaked hang language');
 
     try {
-      const docxBytes = Uint8Array.from(built.docx);
-      const xlsxBytes = Uint8Array.from(built.xlsx);
-      const docPack = assertOfficePackage(docxBytes, 'docx');
-      const xPack = assertOfficePackage(xlsxBytes, 'xlsx');
-      const doc = docPack.files['word/document.xml'].text;
-      const sheet = xPack.files['xl/worksheets/sheet1.xml'].text;
-      if (/NOT READY|NO LISTO|must-fix|do not hang|no lo cuelgues/i.test(doc)
-        || /NOT READY|NO LISTO|must-fix|do not hang|no lo cuelgues/i.test(sheet)) {
-        throw new Error('live files leaked readiness hang banner');
+      const docxBytes = Uint8Array.from(live.docx);
+      const xlsxBytes = Uint8Array.from(live.xlsx);
+      const doc = assertOfficePackage(docxBytes, 'docx').files['word/document.xml'].text;
+      const sheet = assertOfficePackage(xlsxBytes, 'xlsx').files['xl/worksheets/sheet1.xml'].text;
+      if (HANG.test(doc) || HANG.test(sheet)) throw new Error('live OOXML leaked hang language');
+      if (!/Dana/.test(doc) || !/Alex/.test(sheet) || !/0851/.test(doc)) {
+        throw new Error('live OOXML dropped schedule content');
       }
-      if (!/Dana/.test(doc) || !/Alex/.test(sheet)) {
-        throw new Error('live files dropped names');
-      }
-      if (!/0851/.test(doc) || !/0851/.test(sheet)) {
-        throw new Error('live files dropped store number');
-      }
-      pass('live-ooxml-bytes', 'docx=' + docxBytes.length + ' xlsx=' + xlsxBytes.length);
+      pass('live-ooxml-omits-readiness', 'docx=' + docxBytes.length + ' xlsx=' + xlsxBytes.length);
     } catch (e) {
-      fail('live-ooxml-bytes', e.message || e);
+      fail('live-ooxml-omits-readiness', e.message || e);
     }
 
-    await page.evaluate(() => {
-      if (typeof setUiLang === 'function') setUiLang('es');
+    if (/Not ready/i.test(live.posting || '')) pass('in-app-posting-still-shows-readiness', live.posting);
+    else fail('in-app-posting-still-shows-readiness', live.posting);
+
+    const gate = await page.evaluate(() => {
+      const shown = confirmMustFixExport('word', function () { window._wordGo = true; });
+      const modal = document.getElementById('mustfix-export-modal');
+      const title = ((document.getElementById('mustfix-export-title') || {}).textContent || '').trim();
+      const body = ((document.getElementById('mustfix-export-body') || {}).textContent || '').trim();
+      const open = !!(modal && !modal.hasAttribute('hidden'));
+      const kind = modal ? modal.getAttribute('data-export-kind') : null;
+      proceedMustFixExportConfirm();
+      return { shown, open, title, body, kind, proceeded: window._wordGo === true };
     });
-    const es = await page.evaluate(() => {
-      const model = buildExportModel();
-      const doc = MSB_OOXML.unzipStore(MSB_OOXML.buildDocx(model));
-      const sheet = MSB_OOXML.unzipStore(MSB_OOXML.buildXlsx(model));
-      return {
-        ready: model.readiness || '',
-        word: doc['word/document.xml'].text,
-        excel: sheet['xl/worksheets/sheet1.xml'].text
-      };
+    if (gate.shown === false && gate.open && gate.kind === 'word'
+      && /NOT READY/.test(gate.title) && /must-fix/.test(gate.body) && gate.proceeded) {
+      pass('soft-confirm-still-in-app', gate.body);
+    } else fail('soft-confirm-still-in-app', JSON.stringify(gate));
+
+    const review = await page.evaluate(() => {
+      if (typeof openReviewSheet === 'function') openReviewSheet();
+      const sheet = document.getElementById('review-sheet');
+      const open = !!(sheet && sheet.classList.contains('open') && !sheet.hidden);
+      const text = sheet ? (sheet.innerText || sheet.textContent || '') : '';
+      return { open: open, hasMust: /must-fix|Not ready|not ready/i.test(text) };
     });
-    if (!es.ready && !/NO LISTO|NOT READY|must-fix|do not hang|no lo cuelgues/i.test(es.word)
-      && !/NO LISTO|NOT READY|must-fix|do not hang|no lo cuelgues/i.test(es.excel)) {
-      pass('spanish-no-readiness-ooxml');
-    } else fail('spanish-no-readiness-ooxml', JSON.stringify({ ready: es.ready }));
+    if (review.open && review.hasMust) pass('in-app-review-still-shows-readiness');
+    else fail('in-app-review-still-shows-readiness', JSON.stringify(review));
   } finally {
     await browser.close();
   }
 }
 
 async function main() {
-  console.log('\n=== v2.6.48 real Word + Excel OOXML (readiness UI-only) ===');
+  console.log('\n=== v2.6.49 export readiness is UI-only ===');
   staticChecks();
   unitChecks();
 

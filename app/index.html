@@ -4343,6 +4343,56 @@ html.auth-locked .toast-host { z-index: 20050; }
   gap: 0.45rem;
 }
 .ap-signout-opts input { margin-top: 0.15rem; }
+.feature-map-card {
+  max-width: 34rem;
+  max-height: min(88dvh, 44rem);
+  overflow: auto;
+}
+.feature-map-kicker {
+  display: block;
+  margin: 0 0 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: var(--mono);
+}
+.feature-map-card .fm-intro {
+  margin: 0.15rem 0 0.85rem;
+  font-size: 0.88rem;
+  color: var(--ink-3);
+}
+.fm-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 0.85rem;
+}
+.fm-section {
+  margin: 0;
+  padding: 0.65rem 0.75rem 0.55rem;
+  border-radius: 10px;
+  background: var(--tab-rail-bg);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent-2);
+}
+.fm-section h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: var(--mono);
+}
+.fm-section ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-2);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+.fm-section li + li { margin-top: 0.18rem; }
 .license-modal-card label,
 .provider-modal-card label {
   display: flex;
@@ -5574,6 +5624,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" onclick="togglePeakSeasonPref(); closeHeaderMenu()" data-i18n="Toggle peak season">Toggle peak season</button>
         <button type="button" onclick="startNextPeriodSameTeam(); closeHeaderMenu()" data-i18n="Next period same team">Next period same team</button>
         <div class="header-menu-sep" data-i18n="Help">Help</div>
+        <button type="button" id="header-menu-feature-map" onclick="openFeatureMap(); closeHeaderMenu()" data-i18n="Feature Map">Feature Map</button>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()" data-i18n="How it works">How it works</button>
         <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
         <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()" data-i18n="Take tour">Take tour</button>
@@ -6045,11 +6096,12 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 <footer class="app-footer no-print">
   <div class="footer-brand">
-    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.46</span> · <span data-i18n="Works offline">Works offline</span></div>
+    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.47</span> · <span data-i18n="Works offline">Works offline</span></div>
     <p class="footer-privacy" data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</p>
     <p class="footer-pub"><span data-i18n="Support">Support</span>: <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a> · Cortex Developments · <a href="../buy.html" style="font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></p>
   </div>
   <div class="footer-links">
+    <button type="button" id="footer-feature-map" onclick="openFeatureMap()" data-i18n="Feature Map">Feature Map</button>
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
     <button type="button" onclick="location.href='../buy.html'" data-twa-hide data-i18n="Buy Pro">Buy Pro</button>
@@ -6090,6 +6142,69 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   </div>
 </div>
 
+<!-- Feature Map — current capabilities only (static, offline) -->
+<div class="account-modal no-print" id="feature-map-modal" hidden role="dialog" aria-modal="true" aria-labelledby="feature-map-title" onclick="if (event.target === this) closeFeatureMap();">
+  <div class="account-panel-card feature-map-card" onclick="event.stopPropagation()">
+    <span class="feature-map-kicker" data-i18n="What's included">What's included</span>
+    <h3 id="feature-map-title" tabindex="-1" data-i18n="Feature Map">Feature Map</h3>
+    <p class="fm-intro" data-i18n="Current capabilities — what ships today.">Current capabilities — what ships today.</p>
+    <div class="fm-sections" id="feature-map-sections">
+      <section class="fm-section" data-fm-group="build">
+        <h4 data-i18n="Build the period">Build the period</h4>
+        <ul>
+          <li>Load this NRF 4-5-4 period (U.S. retail calendar only)</li>
+          <li>Name the team: Store Manager, Assistant Managers, Key Carriers</li>
+          <li>Edit role titles to match your store</li>
+        </ul>
+      </section>
+      <section class="fm-section" data-fm-group="requests">
+        <h4 data-i18n="Requests &amp; preferences">Requests &amp; preferences</h4>
+        <ul>
+          <li>Lock PTO, RTO, LOA — the generator treats these as hard constraints</li>
+          <li>Preferred shifts, plus the Ask bar (“Casey off Thu–Fri”)</li>
+          <li>Fair weekends; clopen-avoidance is a preference — not a guarantee</li>
+          <li>Role rules on the Rules tab</li>
+        </ul>
+      </section>
+      <section class="fm-section" data-fm-group="review">
+        <h4 data-i18n="Review before you post">Review before you post</h4>
+        <ul>
+          <li>Edit cells on the board after you build</li>
+          <li>Quality chips for coverage, clopens, and weekend fairness</li>
+          <li>Tap a chip to jump and fix</li>
+          <li>Print / Word / Excel asks you to confirm if must-fix remains</li>
+        </ul>
+      </section>
+      <section class="fm-section" data-fm-group="local">
+        <h4 data-i18n="Stay local">Stay local</h4>
+        <ul>
+          <li>Works offline. No account.</li>
+          <li>Names, time off, and the board stay on this device</li>
+          <li>Backup JSON for a new phone — no cloud copy</li>
+        </ul>
+      </section>
+      <section class="fm-section" data-fm-group="look">
+        <h4 data-i18n="Language &amp; look">Language &amp; look</h4>
+        <ul>
+          <li>English and Spanish</li>
+          <li>Appearance: Light or Dark — Light is the first-visit default</li>
+        </ul>
+      </section>
+      <section class="fm-section" data-fm-group="plans">
+        <h4 data-i18n="Free vs Pro">Free vs Pro</h4>
+        <ul>
+          <li>Free: unlimited team size, full cell edits, 2 schedule builds</li>
+          <li>Pro: unlimited builds + Word/Excel</li>
+          <li>$19.99 one-time</li>
+        </ul>
+      </section>
+    </div>
+    <div class="ap-actions">
+      <button type="button" class="ap-btn-secondary" id="feature-map-close" onpointerdown="event.preventDefault(); event.stopPropagation(); closeFeatureMap();" onclick="event.stopPropagation(); closeFeatureMap();" data-i18n="Close panel">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Account panel -->
 <div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title" onclick="if (event.target === this) closeAccountPanel();">
   <div class="account-panel-card" onclick="event.stopPropagation()">
@@ -6122,6 +6237,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       <div class="ap-row"><span data-i18n="Plan">Plan</span><span id="ap-plan">Free · 2 of 2 builds left</span></div>
     </div>
     <div class="ap-actions">
+      <button type="button" class="ap-btn-secondary" id="ap-feature-map-btn" onclick="closeAccountPanel(); openFeatureMap();" data-i18n="What's included">What's included</button>
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()" data-i18n="Activate team license">Activate team license</button>
       <a class="ap-btn-secondary" href="../buy.html" style="display:inline-flex;align-items:center" data-twa-hide data-i18n="Manage billing">Manage billing</a>
@@ -7950,6 +8066,7 @@ document.addEventListener('keydown', (e) => {
   closeHeaderMenu();
   if (typeof closeLicenseModal === 'function') closeLicenseModal();
   if (typeof closeProviderModal === 'function') closeProviderModal();
+  if (typeof closeFeatureMap === 'function') closeFeatureMap();
   if (typeof closeAccountPanel === 'function') closeAccountPanel();
   const saved = document.getElementById('saved-modal-overlay');
   if (saved && saved.style.display !== 'none') {
@@ -8887,7 +9004,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.46';
+const APP_VERSION = '2.6.47';
 
 // ── Appearance (light default; dark optional, on-device) ──
 const MSB_THEME_KEY = 'msb_appearance';
@@ -8973,6 +9090,15 @@ const MSB_I18N_ES = {
   'Toggle peak season': 'Temporada alta',
   'Next period same team': 'Siguiente período, mismo equipo',
   'How it works': 'Cómo funciona',
+  'Feature Map': 'Mapa de funciones',
+  "What's included": 'Qué incluye',
+  'Current capabilities — what ships today.': 'Capacidades actuales — lo que ya está en la app.',
+  'Build the period': 'Armar el período',
+  'Requests & preferences': 'Solicitudes y preferencias',
+  'Review before you post': 'Revisa antes de publicar',
+  'Stay local': 'Se queda en este teléfono',
+  'Language & look': 'Idioma y apariencia',
+  'Free vs Pro': 'Gratis y Pro',
   'Send feedback': 'Enviar comentarios',
   'Take tour': 'Ver recorrido',
   'Account & license': 'Cuenta y licencia',
@@ -10381,6 +10507,38 @@ function showHowItWorks() {
   }
   switchTab('setup');
   showToast(msbT('Name two managers on Setup, then Build. Requests and rules are optional.'), 'info');
+}
+
+function openFeatureMap() {
+  try { closeHeaderMenu(); } catch (eMenu) {}
+  try { closeAccountPanel(); } catch (eAcct) {}
+  const modal = document.getElementById('feature-map-modal');
+  if (modal) modal.removeAttribute('hidden');
+  msbPushUi('feature-map-modal');
+  const title = document.getElementById('feature-map-title');
+  if (title && typeof title.focus === 'function') {
+    try { title.focus(); } catch (eFocus) {}
+  }
+}
+
+function closeFeatureMap() {
+  const modal = document.getElementById('feature-map-modal');
+  const wasOpen = modal && !modal.hasAttribute('hidden');
+  if (modal) modal.setAttribute('hidden', '');
+  if (wasOpen) msbUiClosed('feature-map-modal');
+  try {
+    const h = (location.hash || '').replace(/^#/, '');
+    if (h === 'feature-map' || h === 'whats-included') {
+      history.replaceState(history.state, '', location.pathname + location.search);
+    }
+  } catch (eHash) {}
+}
+
+function maybeOpenFeatureMapFromHash() {
+  try {
+    const h = (location.hash || '').replace(/^#/, '');
+    if (h === 'feature-map' || h === 'whats-included') openFeatureMap();
+  } catch (e) {}
 }
 
 function persistStoreMeta() {
@@ -17727,6 +17885,9 @@ function jumpToRoleOnGrid(role) {
              glass in dark mode. Other dark-console holdovers (calendar
              cells, empty states, account inputs, status chips) read
              from theme tokens. SW cache 2.6.46.
+   v2.6.47 — In-app Feature Map: current capabilities only. More → Help,
+             footer, Account “What’s included”, #feature-map. Spanish
+             chrome. SW cache 2.6.47.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -22086,6 +22247,7 @@ function getCommandPaletteCommands() {
     { id: 'save', label: 'Save schedule', group: 'File', run: () => saveToStorage() },
     { id: 'load', label: 'Load saved schedules', group: 'File', run: () => openSavedSchedulesModal() },
     { id: 'save-team', label: 'Save team template', group: 'Team', run: () => saveTeamTemplate() },
+    { id: 'feature-map', label: 'Feature Map', group: 'Help', run: () => openFeatureMap() },
     { id: 'tour', label: 'Take tour', group: 'Help', run: () => startOnboardingTour(true) },
     { id: 'feedback', label: 'Send feedback', group: 'Help', run: () => openFeedbackPage() },
     { id: 'peak', label: 'Toggle peak season', group: 'Rules', run: () => togglePeakSeasonPref() },
@@ -22431,6 +22593,7 @@ function bootUi() {
   try { if (typeof refreshReviewFromBoard === 'function') refreshReviewFromBoard(); } catch (eRevBoot) {}
   try { if (typeof initDensityAndContrast === 'function') initDensityAndContrast(); } catch (e) {}
   handleLaunchQuery();
+  try { if (typeof maybeOpenFeatureMapFromHash === 'function') maybeOpenFeatureMapFromHash(); } catch (eFmHash) {}
   ensureAuthOnBoot();
   updateAccountChip();
   if (typeof updateGenFreeLeft === 'function') updateGenFreeLeft();
@@ -22466,11 +22629,12 @@ document.addEventListener('visibilitychange', () => {
 
 // Backdrop click to close account / license / provider modals
 document.addEventListener('click', (e) => {
-  ['account-modal', 'license-modal', 'provider-modal'].forEach((id) => {
+  ['account-modal', 'license-modal', 'provider-modal', 'feature-map-modal'].forEach((id) => {
     const m = document.getElementById(id);
     if (m && !m.hasAttribute('hidden') && e.target === m) {
       if (id === 'account-modal') closeAccountPanel();
       else if (id === 'license-modal') closeLicenseModal();
+      else if (id === 'feature-map-modal') closeFeatureMap();
       else closeProviderModal();
     }
   });

@@ -1,5 +1,5 @@
 /**
- * v2.6.47: in-app Feature Map of CURRENT capabilities.
+ * v2.6.48: in-app Feature Map of CURRENT capabilities.
  * Discoverable from More / Help / Account. Spanish chrome for the entry.
  * Not a roadmap. No coming-soon / App Expert / future-ship copy.
  * Run: node tests/test-v2647-feature-map.mjs
@@ -110,15 +110,15 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.47') pass('version.json', ver.version);
+  if (ver.version === '2.6.48') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.47'") && sw.includes('msb-pro-v2.6.47')
-    && app.includes('id="app-version-label">v2.6.47')) {
+  if (app.includes("APP_VERSION = '2.6.48'") && sw.includes('msb-pro-v2.6.48')
+    && app.includes('id="app-version-label">v2.6.48')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.47');
+  } else fail('app-sw-version', 'expected 2.6.48');
 
-  if (twa.appVersion === '2.6.47' && twa.appVersionName === '2.6.47') pass('twa-version');
+  if (twa.appVersion === '2.6.48' && twa.appVersionName === '2.6.48') pass('twa-version');
   else fail('twa-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   if (app.includes('id="feature-map-modal"') && app.includes('function openFeatureMap')
@@ -207,7 +207,7 @@ async function browserChecks(base, chromium) {
         hasOpen: typeof openFeatureMap === 'function',
       };
     });
-    if (/v2\.6\.47/.test(boot.version) && boot.theme === 'light' && boot.hidden && boot.hasOpen) {
+    if (/v2\.6\.48/.test(boot.version) && boot.theme === 'light' && boot.hidden && boot.hasOpen) {
       pass('boot-closed', boot.version);
     } else fail('boot-closed', JSON.stringify(boot));
 
@@ -292,7 +292,7 @@ async function browserChecks(base, chromium) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.47 Feature Map ===');
+  console.log('\n=== v2.6.48 Feature Map ===');
   staticChecks();
 
   let server;

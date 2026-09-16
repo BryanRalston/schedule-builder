@@ -4346,7 +4346,21 @@ html.auth-locked .toast-host { z-index: 20050; }
 .feature-map-card {
   max-width: 34rem;
   max-height: min(88dvh, 44rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.feature-map-card .fm-sections {
   overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.feature-map-card .ap-actions {
+  position: sticky;
+  bottom: 0;
+  margin-top: 0.15rem;
+  padding-top: 0.45rem;
+  background: var(--chrome-elevated);
 }
 .feature-map-kicker {
   display: block;

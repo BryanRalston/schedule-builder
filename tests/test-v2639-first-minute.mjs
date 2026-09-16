@@ -75,13 +75,13 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.46') pass('version.json', ver.version);
+  if (ver.version === '2.6.47') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.46'") && sw.includes("msb-pro-v2.6.46")
-    && index.includes('id="app-version-label">v2.6.46')) {
+  if (index.includes("APP_VERSION = '2.6.47'") && sw.includes("msb-pro-v2.6.47")
+    && index.includes('id="app-version-label">v2.6.47')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.46');
+  } else fail('app-sw-version', 'expected 2.6.47');
 
   if (index.includes("function formatFreePlanDetail(")
     && index.includes("msbT('Free · {n} of {total} builds left'")
@@ -175,7 +175,7 @@ async function main() {
       };
     });
 
-    if (/v2\.6\.46/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.47/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
     if (/Free · 2/i.test(boot.planText) && boot.planDisplay !== 'none' && boot.metaDisplay !== 'none') {
       pass('phone-chip-free-n', boot.planText + ' display=' + boot.planDisplay);

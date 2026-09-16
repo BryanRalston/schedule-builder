@@ -4241,10 +4241,11 @@ html.auth-locked .toast-host { z-index: 20050; }
 }
 .pro-badge { cursor: pointer; }
 
-/* Account panel + license / provider modals */
+/* Account panel + license / provider / feature-map modals */
 .account-modal,
 .license-modal,
-.provider-modal {
+.provider-modal,
+.feature-map-modal {
   position: fixed; inset: 0; z-index: 20100; /* above #auth-shell (20000) */
   background: var(--modal-scrim);
   display: flex; align-items: center; justify-content: center;
@@ -4253,7 +4254,8 @@ html.auth-locked .toast-host { z-index: 20050; }
 }
 .account-modal[hidden],
 .license-modal[hidden],
-.provider-modal[hidden] { display: none !important; }
+.provider-modal[hidden],
+.feature-map-modal[hidden] { display: none !important; }
 .account-panel-card,
 .license-modal-card,
 .provider-modal-card {
@@ -4377,6 +4379,101 @@ html.auth-locked .toast-host { z-index: 20050; }
   color: var(--bad-ink);
 }
 .license-error.show, .provider-error.show { display: block; }
+
+.feature-map-card {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  background: var(--chrome-elevated);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  max-width: 36rem;
+  width: 100%;
+  max-height: min(88vh, 44rem);
+  padding: 1.1rem 1.15rem 0.95rem;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.feature-map-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.feature-map-head h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+.feature-map-head h3 .fm-kicker {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  color: var(--accent);
+  margin-bottom: 0.18rem;
+}
+.feature-map-head h3 .fm-title {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  font-family: var(--font);
+  color: var(--ink);
+}
+.fm-sub {
+  margin: 0.28rem 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+.feature-map-body {
+  overflow: auto;
+  padding: 0.8rem 0.15rem 0.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 0;
+}
+.feature-map-body section h4 {
+  margin: 0 0 0.28rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  color: var(--accent);
+}
+.feature-map-body ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-2);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.feature-map-body li + li { margin-top: 0.18rem; }
+.fm-close {
+  flex-shrink: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  font-family: var(--font);
+  background: rgba(var(--accent-2-rgb),0.08);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+}
 
 @media (max-width: 520px) {
   .account-chip-name { display: none; }
@@ -5574,6 +5671,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" onclick="togglePeakSeasonPref(); closeHeaderMenu()" data-i18n="Toggle peak season">Toggle peak season</button>
         <button type="button" onclick="startNextPeriodSameTeam(); closeHeaderMenu()" data-i18n="Next period same team">Next period same team</button>
         <div class="header-menu-sep" data-i18n="Help">Help</div>
+        <button type="button" onclick="openFeatureMap(); closeHeaderMenu()" data-i18n="Feature Map">Feature Map</button>
         <button type="button" onclick="showHowItWorks(); closeHeaderMenu()" data-i18n="How it works">How it works</button>
         <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
         <button type="button" onclick="startOnboardingTour(true); closeHeaderMenu()" data-i18n="Take tour">Take tour</button>
@@ -6045,12 +6143,13 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 <footer class="app-footer no-print">
   <div class="footer-brand">
-    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.46</span> · <span data-i18n="Works offline">Works offline</span></div>
+    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.47</span> · <span data-i18n="Works offline">Works offline</span></div>
     <p class="footer-privacy" data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</p>
     <p class="footer-pub"><span data-i18n="Support">Support</span>: <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a> · Cortex Developments · <a href="../buy.html" style="font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></p>
   </div>
   <div class="footer-links">
     <button type="button" onclick="showHowItWorks()" data-i18n="Help">Help</button>
+    <button type="button" onclick="openFeatureMap()" data-i18n="Feature Map">Feature Map</button>
     <button type="button" onclick="openFeedbackPage()" data-i18n="Send feedback">Send feedback</button>
     <button type="button" onclick="location.href='../buy.html'" data-twa-hide data-i18n="Buy Pro">Buy Pro</button>
     <a href="https://ralstonia5.gumroad.com/l/pwplbc" target="_blank" rel="noopener noreferrer" data-twa-hide>Gumroad</a>
@@ -6090,6 +6189,91 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   </div>
 </div>
 
+<!-- Feature Map — current capabilities (not a roadmap) -->
+<div class="feature-map-modal no-print" id="feature-map-modal" hidden role="dialog" aria-modal="true" aria-labelledby="feature-map-title" onclick="if (event.target === this) closeFeatureMap();">
+  <div class="feature-map-card" onclick="event.stopPropagation()">
+    <div class="feature-map-head">
+      <div>
+        <h3 id="feature-map-title"><span class="fm-kicker" data-i18n="Feature Map">Feature Map</span><span class="fm-title" data-i18n="What this app can do">What this app can do</span></h3>
+        <p class="fm-sub" data-i18n="What ships today — not a roadmap.">What ships today — not a roadmap.</p>
+      </div>
+      <button type="button" class="fm-close" id="feature-map-close" onpointerdown="event.preventDefault(); event.stopPropagation(); closeFeatureMap();" onclick="event.stopPropagation(); closeFeatureMap();" data-i18n="Close panel">Close</button>
+    </div>
+    <div class="feature-map-body" id="feature-map-body">
+      <section>
+        <h4>On this device</h4>
+        <ul>
+          <li>Works offline. Names, time off, and the board stay on this phone.</li>
+          <li>No account. No cloud roster. Nothing is uploaded.</li>
+        </ul>
+      </section>
+      <section>
+        <h4>Team &amp; store</h4>
+        <ul>
+          <li>Name SM, AM, and KC. Role titles are editable if your store uses different words.</li>
+          <li>Store name, number, and hours.</li>
+          <li>Load an NRF 4-5-4 fiscal period before you build.</li>
+          <li>Mark U.S. federal paid holidays as observed. Matching weeks become 4-day weeks on the calendar.</li>
+          <li>Save a team template, or start the next period with the same team.</li>
+        </ul>
+      </section>
+      <section>
+        <h4>Requests</h4>
+        <ul>
+          <li>Lock PTO, RTO, LOA, and preferred shifts.</li>
+          <li>Type a request in the ask bar, or paint days on the calendar.</li>
+          <li>Build treats those as hard locks.</li>
+        </ul>
+      </section>
+      <section>
+        <h4>Preferences &amp; role rules</h4>
+        <ul>
+          <li>Tune fairness, weekend offs, and per-role targets.</li>
+          <li>Avoiding clopen is a preference — not a guarantee. Coverage still wins.</li>
+        </ul>
+      </section>
+      <section>
+        <h4>Build &amp; review</h4>
+        <ul>
+          <li>Build the period schedule from Setup, then Schedule.</li>
+          <li>Free: 2 builds. Pro: unlimited builds.</li>
+          <li>Review chips: Quality, Coverage, Clopens, AM closes, WE offs, Fairness.</li>
+          <li>Tap a chip to jump to the problem. Apply a suggested fix when the board offers one.</li>
+          <li>If must-fix items remain, Print / Word / Excel ask you to confirm first.</li>
+        </ul>
+      </section>
+      <section>
+        <h4>Board &amp; posting</h4>
+        <ul>
+          <li>Edit any cell on the board. Undo / redo if you change your mind.</li>
+          <li>Print the posting sheet.</li>
+          <li>Word and Excel export on Pro.</li>
+        </ul>
+      </section>
+      <section>
+        <h4>Language &amp; look</h4>
+        <ul>
+          <li>App chrome in English or Spanish. Names you typed stay as you typed them.</li>
+          <li>Appearance: Light (default) or Dark. Stays on this phone.</li>
+        </ul>
+      </section>
+      <section>
+        <h4>New phone</h4>
+        <ul>
+          <li>More → Backup JSON, then Import that file on the new device. No cloud copy.</li>
+        </ul>
+      </section>
+      <section>
+        <h4>Pro unlock</h4>
+        <ul>
+          <li>Android on Google Play: Pro is included with the $19.99 one-time app.</li>
+          <li>Web: buy $19.99 once, then enter your Gumroad license or an MSB-PRO- unlock code. Unlock stays on this site.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+
 <!-- Account panel -->
 <div class="account-modal no-print" id="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="account-panel-title" onclick="if (event.target === this) closeAccountPanel();">
   <div class="account-panel-card" onclick="event.stopPropagation()">
@@ -6123,6 +6307,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     </div>
     <div class="ap-actions">
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
+      <button type="button" class="ap-btn-secondary" onclick="closeAccountPanel(); openFeatureMap();" data-i18n="Feature Map">Feature Map</button>
       <button type="button" class="ap-btn-primary" onclick="openLicenseModal()" data-i18n="Activate team license">Activate team license</button>
       <a class="ap-btn-secondary" href="../buy.html" style="display:inline-flex;align-items:center" data-twa-hide data-i18n="Manage billing">Manage billing</a>
       <button type="button" class="ap-btn-secondary" onpointerdown="event.preventDefault(); event.stopPropagation(); closeAccountPanel();" onclick="event.stopPropagation(); closeAccountPanel();" data-i18n="Close panel">Close</button>
@@ -7622,6 +7807,24 @@ function closeAccountPanel() {
   if (wasOpen) msbUiClosed('account-modal');
 }
 
+function openFeatureMap() {
+  try { closeHeaderMenu(); } catch (e) {}
+  try { closeAccountPanel(); } catch (e2) {}
+  const modal = document.getElementById('feature-map-modal');
+  if (!modal) return;
+  modal.removeAttribute('hidden');
+  msbPushUi('feature-map-modal');
+  const closeBtn = document.getElementById('feature-map-close');
+  if (closeBtn) setTimeout(() => closeBtn.focus(), 40);
+}
+
+function closeFeatureMap() {
+  const modal = document.getElementById('feature-map-modal');
+  const wasOpen = modal && !modal.hasAttribute('hidden');
+  if (modal) modal.setAttribute('hidden', '');
+  if (wasOpen) msbUiClosed('feature-map-modal');
+}
+
 function openLicenseModal() {
   closeProGate();
   const err = document.getElementById('license-error');
@@ -7951,6 +8154,7 @@ document.addEventListener('keydown', (e) => {
   if (typeof closeLicenseModal === 'function') closeLicenseModal();
   if (typeof closeProviderModal === 'function') closeProviderModal();
   if (typeof closeAccountPanel === 'function') closeAccountPanel();
+  if (typeof closeFeatureMap === 'function') closeFeatureMap();
   const saved = document.getElementById('saved-modal-overlay');
   if (saved && saved.style.display !== 'none') {
     if (typeof closeSavedSchedulesModal === 'function') closeSavedSchedulesModal();
@@ -8887,7 +9091,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.46';
+const APP_VERSION = '2.6.47';
 
 // ── Appearance (light default; dark optional, on-device) ──
 const MSB_THEME_KEY = 'msb_appearance';
@@ -8972,6 +9176,9 @@ const MSB_I18N_ES = {
   'Toggle high contrast': 'Alto contraste',
   'Toggle peak season': 'Temporada alta',
   'Next period same team': 'Siguiente período, mismo equipo',
+  'Feature Map': 'Mapa de funciones',
+  'What this app can do': 'Qué puede hacer esta app',
+  'What ships today — not a roadmap.': 'Lo que hay hoy — no es una hoja de ruta.',
   'How it works': 'Cómo funciona',
   'Send feedback': 'Enviar comentarios',
   'Take tour': 'Ver recorrido',
@@ -17727,6 +17934,9 @@ function jumpToRoleOnGrid(role) {
              glass in dark mode. Other dark-console holdovers (calendar
              cells, empty states, account inputs, status chips) read
              from theme tokens. SW cache 2.6.46.
+   v2.6.47 — In-app Feature Map of current capabilities (More / Help /
+             Account, ?map=1). Floor-manager scan — not a roadmap.
+             Spanish chrome for the entry. SW cache 2.6.47.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -22086,6 +22296,7 @@ function getCommandPaletteCommands() {
     { id: 'save', label: 'Save schedule', group: 'File', run: () => saveToStorage() },
     { id: 'load', label: 'Load saved schedules', group: 'File', run: () => openSavedSchedulesModal() },
     { id: 'save-team', label: 'Save team template', group: 'Team', run: () => saveTeamTemplate() },
+    { id: 'feature-map', label: 'Feature Map', group: 'Help', run: () => openFeatureMap() },
     { id: 'tour', label: 'Take tour', group: 'Help', run: () => startOnboardingTour(true) },
     { id: 'feedback', label: 'Send feedback', group: 'Help', run: () => openFeedbackPage() },
     { id: 'peak', label: 'Toggle peak season', group: 'Rules', run: () => togglePeakSeasonPref() },
@@ -22381,6 +22592,18 @@ function handleLaunchQuery() {
     if (params.get('tab') && typeof switchTab === 'function') {
       setTimeout(() => switchTab(params.get('tab')), 50);
     }
+    const mapQ = params.get('map') || params.get('feature-map');
+    if ((mapQ === '1' || mapQ === 'yes') && typeof openFeatureMap === 'function') {
+      setTimeout(() => {
+        openFeatureMap();
+        try {
+          const u = new URL(location.href);
+          u.searchParams.delete('map');
+          u.searchParams.delete('feature-map');
+          history.replaceState({}, '', u.pathname + u.search + u.hash);
+        } catch (eMap) {}
+      }, 80);
+    }
     // Never treat ?source=pwa (Play/PWA start_url) as a demo seed.
     if (typeof wantsDemoLaunch === 'function' ? wantsDemoLaunch(params) : params.get('demo') === '1') {
       const saved = typeof hasSavedUserRoster === 'function' && hasSavedUserRoster();
@@ -22466,11 +22689,12 @@ document.addEventListener('visibilitychange', () => {
 
 // Backdrop click to close account / license / provider modals
 document.addEventListener('click', (e) => {
-  ['account-modal', 'license-modal', 'provider-modal'].forEach((id) => {
+  ['account-modal', 'license-modal', 'provider-modal', 'feature-map-modal'].forEach((id) => {
     const m = document.getElementById(id);
     if (m && !m.hasAttribute('hidden') && e.target === m) {
       if (id === 'account-modal') closeAccountPanel();
       else if (id === 'license-modal') closeLicenseModal();
+      else if (id === 'feature-map-modal') closeFeatureMap();
       else closeProviderModal();
     }
   });

@@ -84,15 +84,15 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.46') pass('version.json', ver.version);
+  if (ver.version === '2.6.47') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.46'") && sw.includes('msb-pro-v2.6.46')
-    && index.includes('id="app-version-label">v2.6.46')) {
+  if (index.includes("APP_VERSION = '2.6.47'") && sw.includes('msb-pro-v2.6.47')
+    && index.includes('id="app-version-label">v2.6.47')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.46');
+  } else fail('app-sw-version', 'expected 2.6.47');
 
-  if (twa.appVersion === '2.6.46' && twa.appVersionName === '2.6.46') pass('twa-manifest-version');
+  if (twa.appVersion === '2.6.47' && twa.appVersionName === '2.6.47') pass('twa-manifest-version');
   else fail('twa-manifest-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   const reviewTag = (index.match(/<button[^>]*id="mustfix-export-review"[^>]*>/) || [])[0] || '';
@@ -244,7 +244,7 @@ async function main() {
     const boot = await page.evaluate(() => ({
       version: (document.getElementById('app-version-label') || {}).textContent,
     }));
-    if (/v2\.6\.46/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.47/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const setup = await setupHuntBoard(page, { unlockPro: true });

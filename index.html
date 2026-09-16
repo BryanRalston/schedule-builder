@@ -133,6 +133,49 @@ body {
   margin: 0.25rem 0 0.5rem;
 }
 .features-cta .btn { min-width: min(100%, 16rem); }
+.can-do {
+  width: min(40rem, calc(100% - 2rem));
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.1rem 1.05rem;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 40px rgba(21, 32, 51, 0.06);
+}
+.can-do h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.can-do .can-do-kicker {
+  margin: 0 0 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  color: var(--accent);
+}
+.can-do p {
+  margin: 0 0 0.65rem;
+  color: var(--ink-3);
+  font-size: 0.86rem;
+}
+.can-do ul {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.can-do li + li { margin-top: 0.18rem; }
+.can-do a {
+  color: #701030;
+  font-weight: 700;
+  text-decoration: none;
+}
+.can-do a:hover { text-decoration: underline; }
 .brand {
   display: flex;
   align-items: center;
@@ -298,9 +341,24 @@ footer a:hover { text-decoration: underline; }
       <a class="btn btn-primary" href="app/">Open app</a>
     </div>
   </section>
+  <section class="can-do" id="can-do" aria-labelledby="can-do-title">
+    <p class="can-do-kicker">Feature Map</p>
+    <h2 id="can-do-title">What this app can do</h2>
+    <p>What ships today — not a roadmap.</p>
+    <ul>
+      <li>Works offline. Names, time off, and the board stay on this device. No account.</li>
+      <li>Team setup: SM / AM / KC (editable titles), store info, NRF 4-5-4, observed U.S. federal holidays.</li>
+      <li>Requests: PTO / RTO / LOA / preferred shifts — ask bar or paint.</li>
+      <li>Fairness, weekends, clopen-avoidance as a preference — not a guarantee.</li>
+      <li>Build the period. Free: 2 builds. Pro: unlimited. Review chips and tap-to-fix.</li>
+      <li>Edit the board. Print the posting sheet. Word / Excel on Pro.</li>
+      <li>English + Spanish chrome. Light (default) or Dark. JSON backup for a new phone.</li>
+    </ul>
+    <a href="app/?map=1">Open Feature Map in the app</a>
+  </section>
   <footer>
     <div>Cortex Developments · <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a></div>
-    <div><a href="legal/privacy.html">Privacy</a></div>
+    <div><a href="app/?map=1">Feature Map</a> · <a href="legal/privacy.html">Privacy</a></div>
   </footer>
 </body>
 </html>

@@ -104,7 +104,8 @@ function staticChecks() {
   }));
 
   if (app.includes('id="feature-map-modal"') && app.includes('function openFeatureMap')
-    && app.includes('function closeFeatureMap') && app.includes('maybeOpenFeatureMapFromHash')) {
+    && app.includes('function closeFeatureMap') && app.includes('maybeOpenFeatureMapFromHash')
+    && app.includes("addEventListener('hashchange'")) {
     pass('feature-map-present');
   } else fail('feature-map-present', 'modal or open/close helpers missing');
 
@@ -248,8 +249,12 @@ async function browserChecks(base, chromium) {
     } else fail('spanish-chrome-live', JSON.stringify(esChrome));
 
     await page.click('#feature-map-close');
+    await page.goto(base + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.goto(base + '/app/#feature-map', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForSelector('#feature-map-modal', { timeout: 20000 });
+    await page.waitForFunction(() => {
+      const m = document.getElementById('feature-map-modal');
+      return m && !m.hasAttribute('hidden');
+    }, { timeout: 20000 });
     const fromHash = await page.evaluate(() => {
       const m = document.getElementById('feature-map-modal');
       return m && !m.hasAttribute('hidden');

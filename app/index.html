@@ -10513,8 +10513,10 @@ function openFeatureMap() {
   try { closeHeaderMenu(); } catch (eMenu) {}
   try { closeAccountPanel(); } catch (eAcct) {}
   const modal = document.getElementById('feature-map-modal');
-  if (modal) modal.removeAttribute('hidden');
-  msbPushUi('feature-map-modal');
+  if (!modal) return;
+  const alreadyOpen = !modal.hasAttribute('hidden');
+  modal.removeAttribute('hidden');
+  if (!alreadyOpen) msbPushUi('feature-map-modal');
   const title = document.getElementById('feature-map-title');
   if (title && typeof title.focus === 'function') {
     try { title.focus(); } catch (eFocus) {}
@@ -10534,12 +10536,22 @@ function closeFeatureMap() {
   } catch (eHash) {}
 }
 
-function maybeOpenFeatureMapFromHash() {
+function featureMapHashName() {
   try {
-    const h = (location.hash || '').replace(/^#/, '');
-    if (h === 'feature-map' || h === 'whats-included') openFeatureMap();
-  } catch (e) {}
+    return (location.hash || '').replace(/^#/, '');
+  } catch (e) {
+    return '';
+  }
 }
+
+function maybeOpenFeatureMapFromHash() {
+  const h = featureMapHashName();
+  if (h === 'feature-map' || h === 'whats-included') openFeatureMap();
+}
+
+window.addEventListener('hashchange', () => {
+  try { maybeOpenFeatureMapFromHash(); } catch (e) {}
+});
 
 function persistStoreMeta() {
   try {

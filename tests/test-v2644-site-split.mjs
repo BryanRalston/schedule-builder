@@ -82,16 +82,16 @@ function staticChecks() {
   if (cname === 'managerschedulepro.com') pass('cname', cname);
   else fail('cname', cname);
 
-  if (ver.version === '2.6.47') pass('version.json', ver.version);
+  if (ver.version === '2.6.48') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.47'") && sw.includes('msb-pro-v2.6.47')
-    && app.includes('id="app-version-label">v2.6.47')) {
+  if (app.includes("APP_VERSION = '2.6.48'") && sw.includes('msb-pro-v2.6.48')
+    && app.includes('id="app-version-label">v2.6.48')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.47 in app + sw');
+  } else fail('app-sw-version', 'expected 2.6.48 in app + sw');
 
   if (twa.startUrl === '/schedule-builder/app/?source=pwa'
-    && twa.appVersion === '2.6.47'
+    && twa.appVersion === '2.6.48'
     && /launchUrl: '\/schedule-builder\/app\/\?source=pwa'/.test(gradle)) {
     pass('twa-start-url', twa.startUrl);
   } else fail('twa-start-url', twa.startUrl);

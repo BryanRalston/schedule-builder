@@ -20,8 +20,8 @@
     "path": "C:\\Users\\bryma\\schedule-builder-secrets\\android.keystore",
     "alias": "schedule-pro"
   },
-  "appVersionName": "2.6.47",
-  "appVersionCode": 2647,
+  "appVersionName": "2.6.48",
+  "appVersionCode": 2648,
   "shortcuts": [
     {
       "name": "Generate schedule",
@@ -56,5 +56,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "2.6.47"
+  "appVersion": "2.6.48"
 }

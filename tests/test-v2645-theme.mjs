@@ -77,13 +77,13 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const manifest = JSON.parse(read('manifest.webmanifest'));
 
-  if (ver.version === '2.6.47') pass('version.json', ver.version);
+  if (ver.version === '2.6.48') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.47'") && sw.includes('msb-pro-v2.6.47')
-    && app.includes('id="app-version-label">v2.6.47')) {
+  if (app.includes("APP_VERSION = '2.6.48'") && sw.includes('msb-pro-v2.6.48')
+    && app.includes('id="app-version-label">v2.6.48')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.47');
+  } else fail('app-sw-version', 'expected 2.6.48');
 
   if (app.includes("msb_appearance") && app.includes("MSB_THEME_KEY")
     && app.includes('function setAppearance') && app.includes("return 'light'")) {

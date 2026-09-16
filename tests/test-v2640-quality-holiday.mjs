@@ -145,7 +145,7 @@ async function main() {
         version: (document.getElementById('app-version-label') || {}).textContent,
       };
     });
-    if (/v2\.6\.47/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.48/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const scoreGate = await page.evaluate(() => {

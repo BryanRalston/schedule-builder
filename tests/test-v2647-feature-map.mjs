@@ -207,7 +207,7 @@ async function browserChecks(base, chromium) {
         hasOpen: typeof openFeatureMap === 'function',
       };
     });
-    if (/v2\.6\.47/.test(boot.version) && boot.theme === 'light' && boot.hidden && boot.hasOpen) {
+    if (/v2\.6\.48/.test(boot.version) && boot.theme === 'light' && boot.hidden && boot.hasOpen) {
       pass('boot-closed', boot.version);
     } else fail('boot-closed', JSON.stringify(boot));
 

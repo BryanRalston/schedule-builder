@@ -200,7 +200,7 @@ async function browserChecks(base, chromium) {
       };
     });
 
-    if (light.theme === 'light' && /v2\.6\.47/.test(light.version)) {
+    if (light.theme === 'light' && /v2\.6\.48/.test(light.version)) {
       pass('default-light-version', light.version);
     } else fail('default-light-version', JSON.stringify({ theme: light.theme, version: light.version }));
 

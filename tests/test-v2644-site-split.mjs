@@ -82,6 +82,19 @@ function staticChecks() {
   if (cname === 'managerschedulepro.com') pass('cname', cname);
   else fail('cname', cname);
 
+  const robots = existsSync(join(ROOT, 'robots.txt')) ? read('robots.txt') : '';
+  const sitemap = existsSync(join(ROOT, 'sitemap.xml')) ? read('sitemap.xml') : '';
+  if (/Allow:\s*\//.test(robots)
+    && robots.includes('Sitemap: https://managerschedulepro.com/sitemap.xml')
+    && !/Disallow:\s*\//.test(robots)) {
+    pass('robots-txt-root');
+  } else fail('robots-txt-root', 'need Allow: / and Sitemap line at repo root (same as CNAME)');
+  if (sitemap.includes('<loc>https://managerschedulepro.com/</loc>')
+    && sitemap.includes('<loc>https://managerschedulepro.com/app/</loc>')
+    && sitemap.includes('<loc>https://managerschedulepro.com/app/?map=1</loc>')) {
+    pass('sitemap-xml-root');
+  } else fail('sitemap-xml-root', 'need landing, /app/, and Feature Map ?map=1 at repo root');
+
   if (ver.version === '2.6.49') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 

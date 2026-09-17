@@ -83,15 +83,15 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.49') pass('version.json', ver.version);
+  if (ver.version === '2.6.50') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.49'") && sw.includes('msb-pro-v2.6.49')
-    && index.includes('id="app-version-label">v2.6.49')) {
+  if (index.includes("APP_VERSION = '2.6.50'") && sw.includes('msb-pro-v2.6.50')
+    && index.includes('id="app-version-label">v2.6.50')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.49');
+  } else fail('app-sw-version', 'expected 2.6.50');
 
-  if (twa.appVersion === '2.6.49' && twa.appVersionName === '2.6.49') pass('twa-manifest-version');
+  if (twa.appVersion === '2.6.50' && twa.appVersionName === '2.6.50') pass('twa-manifest-version');
   else fail('twa-manifest-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   if (index.includes('function countBoardMissDays(')

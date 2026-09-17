@@ -1,7 +1,7 @@
 /* Manager Schedule Builder Pro — service worker
    Paths are relative to this script so GitHub project pages (/schedule-builder/) work.
    App shell lives under ./app/; landing at ./ is network-first and not used as the offline fallback. */
-const CACHE = 'msb-pro-v2.6.49';
+const CACHE = 'msb-pro-v2.6.50';
 const APP_SHELL = './app/index.html';
 const PRECACHE = [
   './app/index.html',
@@ -52,6 +52,19 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+
+  // GA4 gtag is network-only. Never precache or intercept analytics hosts.
+  const host = url.hostname;
+  if (
+    host === 'www.googletagmanager.com' ||
+    host === 'googletagmanager.com' ||
+    host === 'www.google-analytics.com' ||
+    host === 'google-analytics.com' ||
+    host.endsWith('.google-analytics.com') ||
+    host.endsWith('.googletagmanager.com')
+  ) {
+    return;
+  }
 
   // Network-first for navigations (HTML) with offline fallback to the builder only.
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {

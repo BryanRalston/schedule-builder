@@ -1,7 +1,7 @@
 /**
  * v2.6.48: real Office Open XML Word (.docx) + Excel (.xlsx).
  * Assert ZIP/OOXML structure, not HTML-as-.doc / HTML-as-.xls.
- * Soft-confirm stays in-app. Readiness hang banner is UI-only (2.6.49).
+ * Soft-confirm stays in-app. Readiness hang banner is UI-only (2.6.50).
  * Run: node tests/test-v2648-ooxml-export.mjs
  */
 import { createRequire } from 'module';
@@ -145,16 +145,16 @@ function staticChecks() {
   const gradle = read('android-twa/app/build.gradle');
   const landing = read('index.html');
 
-  if (ver.version === '2.6.49') pass('version.json', ver.version);
+  if (ver.version === '2.6.50') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.49'") && sw.includes('msb-pro-v2.6.49')
-    && index.includes('id="app-version-label">v2.6.49')) {
+  if (index.includes("APP_VERSION = '2.6.50'") && sw.includes('msb-pro-v2.6.50')
+    && index.includes('id="app-version-label">v2.6.50')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.49');
+  } else fail('app-sw-version', 'expected 2.6.50');
 
-  if (twa.appVersion === '2.6.49' && twa.appVersionName === '2.6.49'
-    && /versionCode 2649/.test(gradle) && /versionName "2.6.49"/.test(gradle)) {
+  if (twa.appVersion === '2.6.50' && twa.appVersionName === '2.6.50'
+    && /versionCode 2650/.test(gradle) && /versionName "2.6.50"/.test(gradle)) {
     pass('twa-version');
   } else fail('twa-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 

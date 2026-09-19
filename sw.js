@@ -1,11 +1,12 @@
 /* Manager Schedule Builder Pro — service worker
    Paths are relative to this script so GitHub project pages (/schedule-builder/) work.
    App shell lives under ./app/; landing at ./ is network-first and not used as the offline fallback. */
-const CACHE = 'msb-pro-v2.6.50';
+const CACHE = 'msb-pro-v2.6.51';
 const APP_SHELL = './app/index.html';
 const PRECACHE = [
   './app/index.html',
   './app/ooxml-export.js',
+  './app/analytics.js',
   './buy.html',
   './feedback.html',
   './monetization.json',

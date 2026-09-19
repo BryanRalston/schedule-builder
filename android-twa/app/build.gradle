@@ -57,8 +57,8 @@ android {
         applicationId "com.managerschedulebuilder.pro"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 2650
-        versionName "2.6.50"
+        versionCode 2651
+        versionName "2.6.51"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

@@ -5543,6 +5543,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="ooxml-export.js"></script>
+<script src="analytics.js"></script>
 <script>
 /* Auth is optional — never block testers/first use.
    Only re-lock if a non-offline session expired (force re-sign-in for that account).
@@ -6152,7 +6153,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 <footer class="app-footer no-print">
   <div class="footer-brand">
-    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.50</span> · <span data-i18n="Works offline">Works offline</span></div>
+    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.51</span> · <span data-i18n="Works offline">Works offline</span></div>
     <p class="footer-privacy" data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</p>
     <p class="footer-pub"><span data-i18n="Support">Support</span>: <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a> · Cortex Developments · <a href="../buy.html" style="font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></p>
   </div>
@@ -7823,6 +7824,7 @@ function openFeatureMap() {
   if (!modal) return;
   modal.removeAttribute('hidden');
   msbPushUi('feature-map-modal');
+  try { if (typeof msbTrack === 'function') msbTrack('feature_map_open'); } catch (eTrack) {}
   const closeBtn = document.getElementById('feature-map-close');
   if (closeBtn) setTimeout(() => closeBtn.focus(), 40);
 }
@@ -7862,6 +7864,7 @@ async function submitLicenseUnlock() {
       err.textContent = 'Use the Gumroad key from your receipt, or an MSB-PRO-… code.';
       err.classList.add('show');
     }
+    try { if (typeof msbTrack === 'function') msbTrack('license_activate_result', { result: 'fail' }); } catch (eTrack) {}
     return;
   }
   const res = await activateLicenseKey(key.trim());
@@ -7993,23 +7996,31 @@ async function verifyGumroadLicense(key) {
 
 async function activateLicenseKey(key) {
   const s = String(key || '').trim();
+  const trackLicense = (result) => {
+    try { if (typeof msbTrack === 'function') msbTrack('license_activate_result', { result: result }); } catch (e) {}
+  };
   if (!validLicenseKey(s)) {
+    trackLicense('fail');
     return { ok: false, message: 'Use the Gumroad key from your receipt, or an MSB-PRO-… code.' };
   }
   if (isMsbUnlockCode(s)) {
     setProUnlocked(s, { pending: false });
+    trackLicense('success');
     return { ok: true, message: 'Pro unlocked on this device.' };
   }
   setProUnlocked(s, { pending: true });
   const v = await verifyGumroadLicense(s);
   if (v.ok === true) {
     setProUnlocked(s, { pending: false });
+    trackLicense('success');
     return { ok: true, message: 'Pro unlocked on this device.' };
   }
   if (v.ok === false) {
     revokeProUnlock();
+    trackLicense('fail');
     return { ok: false, message: 'That license key isn’t valid for this product.' };
   }
+  trackLicense('success');
   return { ok: true, pending: true, message: 'Pro unlocked on this device. We’ll confirm the key next time you’re online.' };
 }
 
@@ -8135,12 +8146,17 @@ function updateLicenseBadge() {
   if (typeof updateGenFreeLeft === 'function') updateGenFreeLeft();
 }
 
-function showProGate(message) {
+function showProGate(message, reason) {
   const modal = document.getElementById('pro-gate-modal');
   const body = document.getElementById('pro-gate-body');
   if (body && message) body.textContent = message;
   if (modal) modal.removeAttribute('hidden');
   msbPushUi('pro-gate-modal');
+  try {
+    if (typeof msbTrack === 'function') {
+      msbTrack('pro_gate_shown', { reason: reason === 'builds' ? 'builds' : 'export' });
+    }
+  } catch (eTrack) {}
 }
 
 function closeProGate() {
@@ -8178,7 +8194,8 @@ function requirePro(featureLabel) {
       (monetizationConfig.priceLabel || '$19.99') +
       ' one-time). Free includes unlimited managers, full editing, and ' +
       freeGenerateLimit() +
-      ' schedule builds — then unlock for unlimited builds plus Word/Excel.'
+      ' schedule builds — then unlock for unlimited builds plus Word/Excel.',
+    'export'
   );
   return false;
 }
@@ -8190,7 +8207,8 @@ function requireGenerateAllowance() {
       freeGenerateLimit() +
       ' free schedule builds on this device. Edits to an existing schedule stay free. Unlock Pro (' +
       (monetizationConfig.priceLabel || '$19.99') +
-      ' one-time) for unlimited builds plus Word/Excel export.'
+      ' one-time) for unlimited builds plus Word/Excel export.',
+    'builds'
   );
   return false;
 }
@@ -9100,7 +9118,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.50';
+const APP_VERSION = '2.6.51';
 
 // ── Appearance (light default; dark optional, on-device) ──
 const MSB_THEME_KEY = 'msb_appearance';
@@ -9141,6 +9159,7 @@ function setAppearance(theme) {
   const next = theme === 'dark' ? 'dark' : 'light';
   try { localStorage.setItem(MSB_THEME_KEY, next); } catch (e) {}
   applyAppearance(next, false);
+  try { if (typeof msbTrack === 'function') msbTrack('theme_change', { theme: next }); } catch (eTrack) {}
 }
 
 function initAppearance() {
@@ -9896,6 +9915,7 @@ function setUiLang(lang) {
     window._msbHoldMissDays = null;
     window._lastBoardMissDays = heldMiss;
   }
+  try { if (typeof msbTrack === 'function') msbTrack('lang_change', { lang: next }); } catch (eTrack) {}
   return next;
 }
 
@@ -10165,20 +10185,25 @@ function exportReadinessBannerHtml() {
 
 let _mustFixExportProceed = null;
 
-function closeMustFixExportConfirm() {
+function closeMustFixExportConfirm(opts) {
   const modal = document.getElementById('mustfix-export-modal');
   const wasOpen = modal && !modal.hasAttribute('hidden');
+  const kind = modal ? (modal.getAttribute('data-export-kind') || 'print') : 'print';
   if (modal) {
     modal.setAttribute('hidden', '');
     modal.setAttribute('data-mustfix-count', '0');
   }
   _mustFixExportProceed = null;
   if (wasOpen) msbUiClosed('mustfix-export-modal');
+  if (wasOpen && !(opts && opts.fromProceed) && typeof msbTrack === 'function') {
+    const format = kind === 'word' ? 'word' : kind === 'excel' ? 'excel' : 'print';
+    try { msbTrack('export_click', { format: format, result: 'soft_confirm_cancel' }); } catch (eTrack) {}
+  }
 }
 
 function proceedMustFixExportConfirm() {
   const go = _mustFixExportProceed;
-  closeMustFixExportConfirm();
+  closeMustFixExportConfirm({ fromProceed: true });
   if (typeof go === 'function') go();
 }
 
@@ -10238,8 +10263,10 @@ function confirmMustFixExport(kind, onProceed) {
 function printPostingSheet() {
   if (typeof closeHeaderMenu === 'function') closeHeaderMenu();
   if (typeof closeToolbarExportMenu === 'function') closeToolbarExportMenu();
+  try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'print', result: 'started' }); } catch (eTrack) {}
   return confirmMustFixExport('print', function () {
     window.print();
+    try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'print', result: 'downloaded' }); } catch (e2) {}
   });
 }
 
@@ -10542,6 +10569,7 @@ function startWithMyTeam() {
 }
 
 function buildFromSetup() {
+  try { if (typeof msbTrack === 'function') msbTrack('build_click', { surface: 'setup' }); } catch (eTrack) {}
   try { persistManagerNames(); } catch (e) {}
   try { persistStoreMeta(); } catch (e) {}
   if (typeof managersAreNamed === 'function' && !managersAreNamed()) {
@@ -10554,6 +10582,7 @@ function buildFromSetup() {
       }
     }
     showToast('Name your managers on Setup before building.', 'warn');
+    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB) {}
     return;
   }
   if (!periodDates || !periodDates.length || !currentPeriod) {
@@ -10566,10 +10595,11 @@ function buildFromSetup() {
       try { loadBtn.focus({ preventScroll: true }); } catch (e5) { try { loadBtn.focus(); } catch (e6) {} }
     }
     showToast('Load this NRF period on Setup before building.', 'warn');
+    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB2) {}
     return;
   }
   if (typeof switchTab === 'function') switchTab('schedule');
-  if (typeof generateSchedule === 'function') generateSchedule();
+  if (typeof generateSchedule === 'function') generateSchedule({ _trackedClick: true });
 }
 
 function restoreWelcomeState() {
@@ -13690,24 +13720,33 @@ let _generateBusy = false;
 function generateSchedule(opts) {
   opts = opts || {};
   if (_generateBusy) return;
+  if (!opts._trackedClick) {
+    try { if (typeof msbTrack === 'function') msbTrack('build_click', { surface: 'board' }); } catch (eTrack) {}
+  }
   if (window._viewLocked) {
     showToast('View only - cannot generate.', 'warn');
+    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB) {}
     return;
   }
   if (!periodDates || !periodDates.length || !currentPeriod) {
     showToast('Load this NRF period on Setup first.', 'warn');
     switchTab('setup');
+    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB2) {}
     return;
   }
   if (!managersAreNamed()) {
     showToast('Name your managers on Setup before building.', 'warn');
     switchTab('setup');
+    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB3) {}
     return;
   }
   const consumeFree = typeof shouldRecordFreeGenerate === 'function'
     ? shouldRecordFreeGenerate(opts)
     : (!opts.skipFreeCount && !isProUnlocked());
-  if (consumeFree && !requireGenerateAllowance()) return;
+  if (consumeFree && !requireGenerateAllowance()) {
+    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB4) {}
+    return;
+  }
   opts = Object.assign({}, opts, { _consumeFree: consumeFree });
   try { if (typeof cancelGenerateArrival === 'function') cancelGenerateArrival(); } catch (e) {}
   const btn = document.getElementById('btn-generate');
@@ -13736,9 +13775,11 @@ function generateSchedule(opts) {
     try {
       _generateScheduleInner(opts);
       try { if (typeof notifyTourGenerateComplete === 'function') notifyTourGenerateComplete(); } catch (e2) {}
+      try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'success' }); } catch (eOk) {}
     } catch (e) {
       console.error(e);
       showToast('Generate error: ' + (e.message || e), 'error');
+      try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'error' }); } catch (eErr) {}
     } finally {
       _generateBusy = false;
       if (btn) {
@@ -17957,6 +17998,9 @@ function jumpToRoleOnGrid(role) {
    v2.6.50 — GA4 gtag (G-LJ8E69Z8Y0) on landing + /app/. Analytics
              hosts are network-only in the service worker.
              SW cache 2.6.50.
+   v2.6.51 — GA4 custom events via msbTrack (landing + app). Coarse
+             labels only — no names, rosters, keys, or Ask text.
+             SW cache 2.6.51.
    ==================================================================== */
 
 function findScheduleCellEl(role, dk) {
@@ -18540,8 +18584,12 @@ function exportSchedule() {
     alert(msbT('Please generate the schedule first before exporting.'));
     return;
   }
+  try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'word', result: 'started' }); } catch (eTrack) {}
   return confirmMustFixExport('word', function () {
-    if (!requirePro('Word export')) return;
+    if (!requirePro('Word export')) {
+      try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'word', result: 'pro_gate' }); } catch (ePg) {}
+      return;
+    }
     downloadWordExport();
   });
 }
@@ -18684,6 +18732,7 @@ function downloadWordExport() {
   }
   const bytes = MSB_OOXML.buildDocx(buildExportModel());
   downloadOfficeBlob(bytes, officeExportFilename('.docx'), MSB_OOXML.MIME_DOCX);
+  try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'word', result: 'downloaded' }); } catch (eTrack) {}
 }
 
 // ── Export Excel (.xls HTML) painted from live cells — same palette as the board ──
@@ -18768,8 +18817,12 @@ function exportScheduleExcel() {
     alert(msbT('Please generate the schedule first before exporting.'));
     return;
   }
+  try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'excel', result: 'started' }); } catch (eTrack) {}
   return confirmMustFixExport('excel', function () {
-    if (!requirePro('Excel export')) return;
+    if (!requirePro('Excel export')) {
+      try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'excel', result: 'pro_gate' }); } catch (ePg) {}
+      return;
+    }
     downloadExcelExport();
   });
 }
@@ -18781,6 +18834,7 @@ function downloadExcelExport() {
   }
   const bytes = MSB_OOXML.buildXlsx(buildExportModel());
   downloadOfficeBlob(bytes, officeExportFilename('.xlsx'), MSB_OOXML.MIME_XLSX);
+  try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'excel', result: 'downloaded' }); } catch (eTrack) {}
 }
 
 // ── Render Summary ──
@@ -21605,6 +21659,7 @@ function openReviewSheet() {
     if (typeof currentAppTab !== 'undefined' && currentAppTab !== 'schedule') {
       switchTab('schedule');
     }
+    try { if (typeof msbTrack === 'function') msbTrack('review_open', { surface: 'review' }); } catch (eTrack) {}
   } finally {
     window._msbOpeningReview = false;
   }

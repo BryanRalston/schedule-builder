@@ -76,15 +76,15 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.50') pass('version.json', ver.version);
+  if (ver.version === '2.6.52') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.50'") && sw.includes('msb-pro-v2.6.50')
-    && app.includes('id="app-version-label">v2.6.50')) {
+  if (app.includes("APP_VERSION = '2.6.52'") && sw.includes('msb-pro-v2.6.52')
+    && app.includes('id="app-version-label">v2.6.52')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.50');
+  } else fail('app-sw-version', 'expected 2.6.52');
 
-  if (twa.appVersion === '2.6.50' && twa.appVersionName === '2.6.50') pass('twa-version');
+  if (twa.appVersion === '2.6.51' && twa.appVersionName === '2.6.51') pass('twa-version');
   else fail('twa-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   if (app.includes('--headline-color:') && app.includes('--headline-fill:')
@@ -161,7 +161,7 @@ async function browserChecks(base, chromium) {
       try { localStorage.removeItem('msb_appearance'); } catch (e) {}
     });
     await page.goto(base + '/app/', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForSelector('#welcome-title, #tab-setup', { timeout: 20000 });
+    await page.waitForSelector('#welcome-title, #tab-setup', { timeout: 20000, state: 'attached' });
 
     const light = await page.evaluate(() => {
       const welcome = document.getElementById('welcome-title');
@@ -200,7 +200,7 @@ async function browserChecks(base, chromium) {
       };
     });
 
-    if (light.theme === 'light' && /v2\.6\.49/.test(light.version)) {
+    if (light.theme === 'light' && /v2\.6\.52/.test(light.version)) {
       pass('default-light-version', light.version);
     } else fail('default-light-version', JSON.stringify({ theme: light.theme, version: light.version }));
 

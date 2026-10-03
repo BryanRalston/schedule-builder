@@ -3,7 +3,7 @@
  * empty teams, and aria/tooltips. US holiday names stay English.
  * Custom role titles stay typed. Roster names stay typed.
  * Language switch does not wipe the board or burn a free build.
- * Keeps 2.6.12–2.6.27 behavior; version lock 2.6.33.
+ * Keeps 2.6.12–2.6.27 behavior; version lock 2.6.52.
  * Run: node tests/test-v2628-ux.mjs
  */
 import { createServer } from 'http';
@@ -90,15 +90,15 @@ async function main() {
   console.log('\n=== v2.6.28 leftover Spanish hours / FY-Period / teams / aria ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -156,10 +156,12 @@ async function main() {
   });
 
   try {
-    const esPage = await browser.newPage({
+    const context = await browser.newContext({
       viewport: { width: 1280, height: 900 },
       locale: 'en-US',
+      serviceWorkers: 'block',
     });
+    const esPage = await context.newPage();
     await esPage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await esPage.evaluate(() => {
       localStorage.clear();
@@ -172,6 +174,7 @@ async function main() {
     await esPage.waitForTimeout(700);
 
     const prepared = await esPage.evaluate(() => {
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       const am2 = document.getElementById('name-am2');
@@ -357,6 +360,14 @@ async function main() {
 
     const built = await esPage.evaluate(() => {
       const beforeCount = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
+      try { if (typeof clearSamplePersistence === 'function') clearSamplePersistence(); } catch (e) {}
+      try { document.body.classList.remove('sample-board'); } catch (e2) {}
+      window._msbSamplePreview = false;
+      const smEl = document.getElementById('name-sm');
+      const amEl = document.getElementById('name-am1');
+      if (smEl) smEl.value = 'Alex Rivera';
+      if (amEl) amEl.value = 'Sam Chen';
+      if (typeof persistManagerNames === 'function') persistManagerNames();
       if (typeof loadThisNrfPeriod === 'function') loadThisNrfPeriod({ quiet: true });
       if (typeof generateSchedule === 'function') generateSchedule();
       return new Promise((resolve) => {
@@ -370,11 +381,11 @@ async function main() {
             custom: ((document.getElementById('role-title-sm') || {}).value || ''),
             sm: ((document.getElementById('name-sm') || {}).value || ''),
           });
-        }, 2800);
+        }, 4500);
       });
     });
 
-    if (built.afterBuild === 1 && built.cells > 10) {
+    if (built.afterBuild === 0 && built.cells > 10) {
       pass('es-build-keeps-count', built.cells + ' cells · count ' + built.afterBuild);
     } else fail('es-build-keeps-count', JSON.stringify(built));
 
@@ -405,7 +416,7 @@ async function main() {
         headerEn,
       };
     });
-    if (afterSwitch.before === 1 && afterSwitch.midCount === 1 && afterSwitch.afterCount === 1
+    if (afterSwitch.before === 0 && afterSwitch.midCount === 0 && afterSwitch.afterCount === 0
       && afterSwitch.cells > 10 && afterSwitch.midCells === afterSwitch.cells
       && afterSwitch.afterCells === afterSwitch.cells && afterSwitch.sm === 'Alex Rivera'
       && afterSwitch.custom === 'Floor Boss') {

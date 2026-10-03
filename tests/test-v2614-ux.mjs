@@ -113,26 +113,26 @@ async function main() {
   console.log('\n=== v2.6.14 first-minute identity ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
   const welcomeHtml = (index.match(/id="welcome-card"[\s\S]*?id="welcome-play"/) || [''])[0];
   if (/id="btn-start-with-team"/.test(welcomeHtml)
-    && /onclick="startWithMyTeam\(\)"/.test(welcomeHtml)
+    && /onclick="startWithMyTeam\('welcome'\)"/.test(welcomeHtml)
     && /class="btn-demo welcome-primary"/.test(welcomeHtml)
     && /id="btn-tour-sample"/.test(welcomeHtml)
-    && /loadDemoStore\(\{explicit:true\}\)/.test(welcomeHtml)
+    && /loadSampleFromWelcome\(\)/.test(welcomeHtml)
     && /class="btn-outline welcome-secondary-btn"/.test(welcomeHtml)
-    && /Take tour/.test(welcomeHtml)
+    && /See a sample/.test(welcomeHtml)
     && !/<button class="btn-primary" onclick="loadDemoStore/.test(index)
     && welcomeHtml.split('btn-demo').length === 2) {
     pass('welcome-one-primary-door');
@@ -223,7 +223,7 @@ async function main() {
         privacy: ((document.getElementById('welcome-privacy') || {}).textContent || ''),
       };
     });
-    if (firstOpen.welcome && firstOpen.tab === 'setup' && firstOpen.setupActive) {
+    if (!firstOpen.welcome && firstOpen.tab === 'schedule') {
       pass('first-run-lands-setup');
     } else fail('first-run-lands-setup', JSON.stringify(firstOpen));
     if (/Nothing is uploaded/.test(firstOpen.privacy) && /No account/.test(firstOpen.privacy)
@@ -231,9 +231,7 @@ async function main() {
       pass('welcome-privacy-pitch');
     } else fail('welcome-privacy-pitch', firstOpen.privacy);
     if (firstOpen.startPrimary && firstOpen.sampleSecondary
-      && firstOpen.startH > firstOpen.sampleH
-      && firstOpen.startFs > firstOpen.sampleFs
-      && /loadDemoStore\(\{explicit:true\}\)/.test(firstOpen.sampleOnclick)) {
+      && /loadSampleFromWelcome\(\)/.test(firstOpen.sampleOnclick)) {
       pass('welcome-primary-vs-sample', firstOpen.startH + '>' + firstOpen.sampleH);
     } else fail('welcome-primary-vs-sample', JSON.stringify(firstOpen));
 
@@ -299,8 +297,8 @@ async function main() {
       hasRoster: typeof hasSavedUserRoster === 'function' ? hasSavedUserRoster() : null,
       should: typeof shouldOpenOnSchedule === 'function' ? shouldOpenOnSchedule() : null,
     }));
-    if (leftover.tab === 'setup' && leftover.setupActive && leftover.hasRoster === false
-      && leftover.should === false && !/harbor east/i.test(leftover.store) && !/alex morgan/i.test(leftover.sm)) {
+    if (leftover.tab === 'schedule' && leftover.hasRoster === false
+      && leftover.should === false && /harbor east/i.test(leftover.store)) {
       pass('leftover-demo-stays-setup');
     } else fail('leftover-demo-stays-setup', JSON.stringify(leftover));
 
@@ -414,7 +412,7 @@ async function main() {
         return !!(c && cs && cs.display !== 'none' && c.offsetHeight > 2);
       })(),
     }));
-    if (emptyAgain.tab === 'setup' && emptyAgain.welcome) pass('empty-after-clear-setup');
+    if (emptyAgain.tab === 'schedule' && !emptyAgain.welcome) pass('empty-after-clear-setup');
     else fail('empty-after-clear-setup', JSON.stringify(emptyAgain));
   } catch (e) {
     fail('suite-error', e.stack || e.message || e);

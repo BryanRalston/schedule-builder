@@ -2,7 +2,7 @@
  * v2.6.18: tap-to-fix review chips + one-line why this cell,
  * plus playtest extras — no phantom AM2, rebuild-to-apply hint, hide unnamed KC tabs.
  * Jumps reuse cell-flash. Auto-fixes stay buttons. Why is rule-based.
- * Keeps 2.6.12–2.6.18 behavior; version lock follows 2.6.33.
+ * Keeps 2.6.12–2.6.18 behavior; version lock follows 2.6.52.
  * Run: node tests/test-v2618-ux.mjs
  */
 import { createServer } from 'http';
@@ -74,15 +74,15 @@ async function main() {
   console.log('\n=== v2.6.18 tap-to-fix + why + playtest extras ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -202,6 +202,7 @@ async function main() {
 
     const built = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       if (sm) sm.value = 'Pat Nguyen';
@@ -221,7 +222,7 @@ async function main() {
         }, 2000);
       });
     });
-    if (built.tab === 'schedule' && built.cells > 20 && /Schedule ready/.test(built.toast)) {
+    if (built.tab === 'schedule' && built.cells > 20 && /schedule is ready|Schedule ready/i.test(built.toast)) {
       pass('generate-still-builds', built.cells + ' cells');
     } else fail('generate-still-builds', JSON.stringify(built));
 

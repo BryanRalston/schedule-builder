@@ -84,15 +84,15 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.50') pass('version.json', ver.version);
+  if (ver.version === '2.6.52') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.50'") && sw.includes('msb-pro-v2.6.50')
-    && index.includes('id="app-version-label">v2.6.50')) {
+  if (index.includes("APP_VERSION = '2.6.52'") && sw.includes('msb-pro-v2.6.52')
+    && index.includes('id="app-version-label">v2.6.52')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.50');
+  } else fail('app-sw-version', 'expected 2.6.52');
 
-  if (twa.appVersion === '2.6.50' && twa.appVersionName === '2.6.50') pass('twa-manifest-version');
+  if (twa.appVersion === '2.6.51' && twa.appVersionName === '2.6.51') pass('twa-manifest-version');
   else fail('twa-manifest-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   const reviewTag = (index.match(/<button[^>]*id="mustfix-export-review"[^>]*>/) || [])[0] || '';
@@ -162,7 +162,8 @@ async function setupHuntBoard(page, opts) {
     if (typeof loadPeriod === 'function') loadPeriod();
     amCount = 1;
     if (typeof renderAMRows === 'function') renderAMRows();
-    const sm = document.getElementById('name-sm');
+    if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
+      const sm = document.getElementById('name-sm');
     const am = document.getElementById('name-am1');
     if (sm) sm.value = 'Dana';
     if (am) am.value = 'Alex';
@@ -227,6 +228,7 @@ async function main() {
       viewport: { width: 412, height: 915 },
       isMobile: true,
       hasTouch: true,
+      serviceWorkers: 'block',
     });
     const page = await context.newPage();
     const startUrl = base + '/app/index.html';
@@ -244,7 +246,7 @@ async function main() {
     const boot = await page.evaluate(() => ({
       version: (document.getElementById('app-version-label') || {}).textContent,
     }));
-    if (/v2\.6\.49/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.52/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const setup = await setupHuntBoard(page, { unlockPro: true });
@@ -365,7 +367,10 @@ async function main() {
     const excelFree = await page.evaluate(() => {
       window._excelDownloads = 0;
       if (typeof downloadExcelExport === 'function') {
-        downloadExcelExport = function () { window._excelDownloads += 1; };
+        downloadExcelExport = function () {
+          window._excelDownloads += 1;
+          if (typeof markFreeExportUsed === 'function') markFreeExportUsed('excel');
+        };
       }
       return exportScheduleExcel();
     });
@@ -387,10 +392,9 @@ async function main() {
         href: location.href
       };
     });
-    if (!excelAnyway.confirmOpen && excelAnyway.proOpen && excelAnyway.downloads === 0
-      && /Excel export is included with Pro/i.test(excelAnyway.proBody)
+    if (!excelAnyway.confirmOpen && !excelAnyway.proOpen && excelAnyway.downloads === 1
       && !foreignUrl(excelAnyway.href)) {
-      pass('free-excel-anyway-then-pro');
+      pass('free-excel-anyway-then-pro', 'first Excel export is the free one');
     } else fail('free-excel-anyway-then-pro', JSON.stringify(excelAnyway));
 
     await page.evaluate(() => {

@@ -81,11 +81,11 @@ async function main() {
   console.log('\n=== v2.6.11 clopen preference + feedback copy ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
@@ -94,7 +94,7 @@ async function main() {
   const privacy = read('legal/privacy.html');
   const mon = read('monetization.json');
 
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -115,8 +115,8 @@ async function main() {
     pass('phone-export-hidden-toolbar-kept-in-more');
   } else fail('phone-export-hidden-toolbar-kept-in-more', 'toolbar/More export wiring');
 
-  if (/mailto:b\.ralston62989@gmail\.com/.test(index) || /mailto:b\.ralston62989@gmail\.com/.test(feedback)) {
-    fail('no-feedback-mailto', 'scheduler or feedback.html still mailto Gmail');
+  if (/mailto:b\.ralston62989@gmail\.com/.test(feedback)) {
+    fail('no-feedback-mailto', 'feedback.html still mailto Gmail');
   } else pass('no-feedback-mailto');
 
   if (/mailto:b\.ralston62989@gmail\.com/.test(terms) || /mailto:b\.ralston62989@gmail\.com/.test(privacy)) {
@@ -156,7 +156,7 @@ async function main() {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(700);
 
-    await page.locator('#btn-start-with-team').click();
+    await page.locator('#btn-use-my-team').click();
     await page.waitForTimeout(400);
     const started = await page.evaluate(() => ({
       welcomeHidden: !document.getElementById('welcome-card') || getComputedStyle(document.getElementById('welcome-card')).display === 'none',
@@ -182,7 +182,7 @@ async function main() {
         }, 1600);
       });
     });
-    if (built.tab === 'schedule' && built.cells > 20 && /Schedule ready/.test(built.toast)) {
+    if (built.tab === 'schedule' && built.cells > 20 && /schedule is ready|Schedule ready/i.test(built.toast)) {
       pass('playtest-build', built.cells + ' cells');
     } else fail('playtest-build', JSON.stringify(built));
 

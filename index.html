@@ -14,13 +14,36 @@
   } catch (e) {}
 })();
 </script>
-<!-- Google tag (gtag.js) — Manager Schedule Pro GA4, apex stream -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJ8E69Z8Y0"></script>
+<!-- Google tag (gtag.js) — Manager Schedule Pro GA4. Skipped for automation and opt-out devices. -->
 <script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-LJ8E69Z8Y0');
+(function () {
+  var ID = 'G-LJ8E69Z8Y0';
+  function gaOff() {
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.get('no_ga') === '1') localStorage.setItem('msp_no_ga', '1');
+      else if (q.get('no_ga') === '0') localStorage.removeItem('msp_no_ga');
+      if (localStorage.getItem('msp_no_ga') === '1') return true;
+    } catch (e) {}
+    try { if (navigator.webdriver) return true; } catch (e2) {}
+    var ua = String(navigator.userAgent || '');
+    if (/HeadlessChrome|Playwright|Puppeteer|PhantomJS|Selenium|Lighthouse|Googlebot|bingbot|DuckDuckBot|YandexBot|Baiduspider|AhrefsBot|SemrushBot|MJ12bot|DotBot|PetalBot|Applebot|GPTBot|ClaudeBot|PerplexityBot|Bytespider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|crawler|spider/i.test(ua)) return true;
+    return false;
+  }
+  if (gaOff()) { window.MSP_GA_OFF = true; return; }   // gtag stays undefined -> msbTrack() no-ops
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { dataLayer.push(arguments); };
+  var sw = (window.screen && screen.width) || 0, sh = (window.screen && screen.height) || 0;
+  if ((sw === 800 && sh === 600) || (sw === 1024 && sh === 1024)) {
+    gtag('set', { traffic_type: 'bot_suspect' });       // tag, don't drop (see screen rule)
+  }
+  gtag('js', new Date());
+  gtag('config', ID);
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ID;
+  document.head.appendChild(s);
+})();
 </script>
 <script src="app/analytics.js" defer></script>
 <meta charset="UTF-8">
@@ -199,11 +222,33 @@ body {
   border-radius: 10px;
 }
 h1 {
-  margin: 1.15rem 0 0.7rem;
+  margin: 0.85rem 0 0.7rem;
   font-size: clamp(1.7rem, 5vw, 2.35rem);
   line-height: 1.15;
   letter-spacing: -0.035em;
   color: var(--ink);
+}
+.hero-cta {
+  width: 100%;
+  max-width: 22rem;
+  min-height: 3rem;
+  margin: 0 0 0.45rem;
+}
+.ios-safari-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+.ios-safari-note[hidden] { display: none; }
+.nrf-secondary {
+  font-size: 0.82rem;
+  color: var(--ink-3);
+}
+.price-note {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-2);
 }
 .lede {
   color: var(--ink-2);
@@ -301,9 +346,11 @@ footer a:hover { text-decoration: underline; }
       Manager Schedule Pro
     </div>
     <h1>Retail manager shifts you can stand behind</h1>
+    <a class="btn btn-primary hero-cta" href="app/" data-cta="open_app">Build a free schedule — no signup</a>
+    <p class="ios-safari-note" id="ios-safari-note" hidden>Works in Safari, no download</p>
     <div class="lede">
-      <p>Build assistant-manager and key-carrier coverage for the store — fair weekends, NRF 4-5-4 periods, then review the board before you post.</p>
-      <p>No spreadsheet fight. No cloud roster. You stay in charge of what goes on the wall.</p>
+      <p>Build a 5-week retail schedule — weekend days off, close then open avoided where the team allows, then review the board before you post.</p>
+      <p class="nrf-secondary">NRF 4-5-4 periods. No spreadsheet fight. No cloud roster. You stay in charge of what goes on the wall.</p>
     </div>
     <ul class="trust">
       <li>Works offline</li>
@@ -311,9 +358,11 @@ footer a:hover { text-decoration: underline; }
       <li>Names, time off, and the board stay on this device</li>
     </ul>
     <div class="price-row">
-      <div class="price">$19.99<span>one-time</span></div>
+      <div>
+        <div class="price">$19.99<span>one-time</span></div>
+        <p class="price-note">Free to try · $19.99 one-time to unlock</p>
+      </div>
       <div class="ctas">
-        <a class="btn btn-primary" href="app/" data-cta="open_app">Open app</a>
         <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer" data-cta="play">Google Play</a>
         <a class="btn btn-ghost" href="https://ralstonia5.gumroad.com/l/pwplbc" data-cta="gumroad">Buy license</a>
       </div>
@@ -347,7 +396,7 @@ footer a:hover { text-decoration: underline; }
     </article>
 
     <div class="features-cta">
-      <a class="btn btn-primary" href="app/" data-cta="open_app">Open app</a>
+      <a class="btn btn-primary" href="app/" data-cta="open_app">Build a free schedule — no signup</a>
     </div>
   </section>
   <section class="can-do" id="can-do" aria-labelledby="can-do-title">
@@ -359,8 +408,8 @@ footer a:hover { text-decoration: underline; }
       <li>Team setup: SM / AM / KC (editable titles), store info, NRF 4-5-4, observed U.S. federal holidays.</li>
       <li>Requests: PTO / RTO / LOA / preferred shifts — ask bar or paint.</li>
       <li>Fairness, weekends, clopen-avoidance as a preference — not a guarantee.</li>
-      <li>Build the period. Free: 2 builds. Pro: unlimited. Review chips and tap-to-fix.</li>
-      <li>Edit the board. Print the posting sheet. Real Word (.docx) / Excel (.xlsx) on Pro.</li>
+      <li>Build the period. Free: 2 builds and 1 Word/Excel export. Pro: unlimited. Review chips and tap-to-fix.</li>
+      <li>Edit the board. Print the posting sheet. Real Word (.docx) / Excel (.xlsx) on Pro. First Word or Excel export is free; after that, Pro.</li>
       <li>English + Spanish chrome. Light (default) or Dark. JSON backup for a new phone.</li>
     </ul>
     <a href="app/?map=1" data-cta="feature_map">Open Feature Map in the app</a>
@@ -369,5 +418,17 @@ footer a:hover { text-decoration: underline; }
     <div>Cortex Developments · <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a></div>
     <div><a href="app/?map=1" data-cta="feature_map">Feature Map</a> · <a href="legal/privacy.html">Privacy</a></div>
   </footer>
+<script>
+(function () {
+  var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (!ios) return;
+  var note = document.getElementById('ios-safari-note');
+  if (note) note.hidden = false;
+  document.querySelectorAll('[data-cta="play"]').forEach(function (el) {
+    el.hidden = true;
+    el.style.display = 'none';
+  });
+})();
+</script>
 </body>
 </html>

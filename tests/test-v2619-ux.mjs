@@ -2,7 +2,7 @@
  * v2.6.19: Ask-bar trailing date parse, Rebuild hit area above the
  * sticky review bar, Word/Excel Pro modal Not now on pointerdown,
  * and drop the 404 Play badge image.
- * Keeps 2.6.12–2.6.18 behavior; version lock follows 2.6.33.
+ * Keeps 2.6.12–2.6.18 behavior; version lock follows 2.6.52.
  * Run: node tests/test-v2619-ux.mjs
  */
 import { createServer } from 'http';
@@ -115,15 +115,15 @@ async function main() {
   console.log('\n=== v2.6.19 ask-bar date, rebuild hit, pro dismiss ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -323,6 +323,7 @@ async function main() {
 
     const built = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       if (sm) sm.value = 'Pat Nguyen';
@@ -335,6 +336,7 @@ async function main() {
       else generateSchedule({ skipFreeCount: true });
       return new Promise((resolve) => {
         setTimeout(() => {
+          if (typeof showFullChips === 'function') showFullChips();
           if (typeof switchTab === 'function') switchTab('schedule');
           if (typeof syncAppShell === 'function') syncAppShell();
           if (typeof updatePostGenStrip === 'function') updatePostGenStrip();
@@ -359,6 +361,8 @@ async function main() {
     } else fail('board-built-with-review-bar', JSON.stringify(built));
 
     const desktopHit = await page.evaluate(() => {
+      if (typeof showFullChips === 'function') showFullChips();
+      if (typeof updatePostGenStrip === 'function') updatePostGenStrip();
       if (typeof switchTab === 'function') switchTab('schedule');
       if (typeof syncAppShell === 'function') syncAppShell();
       if (typeof dockBuiltRebuildRow === 'function') dockBuiltRebuildRow(true);
@@ -411,6 +415,8 @@ async function main() {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(200);
     const phoneHit = await page.evaluate(() => {
+      if (typeof showFullChips === 'function') showFullChips();
+      if (typeof updatePostGenStrip === 'function') updatePostGenStrip();
       if (typeof switchTab === 'function') switchTab('schedule');
       if (typeof syncAppShell === 'function') syncAppShell();
       if (typeof updatePostGenStrip === 'function') updatePostGenStrip();

@@ -250,6 +250,9 @@ async function main() {
     // Strip after generate
     const stripOk = await page.evaluate(() => {
       const strip = document.getElementById('post-gen-strip');
+      const sample = document.body.classList.contains('sample-board');
+      const sampleStrip = document.getElementById('sample-strip');
+      if (sample) return !!(sampleStrip && !sampleStrip.hidden);
       return !!(strip && (strip.classList.contains('show') || !strip.hidden));
     });
     if (stripOk) pass('post-gen-strip-visible');

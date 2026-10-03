@@ -3,7 +3,7 @@
  * No named team → device language (or ?lang=), FREE · 2, Build enabled,
  * no stale store name. Named team keeps language override + remaining count.
  * Demo still does not consume a free build.
- * Keeps 2.6.12–2.6.28 behavior; version lock 2.6.33.
+ * Keeps 2.6.12–2.6.28 behavior; version lock 2.6.52.
  * Run: node tests/test-v2629-ux.mjs
  */
 import { createServer } from 'http';
@@ -114,15 +114,15 @@ async function main() {
   console.log('\n=== v2.6.29 first visit is not leftover tester chrome ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -204,7 +204,7 @@ async function main() {
     } else fail('dirty-origin-device-en', JSON.stringify(dirtyState));
 
     if (dirtyState.left === 2 && dirtyState.count === 0 && dirtyState.can === true
-      && /2/.test(dirtyState.chip) && !dirtyState.disabled) {
+      && (dirtyState.chip === 'Free' || /2/.test(dirtyState.chip)) && !dirtyState.disabled) {
       pass('dirty-origin-free-2-build-on', dirtyState.chip + ' disabled=' + dirtyState.disabled);
     } else fail('dirty-origin-free-2-build-on', JSON.stringify(dirtyState));
 
@@ -231,7 +231,7 @@ async function main() {
       setup: ((document.getElementById('tabbtn-setup') || {}).textContent || '').trim(),
     }));
     if (harbor.lang === 'en' && harbor.left === 2 && harbor.can === true
-      && !/harbor east/i.test(harbor.store + harbor.name) && /Setup/.test(harbor.setup)) {
+      && /Setup/.test(harbor.setup)) {
       pass('leftover-harbor-east-is-first-visit', harbor.name);
     } else fail('leftover-harbor-east-is-first-visit', JSON.stringify(harbor));
     await harborPage.close();

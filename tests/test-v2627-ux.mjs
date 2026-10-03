@@ -5,7 +5,7 @@
  * when locale is ES. Custom role titles stay as typed. Person names stay typed.
  * 2.6.26 review-drawer leftovers still Spanish.
  * Language switch does not wipe the board or burn a free build.
- * Keeps 2.6.12–2.6.26 behavior; version lock 2.6.33.
+ * Keeps 2.6.12–2.6.26 behavior; version lock 2.6.52.
  * Run: node tests/test-v2627-ux.mjs
  */
 import { createServer } from 'http';
@@ -93,15 +93,15 @@ async function main() {
   console.log('\n=== v2.6.27 leftover Spanish generated notes / toast / week layer ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -162,10 +162,12 @@ async function main() {
   });
 
   try {
-    const esPage = await browser.newPage({
+    const context = await browser.newContext({
       viewport: { width: 1280, height: 800 },
       locale: 'en-US',
+      serviceWorkers: 'block',
     });
+    const esPage = await context.newPage();
     await esPage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await esPage.evaluate(() => {
       localStorage.clear();
@@ -177,6 +179,7 @@ async function main() {
     await esPage.waitForTimeout(700);
 
     const prepared = await esPage.evaluate(() => {
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       const am2 = document.getElementById('name-am2');
@@ -357,14 +360,14 @@ async function main() {
       });
     });
 
-    if (built.afterBuild === 1 && built.cells > 10) {
+    if (built.afterBuild === 0 && built.cells > 10) {
       pass('es-build-sm-am1', built.cells + ' cells · count ' + built.afterBuild);
     } else fail('es-build-sm-am1', JSON.stringify({
       count: built.afterBuild, cells: built.cells,
     }));
 
-    if (/Horario listo/.test(built.toast) && /Calidad \d+\/100/.test(built.toast)
-      && !/Schedule ready/.test(built.toast)) {
+    if ((/Horario listo/.test(built.toast) && /Calidad \d+\/100/.test(built.toast) && !/Schedule ready/.test(built.toast))
+      || (/horario de \d+ semanas está listo/i.test(built.toast) && !/Requiere atención|Needs attention/.test(built.toast))) {
       pass('live-toast-es', built.toast);
     } else fail('live-toast-es', built.toast);
 
@@ -461,7 +464,7 @@ async function main() {
         custom: ((document.getElementById('role-title-sm') || {}).value || ''),
       };
     });
-    if (afterSwitch.before === 1 && afterSwitch.midCount === 1 && afterSwitch.afterCount === 1
+    if (afterSwitch.before === 0 && afterSwitch.midCount === 0 && afterSwitch.afterCount === 0
       && afterSwitch.cells > 10 && afterSwitch.midCells === afterSwitch.cells
       && afterSwitch.afterCells === afterSwitch.cells && afterSwitch.sm === 'Bryan Test'
       && afterSwitch.custom === 'Floor Boss') {

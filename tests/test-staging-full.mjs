@@ -608,18 +608,21 @@ async function runBootNav(browser, base) {
       fail('subtab-role-rules', 'missing', 'low');
     }
 
-    // Header: Demo, Save, Load, More
-    const demoVis = await page.locator('header .btn-demo, button:has-text("Demo")').first().isVisible().catch(() => false);
+    // Header: sample, Save, and Load live in the More menu
+    await page.locator('#header-more-btn').click();
+    await page.waitForTimeout(200);
+    const demoVis = await page.locator('#header-menu-demo').isVisible().catch(() => false);
     if (demoVis) pass('header-demo-btn');
     else await failShot(page, 'header-demo-btn', 'missing', 'medium');
 
-    const saveVis = await page.locator('header button:has-text("Save")').first().isVisible().catch(() => false);
+    const saveVis = await page.locator('#header-menu-panel button:has-text("Save")').first().isVisible().catch(() => false);
     if (saveVis) pass('header-save-btn');
     else fail('header-save-btn', 'missing', 'medium');
 
-    const loadVis = await page.locator('header button:has-text("Load")').first().isVisible().catch(() => false);
+    const loadVis = await page.locator('#header-menu-panel button:has-text("Load")').first().isVisible().catch(() => false);
     if (loadVis) pass('header-load-btn');
     else fail('header-load-btn', 'missing', 'medium');
+    await page.keyboard.press('Escape').catch(() => {});
 
     await page.locator('#header-more-btn').click();
     await page.waitForTimeout(300);
@@ -907,8 +910,10 @@ async function runScheduleUI(browser, base) {
       if (typeof setProUnlocked === 'function') setProUnlocked('MSB-PRO-TEST123');
     });
 
-    const demo = page.locator('header .btn-demo, button.btn-demo').first();
-    await demo.click();
+    await page.evaluate(() => {
+      if (document.body.classList.contains('sample-board')) return;
+      if (typeof loadDemoStore === 'function') loadDemoStore({ explicit: true, confirmed: true });
+    });
     await page.waitForTimeout(4500);
 
     // Wait for schedule results
@@ -1012,8 +1017,9 @@ async function runScheduleUI(browser, base) {
       pass('click-shift-cell', 'no editable cell found — soft ok');
     }
 
-    // Save
-    await page.locator('header button:has-text("Save")').click();
+    // Save (lives in the More menu)
+    await page.locator('#header-more-btn').click();
+    await page.locator('#header-menu-panel button:has-text("Save")').click();
     await page.waitForTimeout(600);
     const toastOrSaved = await page.evaluate(() => {
       const toast = document.querySelector('.toast .toast-msg, .toast');
@@ -1030,7 +1036,8 @@ async function runScheduleUI(browser, base) {
     }
 
     // Load modal
-    await page.locator('header button:has-text("Load")').click();
+    await page.locator('#header-more-btn').click();
+    await page.locator('#header-menu-panel button').filter({ hasText: /^Load$/ }).click();
     await page.waitForTimeout(500);
     const modal = page.locator('.saved-modal, #saved-modal-portal .saved-modal-overlay');
     if (await modal.first().isVisible().catch(() => false)) {
@@ -1058,7 +1065,10 @@ async function runExports(browser, base) {
     await page.evaluate(() => {
       if (typeof setProUnlocked === 'function') setProUnlocked('MSB-PRO-TEST123');
     });
-    await page.locator('header .btn-demo').first().click();
+    await page.evaluate(() => {
+      if (document.body.classList.contains('sample-board')) return;
+      if (typeof loadDemoStore === 'function') loadDemoStore({ explicit: true, confirmed: true });
+    });
     await page.waitForTimeout(4000);
 
     const downloads = [];

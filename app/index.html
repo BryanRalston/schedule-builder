@@ -1125,7 +1125,7 @@ input[type="radio"] { accent-color: var(--gold); }
   #phone-week-switcher:not([hidden]) {
     display: flex;
     position: sticky;
-    top: calc(var(--msb-sticky-top, 56px) + 2.6rem);
+    top: calc(var(--msb-sticky-top, 56px) + var(--msb-pgs-h, 0px) + var(--msb-dock-h, 2.6rem));
     z-index: 96;
     align-items: center;
     flex-wrap: wrap;
@@ -1135,6 +1135,8 @@ input[type="radio"] { accent-color: var(--gold); }
     background: var(--chrome-elevated);
     border-bottom: 1px solid var(--line);
   }
+  /* overflow:hidden ancestors turn into scroll containers and break the sticky switcher; clip keeps the crop without that. */
+  body .workspace, body #schedule-section { overflow: clip; }
   #schedule-grid { max-width: 100%; overflow-x: hidden; }
   .mobile-week-cards { padding: 0.1rem 0 0.2rem; }
   .mw-day {
@@ -10770,6 +10772,11 @@ function scrollClearOfStickyChrome(el) {
   if (header) {
     const hs = getComputedStyle(header);
     if (hs.position === 'sticky' || hs.position === 'fixed') offset += header.getBoundingClientRect().height;
+  }
+  const strip = document.getElementById('post-gen-strip');
+  if (strip && !strip.hidden && strip.classList.contains('show')) {
+    const ss = getComputedStyle(strip);
+    if (ss.display !== 'none' && (ss.position === 'sticky' || ss.position === 'fixed')) offset += strip.getBoundingClientRect().height;
   }
   const dock = document.getElementById('built-rebuild-row');
   if (dock && dock.classList.contains('is-docked') && getComputedStyle(dock).display !== 'none') {
@@ -22540,6 +22547,11 @@ function syncStickyOffsets() {
       ? strip.getBoundingClientRect().height
       : 0;
     root.style.setProperty('--msb-pgs-h', Math.round(pgsH) + 'px');
+    const dock = document.getElementById('built-rebuild-row');
+    const dockH = (dock && dock.classList.contains('is-docked') && getComputedStyle(dock).display !== 'none')
+      ? dock.getBoundingClientRect().height
+      : 0;
+    root.style.setProperty('--msb-dock-h', Math.round(dockH) + 'px');
   } catch (e) {}
 }
 window.addEventListener('resize', () => {

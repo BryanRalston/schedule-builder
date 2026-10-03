@@ -5135,6 +5135,7 @@ body.msb-board-live .container {
   font-size: 0.86rem;
 }
 .sample-strip[hidden], .first-build-ready[hidden] { display: none !important; }
+#first-build-ready { scroll-margin-top: 9rem; }
 body.sample-board #post-gen-strip { display: none !important; }
 .sample-strip button, #btn-add-person, .first-build-review-line {
   min-height: 2.4rem;
@@ -5196,7 +5197,6 @@ body.sample-board #post-gen-strip { display: none !important; }
   body.chips-collapsed #schedule-toolbar,
   body.chips-collapsed .schedule-hours-line { display: none !important; }
   body.chips-collapsed #built-rebuild-row.is-docked { padding: 0.15rem 0.7rem; }
-  #first-build-ready { scroll-margin-top: 4.5rem; }
 }
 
 .review-sheet { display: none; }
@@ -9841,6 +9841,7 @@ const MSB_I18N_ES = {
   'cell edit': 'editar celda',
   'Schedule ready · Quality {score}/100 ({grade})': 'Horario listo · Calidad {score}/100 ({grade})',
   'Your {n}-week schedule is ready': 'Tu horario de {n} semanas está listo',
+  'Sample week is ready. Tap any shift to try editing.': 'La semana de ejemplo está lista. Toca cualquier turno para probar a editar.',
   'Free builds used (edits still free)': 'Armados gratis usados (editar sigue gratis)',
   '{n} free build left': '{n} armado gratis restante',
   '{n} free builds left': '{n} armados gratis restantes',
@@ -16851,7 +16852,7 @@ function _generateScheduleInner(opts) {
       try { if (typeof persistSampleSnapshot === 'function') persistSampleSnapshot(); } catch (eSnap) {}
     }
     try { if (typeof showSampleBoardChrome === 'function') showSampleBoardChrome(); } catch (eChrome) {}
-    showToast('Sample week is ready. Tap any shift to try editing.', 'success');
+    showToast(msbT('Sample week is ready. Tap any shift to try editing.'), 'success');
   } else if (wasFirstOwn) {
     try { if (typeof showFirstBuildWin === 'function') showFirstBuildWin(); } catch (eWin) {}
     const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : 5;

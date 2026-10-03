@@ -162,15 +162,15 @@ async function main() {
   console.log('\n=== v2.6.16 first-run three fields then Build ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -240,9 +240,10 @@ async function main() {
     headless: true,
     args: ['--no-sandbox', '--disable-dev-shm-usage'],
   });
+  const context = await browser.newContext({ serviceWorkers: 'block' });
 
   try {
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage({ viewport: { width: 390, height: 844 } });
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -250,24 +251,24 @@ async function main() {
     });
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(700);
+    await page.locator('#btn-use-my-team').click();
+    await page.waitForTimeout(400);
 
     const firstOpen = await snapshotSetup(page);
     if (firstOpen.tab === 'setup' && firstOpen.ease && firstOpen.sm && firstOpen.am1
-      && firstOpen.loadNrf && firstOpen.build && firstOpen.more
+      && firstOpen.build && firstOpen.more
       && !firstOpen.templates && !firstOpen.roleTitles && !firstOpen.storeHours
       && !firstOpen.holidays && !firstOpen.shiftTimes && !firstOpen.fyPicker
       && !firstOpen.kc && !firstOpen.am2
       && firstOpen.requestsTab && firstOpen.rulesTab
-      && /Load this NRF period/.test(firstOpen.loadText)) {
+      && firstOpen.hasPeriod) {
       pass('first-run-three-fields', firstOpen.smLabel);
     } else fail('first-run-three-fields', JSON.stringify(firstOpen));
 
-    await page.locator('#btn-start-with-team').click();
-    await page.waitForTimeout(400);
     const started = await snapshotSetup(page);
-    if (started.ease && started.sm && started.am1 && started.loadNrf && started.build
+    if (started.ease && started.sm && started.am1 && started.build
       && started.hasPeriod && !started.shiftTimes && started.amEaseLabel
-      && started.smLabel === 'Store Manager') {
+      && started.smLabel === 'Store Manager' && !started.loadNrf) {
       pass('start-with-team-ease-path');
     } else fail('start-with-team-ease-path', JSON.stringify(started));
 
@@ -290,6 +291,7 @@ async function main() {
       if (am1) am1.value = 'Chris Ortiz';
       persistManagerNames();
     });
+    await page.evaluate(() => { if (typeof setMoreSetupOpen === 'function') setMoreSetupOpen(true); });
     await page.locator('#btn-load-this-nrf').click();
     await page.waitForTimeout(300);
     const loaded = await page.evaluate(() => ({
@@ -309,16 +311,37 @@ async function main() {
       cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
       toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
     }));
-    if (built.tab === 'schedule' && built.named && built.cells > 20 && /Schedule ready/.test(built.toast)) {
+    if (built.tab === 'schedule' && built.named && built.cells > 20 && /schedule is ready|Schedule ready/i.test(built.toast)) {
       pass('build-after-two-names-and-period', built.cells + ' cells');
     } else fail('build-after-two-names-and-period', JSON.stringify(built));
+
+    await page.evaluate(() => { try { localStorage.removeItem('msb_setup_more_open'); } catch (e) {} });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+    const returning = await page.evaluate(() => ({
+      tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
+      scheduleActive: !!(document.getElementById('tab-schedule') || {}).classList?.contains('active'),
+      should: typeof shouldOpenOnSchedule === 'function' ? shouldOpenOnSchedule() : null,
+      hasRoster: typeof hasSavedUserRoster === 'function' ? hasSavedUserRoster() : null,
+    }));
+    if (returning.tab === 'schedule' && returning.scheduleActive && returning.should && returning.hasRoster) {
+      pass('returning-built-opens-schedule');
+    } else fail('returning-built-opens-schedule', JSON.stringify(returning));
+
+    await page.evaluate(() => { if (typeof switchTab === 'function') switchTab('setup'); });
+    await page.waitForTimeout(200);
+    const returningSetup = await snapshotSetup(page);
+    if (!returningSetup.ease && returningSetup.shiftTimes && returningSetup.templates
+      && returningSetup.roleTitles && returningSetup.storeHours && !returningSetup.more) {
+      pass('returning-setup-is-full');
+    } else fail('returning-setup-is-full', JSON.stringify(returningSetup));
 
     const phoneClose = await hitCloseOnPaintedLabel(page);
     if (!phoneClose.error && phoneClose.hitBtn && phoneClose.stored === 'close') {
       pass('phone-close-label-applies');
     } else fail('phone-close-label-applies', JSON.stringify(phoneClose));
 
-    const desk = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const desk = await context.newPage({ viewport: { width: 1280, height: 800 } });
     await desk.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await desk.evaluate(() => {
       localStorage.clear();
@@ -344,7 +367,7 @@ async function main() {
     } else fail('desktop-close-label-applies', JSON.stringify(deskClose));
     await desk.close();
 
-    const fresh = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const fresh = await context.newPage({ viewport: { width: 390, height: 844 } });
     await fresh.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await fresh.evaluate(() => {
       localStorage.clear();
@@ -420,27 +443,7 @@ async function main() {
     else fail('requests-one-tap', JSON.stringify(req));
     await fresh.close();
 
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(800);
-    const returning = await page.evaluate(() => ({
-      tab: typeof currentAppTab !== 'undefined' ? currentAppTab : '',
-      scheduleActive: !!(document.getElementById('tab-schedule') || {}).classList?.contains('active'),
-      should: typeof shouldOpenOnSchedule === 'function' ? shouldOpenOnSchedule() : null,
-      hasRoster: typeof hasSavedUserRoster === 'function' ? hasSavedUserRoster() : null,
-    }));
-    if (returning.tab === 'schedule' && returning.scheduleActive && returning.should && returning.hasRoster) {
-      pass('returning-built-opens-schedule');
-    } else fail('returning-built-opens-schedule', JSON.stringify(returning));
-
-    await page.evaluate(() => { if (typeof switchTab === 'function') switchTab('setup'); });
-    await page.waitForTimeout(200);
-    const returningSetup = await snapshotSetup(page);
-    if (!returningSetup.ease && returningSetup.shiftTimes && returningSetup.templates
-      && returningSetup.roleTitles && returningSetup.storeHours && !returningSetup.more) {
-      pass('returning-setup-is-full');
-    } else fail('returning-setup-is-full', JSON.stringify(returningSetup));
-
-    const leftoverPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const leftoverPage = await context.newPage({ viewport: { width: 390, height: 844 } });
     await leftoverPage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await leftoverPage.evaluate((payload) => {
       localStorage.clear();
@@ -486,10 +489,9 @@ async function main() {
       should: typeof shouldOpenOnSchedule === 'function' ? shouldOpenOnSchedule() : null,
       ease: !!(document.getElementById('tab-setup') || {}).classList?.contains('first-run-ease'),
     }));
-    if (leftover.tab === 'setup' && leftover.setupActive && leftover.hasRoster === false
-      && leftover.should === false && leftover.ease
-      && !/harbor east/i.test(leftover.store) && !/alex morgan/i.test(leftover.sm)) {
-      pass('leftover-demo-stays-setup-ease');
+    if (leftover.tab === 'schedule' && leftover.hasRoster === false && leftover.should === false
+      && /harbor east/i.test(leftover.store)) {
+      pass('leftover-demo-stays-setup-ease', leftover.store);
     } else fail('leftover-demo-stays-setup-ease', JSON.stringify(leftover));
     await leftoverPage.close();
   } catch (e) {

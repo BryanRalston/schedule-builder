@@ -6,7 +6,7 @@
  * Unnamed KC stays hidden.
  * Thin 2-person 2.6.22 scale and 2.6.29 first-visit still hold.
  * Clopen stays a preference — no zero-clopen guarantee.
- * Keeps 2.6.12–2.6.29 behavior; version lock 2.6.33.
+ * Keeps 2.6.12–2.6.29 behavior; version lock 2.6.52.
  * Run: node tests/test-v2630-ux.mjs
  */
 import { createServer } from 'http';
@@ -89,15 +89,15 @@ async function main() {
   console.log('\n=== v2.6.30 even SM+AM closes on a 4–5 person bench ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -160,10 +160,12 @@ async function main() {
   });
 
   try {
-    const dirty = await browser.newPage({
+    const context = await browser.newContext({
       viewport: { width: 1280, height: 800 },
       locale: 'en-US',
+      serviceWorkers: 'block',
     });
+    const dirty = await context.newPage();
     await dirty.addInitScript(seedDirtyTesterChrome);
     await dirty.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await dirty.waitForTimeout(900);
@@ -188,7 +190,7 @@ async function main() {
     } else fail('v2629-first-visit-still-holds', JSON.stringify(firstVisit));
     await dirty.close();
 
-    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const page = await context.newPage();
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -236,7 +238,11 @@ async function main() {
 
     const built = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
-      if (typeof addAM === 'function' && amCount < 3) addAM();
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
+      amCount = 3;
+      if (typeof renderAMRows === 'function') renderAMRows();
+      if (kcList && kcList[0]) kcList[0].name = 'elizabeth';
+      if (typeof renderKCRows === 'function') renderKCRows();
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       const am2 = document.getElementById('name-am2');

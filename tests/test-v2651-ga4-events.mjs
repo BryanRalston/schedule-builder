@@ -124,8 +124,10 @@ if (
 } else fail('helper-included', 'landing + app must load app/analytics.js');
 
 if (
-  landing.includes("gtag('config', '" + MSP_ID + "')") &&
-  app.includes("gtag('config', '" + MSP_ID + "')") &&
+  landing.includes("var ID = '" + MSP_ID + "'") &&
+  app.includes("var ID = '" + MSP_ID + "'") &&
+  landing.includes("gtag('config', ID)") &&
+  app.includes("gtag('config', ID)") &&
   helper.includes(MSP_ID)
 ) {
   pass('measurement-id-unchanged', MSP_ID);
@@ -229,17 +231,17 @@ if (
 } else fail('sw-analytics-network-only', 'SW must leave analytics hosts on the network');
 
 if (
-  ver.version === '2.6.51' &&
-  app.includes("APP_VERSION = '2.6.51'") &&
-  sw.includes('msb-pro-v2.6.51') &&
-  app.includes('id="app-version-label">v2.6.51') &&
+  ver.version === '2.6.52' &&
+  app.includes("APP_VERSION = '2.6.52'") &&
+  sw.includes('msb-pro-v2.6.52') &&
+  app.includes('id="app-version-label">v2.6.52') &&
   twa.appVersion === '2.6.51' &&
   twa.appVersionName === '2.6.51' &&
   /versionCode 2651/.test(gradle) &&
   /versionName "2.6.51"/.test(gradle)
 ) {
-  pass('version-2.6.51');
-} else fail('version-2.6.51', ver.version);
+  pass('version-web-2.6.52-twa-2.6.51');
+} else fail('version-web-2.6.52-twa-2.6.51', ver.version + ' twa ' + twa.appVersion);
 
 const failed = results.filter((r) => !r.ok);
 console.log('\n' + results.filter((r) => r.ok).length + ' passed,', failed.length, 'failed');

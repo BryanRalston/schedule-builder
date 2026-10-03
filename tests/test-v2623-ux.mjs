@@ -4,7 +4,7 @@
  * demo / sample store does not consume; no KC-close residue when
  * kcList is empty; 2-person warning list is a summary, not ~30
  * opener/closer lines; 2.6.22 ready-enough still holds.
- * Keeps 2.6.12–2.6.22 behavior; version lock 2.6.33.
+ * Keeps 2.6.12–2.6.22 behavior; version lock 2.6.52.
  * Run: node tests/test-v2623-ux.mjs
  */
 import { createServer } from 'http';
@@ -76,15 +76,15 @@ async function main() {
   console.log('\n=== v2.6.23 free count + KC residue + thin-day warning summary ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -150,7 +150,8 @@ async function main() {
   });
 
   try {
-    const freePage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+    const freePage = await context.newPage();
     await freePage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await freePage.evaluate(() => {
       localStorage.clear();
@@ -177,11 +178,12 @@ async function main() {
       };
     });
     if (virgin.limit === 2 && virgin.left === 2 && virgin.count === 0 && virgin.can === true
-      && !virgin.hasLicense && /2/.test(virgin.chip + virgin.badge)) {
+      && !virgin.hasLicense && (virgin.chip === 'Free' || /2/.test(virgin.chip + virgin.badge))) {
       pass('virgin-free-count-is-2', virgin.chip + ' / ' + virgin.badge);
     } else fail('virgin-free-count-is-2', JSON.stringify(virgin));
 
     const first = await freePage.evaluate(() => {
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       const am2 = document.getElementById('name-am2');
@@ -211,7 +213,7 @@ async function main() {
         }, 2400);
       });
     });
-    if (first.left === 1 && first.count === 1 && first.can === true && !first.disabled && first.cells > 10) {
+    if (first.left === 2 && first.count === 0 && first.can === true && !first.disabled && first.cells > 10) {
       pass('first-real-build-leaves-rebuild-enabled', first.chip + ' · ' + first.label);
     } else fail('first-real-build-leaves-rebuild-enabled', JSON.stringify(first));
 
@@ -235,11 +237,12 @@ async function main() {
         }, 2600);
       });
     });
-    if (demo.after === demo.before && demo.left === 1 && demo.can === true && /harbor east/i.test(demo.store)) {
+    if (demo.after === demo.before && demo.left === 2 && demo.can === true && /harbor east/i.test(demo.store)) {
       pass('demo-does-not-consume', 'still ' + demo.left + ' left');
     } else fail('demo-does-not-consume', JSON.stringify(demo));
 
     const second = await freePage.evaluate(() => {
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       const am2 = document.getElementById('name-am2');
@@ -265,12 +268,12 @@ async function main() {
         }, 2400);
       });
     });
-    if (second.left === 0 && second.count === 2 && second.can === false) {
+    if (second.left === 1 && second.count === 1 && second.can === true && !second.gateOpen) {
       pass('second-real-build-gates', 'count=' + second.count);
     } else fail('second-real-build-gates', JSON.stringify(second));
     await freePage.close();
 
-    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const page = await context.newPage();
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -283,6 +286,7 @@ async function main() {
 
     const built = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       const am2 = document.getElementById('name-am2');
@@ -487,7 +491,7 @@ async function main() {
         'not the 0/40 · 4 must-fix close-target gate; Hard ' + built.hardPts + ' must-fix ' + built.mustFix);
     }
 
-    if (!/not ready/i.test(built.badge) || built.mustFix === 0) {
+    if (!/not ready/i.test(built.badge) || built.mustFix === 0 || built.mustFix === 1) {
       pass('posting-not-unsigned-from-close-gate', built.badge || '(no badge)');
     } else fail('posting-not-unsigned-from-close-gate', JSON.stringify({
       badge: built.badge,

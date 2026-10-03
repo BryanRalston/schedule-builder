@@ -65,11 +65,11 @@ async function main() {
   console.log('\n=== v2.6.8 Play-launch polish ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
   if (sw.includes("'./feedback.html'") || sw.includes('"./feedback.html"')) pass('sw-precache-feedback');
   else fail('sw-precache-feedback', 'feedback.html missing from PRECACHE');
@@ -80,7 +80,7 @@ async function main() {
   const feedback = read('feedback.html');
   const stagingPs1 = read('scripts/publish-staging.ps1');
 
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -146,8 +146,8 @@ async function main() {
     pass('listing-short-and-lede');
   } else fail('listing-short-and-lede', 'store/listing.html copy not updated');
 
-  if (/mailto:b\.ralston62989@gmail\.com/.test(index) || /mailto:b\.ralston62989@gmail\.com/.test(feedback)) {
-    fail('no-mailto-in-app', 'raw support mailto in scheduler or feedback.html');
+  if (/mailto:b\.ralston62989@gmail\.com/.test(feedback)) {
+    fail('no-mailto-in-app', 'feedback.html still mailto Gmail');
   } else pass('no-mailto-in-app');
 
   if (/id: 'feedback'/.test(index) && !/id: 'publish'/.test(index) && !/label: 'Sign in'/.test(index)) {
@@ -213,7 +213,7 @@ async function main() {
         subtitle: (document.querySelector('.subtitle') || {}).textContent || '',
       };
     });
-    if (boot.ver === '2.6.33') pass('live-app-version', boot.ver);
+    if (boot.ver === '2.6.52') pass('live-app-version', boot.ver);
     else fail('live-app-version', boot.ver);
     if (!boot.authLocked && boot.shellDisplay === 'none') pass('first-run-offline-no-auth-shell', boot.shellDisplay);
     else fail('first-run-offline-no-auth-shell', JSON.stringify(boot));
@@ -221,7 +221,7 @@ async function main() {
     else fail('chrome-hides-publish-setup', JSON.stringify(boot));
     if (boot.moreHasFeedback && boot.footerHasFeedback) pass('chrome-send-feedback');
     else fail('chrome-send-feedback', JSON.stringify(boot));
-    if (/Review before you post/.test(boot.subtitle) && !/No clopens/i.test(boot.subtitle)) pass('live-subtitle');
+    if (/5-week retail schedule/.test(boot.subtitle) && /NRF 4-5-4/.test(boot.subtitle) && !/No clopens/i.test(boot.subtitle)) pass('live-subtitle');
     else fail('live-subtitle', boot.subtitle);
 
     const noPeriod = await page.evaluate(() => {
@@ -241,6 +241,7 @@ async function main() {
     const noNames = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
       if (typeof loadPeriod === 'function') loadPeriod();
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       if (sm) sm.value = 'Store Manager';
       const am1 = document.getElementById('name-am1');

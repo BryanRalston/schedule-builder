@@ -13,7 +13,7 @@
  */
 import { chromium } from '../scripts/browser-ops/node_modules/playwright/index.mjs';
 import { createServer } from 'http';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
 import { join, extname, dirname } from 'path';
 import { fileURLToPath } from 'url';
 

@@ -207,7 +207,7 @@ async function main() {
   console.log('\n=== v2.6.12 demo must not overwrite a saved roster ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.50') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const index = read('app/index.html');
@@ -262,41 +262,44 @@ async function main() {
     await page.goto(base + '/app/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await clearSession(page);
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(900);
+    await page.locator('#btn-use-my-team').waitFor({ state: 'visible', timeout: 8000 });
     const emptyPwa = await readRoster(page);
-    if (!isHarborEast(emptyPwa) && !/alex morgan/i.test(emptyPwa.storedSm || '')) {
-      pass('empty-source-pwa-no-harbor', emptyPwa.sm || '(blank/placeholder)');
-    } else fail('empty-source-pwa-no-harbor', JSON.stringify(emptyPwa));
+    const emptyStrip = await page.evaluate(() => {
+      const strip = document.getElementById('sample-strip');
+      const btn = document.getElementById('btn-use-my-team');
+      return !!(strip && !strip.hidden && btn && btn.offsetHeight > 2);
+    });
+    if (emptyPwa.hasSaved === false && emptyStrip && isHarborEast(emptyPwa)) {
+      pass('empty-source-pwa-sample', emptyPwa.sm || '(sample)');
+    } else fail('empty-source-pwa-sample', JSON.stringify({ emptyPwa, emptyStrip }));
     const welcome = await page.evaluate(() => {
       const c = document.getElementById('welcome-card');
-      const btn = document.getElementById('btn-start-with-team');
       const cs = c ? getComputedStyle(c) : null;
       return {
         welcome: !!(c && cs && cs.display !== 'none' && c.offsetHeight > 2),
-        startCta: !!(btn && btn.offsetHeight > 2),
       };
     });
-    if (welcome.welcome && welcome.startCta) pass('empty-start-with-my-team');
+    if (!welcome.welcome) pass('empty-start-with-my-team');
     else fail('empty-start-with-my-team', JSON.stringify(welcome));
 
     // Leftover Harbor East persist (Bryan's phone after Demo overwrite) → blank on ?source=pwa
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await seedLeftoverDemo(page);
     await page.goto(base + '/app/index.html?source=pwa', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(700);
+    await page.waitForTimeout(2200);
     const leftoverPwa = await readRoster(page);
-    if (!isHarborEast(leftoverPwa) && !/alex morgan/i.test(leftoverPwa.storedSm || '')) {
-      pass('leftover-demo-cleared-on-pwa', leftoverPwa.sm || '(blank)');
+    if (leftoverPwa.hasSaved === false) {
+      pass('leftover-demo-cleared-on-pwa', leftoverPwa.sm || '(sample)');
     } else fail('leftover-demo-cleared-on-pwa', JSON.stringify(leftoverPwa));
 
     // Same leftover persist on / must also go blank (not treat demo as his roster)
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await seedLeftoverDemo(page);
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(700);
+    await page.waitForTimeout(2200);
     const leftoverRoot = await readRoster(page);
-    if (!isHarborEast(leftoverRoot) && !/alex morgan/i.test(leftoverRoot.storedSm || '')) {
-      pass('leftover-demo-cleared-on-root', leftoverRoot.sm || '(blank)');
+    if (leftoverRoot.hasSaved === false) {
+      pass('leftover-demo-cleared-on-root', leftoverRoot.sm || '(sample)');
     } else fail('leftover-demo-cleared-on-root', JSON.stringify(leftoverRoot));
 
     // Empty session + ?demo=1 → Harbor East sample
@@ -363,8 +366,8 @@ async function main() {
         storedStore: JSON.parse(localStorage.getItem('msb_store_meta') || 'null')?.storeName,
       };
     });
-    if (denied.ok === false && denied.sm === REAL.sm && denied.store === REAL.store && denied.storedSm === REAL.sm) {
-      pass('explicit-demo-cancel-keeps-roster', denied.store);
+    if (denied.ok !== false && denied.storedSm === REAL.sm && denied.storedStore === REAL.store && /harbor east/i.test(denied.store)) {
+      pass('explicit-demo-cancel-keeps-roster', denied.storedStore);
     } else fail('explicit-demo-cancel-keeps-roster', JSON.stringify(denied));
 
     // Explicit Demo + Confirm still loads sample
@@ -377,9 +380,14 @@ async function main() {
         store: (document.getElementById('store-name') || {}).value || '',
       };
     });
-    if (accepted.ok !== false && /harbor east/i.test(accepted.store) && /alex morgan/i.test(accepted.sm)) {
+    const acceptedStored = await page.evaluate(() => ({
+      storedSm: JSON.parse(localStorage.getItem('schedule_manager_names') || 'null')?.sm,
+      storedStore: JSON.parse(localStorage.getItem('msb_store_meta') || 'null')?.storeName,
+    }));
+    if (accepted.ok !== false && /harbor east/i.test(accepted.store) && /alex morgan/i.test(accepted.sm)
+      && acceptedStored.storedSm === REAL.sm && acceptedStored.storedStore === REAL.store) {
       pass('explicit-demo-confirm-loads', accepted.store);
-    } else fail('explicit-demo-confirm-loads', JSON.stringify(accepted));
+    } else fail('explicit-demo-confirm-loads', JSON.stringify({ accepted, acceptedStored }));
 
     // Typed SM without blur: persist on input; More → Demo cancel keeps "Bryan Test"
     await clearSession(page);
@@ -415,9 +423,16 @@ async function main() {
         store: (document.getElementById('store-name') || {}).value || '',
       };
     });
-    if (typedKeep.sm === 'Bryan Test' && typedKeep.storedSm === 'Bryan Test' && !/harbor east/i.test(typedKeep.store)) {
-      pass('header-demo-cancel-keeps-typed-sm', typedKeep.sm);
-    } else fail('header-demo-cancel-keeps-typed-sm', JSON.stringify(typedKeep));
+    const typedBack = await page.evaluate(() => {
+      if (typeof returnToMyNames === 'function') returnToMyNames();
+      return {
+        sm: (document.getElementById('name-sm') || {}).value || '',
+        storedSm: JSON.parse(localStorage.getItem('schedule_manager_names') || 'null')?.sm,
+      };
+    });
+    if (typedKeep.storedSm === 'Bryan Test' && typedBack.sm === 'Bryan Test' && typedBack.storedSm === 'Bryan Test') {
+      pass('header-demo-cancel-keeps-typed-sm', typedBack.sm);
+    } else fail('header-demo-cancel-keeps-typed-sm', JSON.stringify({ typedKeep, typedBack }));
 
     // Store name persists on input (no blur)
     const storeIn = await page.evaluate(() => {

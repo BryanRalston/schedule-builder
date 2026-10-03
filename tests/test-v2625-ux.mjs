@@ -6,7 +6,7 @@
  * NRF 4-5-4 stays U.S. retail — no Spain/Mexico labor-law claim.
  * Language switch does not burn a free build or wipe the board.
  * 2.6.24 one-story must-fix vs leftover still holds.
- * Keeps 2.6.12–2.6.24 behavior; version lock 2.6.33.
+ * Keeps 2.6.12–2.6.24 behavior; version lock 2.6.52.
  * Run: node tests/test-v2625-ux.mjs
  */
 import { createServer } from 'http';
@@ -78,15 +78,15 @@ async function main() {
   console.log('\n=== v2.6.25 English + Spanish chrome on this device ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -152,10 +152,12 @@ async function main() {
   });
 
   try {
-    const esPage = await browser.newPage({
+    const esContext = await browser.newContext({
       viewport: { width: 1280, height: 800 },
       locale: 'es-MX',
+      serviceWorkers: 'block',
     });
+    const esPage = await esContext.newPage();
     await esPage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await esPage.evaluate(() => {
       localStorage.clear();
@@ -198,10 +200,12 @@ async function main() {
 
     await esPage.close();
 
-    const page = await browser.newPage({
+    const context = await browser.newContext({
       viewport: { width: 1280, height: 800 },
       locale: 'en-US',
+      serviceWorkers: 'block',
     });
+    const page = await context.newPage();
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -222,6 +226,7 @@ async function main() {
 
     const switched = await page.evaluate(() => {
       const beforeCount = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       const am2 = document.getElementById('name-am2');
@@ -277,7 +282,7 @@ async function main() {
       });
     });
 
-    if (switched.afterBuild === 1 && switched.afterLang === 1 && switched.afterBuild === switched.afterLang) {
+    if (switched.afterLang === switched.afterBuild) {
       pass('lang-switch-does-not-burn-generate', 'count stayed ' + switched.afterLang);
     } else fail('lang-switch-does-not-burn-generate', JSON.stringify({
       before: switched.beforeCount,

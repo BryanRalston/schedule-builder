@@ -77,13 +77,13 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.50') pass('version.json', ver.version);
+  if (ver.version === '2.6.52') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.50'") && sw.includes("msb-pro-v2.6.50")
-    && index.includes('id="app-version-label">v2.6.50')) {
+  if (index.includes("APP_VERSION = '2.6.52'") && sw.includes("msb-pro-v2.6.52")
+    && index.includes('id="app-version-label">v2.6.52')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.50');
+  } else fail('app-sw-version', 'expected 2.6.52');
 
   if (index.includes("QUALITY_BLOCKED_GRADE = 'Needs attention'")
     && index.includes('function qualityHasMustFix(')
@@ -129,6 +129,7 @@ async function main() {
       viewport: { width: 412, height: 915 },
       isMobile: true,
       hasTouch: true,
+      serviceWorkers: 'block',
     });
     const page = await context.newPage();
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -145,7 +146,7 @@ async function main() {
         version: (document.getElementById('app-version-label') || {}).textContent,
       };
     });
-    if (/v2\.6\.49/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.52/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const scoreGate = await page.evaluate(() => {
@@ -211,6 +212,7 @@ async function main() {
       if (typeof loadPeriod === 'function') loadPeriod();
       amCount = 1;
       if (typeof renderAMRows === 'function') renderAMRows();
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am = document.getElementById('name-am1');
       if (sm) sm.value = 'Dana';

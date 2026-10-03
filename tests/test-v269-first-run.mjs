@@ -71,7 +71,7 @@ async function main() {
   console.log('\n=== v2.6.9 first-run Start with my team ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const index = read('app/index.html');
@@ -79,7 +79,7 @@ async function main() {
     pass('first-run-fns');
   } else fail('first-run-fns', 'missing startWithMyTeam / buildFromSetup');
 
-  if (/id="btn-start-with-team"[^>]*onclick="startWithMyTeam\(\)"/.test(index)) {
+  if (/id="btn-start-with-team"[^>]*onclick="startWithMyTeam\([^)]*\)"/.test(index)) {
     pass('welcome-cta-wired');
   } else fail('welcome-cta-wired', 'Start with my team not wired');
 
@@ -122,7 +122,8 @@ async function main() {
     if (bootToasts.some((t) => /Density:/i.test(t))) fail('no-boot-density-toast', bootToasts.join(' | '));
     else pass('no-boot-density-toast');
 
-    await page.locator('#btn-start-with-team').click();
+    await page.locator('#btn-use-my-team').waitFor({ state: 'visible', timeout: 8000 });
+    await page.locator('#btn-use-my-team').click();
     await page.waitForTimeout(400);
 
     const started = await page.evaluate(() => {
@@ -177,7 +178,7 @@ async function main() {
         }, 1600);
       });
     });
-    if (built.tab === 'schedule' && built.named && built.cells > 20 && /Schedule ready/.test(built.toast)) {
+    if (built.tab === 'schedule' && built.named && built.cells > 20 && /schedule is ready/i.test(built.toast)) {
       pass('build-from-setup-named', built.cells + ' cells');
     } else fail('build-from-setup-named', JSON.stringify(built));
 
@@ -187,6 +188,7 @@ async function main() {
       localStorage.clear();
       localStorage.setItem('msb_tour_done', '1');
       localStorage.setItem('msb_welcome_dismissed', '1');
+      localStorage.setItem('msb_own_team_started', '1');
       localStorage.setItem('msb_pro_license', JSON.stringify({ key: 'TEST-PRO-KEY-999', unlockedAt: Date.now() }));
     });
     await desk.reload({ waitUntil: 'domcontentloaded' });
@@ -201,7 +203,10 @@ async function main() {
       persistManagerNames();
       buildFromSetup();
     });
-    await desk.waitForTimeout(1800);
+    await desk.waitForFunction(() => {
+      const cells = [...document.querySelectorAll('#schedule-grid td.shift-editable')];
+      return cells.some((c) => /O |C |M /i.test(c.textContent || ''));
+    }, { timeout: 15000 });
     const menuHit = await desk.evaluate(async () => {
       const cells = [...document.querySelectorAll('#schedule-grid td.shift-editable')];
       const work = cells.find((c) => /O |C |M /i.test(c.textContent || ''));

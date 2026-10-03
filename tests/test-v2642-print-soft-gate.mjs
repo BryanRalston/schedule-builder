@@ -1,6 +1,6 @@
 /**
  * v2.6.46: soft-gate Print / Word / Excel when must-fix remains.
- * Must-fix board: confirm stays in-app. Hang banner is UI-only (2.6.50).
+ * Must-fix board: confirm stays in-app. Hang banner is UI-only (2.6.52).
  * Zero must-fix: unchanged.
  * Extends 2.6.38 / 2.6.39 / 2.6.40 / 2.6.41 (keep those green).
  * Run: node tests/test-v2642-print-soft-gate.mjs
@@ -77,15 +77,15 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
 
-  if (ver.version === '2.6.50') pass('version.json', ver.version);
+  if (ver.version === '2.6.52') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.50'") && sw.includes('msb-pro-v2.6.50')
-    && index.includes('id="app-version-label">v2.6.50')) {
+  if (index.includes("APP_VERSION = '2.6.52'") && sw.includes('msb-pro-v2.6.52')
+    && index.includes('id="app-version-label">v2.6.52')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.50');
+  } else fail('app-sw-version', 'expected 2.6.52');
 
-  if (twa.appVersion === '2.6.50' && twa.appVersionName === '2.6.50') pass('twa-manifest-version');
+  if (twa.appVersion === '2.6.51' && twa.appVersionName === '2.6.51') pass('twa-manifest-version');
   else fail('twa-manifest-version', JSON.stringify({ v: twa.appVersion, n: twa.appVersionName }));
 
   if (index.includes('function currentMustFixCount(')
@@ -161,7 +161,8 @@ async function setupHuntBoard(page) {
     if (typeof loadPeriod === 'function') loadPeriod();
     amCount = 1;
     if (typeof renderAMRows === 'function') renderAMRows();
-    const sm = document.getElementById('name-sm');
+    if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
+      const sm = document.getElementById('name-sm');
     const am = document.getElementById('name-am1');
     if (sm) sm.value = 'Dana';
     if (am) am.value = 'Alex';
@@ -232,7 +233,7 @@ async function main() {
     const boot = await page.evaluate(() => ({
       version: (document.getElementById('app-version-label') || {}).textContent,
     }));
-    if (/v2\.6\.49/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.52/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const helpers = await page.evaluate(() => {

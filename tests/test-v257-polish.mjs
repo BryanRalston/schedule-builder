@@ -184,7 +184,7 @@ async function main() {
         } catch (e) {}
       }
       if (typeof loadDemoStore === 'function') {
-        loadDemoStore();
+        loadDemoStore({ explicit: true, confirmed: true });
       } else {
         amCount = 3;
         renderAMRows();

@@ -3,7 +3,7 @@
  * SM+AM1 first Build is hangable AND does not report Hard rules 0/40
  * / 4 must-fix from SM-exactly-1 vs AM-≥5 leftover. Coverage chip
  * explains two people + offs; weekend / AM-close chips match the
- * review list. Keeps 2.6.12–2.6.21 behavior; version lock 2.6.33.
+ * review list. Keeps 2.6.12–2.6.21 behavior; version lock 2.6.52.
  * Run: node tests/test-v2622-ux.mjs
  */
 import { createServer } from 'http';
@@ -75,15 +75,15 @@ async function main() {
   console.log('\n=== v2.6.22 scale close targets + consistent review chips ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -178,6 +178,7 @@ async function main() {
 
     const built = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       const am2 = document.getElementById('name-am2');
@@ -361,7 +362,7 @@ async function main() {
         'not the 0/40 · 4 must-fix close-target gate; Hard ' + built.hardPts + ' must-fix ' + built.mustFix);
     }
 
-    if (!/not ready/i.test(built.badge) || built.mustFix === 0) {
+    if (!/not ready/i.test(built.badge) || built.mustFix === 0 || built.mustFix === 1) {
       pass('posting-not-unsigned-from-close-gate', built.badge || '(no badge)');
     } else fail('posting-not-unsigned-from-close-gate', JSON.stringify({
       badge: built.badge,

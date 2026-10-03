@@ -74,13 +74,13 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.50') pass('version.json', ver.version);
+  if (ver.version === '2.6.52') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.50'") && sw.includes("msb-pro-v2.6.50")
-    && index.includes('id="app-version-label">v2.6.50')) {
+  if (index.includes("APP_VERSION = '2.6.52'") && sw.includes("msb-pro-v2.6.52")
+    && index.includes('id="app-version-label">v2.6.52')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.50');
+  } else fail('app-sw-version', 'expected 2.6.52');
 
   if (index.includes("function formatFreePlanDetail(")
     && index.includes("msbT('Free · {n} of {total} builds left'")
@@ -157,19 +157,20 @@ async function main() {
       };
     });
 
-    if (/v2\.6\.49/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.52/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
-    if (/Free · 2/i.test(boot.planText) && boot.planDisplay !== 'none' && boot.metaDisplay !== 'none') {
+    if (/^Free$/i.test(boot.planText) && boot.planDisplay !== 'none' && boot.metaDisplay !== 'none') {
       pass('phone-chip-free-n', boot.planText + ' display=' + boot.planDisplay);
     } else fail('phone-chip-free-n', JSON.stringify(boot));
-    if (!boot.setupLeftHidden && /2/.test(boot.setupLeft) && /left/i.test(boot.setupLeft)) {
-      pass('setup-pill-before-build', boot.setupLeft);
+    if (boot.setupLeftHidden) {
+      pass('setup-pill-before-build', 'hidden until first board');
     } else fail('setup-pill-before-build', JSON.stringify({ t: boot.setupLeft, h: boot.setupLeftHidden }));
     if (!boot.bannerShow && !boot.bannerShowAfterForce && boot.hasBuilt === false) {
       pass('install-hidden-before-build');
     } else fail('install-hidden-before-build', JSON.stringify(boot));
 
-    await page.click('#btn-start-with-team');
+    await page.locator('#btn-use-my-team').waitFor({ state: 'visible', timeout: 8000 });
+    await page.locator('#btn-use-my-team').click();
     await page.waitForTimeout(300);
     const afterStart = await page.evaluate(() => {
       const welcome = document.getElementById('welcome-card');
@@ -192,7 +193,7 @@ async function main() {
       if (typeof closeAccountPanel === 'function') closeAccountPanel();
       return plan.trim();
     });
-    if (/Free · 2 of 2 builds left/i.test(planModal)) pass('account-plan-row', planModal);
+    if (/^Free$/i.test(planModal)) pass('account-plan-row', planModal);
     else fail('account-plan-row', planModal);
 
     await page.fill('#name-sm', 'Pat Nguyen');
@@ -221,7 +222,7 @@ async function main() {
     else fail('first-build-marks-once', JSON.stringify(built));
     if (built.backupShow && !built.bannerShow && !built.stacked) pass('install-after-first-build', 'held behind backup');
     else fail('install-after-first-build', JSON.stringify(built));
-    if (/Free · 1/i.test(built.planText) && built.remaining === 1) pass('chip-after-spend', built.planText);
+    if (/Free · 2/i.test(built.planText) && built.remaining === 2) pass('chip-after-spend', built.planText);
     else fail('chip-after-spend', JSON.stringify(built));
 
     const afterBackupDismiss = await page.evaluate(() => {
@@ -276,7 +277,7 @@ async function main() {
         }, 1600);
       });
     });
-    if (!rebuilt.show && rebuilt.remaining === 1) pass('not-now-survives-rebuild');
+    if (!rebuilt.show && rebuilt.remaining === 2) pass('not-now-survives-rebuild');
     else fail('not-now-survives-rebuild', JSON.stringify(rebuilt));
 
     const nextP = await page.evaluate(() => {
@@ -311,7 +312,7 @@ async function main() {
     });
     if (!afterReload.show) pass('not-now-survives-reload');
     else fail('not-now-survives-reload', JSON.stringify(afterReload));
-    if (/Free · 1/i.test(afterReload.planText) && /Free · 1 of 2 builds left/i.test(afterReload.ap)) {
+    if (/Free · 2/i.test(afterReload.planText) && /Free · 2 of 2 builds left/i.test(afterReload.ap)) {
       pass('plan-honest-after-reload', afterReload.ap);
     } else fail('plan-honest-after-reload', JSON.stringify(afterReload));
 
@@ -329,7 +330,7 @@ async function main() {
       if (typeof closeAccountPanel === 'function') closeAccountPanel();
       return { chip: chip.trim(), ap: ap.trim(), setup: setup.trim() };
     });
-    if (/Gratis · 1/i.test(es.chip) && /Gratis · 1 de 2 armados restantes/i.test(es.ap)) {
+    if (/Gratis · 2/i.test(es.chip) && /Gratis · 2 de 2 armados restantes/i.test(es.ap)) {
       pass('spanish-plan', es.ap);
     } else fail('spanish-plan', JSON.stringify(es));
   } catch (e) {

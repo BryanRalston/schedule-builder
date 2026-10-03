@@ -87,13 +87,36 @@
   }
 })();
 </script>
-<!-- Google tag (gtag.js) — Manager Schedule Pro GA4, apex stream -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJ8E69Z8Y0"></script>
+<!-- Google tag (gtag.js) — Manager Schedule Pro GA4. Skipped for automation and opt-out devices. -->
 <script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-LJ8E69Z8Y0');
+(function () {
+  var ID = 'G-LJ8E69Z8Y0';
+  function gaOff() {
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.get('no_ga') === '1') localStorage.setItem('msp_no_ga', '1');
+      else if (q.get('no_ga') === '0') localStorage.removeItem('msp_no_ga');
+      if (localStorage.getItem('msp_no_ga') === '1') return true;
+    } catch (e) {}
+    try { if (navigator.webdriver) return true; } catch (e2) {}
+    var ua = String(navigator.userAgent || '');
+    if (/HeadlessChrome|Playwright|Puppeteer|PhantomJS|Selenium|Lighthouse|Googlebot|bingbot|DuckDuckBot|YandexBot|Baiduspider|AhrefsBot|SemrushBot|MJ12bot|DotBot|PetalBot|Applebot|GPTBot|ClaudeBot|PerplexityBot|Bytespider|facebookexternalhit|Twitterbot|Slackbot|Discordbot|crawler|spider/i.test(ua)) return true;
+    return false;
+  }
+  if (gaOff()) { window.MSP_GA_OFF = true; return; }   // gtag stays undefined -> msbTrack() no-ops
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { dataLayer.push(arguments); };
+  var sw = (window.screen && screen.width) || 0, sh = (window.screen && screen.height) || 0;
+  if ((sw === 800 && sh === 600) || (sw === 1024 && sh === 1024)) {
+    gtag('set', { traffic_type: 'bot_suspect' });       // tag, don't drop (see screen rule)
+  }
+  gtag('js', new Date());
+  gtag('config', ID);
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ID;
+  document.head.appendChild(s);
+})();
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -407,13 +430,21 @@ body::before {
   max-width: 100%;
 }
 .app-header .subtitle {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  opacity: 0.55;
+  opacity: 0.85;
   margin-top: 3px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-family: var(--mono);
+  letter-spacing: 0;
+  text-transform: none;
+  font-family: var(--font);
+  line-height: 1.35;
+}
+.app-header .subtitle .nrf-secondary {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
 }
 .header-actions { display: flex; gap: 0.45rem; align-items: center; flex-shrink: 0; }
 
@@ -612,6 +643,19 @@ input[type="radio"] { accent-color: var(--gold); }
   min-height: 3rem;
   font-size: 1.05rem;
 }
+#tab-setup.first-run-ease #ease-period-row,
+#tab-setup.first-run-ease #nrf-us-law-note,
+#tab-setup.first-run-ease .tab-footer-nav .btn-secondary { display: none !important; }
+#tab-setup.first-run-ease .am-row-extra.am-row-shown,
+#tab-setup.first-run-ease .manager-row.am-row-shown { display: flex !important; }
+#first-build-shift-line,
+#first-build-period {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+#btn-add-another-manager { margin-top: 0.55rem; min-height: 2.6rem; }
 
 .manager-section-header {
   display: flex;
@@ -3763,7 +3807,8 @@ input[type="radio"] { accent-color: var(--gold); }
 }
 .welcome-card.compact .welcome-steps { display: none; }
 .welcome-card.compact .feature-pills { display: none; }
-.welcome-card.compact p { margin-bottom: 0.65rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.welcome-card.compact p { margin-bottom: 0.65rem; }
+.welcome-card.compact #welcome-body { -webkit-line-clamp: unset; overflow: visible; display: block; }
 .welcome-privacy {
   font-size: 0.78rem;
   color: var(--ink-2);
@@ -5077,6 +5122,82 @@ body.msb-board-live .container {
 #schedule-grid {
   scroll-margin-top: 8.5rem;
 }
+.sample-strip, .first-build-ready { margin: 0 0 0.45rem; }
+.sample-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 0.86rem;
+}
+.sample-strip[hidden], .first-build-ready[hidden] { display: none !important; }
+#first-build-ready { scroll-margin-top: 9rem; }
+body.sample-board #post-gen-strip { display: none !important; }
+.sample-strip button, #btn-add-person, .first-build-review-line {
+  min-height: 2.4rem;
+  font-weight: 700;
+}
+.first-build-ready h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+.first-build-ready p { margin: 0 0 0.45rem; font-size: 0.9rem; }
+.first-build-review-line {
+  display: inline-flex;
+  margin-left: 0.4rem;
+  background: transparent;
+  border: none;
+  color: var(--ink-2);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+@media (max-width: 480px) {
+  .app-header .subtitle { display: none !important; }
+}
+@media (max-width: 720px) {
+  body.sample-board .app-header {
+    padding: 0.2rem 0.5rem;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+  }
+  body.sample-board .brand-row { flex-wrap: nowrap; min-width: 0; }
+  body.sample-board .app-header h1 {
+    font-size: 0.82rem;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  body.sample-board .brand-status,
+  body.sample-board #btn-cmd-palette,
+  body.sample-board #schedule-section > .section-header { display: none !important; }
+  body.sample-board .app-tabs { padding: 0 0.25rem; }
+  body.sample-board .container { padding: 0.2rem 0.4rem 0.45rem; }
+  body.sample-board .app-tab { padding: 0.28rem 0.35rem; min-height: 0; font-size: 0.75rem; }
+  body.sample-board .sample-strip { padding: 0.2rem 0.45rem; margin-bottom: 0.25rem; font-size: 0.78rem; }
+  body.sample-board .sample-strip button { min-height: 2rem; padding: 0.15rem 0.5rem; }
+  body.sample-board .week-header { font-size: 0.82rem; padding: 0.28rem 0.5rem; }
+  body.sample-board .week-dates { font-size: 0.68rem; }
+  body.sample-board .week-table thead th .day-hours,
+  body.sample-board .week-table thead th .dh-date { display: none; }
+  body.sample-board .week-table thead th.day-head-cell { padding: 0.12rem 0.08rem !important; }
+  body.sample-board #schedule-grid::after { display: none; }
+  body.sample-board #post-gen-strip,
+  body.sample-board #built-rebuild-row,
+  body.sample-board #schedule-toolbar,
+  body.sample-board .schedule-hours-line,
+  body.sample-board .app-footer,
+  body.sample-board #fairness-under-schedule,
+  body.sample-board #schedule-empty { display: none !important; }
+  body.chips-collapsed #post-gen-strip,
+  body.chips-collapsed #schedule-toolbar,
+  body.chips-collapsed .schedule-hours-line { display: none !important; }
+  body.chips-collapsed #built-rebuild-row.is-docked { padding: 0.15rem 0.7rem; }
+}
 
 .review-sheet { display: none; }
 .review-sheet.open,
@@ -5632,7 +5753,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <span class="account-chip-avatar" id="account-chip-avatar">?</span>
         <span class="account-chip-meta">
           <span class="account-chip-name" id="account-chip-name">Account</span>
-          <span class="account-chip-plan is-free" id="account-chip-plan">Free · 2</span>
+          <span class="account-chip-plan is-free" id="account-chip-plan">Free</span>
         </span>
       </button>
       <span class="brand-status" id="brand-status">
@@ -5641,7 +5762,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <span class="local-status-pill" id="local-status-pill" title="Last local save" data-i18n-title="Last local save"><span class="pill-text" data-i18n="Saved">Saved</span></span>
       </span>
     </div>
-    <div class="subtitle" data-i18n="Manager shifts · NRF periods · Fair weekends · Review before you post">Manager shifts · NRF periods · Fair weekends · Review before you post</div>
+    <div class="subtitle"><span data-i18n="5-week retail schedule · weekend days off · close then open">5-week retail schedule · weekend days off · close then open</span><span class="nrf-secondary" data-i18n="NRF 4-5-4">NRF 4-5-4</span></div>
   </div>
   <div class="header-actions no-print">
     <button type="button" class="btn-outline btn-cmdk" id="btn-cmd-palette" onclick="openCommandPalette()" style="color:var(--ink);border-color:var(--line-strong)" title="Command palette (Ctrl+K)">⌘K</button>
@@ -5730,11 +5851,11 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <div class="welcome-card no-print compact" id="welcome-card">
     <button type="button" class="welcome-dismiss-x" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)" aria-label="Dismiss" data-i18n-aria="Dismiss" title="Dismiss" data-i18n-title="Dismiss">&times;</button>
     <h2 id="welcome-title" data-i18n="Build the period. Post with confidence.">Build the period. Post with confidence.</h2>
-    <p id="welcome-body" data-i18n="welcome-body">Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.</p>
+    <p id="welcome-body" data-i18n="welcome-body">5-week retail schedule with weekend days off, and close then open avoided where the team allows. Free: 2 builds and 1 Word/Excel export. Pro: unlimited. Always review before you post.</p>
     <p id="welcome-privacy" class="welcome-privacy" data-i18n="Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
     <div class="welcome-actions">
-      <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam()" data-i18n="Start with my team">Start with my team</button>
-      <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadDemoStore({explicit:true})" data-i18n="See a sample">See a sample</button>
+      <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam('welcome')" data-i18n="Start with my team">Start with my team</button>
+      <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadSampleFromWelcome()" data-i18n="See a sample">See a sample</button>
     </div>
     <div class="welcome-play" id="welcome-play">
       <a class="gp-badge" id="welcome-play-link" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Get it on Google Play</a>
@@ -5802,6 +5923,9 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
               <button class="btn-round btn-primary" id="btn-add-am" onclick="addAM()" title="Add assistant manager" aria-label="Add assistant manager" data-i18n-title="Add assistant manager" data-i18n-aria="Add assistant manager">+</button>
             </div>
             <div id="am-rows"></div>
+            <button type="button" class="btn-outline first-run-ease-only" id="btn-add-another-manager" onclick="revealAnotherManager()">+ Add another manager</button>
+            <p class="first-run-ease-only" id="first-build-shift-line"></p>
+            <p class="first-run-ease-only" id="first-build-period"></p>
           </div>
 
           <!-- KCs (dynamic) -->
@@ -6100,6 +6224,16 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
       </div>
       <div class="period-print-header" id="print-header"></div>
       <div class="schedule-hours-line no-print" id="schedule-hours-line"></div>
+      <div id="sample-strip" class="sample-strip no-print" hidden>
+        <span id="sample-strip-text">Sample week — tap any shift to try editing.</span>
+        <button type="button" id="btn-use-my-team" onclick="onSampleStripAction()">Use my team</button>
+      </div>
+      <div id="first-build-ready" class="first-build-ready no-print" hidden>
+        <h2 id="first-build-ready-title">Your 5-week schedule is ready</h2>
+        <p id="first-build-gap"></p>
+        <button type="button" class="btn-primary" id="btn-add-person" onclick="addPersonFromReady()">Add person</button>
+        <button type="button" class="first-build-review-line" id="first-build-review-line" onclick="openReviewSheet()">Review this week</button>
+      </div>
       <div id="schedule-grid"></div>
       <div id="fairness-under-schedule" class="fairness-under no-print" data-tour="fairness" hidden></div>
       <div class="print-schedule" id="print-schedule"></div>
@@ -6153,7 +6287,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 <footer class="app-footer no-print">
   <div class="footer-brand">
-    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.51</span> · <span data-i18n="Works offline">Works offline</span></div>
+    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.52</span> · <span data-i18n="Works offline">Works offline</span></div>
     <p class="footer-privacy" data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</p>
     <p class="footer-pub"><span data-i18n="Support">Support</span>: <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a> · Cortex Developments · <a href="../buy.html" style="font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></p>
   </div>
@@ -6184,7 +6318,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 <div class="pro-gate-modal no-print" id="pro-gate-modal" hidden role="dialog" aria-modal="true" aria-labelledby="pro-gate-title" onpointerdown="if (event.target === this) { event.preventDefault(); event.stopPropagation(); closeProGate(); }">
   <div class="pro-gate-card" onpointerdown="event.stopPropagation()">
     <h3 id="pro-gate-title" data-i18n="Pro feature">Pro feature</h3>
-    <p id="pro-gate-body" data-i18n="Unlock Pro for unlimited schedule builds and Word/Excel export.">Unlock Pro for unlimited schedule builds and Word/Excel export.</p>
+    <p id="pro-gate-body" data-i18n="Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes 2 builds and 1 Word/Excel export.">Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes 2 builds and 1 Word/Excel export.</p>
     <p class="pro-gate-reassure" data-i18n="Your schedules and edits stay — only new builds need Pro.">Your schedules and edits stay — only new builds need Pro.</p>
     <ul class="pro-gate-benefits" id="pro-gate-benefits">
       <li>unlimited schedule builds</li>
@@ -6246,7 +6380,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <h4>Build &amp; review</h4>
         <ul>
           <li>Build the period schedule from Setup, then Schedule.</li>
-          <li>Free: 2 builds. Pro: unlimited builds.</li>
+          <li>Free: 2 builds and 1 Word/Excel export. Pro: unlimited builds.</li>
           <li>Review chips: Quality, Coverage, Clopens, AM closes, WE offs, Fairness.</li>
           <li>Tap a chip to jump to the problem. Apply a suggested fix when the board offers one.</li>
           <li>If must-fix items remain, Print / Word / Excel ask you to confirm first.</li>
@@ -6313,7 +6447,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
     </div>
     <div class="ap-rows">
       <div class="ap-row"><span data-i18n="Store">Store</span><span id="ap-store">This device</span></div>
-      <div class="ap-row"><span data-i18n="Plan">Plan</span><span id="ap-plan">Free · 2 of 2 builds left</span></div>
+      <div class="ap-row"><span data-i18n="Plan">Plan</span><span id="ap-plan">Free</span></div>
     </div>
     <div class="ap-actions">
       <button type="button" class="ap-btn-secondary" id="ap-signin-btn" onclick="openSignInFromApp()" hidden>Sign in / switch account</button>
@@ -7730,12 +7864,20 @@ function formatSignInRow(s) {
   return method;
 }
 
+function quotaCounterVisible() {
+  if (typeof isProUnlocked === 'function' && isProUnlocked()) return false;
+  if (typeof firstOwnBuildDone === 'function' && !firstOwnBuildDone()) return false;
+  return true;
+}
+
 function formatFreeChipLabel() {
+  if (!quotaCounterVisible()) return msbT('Free');
   const left = remainingFreeGenerates();
   return left === 0 ? msbT('Free · 0') : msbT('Free · {n}', { n: left });
 }
 
 function formatFreePlanDetail() {
+  if (!quotaCounterVisible()) return msbT('Free');
   const left = remainingFreeGenerates();
   const total = typeof freeGenerateLimit === 'function' ? freeGenerateLimit() : 2;
   return msbT('Free · {n} of {total} builds left', { n: left, total: total });
@@ -8099,9 +8241,10 @@ function rosterIsDemoForFreeCount() {
 
 /** Real user Build only. Demo, Pro, and skipFreeCount never burn a seat. */
 function shouldRecordFreeGenerate(opts) {
-  if (opts && opts.skipFreeCount) return false;
+  if (opts && (opts.skipFreeCount || opts._sample)) return false;
   if (typeof isProUnlocked === 'function' && isProUnlocked()) return false;
   if (rosterIsDemoForFreeCount()) return false;
+  if (typeof firstOwnBuildDone === 'function' && !firstOwnBuildDone()) return false;
   return true;
 }
 
@@ -8124,6 +8267,13 @@ function updateLicenseBadge() {
       el.classList.remove('is-free');
       el.classList.add('is-pro');
       el.title = 'Pro unlocked — unlimited builds + Word/Excel';
+      el.style.cursor = 'pointer';
+      el.onclick = () => openAccountPanel();
+    } else if (!quotaCounterVisible()) {
+      el.textContent = 'Free';
+      el.classList.add('is-free');
+      el.classList.remove('is-pro');
+      el.title = 'Free includes 2 builds and 1 Word/Excel export';
       el.style.cursor = 'pointer';
       el.onclick = () => openAccountPanel();
     } else {
@@ -8186,15 +8336,27 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+function freeExportUnused() {
+  try { return localStorage.getItem('msb_free_export_used') !== '1'; } catch (e) { return true; }
+}
+
+function markFreeExportUsed(format) {
+  if (typeof isProUnlocked === 'function' && isProUnlocked()) return;
+  try {
+    if (localStorage.getItem('msb_free_export_used') === '1') return;
+    localStorage.setItem('msb_free_export_used', '1');
+  } catch (e) {}
+  try { if (typeof msbTrack === 'function') msbTrack('free_export_used', { format: format === 'excel' ? 'excel' : 'word' }); } catch (e2) {}
+}
+
 function requirePro(featureLabel) {
   if (isProUnlocked()) return true;
+  if ((featureLabel === 'Word export' || featureLabel === 'Excel export') && freeExportUnused()) return true;
   showProGate(
     (featureLabel || 'This feature') +
       ' is included with Pro (' +
       (monetizationConfig.priceLabel || '$19.99') +
-      ' one-time). Free includes unlimited managers, full editing, and ' +
-      freeGenerateLimit() +
-      ' schedule builds — then unlock for unlimited builds plus Word/Excel.',
+      ' one-time). Free includes 2 builds and 1 Word/Excel export.',
     'export'
   );
   return false;
@@ -8260,7 +8422,7 @@ function applyUrlProUnlock() {
 function updateGenFreeLeft() {
   const els = document.querySelectorAll('.gen-free-left');
   if (!els.length) return;
-  if (isProUnlocked()) {
+  if (isProUnlocked() || !quotaCounterVisible()) {
     els.forEach((el) => {
       el.hidden = true;
       el.textContent = '';
@@ -8679,8 +8841,11 @@ function leftoverMustFixViolations(violations, roles) {
     return true;
   });
   if (typeof isTwoManagerNoKeyCarrierRoster === 'function' && isTwoManagerNoKeyCarrierRoster(roles)) {
+    const realHoles = filtered.filter((v) =>
+      v && (v.rule === 'coverage-open' || v.rule === 'coverage-close'));
     const hasCover = list.some((v) => v && (v.rule === 'coverage-open' || v.rule === 'coverage-close'));
-    if (hasCover) {
+    // Expected thin days collapse to one must-fix. Both people off stays a real hole.
+    if (hasCover && realHoles.length === 0) {
       const rest = filtered.filter((v) =>
         v.rule !== 'coverage-open' && v.rule !== 'coverage-close' && v.rule !== 'coverage-infeasible');
       rest.unshift({
@@ -9118,7 +9283,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.51';
+const APP_VERSION = '2.6.52';
 
 // ── Appearance (light default; dark optional, on-device) ──
 const MSB_THEME_KEY = 'msb_appearance';
@@ -9196,6 +9361,7 @@ const MSB_I18N_ES = {
   'Export Word': 'Exportar Word',
   'Export Excel': 'Exportar Excel',
   'New phone? Export a JSON backup, then Load. No cloud — file stays yours.': '¿Teléfono nuevo? Exporta un respaldo JSON y luego Cargar. Sin nube — el archivo es tuyo.',
+  'New phone? Export a JSON backup, then Import that file here. No cloud — file stays yours.': '¿Teléfono nuevo? Exporta un respaldo JSON y luego importa ese archivo aquí. Sin nube — el archivo es tuyo.',
   'Backup JSON — new phone': 'Respaldo JSON — teléfono nuevo',
   'Copy summary': 'Copiar resumen',
   'Density: Compact': 'Densidad: Compacta',
@@ -9234,7 +9400,7 @@ const MSB_I18N_ES = {
   'Install': 'Instalar',
   'Not now': 'Ahora no',
   'Build the period. Post with confidence.': 'Arma el período. Publica con confianza.',
-  'welcome-body': 'Horarios de gerentes para retail — períodos NRF de EE. UU., fines de semana justos, evitar clopen es una preferencia. Todo en este teléfono. Gratis: equipo ilimitado, editar celdas y 2 armados. Pro: armados ilimitados + Word/Excel. Siempre revisa antes de publicar.',
+  'welcome-body': 'Horario de 5 semanas para retail, con fines de semana libres y sin cerrar y abrir al día siguiente cuando el equipo lo permite. Gratis: 2 armados y 1 export de Word/Excel. Pro: ilimitado. Siempre revisa antes de publicar.',
   'Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.': 'Nombres, tiempo libre y el tablero se quedan en este teléfono. Nada se sube. Sin cuenta, sin plantilla en la nube.',
   'Start with my team': 'Empezar con mi equipo',
   'Pro · $19.99': 'Pro · $19.99',
@@ -9363,6 +9529,7 @@ const MSB_I18N_ES = {
   'Buy Pro': 'Comprar Pro',
   'Pro feature': 'Función Pro',
   'Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes unlimited managers, full editing, and 2 builds.': 'Desbloquea Pro para armados ilimitados y exportar Word/Excel. Gratis incluye gerentes ilimitados, edición completa y 2 armados.',
+  'Unlock Pro for unlimited schedule builds and Word/Excel export. Free includes 2 builds and 1 Word/Excel export.': 'Desbloquea Pro para armados ilimitados y exportar Word/Excel. Gratis incluye 2 armados y 1 export de Word/Excel.',
   'Enter license': 'Ingresar licencia',
   'Stays on this phone. Does not translate names you typed.': 'Se queda en este teléfono. No traduce los nombres que escribiste.',
   'Plan': 'Plan',
@@ -9673,6 +9840,8 @@ const MSB_I18N_ES = {
   'cell': 'celda',
   'cell edit': 'editar celda',
   'Schedule ready · Quality {score}/100 ({grade})': 'Horario listo · Calidad {score}/100 ({grade})',
+  'Your {n}-week schedule is ready': 'Tu horario de {n} semanas está listo',
+  'Sample week is ready. Tap any shift to try editing.': 'La semana de ejemplo está lista. Toca cualquier turno para probar a editar.',
   'Free builds used (edits still free)': 'Armados gratis usados (editar sigue gratis)',
   '{n} free build left': '{n} armado gratis restante',
   '{n} free builds left': '{n} armados gratis restantes',
@@ -9734,7 +9903,7 @@ const MSB_I18N_ES = {
 };
 
 const MSB_I18N_EN = {
-  'welcome-body': 'Preference-aware manager schedules for retail — NRF periods, fair weekends, clopen-avoidance as a preference. Fully offline. Free: unlimited team size, full cell edits, and 2 schedule builds. Pro: unlimited builds + Word/Excel. Always review before you post.',
+  'welcome-body': '5-week retail schedule with weekend days off, and close then open avoided where the team allows. Free: 2 builds and 1 Word/Excel export. Pro: unlimited. Always review before you post.',
   'ask-hint': 'Runs on this device. “Casey off Thu–Fri” or “Alex off Thu 8/6”. Paint still works if this does not read it.',
   'prefs-footer': 'These preferences guide Generate Schedule. Hard constraints (PTO/RTO/LOA, coverage) always win. Clopen-avoidance is a preference — not a guarantee. Review before you post.',
   'holiday-note-default': 'Check holidays your store observes as paid. Matching weeks auto-mark as holiday (4-day) and show on the calendar. U.S. retail dates only — not Spain or Mexico labor holidays.',
@@ -10422,13 +10591,17 @@ function syncMarketingHero() {
 const MSB_SETUP_MORE_KEY = 'msb_setup_more_open';
 
 function findNrfPeriodForDate(date) {
-  const d = date instanceof Date ? date : new Date();
+  const raw = date instanceof Date ? date : new Date();
+  const day = typeof startOfLocalDay === 'function'
+    ? startOfLocalDay
+    : function (x) { return new Date(x.getFullYear(), x.getMonth(), x.getDate()); };
+  const d = day(raw);
   const years = [d.getFullYear(), d.getFullYear() - 1, d.getFullYear() + 1];
   for (let yi = 0; yi < years.length; yi++) {
     const fy = years[yi];
     const periods = typeof getFiscalPeriods === 'function' ? getFiscalPeriods(fy) : [];
     for (let i = 0; i < periods.length; i++) {
-      if (d >= periods[i].start && d <= periods[i].end) {
+      if (d >= day(periods[i].start) && d <= day(periods[i].end)) {
         return { fiscalYear: fy, index: i, period: periods[i] };
       }
     }
@@ -10515,9 +10688,19 @@ function syncFirstRunEase() {
   if (title) title.textContent = ease ? msbT('Your team') : msbT('Store & team');
   if (desc) {
     desc.textContent = ease
-      ? msbT('Name two managers, load this NRF period, then Build. Requests and rules can wait. New phone? More → Backup JSON, then Load.')
+      ? msbT('Name two managers, then Build. Shifts and the period are already set — change them later under More setup.')
       : msbT('Names, store info, fiscal period, and shift times. Load a period before generating. New phone? More → Backup JSON, then Load.');
   }
+  const buildBtn = document.getElementById('btn-build-from-setup');
+  if (buildBtn && buildBtn.getAttribute('aria-busy') !== 'true') {
+    buildBtn.textContent = ease ? 'Build my schedule' : msbT('Build this period');
+  }
+  if (ease && typeof updateFirstBuildSummary === 'function') updateFirstBuildSummary();
+  const namesOpen = typeof ownTeamStarted === 'function' && ownTeamStarted()
+    && !(typeof firstOwnBuildDone === 'function' && firstOwnBuildDone())
+    && !(typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule());
+  if (namesOpen && ease) document.body.classList.add('first-build-open');
+  else document.body.classList.remove('first-build-open');
   updateLoadThisNrfButton();
 }
 
@@ -10534,23 +10717,114 @@ function toggleMoreSetup() {
   setMoreSetupOpen(collapsed);
 }
 
-function startWithMyTeam() {
+function formatShiftSummaryLine() {
+  const times = (typeof customShiftTimes === 'object' && customShiftTimes) || (typeof DEFAULT_SHIFT_TIMES === 'object' ? DEFAULT_SHIFT_TIMES : {});
+  const fallback = { start: '', end: '' };
+  const o = times['open-late'] || fallback;
+  const m = times['mid-early'] || fallback;
+  const c = times['close'] || fallback;
+  return 'Open ' + o.start + '–' + o.end + ' · Mid ' + m.start + '–' + m.end + ' · Close ' + c.start + '–' + c.end + ', change later';
+}
+
+function updateFirstBuildSummary() {
+  const shift = document.getElementById('first-build-shift-line');
+  if (shift) shift.textContent = formatShiftSummaryLine();
+  const label = document.getElementById('first-build-period');
+  if (label && currentPeriod) {
+    label.textContent = 'FY' + fiscalYear + ' Period ' + currentPeriod.number +
+      (currentPeriod.approxMonth ? ' · ' + currentPeriod.approxMonth : '') + ' · change later';
+  }
+}
+
+function revealAnotherManager() {
+  const hidden = document.querySelector('#am-rows .am-row-extra:not(.am-row-shown)');
+  if (hidden) {
+    hidden.classList.add('am-row-shown');
+    const input = hidden.querySelector('input');
+    if (input) {
+      try { input.focus({ preventScroll: true }); } catch (e) { try { input.focus(); } catch (e2) {} }
+    }
+    return;
+  }
+  if (typeof addAM === 'function') addAM();
+}
+
+function applySmartNrfPeriod() {
+  const today = new Date();
+  const found = typeof findNrfPeriodForDate === 'function' ? findNrfPeriodForDate(today) : null;
+  if (!found || !found.period) {
+    try { return loadThisNrfPeriod({ quiet: true }); } catch (e) { return false; }
+  }
+  let fy = found.fiscalYear;
+  let idx = found.index;
+  const end = found.period.end;
+  const startOf = typeof startOfLocalDay === 'function' ? startOfLocalDay : function (d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+  const left = Math.round((startOf(end) - startOf(today)) / 86400000) + 1;
+  if (left < 7) {
+    const periods = typeof getFiscalPeriods === 'function' ? getFiscalPeriods(fy) : [];
+    if (idx + 1 < periods.length) idx += 1;
+    else { fy += 1; idx = 0; }
+  }
+  fiscalYear = fy;
+  currentPeriodIndex = idx;
+  const yEl = document.getElementById('pick-year');
+  if (yEl) yEl.value = fiscalYear;
+  if (typeof buildPeriodDropdown === 'function') buildPeriodDropdown();
+  const pEl = document.getElementById('pick-period');
+  if (pEl) pEl.value = String(currentPeriodIndex);
+  if (typeof loadPeriod === 'function') loadPeriod();
+  updateFirstBuildSummary();
+  return !!currentPeriod;
+}
+
+function addPersonFromReady() {
+  amCount = (typeof amCount === 'number' ? amCount : 2) + 1;
+  if (typeof renderAMRows === 'function') renderAMRows();
+  try {
+    if (typeof getAllPersonIds === 'function') {
+      getAllPersonIds().forEach((r) => { if (!inputs[r]) inputs[r] = {}; });
+    }
+  } catch (e) {}
+  try { if (typeof setMoreSetupOpen === 'function') setMoreSetupOpen(true); } catch (e2) {}
+  if (typeof switchTab === 'function') switchTab('setup');
+  const el = document.getElementById('name-am' + amCount);
+  if (el) {
+    if (typeof isPlaceholderManagerName === 'function' && isPlaceholderManagerName(el.value)) el.value = '';
+    try { el.focus({ preventScroll: true }); } catch (e3) { try { el.focus(); } catch (e4) {} }
+  }
+  showToast('Add a name, then Build again.', 'info');
+}
+
+function startWithMyTeam(surface) {
+  const surf = surface === 'sample_strip' || surface === 'menu' || surface === 'welcome' ? surface : 'welcome';
+  try { if (typeof msbTrack === 'function') msbTrack('team_start', { surface: surf }); } catch (eTrack) {}
+  window._msbSamplePreview = false;
+  window._msbUserRosterSnap = null;
+  try { if (typeof clearSamplePersistence === 'function') clearSamplePersistence(); } catch (eClr) {}
+  document.body.classList.remove('sample-board');
+  const strip = document.getElementById('sample-strip');
+  if (strip) strip.hidden = true;
+  try { schedule = {}; } catch (eSch) {}
+  try {
+    const grid = document.getElementById('schedule-grid');
+    if (grid) grid.innerHTML = '';
+  } catch (eGrid) {}
+  try { if (typeof setScheduleResultsVisible === 'function') setScheduleResultsVisible(false); } catch (eVis) {}
   try { dismissWelcome(); } catch (e) {}
   try {
     if (typeof endOnboardingTour === 'function') endOnboardingTour(true);
     else if (typeof setTourDone === 'function') setTourDone();
   } catch (e) {}
-  try {
-    if (typeof liveRosterLooksLikeDemo === 'function' && liveRosterLooksLikeDemo()) {
-      applyBlankTeam({ persist: true });
-    }
-  } catch (e) {}
+  try { applyBlankTeam({ persist: true }); } catch (e) {}
+  try { localStorage.setItem('msb_own_team_started', '1'); } catch (eOwn) {}
   try {
     if (typeof hasPersistedBuiltSchedule !== 'function' || !hasPersistedBuiltSchedule()) {
       localStorage.removeItem(MSB_SETUP_MORE_KEY);
     }
   } catch (e5) {}
+  document.body.classList.add('first-build-open');
   if (typeof switchTab === 'function') switchTab('setup');
+  try { applySmartNrfPeriod(); } catch (ePer) {}
   try { syncFirstRunEase(); } catch (e6) {}
   setTimeout(() => {
     const sm = document.getElementById('name-sm');
@@ -10565,7 +10839,7 @@ function startWithMyTeam() {
       team.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, 50);
-  showToast('Name two managers, load this NRF period, then Build. Requests can wait.', 'info');
+  showToast('Name two managers, then Build. Requests can wait.', 'info');
 }
 
 function buildFromSetup() {
@@ -10631,6 +10905,10 @@ function showHowItWorks() {
 }
 
 function persistStoreMeta() {
+  if (window._msbSamplePreview) {
+    try { if (typeof restoreUserRosterStorage === 'function') restoreUserRosterStorage(); } catch (ePrev) {}
+    return;
+  }
   try {
     localStorage.setItem('msb_store_meta', JSON.stringify({
       storeName: (document.getElementById('store-name') || {}).value || '',
@@ -10836,7 +11114,7 @@ function restoreStoreMeta() {
       persistStoreMeta();
     } else {
       if (sn && d.storeName) sn.value = d.storeName;
-      if (num && d.storeNumber && !num.value) num.value = d.storeNumber;
+      if (num && d.storeNumber && (!num.value || String(num.value).trim() === String(DEMO_STORE_NUMBER))) num.value = d.storeNumber;
       if (d.storeHours) applyStoreHoursObject(d.storeHours);
     }
   } catch(e) {}
@@ -12013,17 +12291,244 @@ function confirmReplaceRosterWithDemo() {
   }
 }
 
+function sampleSessionActive() {
+  try { return localStorage.getItem('msb_sample_active') === '1'; } catch (e) { return false; }
+}
+function ownTeamStarted() {
+  try { return localStorage.getItem('msb_own_team_started') === '1'; } catch (e) { return false; }
+}
+function firstOwnBuildDone() {
+  try { return localStorage.getItem('msb_first_own_build_done') === '1'; } catch (e) { return false; }
+}
+function isTrueFirstRun() {
+  if (typeof hasSavedUserRoster === 'function' && hasSavedUserRoster()) return false;
+  if (typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule()) return false;
+  if (ownTeamStarted()) return false;
+  return true;
+}
+function clearSamplePersistence() {
+  try {
+    localStorage.removeItem('msb_sample_active');
+    localStorage.removeItem('msb_sample_snapshot');
+  } catch (e) {}
+  window._msbSamplePending = false;
+}
+function sampleSurfaceFromOpts(opts) {
+  opts = opts || {};
+  if (opts.surface === 'auto' || opts.surface === 'welcome' || opts.surface === 'menu' || opts.surface === 'url') return opts.surface;
+  if (opts.auto) return 'auto';
+  if (opts.fromUrl) return 'url';
+  return 'menu';
+}
+function captureLiveRosterDom() {
+  const ams = {};
+  const max = typeof amCount === 'number' ? amCount : 8;
+  for (let i = 1; i <= max; i++) {
+    const el = document.getElementById('name-am' + i);
+    if (el) ams['am' + i] = el.value;
+  }
+  return {
+    sm: (document.getElementById('name-sm') || {}).value || '',
+    ams: ams,
+    amCount: typeof amCount === 'number' ? amCount : 2,
+    storeName: (document.getElementById('store-name') || {}).value || '',
+    storeNumber: (document.getElementById('store-number') || {}).value || '',
+    kcList: JSON.parse(JSON.stringify(typeof kcList !== 'undefined' ? kcList : []))
+  };
+}
+function restoreUserRosterStorage() {
+  const snap = window._msbUserRosterSnap;
+  if (!snap) return;
+  try {
+    if (snap.names != null) localStorage.setItem('schedule_manager_names', snap.names);
+    else localStorage.removeItem('schedule_manager_names');
+  } catch (e) {}
+  try {
+    if (snap.meta != null) localStorage.setItem('msb_store_meta', snap.meta);
+    else localStorage.removeItem('msb_store_meta');
+  } catch (e2) {}
+}
+function beginSamplePreviewSnap() {
+  if (window._msbSamplePreview && window._msbUserRosterSnap) return;
+  let names = null;
+  let meta = null;
+  let live = null;
+  try { names = localStorage.getItem('schedule_manager_names'); } catch (e) {}
+  try { meta = localStorage.getItem('msb_store_meta'); } catch (e2) {}
+  try { live = typeof buildSnapshotData === 'function' ? buildSnapshotData() : null; } catch (e3) { live = null; }
+  window._msbUserRosterSnap = { names: names, meta: meta, live: live, dom: captureLiveRosterDom() };
+  window._msbSamplePreview = true;
+}
+function applyDomRoster(dom) {
+  if (!dom) return;
+  amCount = dom.amCount || 2;
+  if (Array.isArray(dom.kcList)) kcList = dom.kcList;
+  if (typeof renderAMRows === 'function') renderAMRows();
+  if (typeof renderKCRows === 'function') renderKCRows();
+  const sm = document.getElementById('name-sm');
+  if (sm) sm.value = dom.sm || '';
+  Object.keys(dom.ams || {}).forEach((id) => {
+    const el = document.getElementById('name-' + id);
+    if (el) el.value = dom.ams[id];
+  });
+  const sn = document.getElementById('store-name');
+  const num = document.getElementById('store-number');
+  if (sn) sn.value = dom.storeName || '';
+  if (num) num.value = dom.storeNumber || '';
+}
+function returnToMyNames() {
+  const snap = window._msbUserRosterSnap;
+  window._msbSamplePreview = false;
+  window._msbUserRosterSnap = null;
+  document.body.classList.remove('sample-board');
+  const strip = document.getElementById('sample-strip');
+  if (strip) strip.hidden = true;
+  if (snap) {
+    try {
+      if (snap.names != null) localStorage.setItem('schedule_manager_names', snap.names);
+      if (snap.meta != null) localStorage.setItem('msb_store_meta', snap.meta);
+    } catch (e) {}
+  }
+  let showedBoard = false;
+  if (snap && snap.live && snap.live.schedule && Object.keys(snap.live.schedule).length) {
+    try {
+      applyLoadedScheduleData(snap.live);
+      showedBoard = true;
+    } catch (e2) {
+      applyDomRoster(snap.dom);
+    }
+  } else if (snap && snap.dom) {
+    applyDomRoster(snap.dom);
+    try { schedule = {}; } catch (e3) {}
+    try { if (typeof setScheduleResultsVisible === 'function') setScheduleResultsVisible(false); } catch (e4) {}
+  }
+  if (!showedBoard && typeof switchTab === 'function') switchTab('setup');
+  if (ownTeamStarted() && !firstOwnBuildDone()) {
+    document.body.classList.add('first-build-open');
+    try { syncFirstRunEase(); } catch (e5) {}
+  }
+  showToast('Back to your names.', 'info');
+}
+function onSampleStripAction() {
+  if (window._msbSamplePreview) returnToMyNames();
+  else startWithMyTeam('sample_strip');
+}
+function loadSampleFromWelcome() {
+  loadDemoStore({ explicit: true, surface: 'welcome' });
+}
+function showSampleBoardChrome() {
+  document.body.classList.add('sample-board');
+  document.body.classList.remove('chips-collapsed', 'first-build-open');
+  const strip = document.getElementById('sample-strip');
+  if (strip) strip.hidden = false;
+  const btn = document.getElementById('btn-use-my-team');
+  if (btn) btn.textContent = window._msbSamplePreview ? 'Back to my names' : 'Use my team';
+  const text = document.getElementById('sample-strip-text');
+  if (text) {
+    text.textContent = window._msbSamplePreview
+      ? 'Sample preview — your names stay saved.'
+      : 'Sample week — tap any shift to try editing.';
+  }
+  const ready = document.getElementById('first-build-ready');
+  if (ready) ready.hidden = true;
+  const pgs = document.getElementById('post-gen-strip');
+  if (pgs) { pgs.hidden = true; pgs.classList.remove('show'); }
+  try { hideBackupNudge(); } catch (e) {}
+  try { if (typeof hideInstallBanner === 'function') hideInstallBanner(); } catch (e2) {}
+  try { dismissWelcome(); } catch (e3) {}
+  try {
+    if (typeof endOnboardingTour === 'function') endOnboardingTour(true);
+  } catch (e4) {}
+}
+function persistSampleSnapshot() {
+  try {
+    const data = buildSnapshotData();
+    localStorage.setItem('msb_sample_snapshot', JSON.stringify(data));
+    localStorage.setItem('msb_sample_active', '1');
+  } catch (e) {}
+}
+function maybeRestoreSampleBoard() {
+  if (!sampleSessionActive()) return false;
+  if ((typeof hasSavedUserRoster === 'function' && hasSavedUserRoster()) ||
+      (typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule())) {
+    clearSamplePersistence();
+    return false;
+  }
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem('msb_sample_snapshot') || 'null'); } catch (e) { data = null; }
+  if (!data || !data.schedule) return false;
+  window._msbRestoringSample = true;
+  try { applyLoadedScheduleData(data); }
+  catch (e2) { window._msbRestoringSample = false; return false; }
+  window._msbRestoringSample = false;
+  showSampleBoardChrome();
+  try { if (typeof switchTab === 'function') switchTab('schedule'); } catch (e3) {}
+  window._msbSampleLoadedTracked = true;
+  try { if (typeof msbTrack === 'function') msbTrack('sample_loaded', { surface: 'auto', result: 'success' }); } catch (e4) {}
+  return true;
+}
+function plainCoverageGapLine() {
+  const people = (typeof getRoles === 'function' ? getRoles() : []).length;
+  let gaps = 0;
+  try {
+    const st = typeof computeCoverageAndFairnessStats === 'function' ? computeCoverageAndFairnessStats() : null;
+    gaps = st && st.missDays ? st.missDays : 0;
+  } catch (e) {}
+  if (gaps > 0) {
+    const who = people === 1 ? '1 person can\'t' : people + ' people can\'t';
+    return who + ' cover every open and close — add one more to fill ' + gaps + ' gap' + (gaps === 1 ? '' : 's');
+  }
+  return 'Weekend days off are in. Close then open is avoided where the team allows. Tap a shift to change it.';
+}
+function showFirstBuildWin() {
+  document.body.classList.add('chips-collapsed');
+  document.body.classList.remove('sample-board', 'first-build-open');
+  const strip = document.getElementById('sample-strip');
+  if (strip) strip.hidden = true;
+  const box = document.getElementById('first-build-ready');
+  if (box) box.hidden = false;
+  const title = document.getElementById('first-build-ready-title');
+  const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : 5;
+  if (title) title.textContent = msbT('Your {n}-week schedule is ready', { n: weeks });
+  const gap = document.getElementById('first-build-gap');
+  if (gap) gap.textContent = plainCoverageGapLine();
+  const line = document.getElementById('first-build-review-line');
+  if (line) {
+    line.textContent = 'Review this week';
+    line.classList.remove('bad');
+  }
+  const pgs = document.getElementById('post-gen-strip');
+  if (pgs) { pgs.hidden = true; pgs.classList.remove('show'); }
+}
+function showFullChips() {
+  document.body.classList.remove('chips-collapsed');
+  const box = document.getElementById('first-build-ready');
+  if (box) box.hidden = true;
+}
+function maybeTrackFirstRealBuild() {
+  try {
+    if (localStorage.getItem('msb_first_build_sent') === '1') return;
+    localStorage.setItem('msb_first_build_sent', '1');
+  } catch (e) {
+    if (window._msbFirstBuildSent) return;
+    window._msbFirstBuildSent = true;
+  }
+  try { if (typeof msbTrack === 'function') msbTrack('first_build', { result: 'success' }); } catch (e2) {}
+}
+
 function loadDemoStore(opts) {
   opts = opts || {};
   const explicit = opts.explicit === true;
   const fromUrl = opts.fromUrl === true;
+  const auto = opts.auto === true;
+  let preview = false;
   try {
-    if (typeof persistSetupDraft === 'function') persistSetupDraft();
+    if (!window._msbSamplePreview && typeof persistSetupDraft === 'function') persistSetupDraft();
   } catch (e0) {}
   const hasRoster = typeof hasSavedUserRoster === 'function' && hasSavedUserRoster();
   if (hasRoster) {
     // URL / auto / leftover ?demo=1: never persist demo over a saved store.
-    // Explicit Demo / Tour sample: confirm first — do not persist without it.
+    // Explicit sample opens a preview. opts.confirmed === true still does not overwrite storage.
     if (!explicit) {
       if (fromUrl) {
         try {
@@ -12031,26 +12536,23 @@ function loadDemoStore(opts) {
         } catch (e) {}
         return false;
       }
-      try {
-        if (typeof showToast === 'function') {
-          showToast('Kept your saved team — sample store was not loaded over it.', 'info');
-        }
-      } catch (e) {}
-      return false;
-    }
-    let allowed = false;
-    if (opts.confirmed === true) allowed = true;
-    else if (opts.confirmed === false) allowed = false;
-    else allowed = typeof confirmReplaceRosterWithDemo === 'function' && confirmReplaceRosterWithDemo();
-    if (!allowed) {
-      try {
-        if (typeof showToast === 'function') showToast('Kept your saved team.', 'info');
-      } catch (e) {}
-      return false;
+      if (opts.confirmed === true) {
+        preview = true;
+      } else {
+        try {
+          if (typeof showToast === 'function') {
+            showToast('Kept your saved team — sample store was not loaded over it.', 'info');
+          }
+        } catch (e) {}
+        return false;
+      }
+    } else {
+      preview = true;
     }
   }
+  if (preview) beginSamplePreviewSnap();
+  const surface = sampleSurfaceFromOpts(opts);
   try {
-    // Team
     amCount = 3;
     kcList = [
       { id: 'kc1', name: 'Jordan Lee', asManager: false, midDows: [0, 2, 4, 5] },
@@ -12065,36 +12567,24 @@ function loadDemoStore(opts) {
     const sn = document.getElementById('store-name');
     if (sn) sn.value = DEMO_STORE_NAME;
     document.getElementById('store-number').value = DEMO_STORE_NUMBER;
-    persistManagerNames();
-    persistStoreMeta();
-    try { if (typeof setMoreSetupOpen === 'function') setMoreSetupOpen(true); } catch (eMore) {}
-
-    // Period — current FY / period already in dropdown
-    if (!periodDates || !periodDates.length) {
-      loadPeriod();
-    } else {
-      // refresh
-      loadPeriod();
+    if (preview) restoreUserRosterStorage();
+    else {
+      persistManagerNames();
+      persistStoreMeta();
     }
+    if (typeof loadPeriod === 'function') loadPeriod();
 
-    // Sample PTO / RTO / requests after period loads
     setTimeout(() => {
       if (!periodDates || !periodDates.length) {
         showToast('Could not load period for demo.', 'error');
+        try { if (typeof msbTrack === 'function') msbTrack('sample_loaded', { surface: surface, result: 'error' }); } catch (eErr) {}
         return;
       }
       const dks = periodDates.map(d => dateKey(d));
       inputs = { sm: {}, am1: {}, am2: {}, am3: {}, kc1: {}, kc2: {} };
-      // SM wants a mid one day
-      if (dks[2]) inputs.sm[dks[2]] = 'mid-early';
-      // AM1 PTO mid-week week 2
-      if (dks[9]) inputs.am1[dks[9]] = 'pto';
-      if (dks[10]) inputs.am1[dks[10]] = 'pto';
-      // AM2 RTO one day
-      if (dks[16]) inputs.am2[dks[16]] = 'rto';
-      // AM3 requested open
-      if (dks[4]) inputs.am3[dks[4]] = 'open-early';
-      // Prefer reasonable defaults
+      // One mild close-then-open so Review has something. Coverage stays intact.
+      if (dks[5]) inputs.am1[dks[5]] = 'close';
+      if (dks[6]) inputs.am1[dks[6]] = 'open-late';
       preferences = Object.assign({}, DEFAULT_PREFERENCES, {
         targetWeekendDaysOff: 2,
         preferConsecutiveDaysOff: true,
@@ -12106,16 +12596,25 @@ function loadDemoStore(opts) {
       buildInputTabs();
       buildInputCalendar(activeTab || 'sm');
       updateReadyChecklist();
-      showToast('Sample store loaded — generating schedule…', 'success');
+      dismissWelcome();
       setTimeout(() => {
-        generateSchedule({ skipFreeCount: true });
-        dismissWelcome();
-      }, 200);
-    }, 100);
+        generateSchedule({
+          skipFreeCount: true,
+          _trackedClick: true,
+          _sample: true,
+          _sampleSurface: surface,
+          _samplePreview: preview
+        });
+      }, 30);
+    }, 40);
     return true;
   } catch (e) {
     console.error(e);
+    if (preview) {
+      try { returnToMyNames(); } catch (e2) {}
+    }
     showToast('Demo failed: ' + e.message, 'error');
+    try { if (typeof msbTrack === 'function') msbTrack('sample_loaded', { surface: surface, result: 'error' }); } catch (e3) {}
     return false;
   }
 }
@@ -12176,8 +12675,13 @@ function markBackupNudgeDone() {
   hideBackupNudge();
 }
 
+function backupNudgeBlocked() {
+  if (document.body && document.body.classList.contains('sample-board')) return true;
+  return typeof rosterIsDemoForFreeCount === 'function' && rosterIsDemoForFreeCount();
+}
+
 function maybeShowBackupNudge() {
-  if (backupNudgeIsDone()) {
+  if (backupNudgeBlocked() || backupNudgeIsDone()) {
     hideBackupNudge();
     return;
   }
@@ -13720,31 +14224,31 @@ let _generateBusy = false;
 function generateSchedule(opts) {
   opts = opts || {};
   if (_generateBusy) return;
-  if (!opts._trackedClick) {
+  if (!opts._trackedClick && !opts._sample) {
     try { if (typeof msbTrack === 'function') msbTrack('build_click', { surface: 'board' }); } catch (eTrack) {}
   }
   if (window._viewLocked) {
     showToast('View only - cannot generate.', 'warn');
-    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB) {}
+    try { if (!opts._sample && typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB) {}
     return;
   }
   if (!periodDates || !periodDates.length || !currentPeriod) {
     showToast('Load this NRF period on Setup first.', 'warn');
     switchTab('setup');
-    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB2) {}
+    try { if (!opts._sample && typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB2) {}
     return;
   }
   if (!managersAreNamed()) {
     showToast('Name your managers on Setup before building.', 'warn');
     switchTab('setup');
-    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB3) {}
+    try { if (!opts._sample && typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB3) {}
     return;
   }
   const consumeFree = typeof shouldRecordFreeGenerate === 'function'
     ? shouldRecordFreeGenerate(opts)
     : (!opts.skipFreeCount && !isProUnlocked());
   if (consumeFree && !requireGenerateAllowance()) {
-    try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB4) {}
+    try { if (!opts._sample && typeof msbTrack === 'function') msbTrack('build_result', { result: 'blocked' }); } catch (eB4) {}
     return;
   }
   opts = Object.assign({}, opts, { _consumeFree: consumeFree });
@@ -13775,11 +14279,25 @@ function generateSchedule(opts) {
     try {
       _generateScheduleInner(opts);
       try { if (typeof notifyTourGenerateComplete === 'function') notifyTourGenerateComplete(); } catch (e2) {}
-      try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'success' }); } catch (eOk) {}
+      if (opts._sample) {
+        try {
+          if (!window._msbSampleLoadedTracked && typeof msbTrack === 'function') {
+            msbTrack('sample_loaded', { surface: opts._sampleSurface || 'menu', result: 'success' });
+          }
+        } catch (eOk) {}
+        window._msbSampleLoadedTracked = false;
+      } else {
+        try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'success' }); } catch (eOk) {}
+        try { if (typeof maybeTrackFirstRealBuild === 'function') maybeTrackFirstRealBuild(); } catch (eFirst) {}
+      }
     } catch (e) {
       console.error(e);
       showToast('Generate error: ' + (e.message || e), 'error');
-      try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'error' }); } catch (eErr) {}
+      if (opts._sample) {
+        try { if (typeof msbTrack === 'function') msbTrack('sample_loaded', { surface: opts._sampleSurface || 'menu', result: 'error' }); } catch (eErr) {}
+      } else {
+        try { if (typeof msbTrack === 'function') msbTrack('build_result', { result: 'error' }); } catch (eErr) {}
+      }
     } finally {
       _generateBusy = false;
       if (btn) {
@@ -16319,20 +16837,44 @@ function _generateScheduleInner(opts) {
   window._lastGeneratedAt = new Date();
   if (ts) ts.textContent = msbT('Generated {when}', { when: window._lastGeneratedAt.toLocaleString() });
   const q = lastGenReport.quality || computeQualityScore(lastGenReport, ROLES);
-  // Successful user Build only — sample / tour generate does not burn a free build
-  if (opts._consumeFree || (typeof shouldRecordFreeGenerate === 'function' && shouldRecordFreeGenerate(opts))) {
+  const wasSample = !!(opts && opts._sample);
+  const wasFirstOwn = !wasSample && !rosterIsDemoForFreeCount() && !(typeof firstOwnBuildDone === 'function' && firstOwnBuildDone());
+  if (!wasSample && (opts._consumeFree || (typeof shouldRecordFreeGenerate === 'function' && shouldRecordFreeGenerate(opts)))) {
     recordFreeGenerate();
+  }
+  if (wasFirstOwn) {
+    try { localStorage.setItem('msb_first_own_build_done', '1'); } catch (eOwn) {}
   }
   const left = remainingFreeGenerates();
   const leftoverClopens = !!(lastGenReport && lastGenReport.prefs && lastGenReport.prefs.avoidClopening && lastGenReport.totalClopens > 0);
-  const toastMsg = formatScheduleReadyToast(q, left, leftoverClopens, isProUnlocked());
-  showToast(toastMsg, hasErrors ? 'warn' : 'success', function () {
-    if (typeof jumpToReviewChip === 'function') jumpToReviewChip('quality');
-  });
-  try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
-  try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
-  try { if (typeof markHasBuiltOnce === 'function') markHasBuiltOnce(); } catch (eBuilt) {}
-  try { if (typeof maybeOfferInstall === 'function') maybeOfferInstall(); } catch (eInst) {}
+  if (wasSample) {
+    if (!opts._samplePreview && !window._msbSamplePreview) {
+      try { if (typeof persistSampleSnapshot === 'function') persistSampleSnapshot(); } catch (eSnap) {}
+    }
+    try { if (typeof showSampleBoardChrome === 'function') showSampleBoardChrome(); } catch (eChrome) {}
+    showToast(msbT('Sample week is ready. Tap any shift to try editing.'), 'success');
+  } else if (wasFirstOwn) {
+    try { if (typeof showFirstBuildWin === 'function') showFirstBuildWin(); } catch (eWin) {}
+    const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : 5;
+    showToast(msbT('Your {n}-week schedule is ready', { n: weeks }), 'success');
+    try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
+    try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
+    try { if (typeof markHasBuiltOnce === 'function') markHasBuiltOnce(); } catch (eBuilt) {}
+    try { if (typeof maybeOfferInstall === 'function') maybeOfferInstall(); } catch (eInst) {}
+  } else {
+    try { if (typeof showFullChips === 'function') showFullChips(); } catch (eFull) {}
+    const toastMsg = formatScheduleReadyToast(q, left, leftoverClopens, isProUnlocked());
+    showToast(toastMsg, hasErrors ? 'warn' : 'success', function () {
+      if (typeof jumpToReviewChip === 'function') jumpToReviewChip('quality');
+    });
+    try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
+    try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
+    try { if (typeof markHasBuiltOnce === 'function') markHasBuiltOnce(); } catch (eBuilt) {}
+    try { if (typeof maybeOfferInstall === 'function') maybeOfferInstall(); } catch (eInst) {}
+  }
+  if (!wasSample) {
+    try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEase) {}
+  }
   try {
     if (typeof computeScheduleDiff === 'function') {
       window._lastScheduleDiff = computeScheduleDiff(window._prevScheduleSnap || {}, schedule);
@@ -16354,7 +16896,18 @@ function _generateScheduleInner(opts) {
   switchTab('schedule');
   try { if (typeof syncAppShell === 'function') syncAppShell(); } catch (e) {}
   setTimeout(() => {
-    document.getElementById('schedule-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (opts && opts._sample) {
+      const row = document.querySelector('#schedule-grid tbody tr');
+      if (row && typeof row.scrollIntoView === 'function') row.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+      return;
+    }
+    const ready = document.getElementById('first-build-ready');
+    const target = (document.body.classList.contains('chips-collapsed') && ready && !ready.hidden)
+      ? ready
+      : document.getElementById('schedule-grid');
+    if (target && typeof target.scrollIntoView === 'function') {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, 50);
 }
 
@@ -18732,6 +19285,7 @@ function downloadWordExport() {
   }
   const bytes = MSB_OOXML.buildDocx(buildExportModel());
   downloadOfficeBlob(bytes, officeExportFilename('.docx'), MSB_OOXML.MIME_DOCX);
+  try { if (typeof markFreeExportUsed === 'function') markFreeExportUsed('word'); } catch (eFree) {}
   try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'word', result: 'downloaded' }); } catch (eTrack) {}
 }
 
@@ -18834,6 +19388,7 @@ function downloadExcelExport() {
   }
   const bytes = MSB_OOXML.buildXlsx(buildExportModel());
   downloadOfficeBlob(bytes, officeExportFilename('.xlsx'), MSB_OOXML.MIME_XLSX);
+  try { if (typeof markFreeExportUsed === 'function') markFreeExportUsed('excel'); } catch (eFree) {}
   try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'excel', result: 'downloaded' }); } catch (eTrack) {}
 }
 
@@ -20259,6 +20814,10 @@ function deleteSavedSchedule(key, event) {
 // ════════════════════════════════════════════════════
 
 function persistManagerNames() {
+  if (window._msbSamplePreview) {
+    try { if (typeof restoreUserRosterStorage === 'function') restoreUserRosterStorage(); } catch (ePrev) {}
+    return;
+  }
   const names = {
     sm: document.getElementById('name-sm').value || defaultRolePersonName('sm'),
     amCount: amCount,
@@ -20290,6 +20849,7 @@ function restoreManagerNames() {
     if (
       typeof wantsDemoLaunch === 'function' &&
       !wantsDemoLaunch() &&
+      !(typeof sampleSessionActive === 'function' && sampleSessionActive()) &&
       typeof storedNamesLookLikeDemo === 'function' &&
       storedNamesLookLikeDemo(names)
     ) {
@@ -20857,9 +21417,13 @@ function notifyTourGenerateComplete() {
 }
 
 function maybeAutoStartTour() {
+  if (window._msbSamplePending || (typeof sampleSessionActive === 'function' && sampleSessionActive())) return;
+  if (document.body && (document.body.classList.contains('sample-board') || document.body.classList.contains('first-build-open'))) return;
   if (isTourDone()) return;
   if (document.documentElement.classList.contains('auth-locked')) return;
   setTimeout(() => {
+    if (window._msbSamplePending || (typeof sampleSessionActive === 'function' && sampleSessionActive())) return;
+    if (document.body && (document.body.classList.contains('sample-board') || document.body.classList.contains('first-build-open'))) return;
     if (isTourDone()) return;
     if (document.documentElement.classList.contains('auth-locked')) return;
     if (isWelcomeCardVisible()) return;
@@ -21024,6 +21588,10 @@ function hasBuiltOnceForInstall() {
     if (sessionStorage.getItem(MSB_HAS_BUILT_ONCE_KEY) === '1') return true;
   } catch (e) {}
   try {
+    if (document.body && document.body.classList.contains('sample-board')) return false;
+    if (typeof rosterIsDemoForFreeCount === 'function' && rosterIsDemoForFreeCount()) return false;
+  } catch (e1) {}
+  try {
     if (typeof hasLiveBuiltBoard === 'function' && hasLiveBuiltBoard()) return true;
   } catch (e2) {}
   try {
@@ -21082,6 +21650,7 @@ function setupInstallPrompt() {
 }
 
 function showInstallBanner(iosHint) {
+  if (document.body && document.body.classList.contains('sample-board')) return;
   const el = document.getElementById('install-banner');
   if (!el || isStandalonePwa()) return;
   if (isInstallBannerDismissed()) return;
@@ -21477,14 +22046,20 @@ function updatePostGenStrip() {
   if (window._msbStripArriving) return;
   const strip = document.getElementById('post-gen-strip');
   if (!strip) return;
+  const collapsed = !!(document.body && (document.body.classList.contains('sample-board') || document.body.classList.contains('chips-collapsed')));
   const hasSched = !!(schedule && Object.keys(schedule).some((r) => schedule[r] && Object.keys(schedule[r]).length));
   if (!hasSched) {
     strip.classList.remove('show');
     strip.hidden = true;
     return;
   }
-  strip.hidden = false;
-  strip.classList.add('show');
+  if (collapsed) {
+    strip.classList.remove('show');
+    strip.hidden = true;
+  } else {
+    strip.hidden = false;
+    strip.classList.add('show');
+  }
   const st = computeCoverageAndFairnessStats();
   const quality = document.getElementById('pgs-quality');
   const cover = document.getElementById('pgs-cover');
@@ -22846,10 +23421,12 @@ document.addEventListener('click', (e) => {
 })();
 
 restoreRoleTitles();
-const _hadRestoredNames = !!restoreManagerNames();
+const _sampleActiveBoot = typeof sampleSessionActive === 'function' && sampleSessionActive();
+const _hadRestoredNames = _sampleActiveBoot ? false : !!restoreManagerNames();
 restoreLastTeamTemplateIfNeeded(_hadRestoredNames);
 restoreStoreMeta();
 if (
+  !_sampleActiveBoot &&
   !_hadRestoredNames &&
   typeof wantsDemoLaunch === 'function' &&
   !wantsDemoLaunch() &&
@@ -22873,6 +23450,19 @@ buildInputCalendar(activeTab);
 updateReadyChecklist();
 updateLicenseBadge();
 updateAccountChip();
+let _restoredSample = false;
+try { _restoredSample = _sampleActiveBoot && maybeRestoreSampleBoard(); } catch (eSample) {}
+if (!_restoredSample && typeof isTrueFirstRun === 'function' && isTrueFirstRun() && typeof wantsDemoLaunch === 'function' && !wantsDemoLaunch()) {
+  window._msbSamplePending = true;
+  try { dismissWelcome(); } catch (eW) {}
+  setTimeout(() => { try { loadDemoStore({ auto: true, surface: 'auto' }); } catch (eAuto) {} }, 40);
+}
+if (!_restoredSample && typeof ownTeamStarted === 'function' && ownTeamStarted() && typeof firstOwnBuildDone === 'function' && !firstOwnBuildDone() && !(typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule())) {
+  try { applySmartNrfPeriod(); } catch (ePer) {}
+  document.body.classList.add('first-build-open');
+  try { if (typeof switchTab === 'function') switchTab('setup'); } catch (eTabOwn) {}
+  try { syncFirstRunEase(); } catch (eEaseOwn) {}
+}
 maybeAutoStartTour();
 // Keep checklist fresh when period/names change
 const _pickPeriod = document.getElementById('pick-period');

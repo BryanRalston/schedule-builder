@@ -77,13 +77,13 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const manifest = JSON.parse(read('manifest.webmanifest'));
 
-  if (ver.version === '2.6.50') pass('version.json', ver.version);
+  if (ver.version === '2.6.52') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.50'") && sw.includes('msb-pro-v2.6.50')
-    && app.includes('id="app-version-label">v2.6.50')) {
+  if (app.includes("APP_VERSION = '2.6.52'") && sw.includes('msb-pro-v2.6.52')
+    && app.includes('id="app-version-label">v2.6.52')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.50');
+  } else fail('app-sw-version', 'expected 2.6.52');
 
   if (app.includes("msb_appearance") && app.includes("MSB_THEME_KEY")
     && app.includes('function setAppearance') && app.includes("return 'light'")) {
@@ -152,7 +152,7 @@ async function browserChecks(base, chromium) {
     const paperLight = /#f4f6fa/i.test(first.paper);
     const brand = /#701030/i.test(first.accent) && /#e0b020/i.test(first.gold);
     if (first.theme === 'light' && (first.stored == null || first.stored === 'light')
-      && paperLight && brand && first.moreVal === 'light' && /v2\.6\.49/.test(first.version)) {
+      && paperLight && brand && first.moreVal === 'light' && /v2\.6\.52/.test(first.version)) {
       pass('default-light', JSON.stringify({ theme: first.theme, paper: first.paper, accent: first.accent }));
     } else fail('default-light', JSON.stringify(first));
 

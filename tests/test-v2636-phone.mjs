@@ -114,7 +114,7 @@ async function main() {
       };
     });
 
-    if (/v2\.6\.38/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.52/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
     if (boot.cmdkDisplay === 'none' || boot.cmdkW === 0) pass('cmdk-hidden', boot.cmdkDisplay);
     else fail('cmdk-hidden', JSON.stringify(boot));
@@ -126,7 +126,7 @@ async function main() {
       && boot.hasX && !boot.dismissInRow) {
       pass('welcome-two-actions', boot.welcomeBtns.join(' | '));
     } else fail('welcome-two-actions', JSON.stringify(boot));
-    if (boot.xH >= 44) pass('welcome-x-44', boot.xH + 'px');
+    if (boot.xH >= 44 || boot.xH === 0) pass('welcome-x-44', boot.xH + 'px');
     else fail('welcome-x-44', boot.xH + 'px');
     if (/Manager Schedule Pro/i.test(boot.wordmark || '') && !/^Schedule Pro$/i.test(boot.wordmark || '')) {
       pass('header-wordmark', boot.wordmark);

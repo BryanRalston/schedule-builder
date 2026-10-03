@@ -72,15 +72,15 @@ async function main() {
   console.log('\n=== v2.6.15 backup nudge + board clopens ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -145,7 +145,7 @@ async function main() {
   } else fail('nudge-stays-offline', 'nudge invented a cloud/account path');
 
   const licenseModal = (index.match(/id="license-modal"[\s\S]*?id="provider-modal"/) || [''])[0];
-  if (/Enter your Gumroad license or an MSB-PRO- unlock code/.test(licenseModal)
+  if (/Enter the Gumroad license key from your receipt, or an MSB-PRO-/.test(licenseModal)
     && /placeholder="Gumroad license or MSB-PRO-…/.test(licenseModal)
     && !/any key 6\+/.test(licenseModal)
     && !/6\+ characters/.test(licenseModal)
@@ -203,14 +203,14 @@ async function main() {
     && (/if \(!opts\.skipFreeCount && !requireGenerateAllowance/.test(index)
       || /consumeFree && !requireGenerateAllowance/.test(index))
     && !/Tour sample store/.test(index)
-    && /id="btn-tour-sample"[^>]*>Load sample store</.test(index)) {
+    && /id="btn-tour-sample"[^>]*>See a sample</.test(index)) {
     pass('sample-does-not-burn-free-build');
   } else fail('sample-does-not-burn-free-build', 'demo generate still counts or Tour sample label remains');
 
   const buy = read('buy.html');
   if (/any key ≥ 6|at least 6 characters/.test(buy) || /s\.length >= 6\) return true/.test(buy)) {
     fail('buy-unlock-not-six-char-junk', 'buy.html still accepts any 6+ key');
-  } else if (/Gumroad license or an MSB-PRO- unlock code/.test(buy)) {
+  } else if (/Gumroad receipt key, or an <code>MSB-PRO-/.test(buy)) {
     pass('buy-unlock-not-six-char-junk');
   } else fail('buy-unlock-not-six-char-junk', 'buy.html unlock copy/gate missing');
 
@@ -221,9 +221,10 @@ async function main() {
     headless: true,
     args: ['--no-sandbox', '--disable-dev-shm-usage'],
   });
+  const context = await browser.newContext({ serviceWorkers: 'block' });
 
   try {
-    const firstRun = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const firstRun = await context.newPage({ viewport: { width: 390, height: 844 } });
     await firstRun.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await firstRun.evaluate(() => {
       localStorage.clear();
@@ -258,7 +259,7 @@ async function main() {
     } else fail('first-run-no-sso-preview', JSON.stringify(firstRunAuth));
     await firstRun.close();
 
-    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const page = await context.newPage({ viewport: { width: 1280, height: 800 } });
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -272,6 +273,7 @@ async function main() {
 
     const built = await page.evaluate(() => {
       document.querySelectorAll('#toast-host .toast').forEach((el) => el.remove());
+      if (typeof startWithMyTeam === 'function') startWithMyTeam('welcome');
       const sm = document.getElementById('name-sm');
       const am1 = document.getElementById('name-am1');
       if (sm) sm.value = 'Pat Nguyen';
@@ -304,7 +306,7 @@ async function main() {
         }, 2000);
       });
     });
-    if (built.tab === 'schedule' && built.cells > 20 && /Schedule ready/.test(built.toast)) {
+    if (built.tab === 'schedule' && built.cells > 20 && /schedule is ready|Schedule ready/i.test(built.toast)) {
       pass('generate-still-builds', built.cells + ' cells');
     } else fail('generate-still-builds', JSON.stringify(built));
 
@@ -353,7 +355,7 @@ async function main() {
         }, 2000);
       });
     });
-    if (rebuilt.cells > 20 && /Schedule ready/.test(rebuilt.toast) && !rebuilt.nudgeShown && rebuilt.flag === '1') {
+    if (rebuilt.cells > 20 && /Schedule ready|Quality \d+/.test(rebuilt.toast) && !rebuilt.nudgeShown && rebuilt.flag === '1') {
       pass('nudge-one-time-after-rebuild');
     } else fail('nudge-one-time-after-rebuild', JSON.stringify(rebuilt));
 
@@ -410,7 +412,7 @@ async function main() {
       const err = document.getElementById('license-error');
       if (input) input.value = 'abcdef';
       if (typeof submitLicenseUnlock === 'function') submitLicenseUnlock();
-      const junkBlocked = !!(err && /Gumroad license or an MSB-PRO-/.test(err.textContent || ''));
+      const junkBlocked = !!(err && /Gumroad key from your receipt/.test(err.textContent || ''));
       const stillBefore = typeof isProUnlocked === 'function' ? isProUnlocked() : null;
       if (input) input.value = 'MSB-PRO-CLOSED-TEST';
       if (typeof submitLicenseUnlock === 'function') submitLicenseUnlock();
@@ -577,6 +579,7 @@ async function main() {
     } else fail('more-menu-all-items-reachable', JSON.stringify(moreScroll));
 
     const kcBoard = await page.evaluate(() => {
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const ids = typeof getAllWithKC === 'function' ? getAllWithKC() : [];
       const rows = [...document.querySelectorAll('#schedule-grid [data-role^="kc"]')].map((el) => el.getAttribute('data-role'));
       return { allWithKc: ids, kcRows: [...new Set(rows)] };
@@ -585,7 +588,7 @@ async function main() {
       pass('unnamed-kc1-not-on-board');
     } else fail('unnamed-kc1-not-on-board', JSON.stringify(kcBoard));
 
-    const freePage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const freePage = await context.newPage({ viewport: { width: 1280, height: 800 } });
     await freePage.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await freePage.evaluate(() => {
       localStorage.clear();
@@ -596,6 +599,7 @@ async function main() {
     await freePage.reload({ waitUntil: 'domcontentloaded' });
     await freePage.waitForTimeout(700);
     const freeFresh = await freePage.evaluate(() => {
+      if (typeof applyBlankTeam === 'function') applyBlankTeam({ persist: false });
       const limit = typeof freeGenerateLimit === 'function' ? freeGenerateLimit() : null;
       const left = typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null;
       const count = typeof getFreeGenerateCount === 'function' ? getFreeGenerateCount() : null;
@@ -606,7 +610,7 @@ async function main() {
       return { limit, left, count, chip, meta, named, boardIds };
     });
     if (freeFresh.limit === 2 && freeFresh.left === 2 && freeFresh.count === 0
-      && /2/.test(freeFresh.chip) && freeFresh.named === false && !freeFresh.boardIds.includes('kc1')) {
+      && (freeFresh.chip === 'Free' || /2/.test(freeFresh.chip)) && freeFresh.named === false && !freeFresh.boardIds.includes('kc1')) {
       pass('fresh-free-shows-two-builds', freeFresh.chip);
     } else fail('fresh-free-shows-two-builds', JSON.stringify(freeFresh));
 
@@ -634,7 +638,7 @@ async function main() {
         }, 2000);
       });
     });
-    if (freeBuilt.left === 1 && freeBuilt.count === 1 && freeBuilt.canAgain === true && !freeBuilt.disabled && freeBuilt.cells > 10) {
+    if (freeBuilt.left === 2 && freeBuilt.count === 0 && freeBuilt.canAgain === true && !freeBuilt.disabled && freeBuilt.cells > 10) {
       pass('first-build-leaves-one-free', freeBuilt.chip);
     } else fail('first-build-leaves-one-free', JSON.stringify(freeBuilt));
 
@@ -649,7 +653,7 @@ async function main() {
         }, 2200);
       });
     });
-    if (sampleFree.after === sampleFree.before && sampleFree.left === 1) {
+    if (sampleFree.after === sampleFree.before && sampleFree.left === 2) {
       pass('sample-generate-does-not-consume', 'still ' + sampleFree.left + ' left');
     } else fail('sample-generate-does-not-consume', JSON.stringify(sampleFree));
     await freePage.close();

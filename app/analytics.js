@@ -35,7 +35,11 @@
     theme_change: 1,
     lang_change: 1,
     app_hide: 1,
-    page_leave: 1
+    page_leave: 1,
+    sample_loaded: 1,
+    team_start: 1,
+    first_build: 1,
+    free_export_used: 1
   };
 
   var ALLOWED_KEYS = {
@@ -60,6 +64,7 @@
   var hideBound = false;
 
   function resolveGtag() {
+    // gtag stays undefined when the head guard sets MSP_GA_OFF (automation, headless UA, msp_no_ga).
     try { if (typeof gtag === 'function') return gtag; } catch (e) {}
     try {
       if (typeof globalThis !== 'undefined' && typeof globalThis.gtag === 'function') {
@@ -160,6 +165,8 @@
       if (account && !account.hasAttribute('hidden')) return 'account';
       var review = document.getElementById('review-sheet');
       if (review && !review.hidden && review.classList.contains('open')) return 'review';
+      var gate = document.getElementById('pro-gate-modal');
+      if (gate && !gate.hasAttribute('hidden')) return 'pro_gate';
       var welcome = document.getElementById('welcome-card');
       if (welcome && welcome.style.display !== 'none' && !welcome.hasAttribute('hidden')
         && !welcome.classList.contains('welcome-after-board')) {
@@ -167,6 +174,14 @@
         if (!tab0 || tab0 === 'setup') return 'welcome';
       }
       var tab = typeof currentAppTab === 'string' ? currentAppTab : '';
+      if (tab === 'rules') return 'rules';
+      var sampleBoard = false;
+      try {
+        if (document.body && document.body.classList.contains('sample-board')) sampleBoard = true;
+        else if (typeof liveRosterLooksLikeDemo === 'function' && liveRosterLooksLikeDemo()) sampleBoard = true;
+      } catch (eS) {}
+      if (tab === 'schedule' && sampleBoard) return 'sample';
+      if (tab === 'setup' && document.body && document.body.classList.contains('first-build-open')) return 'first_build';
       if (tab === 'setup') return 'setup';
       if (tab === 'requests') return 'team';
       if (tab === 'schedule') return 'board';

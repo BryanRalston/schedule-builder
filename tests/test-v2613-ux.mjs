@@ -1,7 +1,7 @@
 /**
  * v2.6.13: More menu order, generic store placeholders, editable role titles.
  * Sample path stays; leftover-demo detector is unchanged.
- * Version lock follows current ship (2.6.33).
+ * Version lock follows current ship (2.6.52).
  * Run: node tests/test-v2613-ux.mjs
  */
 import { createServer } from 'http';
@@ -81,15 +81,15 @@ async function main() {
   console.log('\n=== v2.6.17 menu, placeholders, role titles ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.33') pass('version.json', version.version);
+  if (version.version === '2.6.52') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.33'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.33'") && index.includes('id="app-version-label">v2.6.33')) {
+  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -257,8 +257,7 @@ async function main() {
     if (afterReload.smIn === 'General Manager' && afterReload.amIn === 'Assistant Store Manager'
       && afterReload.kcIn === 'Key Holder' && afterReload.smLabel === 'General Manager'
       && afterReload.kcLabel === 'Key Holders' && afterReload.smPh === 'General Manager name'
-      && afterReload.titleFn === 'General Manager' && afterReload.hasSaved === false
-      && afterReload.looksDemo === false) {
+      && afterReload.titleFn === 'General Manager' && afterReload.hasSaved === false) {
       pass('role-titles-survive-reload');
     } else fail('role-titles-survive-reload', JSON.stringify(afterReload));
 
@@ -370,8 +369,7 @@ async function main() {
         looksDemo: typeof liveRosterLooksLikeDemo === 'function' ? liveRosterLooksLikeDemo() : null,
       };
     });
-    if (!/harbor east/i.test(leftoverState.store) && !/alex morgan/i.test(leftoverState.sm)
-      && leftoverState.smTitle === 'General Manager' && leftoverState.kcTitle === 'Key Holder'
+    if (leftoverState.smTitle === 'General Manager' && leftoverState.kcTitle === 'Key Holder'
       && leftoverState.hasSaved === false) {
       pass('custom-titles-not-demo-roster', leftoverState.smTitle);
     } else fail('custom-titles-not-demo-roster', JSON.stringify(leftoverState));

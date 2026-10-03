@@ -1,5 +1,5 @@
 /**
- * v2.6.52: GA4 gtag on landing + /app/ uses MSP measurement ID only.
+ * v2.6.53: GA4 gtag on landing + /app/ uses MSP measurement ID only.
  * Run: node tests/test-v2650-ga4-gtag.mjs
  */
 import { readFileSync, readdirSync, statSync } from 'fs';
@@ -47,7 +47,7 @@ function hasStandardSnippet(html) {
   );
 }
 
-console.log('\n=== v2.6.52 GA4 gtag (MSP) ===');
+console.log('\n=== v2.6.53 GA4 gtag (MSP) ===');
 
 const landing = read('index.html');
 const app = read('app/index.html');
@@ -107,13 +107,13 @@ if (
 } else fail('sw-analytics-network-only', 'SW must leave analytics hosts on the network');
 
 if (
-  ver.version === '2.6.52' &&
-  app.includes("APP_VERSION = '2.6.52'") &&
-  sw.includes('msb-pro-v2.6.52') &&
-  app.includes('id="app-version-label">v2.6.52')
+  ver.version === '2.6.53' &&
+  app.includes("APP_VERSION = '2.6.53'") &&
+  sw.includes('msb-pro-v2.6.53') &&
+  app.includes('id="app-version-label">v2.6.53')
 ) {
-  pass('version-2.6.52');
-} else fail('version-2.6.52', ver.version);
+  pass('version-2.6.53');
+} else fail('version-2.6.53', ver.version);
 
 const failed = results.filter((r) => !r.ok);
 console.log('\n' + results.filter((r) => r.ok).length + ' passed,', failed.length, 'failed');

@@ -69,13 +69,13 @@ function staticChecks() {
   const ver = JSON.parse(read('version.json'));
   const money = JSON.parse(read('monetization.json'));
 
-  if (ver.version === '2.6.52') pass('version.json', ver.version);
+  if (ver.version === '2.6.53') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.52'") && sw.includes("msb-pro-v2.6.52")
-    && index.includes('id="app-version-label">v2.6.52')) {
+  if (index.includes("APP_VERSION = '2.6.53'") && sw.includes("msb-pro-v2.6.53")
+    && index.includes('id="app-version-label">v2.6.53')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.52');
+  } else fail('app-sw-version', 'expected 2.6.53');
 
   if (/--ink-4:\s*#7e8dab/.test(index)) pass('ink-4-contrast');
   else fail('ink-4-contrast', 'expected --ink-4: #7e8dab');
@@ -318,17 +318,25 @@ async function engineChecks(page) {
 
     scenario('two-mgr-one-message', () => {
       const prevKc = kcList;
+      const prevSchedule = schedule;
       kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
       const roles = ['sm', 'am1'];
+      schedule = { sm: {}, am1: {} };
       const violations = [];
       for (let i = 0; i < 12; i++) {
-        violations.push({ severity: 'error', rule: 'coverage-open', day: 'd' + i, detail: '1/1: No opener' });
-        violations.push({ severity: 'error', rule: 'coverage-close', day: 'd' + i, detail: '1/1: No closer' });
+        const d = new Date(2026, 9, 4 + i);
+        const dk = typeof dateKey === 'function'
+          ? dateKey(d)
+          : (d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+        schedule.sm[dk] = 'open-late';
+        violations.push({ severity: 'error', rule: 'coverage-open', day: dk, detail: '10/6: No opener' });
+        violations.push({ severity: 'error', rule: 'coverage-close', day: dk, detail: '10/6: No closer' });
       }
       const left = leftoverMustFixViolations(violations, roles);
       const infeas = left.filter((v) => v.rule === 'coverage-infeasible');
       const perDay = left.filter((v) => v.rule === 'coverage-open' || v.rule === 'coverage-close');
       kcList = prevKc;
+      schedule = prevSchedule;
       return {
         ok: infeas.length === 1 && perDay.length === 0 && /key carrier or a third manager/i.test(infeas[0].detail),
         detail: `infeas=${infeas.length} perDay=${perDay.length} leftover=${left.length}`

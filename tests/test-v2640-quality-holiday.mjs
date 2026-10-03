@@ -77,13 +77,13 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.52') pass('version.json', ver.version);
+  if (ver.version === '2.6.53') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.52'") && sw.includes("msb-pro-v2.6.52")
-    && index.includes('id="app-version-label">v2.6.52')) {
+  if (index.includes("APP_VERSION = '2.6.53'") && sw.includes("msb-pro-v2.6.53")
+    && index.includes('id="app-version-label">v2.6.53')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.52');
+  } else fail('app-sw-version', 'expected 2.6.53');
 
   if (index.includes("QUALITY_BLOCKED_GRADE = 'Needs attention'")
     && index.includes('function qualityHasMustFix(')
@@ -146,7 +146,7 @@ async function main() {
         version: (document.getElementById('app-version-label') || {}).textContent,
       };
     });
-    if (/v2\.6\.52/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.53/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
 
     const scoreGate = await page.evaluate(() => {

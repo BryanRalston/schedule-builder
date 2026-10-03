@@ -95,13 +95,13 @@ function staticChecks() {
     pass('sitemap-xml-root');
   } else fail('sitemap-xml-root', 'need landing, /app/, and Feature Map ?map=1 at repo root');
 
-  if (ver.version === '2.6.52') pass('version.json', ver.version);
+  if (ver.version === '2.6.53') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.52'") && sw.includes('msb-pro-v2.6.52')
-    && app.includes('id="app-version-label">v2.6.52')) {
+  if (app.includes("APP_VERSION = '2.6.53'") && sw.includes('msb-pro-v2.6.53')
+    && app.includes('id="app-version-label">v2.6.53')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.52 in app + sw');
+  } else fail('app-sw-version', 'expected 2.6.53 in app + sw');
 
   if (twa.startUrl === '/schedule-builder/app/?source=pwa'
     && twa.appVersion === '2.6.51'
@@ -191,7 +191,7 @@ async function browserChecks(base, chromium) {
       store: !!document.getElementById('store-name'),
       version: (document.getElementById('app-version-label') || {}).textContent || ''
     }));
-    if (/\/app\/?/.test(opened.path) && opened.setup && opened.store && /v2\.6\.52/.test(opened.version)) {
+    if (/\/app\/?/.test(opened.path) && opened.setup && opened.store && /v2\.6\.53/.test(opened.version)) {
       pass('open-app-builder', opened.path + ' ' + opened.version);
     } else fail('open-app-builder', JSON.stringify(opened));
 

@@ -1106,6 +1106,99 @@ input[type="radio"] { accent-color: var(--gold); }
 }
 .mw-coverage.coverage-bad { color: var(--bad); background: var(--bad-bg); }
 
+#phone-week-switcher { display: none; }
+.pws-week, .pws-toggle {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pws-toggle { background: transparent; text-decoration: underline; }
+@media (max-width: 480px) {
+  #phone-week-switcher:not([hidden]) {
+    display: flex;
+    position: sticky;
+    top: calc(var(--msb-sticky-top, 56px) + 2.6rem);
+    z-index: 96;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.28rem;
+    margin: 0 0 0.35rem;
+    padding: 0.2rem 0.35rem;
+    background: var(--chrome-elevated);
+    border-bottom: 1px solid var(--line);
+  }
+  #first-build-ready { scroll-margin-top: 12.5rem; }
+  .week-table-wrapper { scroll-margin-top: 11rem; }
+  #schedule-grid { max-width: 100%; overflow-x: hidden; }
+  .mobile-week-cards { padding: 0.1rem 0 0.2rem; }
+  .mw-day {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.12rem 0.28rem;
+    margin: 0 0 0.18rem;
+    padding: 0.12rem 0.3rem;
+    border-radius: 8px;
+  }
+  .mw-day-head {
+    flex: 0 0 auto;
+    padding: 0 0.15rem 0 0;
+    border: none;
+    background: transparent;
+    font-size: 0.75rem;
+    gap: 0.2rem;
+  }
+  .mw-person {
+    display: inline-flex;
+    flex: 0 1 auto;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    gap: 0.15rem;
+  }
+  .mw-person .mw-name { flex: 0 1 auto; font-size: 0.75rem; }
+  .mw-person .mw-shift {
+    font-size: 0.72rem;
+    padding: 0;
+    background: transparent !important;
+  }
+  .mw-person .mw-shift::before { content: '\00b7  '; font-weight: 500; }
+  .mw-coverage:not(.coverage-bad) {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    margin-left: 0.15rem;
+    border-radius: 50%;
+    font-size: 0;
+    line-height: 0;
+    overflow: hidden;
+    color: transparent;
+    background: #3dde8c;
+  }
+  .mw-coverage.coverage-bad {
+    flex: 1 0 100%;
+    width: auto;
+    height: auto;
+    font-size: 0.68rem;
+    line-height: 1.2;
+    color: var(--bad);
+    overflow: visible;
+    border-radius: 6px;
+    padding: 0.1rem 0.35rem;
+  }
+}
+
 /* Month calendar view */
 .month-calendar {
   border: 1px solid var(--line);
@@ -3826,6 +3919,40 @@ input[type="radio"] { accent-color: var(--gold); }
   margin-bottom: 0.7rem;
 }
 .welcome-card h2 { font-size: 1.05rem; }
+.welcome-card.compact {
+  padding: 0.5rem 2.2rem 0.45rem 0.85rem;
+}
+.welcome-card.compact h2 {
+  font-size: 1.02rem;
+  line-height: 1.2;
+  margin: 0 0 0.35rem;
+}
+.welcome-card.compact .welcome-actions { gap: 0.2rem; }
+.welcome-card.compact .welcome-primary {
+  min-height: 44px;
+  padding: 0.35rem 0.9rem;
+}
+.welcome-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0.15rem 0 0;
+}
+.welcome-text-link {
+  background: none;
+  border: none;
+  color: var(--ink-2);
+  text-decoration: underline;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.1rem 0.05rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+.welcome-link-dot { color: var(--ink-3); font-size: 0.78rem; }
+#welcome-more[hidden] { display: none !important; }
 
 /* Generate bar inside schedule tab — less boxy */
 .tab-panel .generate-panel {
@@ -5611,7 +5738,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   align-items: flex-start;
   gap: 0.65rem 0.85rem;
   flex-wrap: wrap;
-  margin: 0 0 0.75rem;
+  margin: 0.75rem 0;
   padding: 0.7rem 0.85rem;
   border-radius: 10px;
   border: 1px solid rgba(255, 200, 87, 0.38);
@@ -5850,16 +5977,22 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
   <!-- WELCOME / ONBOARDING -->
   <div class="welcome-card no-print compact" id="welcome-card">
     <button type="button" class="welcome-dismiss-x" onclick="dismissWelcome(); if (typeof startOnboardingTour === 'function') startOnboardingTour(false)" aria-label="Dismiss" data-i18n-aria="Dismiss" title="Dismiss" data-i18n-title="Dismiss">&times;</button>
-    <h2 id="welcome-title" data-i18n="Build the period. Post with confidence.">Build the period. Post with confidence.</h2>
-    <p id="welcome-body" data-i18n="welcome-body">5-week retail schedule with weekend days off, and close then open avoided where the team allows. Free: 2 builds and 1 Word/Excel export. Pro: unlimited. Always review before you post.</p>
-    <p id="welcome-privacy" class="welcome-privacy" data-i18n="Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
+    <h2 id="welcome-title" data-i18n="Build your schedule — free, no signup">Build your schedule — free, no signup</h2>
     <div class="welcome-actions">
       <button class="btn-demo welcome-primary" id="btn-start-with-team" onclick="startWithMyTeam('welcome')" data-i18n="Start with my team">Start with my team</button>
-      <button type="button" class="btn-outline welcome-secondary-btn" id="btn-tour-sample" onclick="loadSampleFromWelcome()" data-i18n="See a sample">See a sample</button>
+      <p class="welcome-link-row">
+        <button type="button" class="welcome-text-link" id="btn-tour-sample" onclick="loadSampleFromWelcome()" data-i18n="See a sample">See a sample</button>
+        <span class="welcome-link-dot" aria-hidden="true">·</span>
+        <button type="button" class="welcome-text-link" id="btn-how-it-works" onclick="showHowItWorks()" data-i18n="How it works">How it works</button>
+      </p>
     </div>
-    <div class="welcome-play" id="welcome-play">
-      <a class="gp-badge" id="welcome-play-link" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Get it on Google Play</a>
-      <span class="welcome-play-note" data-i18n="Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.">Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.</span>
+    <div id="welcome-more" hidden>
+      <p id="welcome-body" data-i18n="welcome-body">5-week retail schedule with weekend days off, and close then open avoided where the team allows. Free: 2 builds and 1 Word/Excel export. Pro: unlimited. Always review before you post.</p>
+      <p id="welcome-privacy" class="welcome-privacy" data-i18n="Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.">Names, time off, and the board stay on this phone. Nothing is uploaded. No account, no cloud roster.</p>
+      <div class="welcome-play" id="welcome-play">
+        <a class="gp-badge" id="welcome-play-link" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer">Get it on Google Play</a>
+        <span class="welcome-play-note" data-i18n="Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.">Android · $19.99 one-time on Google Play. Web Pro unlock stays on this site.</span>
+      </div>
     </div>
   </div>
 
@@ -6212,16 +6345,6 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         </div>
         <span class="gen-timestamp" id="gen-timestamp"></span>
       </div>
-      <div id="backup-nudge" class="backup-nudge no-print" hidden role="status">
-        <div class="bn-text">
-          <strong data-i18n="Save a backup now">Save a backup now</strong>
-          <span data-i18n="This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.">This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.</span>
-        </div>
-        <div class="bn-actions">
-          <button type="button" class="btn-secondary" id="bn-save" onclick="saveBackupFromNudge()" data-i18n="Save backup">Save backup</button>
-          <button type="button" class="bn-dismiss" id="bn-dismiss" onclick="dismissBackupNudge()" data-i18n="Not now">Not now</button>
-        </div>
-      </div>
       <div class="period-print-header" id="print-header"></div>
       <div class="schedule-hours-line no-print" id="schedule-hours-line"></div>
       <div id="sample-strip" class="sample-strip no-print" hidden>
@@ -6234,8 +6357,19 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
         <button type="button" class="btn-primary" id="btn-add-person" onclick="addPersonFromReady()">Add person</button>
         <button type="button" class="first-build-review-line" id="first-build-review-line" onclick="openReviewSheet()">Review this week</button>
       </div>
+      <div id="phone-week-switcher" class="phone-week-switcher no-print" hidden></div>
       <div id="schedule-grid"></div>
       <div id="fairness-under-schedule" class="fairness-under no-print" data-tour="fairness" hidden></div>
+      <div id="backup-nudge" class="backup-nudge no-print" hidden role="status">
+        <div class="bn-text">
+          <strong data-i18n="Save a backup now">Save a backup now</strong>
+          <span data-i18n="This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.">This board lives on this phone. A new device starts empty. More → Backup JSON — no cloud copy.</span>
+        </div>
+        <div class="bn-actions">
+          <button type="button" class="btn-secondary" id="bn-save" onclick="saveBackupFromNudge()" data-i18n="Save backup">Save backup</button>
+          <button type="button" class="bn-dismiss" id="bn-dismiss" onclick="dismissBackupNudge()" data-i18n="Not now">Not now</button>
+        </div>
+      </div>
       <div class="print-schedule" id="print-schedule"></div>
     </div>
   </div>
@@ -6287,7 +6421,7 @@ html[data-density="board"] .day-hours { font-size: 0.72rem; font-weight: 600; co
 
 <footer class="app-footer no-print">
   <div class="footer-brand">
-    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.52</span> · <span data-i18n="Works offline">Works offline</span></div>
+    <div><strong>Manager Schedule Pro</strong> · <span id="app-version-label">v2.6.53</span> · <span data-i18n="Works offline">Works offline</span></div>
     <p class="footer-privacy" data-i18n="Names, time off, and the board stay on this device · nothing uploaded">Names, time off, and the board stay on this device · nothing uploaded</p>
     <p class="footer-pub"><span data-i18n="Support">Support</span>: <a href="mailto:b.ralston62989@gmail.com">b.ralston62989@gmail.com</a> · Cortex Developments · <a href="../buy.html" style="font-weight:600;text-decoration:none" data-price-label data-twa-hide data-i18n="Upgrade to Pro $19.99">Upgrade to Pro $19.99</a></p>
   </div>
@@ -7864,9 +7998,47 @@ function formatSignInRow(s) {
   return method;
 }
 
+/** Session window after the first own build: FY-period, until export, print, or a different period. */
+function firstRunWindowToken() {
+  try {
+    if (typeof currentPeriod === 'undefined' || !currentPeriod) return '';
+    const n = currentPeriod.number != null ? currentPeriod.number : (typeof currentPeriodIndex !== 'undefined' ? currentPeriodIndex : '');
+    return String(typeof fiscalYear !== 'undefined' ? fiscalYear : '') + '-' + String(n);
+  } catch (e) { return ''; }
+}
+function firstRunWindowOpen() {
+  try {
+    const key = sessionStorage.getItem('msb_first_run_window');
+    if (!key) return false;
+    const now = firstRunWindowToken();
+    if (!now || key !== now) return false;
+    if (localStorage.getItem('msb_free_export_used') === '1') return false;
+    if (sessionStorage.getItem('msb_first_run_printed')) return false;
+    return true;
+  } catch (e) { return false; }
+}
+function openFirstRunWindow() {
+  try {
+    const key = firstRunWindowToken();
+    if (key) sessionStorage.setItem('msb_first_run_window', key);
+  } catch (e) {}
+}
+function closeFirstRunWindow() {
+  try { sessionStorage.removeItem('msb_first_run_window'); } catch (e) {}
+}
+function syncFirstRunWindowToPeriod() {
+  try {
+    const stored = sessionStorage.getItem('msb_first_run_window');
+    if (!stored) return;
+    const now = firstRunWindowToken();
+    if (now && stored !== now) sessionStorage.removeItem('msb_first_run_window');
+  } catch (e) {}
+}
+
 function quotaCounterVisible() {
   if (typeof isProUnlocked === 'function' && isProUnlocked()) return false;
   if (typeof firstOwnBuildDone === 'function' && !firstOwnBuildDone()) return false;
+  if (typeof firstRunWindowOpen === 'function' && firstRunWindowOpen()) return false;
   return true;
 }
 
@@ -8062,7 +8234,7 @@ function personalizeWelcome() {
   if (!title) return;
   const id = typeof getStoreIdentity === 'function' ? getStoreIdentity() : { name: '', label: 'This device' };
   if (id.name) title.textContent = msbT('Welcome · {store}', { store: id.label });
-  else title.textContent = msbT('Build the period. Post with confidence.');
+  else title.textContent = msbT('Build your schedule — free, no signup');
 }
 
 function forceOfflineSession() {
@@ -8245,6 +8417,7 @@ function shouldRecordFreeGenerate(opts) {
   if (typeof isProUnlocked === 'function' && isProUnlocked()) return false;
   if (rosterIsDemoForFreeCount()) return false;
   if (typeof firstOwnBuildDone === 'function' && !firstOwnBuildDone()) return false;
+  if (typeof firstRunWindowOpen === 'function' && firstRunWindowOpen()) return false;
   return true;
 }
 
@@ -8346,7 +8519,11 @@ function markFreeExportUsed(format) {
     if (localStorage.getItem('msb_free_export_used') === '1') return;
     localStorage.setItem('msb_free_export_used', '1');
   } catch (e) {}
+  try { if (typeof closeFirstRunWindow === 'function') closeFirstRunWindow(); } catch (eClose) {}
   try { if (typeof msbTrack === 'function') msbTrack('free_export_used', { format: format === 'excel' ? 'excel' : 'word' }); } catch (e2) {}
+  try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (eNudge) {}
+  try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEase) {}
+  try { if (typeof updateLicenseBadge === 'function') updateLicenseBadge(); } catch (eBadge) {}
 }
 
 function requirePro(featureLabel) {
@@ -8562,6 +8739,54 @@ function countNamedClosers(roles) {
   return list.filter((r) => r && r !== 'sm').length;
 }
 
+/** Typed close numbers stay hard rules. Auto SM=1 / AM fair-share stays a preference. */
+function smCloseCountIsLocked(prefs) {
+  const p = prefs || (typeof preferences !== 'undefined' ? preferences : DEFAULT_PREFERENCES);
+  const rule = (typeof roleRules !== 'undefined' && roleRules && roleRules.sm) ? roleRules.sm : null;
+  if (rule && rule.closesPerWeek != null && rule.closesPerWeek !== '') return true;
+  if (p && p.smClosesPerWeek != null && p.smClosesPerWeek !== '') {
+    const n = parseInt(p.smClosesPerWeek, 10);
+    if (Number.isFinite(n) && n !== 1) return true;
+  }
+  return false;
+}
+function amCloseCountIsLocked(prefs) {
+  const p = prefs || (typeof preferences !== 'undefined' ? preferences : DEFAULT_PREFERENCES);
+  if (p && p.amClosesPerWeek != null && p.amClosesPerWeek !== '') return true;
+  const rule = (typeof roleRules !== 'undefined' && roleRules && roleRules.am) ? roleRules.am : null;
+  return !!(rule && rule.closesPerWeek != null && rule.closesPerWeek !== '');
+}
+
+function closerRoleAt(closerIdx) {
+  try {
+    const roles = typeof getRoles === 'function' ? getRoles() : [];
+    const closers = roles.filter((r) => r && r !== 'sm');
+    return closers[Math.max(0, closerIdx | 0)] || null;
+  } catch (e) { return null; }
+}
+
+/** Days this person is scheduled to work that week (holiday 4, else 5, minus RTO/LOA). */
+function scheduledWorkDayCap(role, weekIdx) {
+  const holiday = typeof holidayWeeks !== 'undefined' && holidayWeeks && holidayWeeks[weekIdx];
+  let cap = holiday ? 4 : 5;
+  if (!role) return cap;
+  try {
+    const week = typeof currentPeriod !== 'undefined' && currentPeriod && currentPeriod.weeks && currentPeriod.weeks[weekIdx];
+    if (!week || typeof dateKey !== 'function') return cap;
+    const start = new Date(week.start);
+    let blocked = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const dk = dateKey(d);
+      const locked = (typeof inputs !== 'undefined' && inputs && inputs[role]) ? inputs[role][dk] : '';
+      if (locked === 'rto' || locked === 'loa') blocked++;
+    }
+    cap = Math.max(0, Math.min(cap, 7 - blocked));
+  } catch (e) {}
+  return cap;
+}
+
 function isThinManagerRoster(roles) {
   const list = roles || (typeof getRoles === 'function' ? getRoles() : []);
   return list.length > 0 && list.length <= 2;
@@ -8667,16 +8892,32 @@ function getAmClosesPerWeekTarget(prefs, remainingCloses, closerCount, closerIdx
   }
   if (!closerCount || closerCount <= 0) return 0;
   const rem = Math.max(0, remainingCloses | 0);
-  // Scale the auto pool to named AM count. Template leftover (all remaining
-  // nights) must not land on 1 named AM as a must-meet floor.
-  const sharePool = closerCount < CLOSE_TARGET_TEMPLATE_AM_BENCH
+  // 3-AM template down-scale only for the 2-person (1 AM) thin path.
+  // Two or more named closers share every remaining manager night.
+  const sharePool = closerCount === 1
     ? Math.ceil(rem * closerCount / CLOSE_TARGET_TEMPLATE_AM_BENCH)
     : rem;
   const base = Math.floor(sharePool / closerCount);
   const extra = sharePool % closerCount;
   const idx = Math.max(0, closerIdx | 0);
   const w = Math.max(0, weekIdx | 0);
-  return base + ((idx + w) % closerCount < extra ? 1 : 0);
+  const raw = base + ((idx + w) % closerCount < extra ? 1 : 0);
+  const cap = scheduledWorkDayCap(closerRoleAt(idx), w);
+  return Math.min(raw, cap);
+}
+
+/** Period goal is the sum of that AM's weekly targets, not one week times weeks. */
+function amPeriodCloseGoal(prefs, roles, numWeeks) {
+  const list = roles || (typeof getRoles === 'function' ? getRoles() : []);
+  const closers = list.filter((r) => r && r !== 'sm');
+  const weeks = Math.max(0, numWeeks | 0);
+  if (!closers.length || !weeks) return 0;
+  const nights = typeof getManagerNightsPerWeek === 'function' ? getManagerNightsPerWeek(prefs) : 7;
+  let sum = 0;
+  for (let w = 0; w < weeks; w++) {
+    sum += getCloseTargetForRole(prefs, list, nights, closers[0], w);
+  }
+  return sum;
 }
 
 /** SM + per-AM weekly close targets for this named roster. */
@@ -9283,7 +9524,7 @@ function resetPreferences() {
 
 
 // ── Market polish utilities ──
-const APP_VERSION = '2.6.52';
+const APP_VERSION = '2.6.53';
 
 // ── Appearance (light default; dark optional, on-device) ──
 const MSB_THEME_KEY = 'msb_appearance';
@@ -9374,6 +9615,14 @@ const MSB_I18N_ES = {
   'What this app can do': 'Qué puede hacer esta app',
   'What ships today — not a roadmap.': 'Lo que hay hoy — no es una hoja de ruta.',
   'How it works': 'Cómo funciona',
+  'Filled the gaps: every open and close is covered now': 'Huecos cubiertos: ya hay apertura y cierre todos los días',
+  'Still {n} days without an open or close. Add one more person or tap a shift.': 'Aún faltan {n} días sin apertura o cierre. Agrega una persona más o toca un turno.',
+  'AM closes {range} · goal {goal}': 'Cierres AM {range} · meta {goal}',
+  'Each assistant closes {range} times this period; a fair share is about {goal}.': 'Cada asistente cierra {range} veces en este período; lo justo es unas {goal}.',
+  'Day list': 'Lista por día',
+  'Grid': 'Cuadrícula',
+  'W{n}': 'S{n}',
+  'Build your schedule — free, no signup': 'Arma tu horario — gratis, sin registro',
   'Send feedback': 'Enviar comentarios',
   'Take tour': 'Ver recorrido',
   'Account & license': 'Cuenta y licencia',
@@ -10435,6 +10684,11 @@ function printPostingSheet() {
   try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'print', result: 'started' }); } catch (eTrack) {}
   return confirmMustFixExport('print', function () {
     window.print();
+    try { sessionStorage.setItem('msb_first_run_printed', '1'); } catch (ePrint) {}
+    try { if (typeof closeFirstRunWindow === 'function') closeFirstRunWindow(); } catch (eClose) {}
+    try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (eNudge) {}
+    try { if (typeof syncFirstRunEase === 'function') syncFirstRunEase(); } catch (eEase) {}
+    try { if (typeof updateLicenseBadge === 'function') updateLicenseBadge(); } catch (eBadge) {}
     try { if (typeof msbTrack === 'function') msbTrack('export_click', { format: 'print', result: 'downloaded' }); } catch (e2) {}
   });
 }
@@ -10470,13 +10724,20 @@ function formatMissingDaysLong(n) {
 }
 
 // ── Schedule view mode: month | week | day ──
-let scheduleViewMode = 'week';
-try {
-  const storedView = localStorage.getItem('msb_schedule_view');
-  if (storedView === 'month' || storedView === 'week' || storedView === 'day') {
-    scheduleViewMode = storedView;
-  }
-} catch (e) {}
+function defaultScheduleViewMode() {
+  let phone = false;
+  try { phone = !!(window.matchMedia && window.matchMedia('(max-width: 480px)').matches); } catch (e) {}
+  let userPicked = false;
+  let stored = '';
+  try {
+    userPicked = localStorage.getItem('msb_schedule_view_user') === '1';
+    stored = localStorage.getItem('msb_schedule_view') || '';
+  } catch (e2) {}
+  if (phone && !userPicked) return 'day';
+  if (stored === 'month' || stored === 'week' || stored === 'day') return stored;
+  return 'week';
+}
+let scheduleViewMode = defaultScheduleViewMode();
 let lastScheduleRenderArgs = null; // { warnings, ROLES, ALL_KC }
 
 function updateScheduleViewToggleUI() {
@@ -10487,10 +10748,39 @@ function updateScheduleViewToggleUI() {
   });
 }
 
+function scrollPhoneWeek(i) {
+  const el = document.getElementById('week-wrap-' + i);
+  if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderPhoneWeekSwitcher() {
+  const el = document.getElementById('phone-week-switcher');
+  if (!el) return;
+  const weeks = currentPeriod && currentPeriod.weeks ? currentPeriod.weeks.length : 0;
+  const live = !!(schedule && Object.keys(schedule).some((r) => schedule[r] && Object.keys(schedule[r]).length));
+  if (!weeks || !live) {
+    el.hidden = true;
+    el.innerHTML = '';
+    return;
+  }
+  const dayMode = scheduleViewMode === 'day';
+  let html = '';
+  for (let i = 0; i < weeks; i++) {
+    html += '<button type="button" class="pws-week" onclick="scrollPhoneWeek(' + i + ')">' + msbT('W{n}', { n: i + 1 }) + '</button>';
+  }
+  html += '<button type="button" class="pws-toggle" onclick="setScheduleViewMode(\'' + (dayMode ? 'week' : 'day') + '\')">'
+    + (dayMode ? msbT('Grid') : msbT('Day list')) + '</button>';
+  el.innerHTML = html;
+  el.hidden = false;
+}
+
 function setScheduleViewMode(mode) {
   if (mode !== 'month' && mode !== 'week' && mode !== 'day') return;
   scheduleViewMode = mode;
-  try { localStorage.setItem('msb_schedule_view', mode); } catch (e) {}
+  try {
+    localStorage.setItem('msb_schedule_view', mode);
+    localStorage.setItem('msb_schedule_view_user', '1');
+  } catch (e) {}
   updateScheduleViewToggleUI();
   if (schedule && Object.keys(schedule).length > 0 && currentPeriod) {
     const ROLES = (lastScheduleRenderArgs && lastScheduleRenderArgs.ROLES) || getRoles();
@@ -10570,6 +10860,14 @@ function syncMarketingHero() {
   let dismissed = false;
   try { dismissed = localStorage.getItem('msb_welcome_dismissed') === '1'; } catch (e) {}
   const live = typeof hasLiveBuiltBoard === 'function' && hasLiveBuiltBoard();
+  const more = document.getElementById('welcome-more');
+  if (more && !more.hidden) {
+    hero.classList.remove('welcome-after-board');
+    hero.removeAttribute('hidden');
+    hero.removeAttribute('aria-hidden');
+    hero.style.display = '';
+    return;
+  }
   if (live) {
     hero.classList.add('welcome-after-board');
     hero.setAttribute('hidden', '');
@@ -10693,7 +10991,8 @@ function syncFirstRunEase() {
   }
   const buildBtn = document.getElementById('btn-build-from-setup');
   if (buildBtn && buildBtn.getAttribute('aria-busy') !== 'true') {
-    buildBtn.textContent = ease ? 'Build my schedule' : msbT('Build this period');
+    const keepEasyLabel = ease || (typeof firstRunWindowOpen === 'function' && firstRunWindowOpen());
+    buildBtn.textContent = keepEasyLabel ? 'Build my schedule' : msbT('Build this period');
   }
   if (ease && typeof updateFirstBuildSummary === 'function') updateFirstBuildSummary();
   const namesOpen = typeof ownTeamStarted === 'function' && ownTeamStarted()
@@ -10786,6 +11085,7 @@ function addPersonFromReady() {
     }
   } catch (e) {}
   try { if (typeof setMoreSetupOpen === 'function') setMoreSetupOpen(true); } catch (e2) {}
+  window._msbBuildSurface = 'add_person';
   if (typeof switchTab === 'function') switchTab('setup');
   const el = document.getElementById('name-am' + amCount);
   if (el) {
@@ -10843,7 +11143,9 @@ function startWithMyTeam(surface) {
 }
 
 function buildFromSetup() {
-  try { if (typeof msbTrack === 'function') msbTrack('build_click', { surface: 'setup' }); } catch (eTrack) {}
+  const buildSurface = window._msbBuildSurface === 'add_person' ? 'add_person' : 'setup';
+  window._msbBuildSurface = '';
+  try { if (typeof msbTrack === 'function') msbTrack('build_click', { surface: buildSurface }); } catch (eTrack) {}
   try { persistManagerNames(); } catch (e) {}
   try { persistStoreMeta(); } catch (e) {}
   if (typeof managersAreNamed === 'function' && !managersAreNamed()) {
@@ -10895,13 +11197,17 @@ function openFeedbackPage() {
 
 function showHowItWorks() {
   const c = document.getElementById('welcome-card');
+  const more = document.getElementById('welcome-more');
   if (c) {
     c.style.display = '';
-    c.classList.remove('compact');
-    c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    c.removeAttribute('hidden');
+    c.classList.remove('welcome-after-board');
+    c.setAttribute('aria-hidden', 'false');
   }
-  switchTab('setup');
-  showToast(msbT('Name two managers on Setup, then Build. Requests and rules are optional.'), 'info');
+  if (!more) return;
+  const open = more.hidden;
+  more.hidden = !open;
+  if (c) c.classList.toggle('welcome-more-open', open);
 }
 
 function persistStoreMeta() {
@@ -11649,13 +11955,25 @@ function computeQualityScore(genReport, ROLES) {
   parts.soft = softOnly === 0 ? 10 : Math.max(0, 10 - softOnly * 2);
   const score = Math.max(0, Math.min(100, parts.hard + parts.clopen + parts.weekend + parts.streak + parts.soft));
   const mustFixCount = typeof countMustFixErrors === 'function' ? countMustFixErrors(genReport) : 0;
+  let missDays = 0;
+  try {
+    if (typeof countBoardMissDays === 'function' && typeof periodDates !== 'undefined' && periodDates && periodDates.length && typeof schedule !== 'undefined' && schedule) {
+      const roles = (ROLES && ROLES.length) ? ROLES : (typeof getRoles === 'function' ? getRoles() : []);
+      const all = typeof getAllWithKC === 'function' ? getAllWithKC() : roles;
+      missDays = countBoardMissDays(schedule, periodDates, roles, all) || 0;
+    }
+  } catch (eMiss) { missDays = 0; }
   let grade = 'Needs work';
   if (mustFixCount > 0) grade = QUALITY_BLOCKED_GRADE;
   else if (score >= 95) grade = 'Excellent';
   else if (score >= 85) grade = 'Strong';
   else if (score >= 70) grade = 'Good';
   else if (score >= 55) grade = 'Fair';
-  return { score, parts, grade, mustFixCount, hard, cl, met, over, softOnly, avoidOn, maxLim };
+  // Coverage-clean board with only warnings is not "Needs attention".
+  if (grade === QUALITY_BLOCKED_GRADE && missDays === 0 && cl === 0 && mustFixCount === 0) {
+    grade = score >= 95 ? 'Excellent' : score >= 85 ? 'Strong' : score >= 70 ? 'Good' : score >= 55 ? 'Fair' : 'Needs work';
+  }
+  return { score, parts, grade, mustFixCount, hard, cl, met, over, softOnly, avoidOn, maxLim, missDays };
 }
 
 function explainQualityScore(q, genReport, ROLES) {
@@ -12504,6 +12822,36 @@ function showFullChips() {
   document.body.classList.remove('chips-collapsed');
   const box = document.getElementById('first-build-ready');
   if (box) box.hidden = true;
+}
+function rebuildWinCopy() {
+  let gaps = 0;
+  try {
+    const st = typeof computeCoverageAndFairnessStats === 'function' ? computeCoverageAndFairnessStats() : null;
+    gaps = st && st.missDays ? st.missDays : 0;
+  } catch (e) {}
+  if (gaps === 0) return msbT('Filled the gaps: every open and close is covered now');
+  return msbT('Still {n} days without an open or close. Add one more person or tap a shift.', { n: gaps });
+}
+function showRebuildWin() {
+  document.body.classList.add('chips-collapsed');
+  document.body.classList.remove('sample-board');
+  const strip = document.getElementById('sample-strip');
+  if (strip) strip.hidden = true;
+  const box = document.getElementById('first-build-ready');
+  if (box) box.hidden = false;
+  const title = document.getElementById('first-build-ready-title');
+  if (title) title.textContent = rebuildWinCopy();
+  const gap = document.getElementById('first-build-gap');
+  if (gap) gap.textContent = plainCoverageGapLine();
+  let gaps = 0;
+  try {
+    const st = typeof computeCoverageAndFairnessStats === 'function' ? computeCoverageAndFairnessStats() : null;
+    gaps = st && st.missDays ? st.missDays : 0;
+  } catch (e2) {}
+  const add = document.getElementById('btn-add-person');
+  if (add) add.hidden = gaps === 0;
+  const pgs = document.getElementById('post-gen-strip');
+  if (pgs) { pgs.hidden = true; pgs.classList.remove('show'); }
 }
 function maybeTrackFirstRealBuild() {
   try {
@@ -13841,6 +14189,7 @@ function loadPeriod() {
   document.getElementById('schedule-section').style.display = 'none';
   document.getElementById('summary-section').style.display = 'none';
   try { if (typeof updateLoadThisNrfButton === 'function') updateLoadThisNrfButton(); } catch (eNrf) {}
+  try { if (typeof syncFirstRunWindowToPeriod === 'function') syncFirstRunWindowToPeriod(); } catch (eWin) {}
 }
 
 // ── Input Tabs ──
@@ -16854,13 +17203,20 @@ function _generateScheduleInner(opts) {
     try { if (typeof showSampleBoardChrome === 'function') showSampleBoardChrome(); } catch (eChrome) {}
     showToast(msbT('Sample week is ready. Tap any shift to try editing.'), 'success');
   } else if (wasFirstOwn) {
+    try { if (typeof openFirstRunWindow === 'function') openFirstRunWindow(); } catch (eWinOpen) {}
     try { if (typeof showFirstBuildWin === 'function') showFirstBuildWin(); } catch (eWin) {}
     const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : 5;
     showToast(msbT('Your {n}-week schedule is ready', { n: weeks }), 'success');
-    try { if (typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge(); } catch (e) {}
     try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
     try { if (typeof markHasBuiltOnce === 'function') markHasBuiltOnce(); } catch (eBuilt) {}
     try { if (typeof maybeOfferInstall === 'function') maybeOfferInstall(); } catch (eInst) {}
+    try { if (typeof updateLicenseBadge === 'function') updateLicenseBadge(); } catch (eBadge) {}
+  } else if (typeof firstRunWindowOpen === 'function' && firstRunWindowOpen()) {
+    try { if (typeof showRebuildWin === 'function') showRebuildWin(); } catch (eReb) {}
+    showToast(typeof rebuildWinCopy === 'function' ? rebuildWinCopy() : '', 'success');
+    try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
+    try { if (typeof markHasBuiltOnce === 'function') markHasBuiltOnce(); } catch (eBuilt) {}
+    try { if (typeof updateLicenseBadge === 'function') updateLicenseBadge(); } catch (eBadge) {}
   } else {
     try { if (typeof showFullChips === 'function') showFullChips(); } catch (eFull) {}
     const toastMsg = formatScheduleReadyToast(q, left, leftoverClopens, isProUnlocked());
@@ -17090,10 +17446,13 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
           `${names.sm}: Week ${w+1} has ${smCloses} closes (goal ${smEven} — SM+AM close share is a preference)`);
       }
     } else if (smCloses !== smCloseTarget) {
-      v(thinRoster ? 'warning' : 'error', 'sm-close-1', 'sm', w, null,
-        thinRoster
-          ? `${names.sm}: Week ${w+1} has ${smCloses} closes (goal ${smCloseTarget} — two-person boards often share closes)`
-          : `${names.sm}: Week ${w+1} has ${smCloses} closes (need exactly ${smCloseTarget})`);
+      const smLocked = typeof smCloseCountIsLocked === 'function' && smCloseCountIsLocked(preferences);
+      v(smLocked ? 'error' : 'warning', 'sm-close-1', 'sm', w, null,
+        smLocked
+          ? `${names.sm}: Week ${w+1} has ${smCloses} closes (need exactly ${smCloseTarget})`
+          : (thinRoster
+            ? `${names.sm}: Week ${w+1} has ${smCloses} closes (goal ${smCloseTarget} — two-person boards often share closes)`
+            : `${names.sm}: Week ${w+1} has ${smCloses} closes (goal ${smCloseTarget})`));
     }
   }
 
@@ -17125,8 +17484,9 @@ function validateSchedule(schedule, allDks, numWeeks, getWeekDks, dkToDate, isDk
         v('warning', 'am-close-2', r, w, null,
           `${names[r]}: Week ${w+1} has ${closes} closes (need at least ${minTarget}${amFixed ? '' : ' — auto share for ' + closerCount + ' named AM' + (closerCount === 1 ? '' : 's')})`);
       } else if (closes > maxTarget + 1) {
-        v(thinRoster ? 'warning' : 'error', 'am-close-2', r, w, null,
-          `${names[r]}: Week ${w+1} has ${closes} closes (target ${maxTarget}${thinRoster ? ' — extra closes are expected on a two-person roster' : ''})`);
+        const amLocked = typeof amCloseCountIsLocked === 'function' && amCloseCountIsLocked(preferences);
+        v(amLocked ? 'error' : 'warning', 'am-close-2', r, w, null,
+          `${names[r]}: Week ${w+1} has ${closes} closes (target ${maxTarget}${!amLocked && thinRoster ? ' — extra closes are expected on a two-person roster' : ''})`);
       } else if (closes === maxTarget + 1 && maxTarget >= 0) {
         v('warning', 'am-close-2', r, w, null,
           `${names[r]}: Week ${w+1} has ${closes} closes (target ${maxTarget}; extra may be needed for coverage)`);
@@ -17738,7 +18098,7 @@ function renderDayCardsHtml(weekDates, wIdx, names, ALL_KC) {
     let opens = 0, mids = 0, closes = 0;
     html += `<div class="mw-day">`;
     const fhCard = typeof getFederalHolidayForDate === 'function' ? getFederalHolidayForDate(dk) : null;
-    html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${msbT(DAY_NAMES_FULL[dow])}</span><span class="mw-date">${formatDate(wd)}</span>${fhCard ? '<span class="mw-holiday">' + esc(formatPaidHolidayWeekLabel(fhCard.name)) + '</span>' : ''}</div>`;
+    html += `<div class="mw-day-head${isWe ? ' weekend' : ''}"><span>${msbT(DAY_NAMES[dow])}</span><span class="mw-date">${formatDate(wd)}</span>${fhCard ? '<span class="mw-holiday">' + esc(formatPaidHolidayWeekLabel(fhCard.name)) + '</span>' : ''}</div>`;
     ALL_KC.forEach((r) => {
       const isKC = r.startsWith('kc');
       const s = schedule[r] && schedule[r][dk];
@@ -17936,6 +18296,7 @@ function renderSchedule(warnings, ROLES, ALL_KC) {
 
   try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
   try { if (typeof updateOpsHome === 'function') updateOpsHome(); } catch (e) {}
+  try { if (typeof renderPhoneWeekSwitcher === 'function') renderPhoneWeekSwitcher(); } catch (e) {}
 }
 
 /** Compact fairness card directly under the schedule grid. */
@@ -18017,12 +18378,11 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
     const t = typeof getWeekendTargetForPerson === 'function' ? getWeekendTargetForPerson(row.role) : 2;
     return row.we >= t;
   }).length;
-  const nights = nightsForPeers;
   const weeks = currentPeriod && currentPeriod.numWeeks ? currentPeriod.numWeeks : 4;
   const closeTargets = closeTargetsEarly;
-  const amPeriodGoal = closeTargets && closeTargets.evenPeers && closeTargets.peerCount
-    ? Math.floor(nights * weeks / closeTargets.peerCount)
-    : (closeTargets && closeTargets.amTarget ? closeTargets.amTarget * weeks : 0);
+  const amPeriodGoal = typeof amPeriodCloseGoal === 'function'
+    ? amPeriodCloseGoal((report && report.prefs) || preferences, ROLES, weeks)
+    : 0;
 
   // Coverage: one board missDays integer — formatters only change words (v2.6.41).
   const missDays = typeof countBoardMissDays === 'function'
@@ -18057,7 +18417,7 @@ function renderFairnessUnderSchedule(ROLES, ALL_KC, genReport) {
       n: weRows.length || rows.length
     })) +
     (amPeriodGoal
-      ? ' · ' + esc(msbT('AM closes {range} / {goal}', {
+      ? ' · ' + esc(msbT('Each assistant closes {range} times this period; a fair share is about {goal}.', {
         range: (cMin === cMax ? String(cMin) : cMin + '–' + cMax),
         goal: amPeriodGoal
       }))
@@ -20111,6 +20471,10 @@ function applySchedEdit(role, dk, weekIdx, value) {
   }
   try { if (typeof updatePostGenStrip === 'function') updatePostGenStrip(); } catch (e) {}
   try { if (typeof persistLiveSchedule === 'function') persistLiveSchedule(); } catch (ePersist) {}
+  try {
+    if (!(document.body && document.body.classList.contains('sample-board'))
+      && typeof maybeShowBackupNudge === 'function') maybeShowBackupNudge();
+  } catch (eNudge) {}
 }
 
 // Escape + undo/redo + command palette
@@ -21936,13 +22300,13 @@ function computeCoverageAndFairnessStats() {
       ? twoManagerNoKcCoverageMessage()
       : twoPersonOffsCoverageNote(ROLES))
     : '';
-  const nights = nightsEarly;
   const closeTargets = closeTargetsEarly;
   const amWeeklyGoal = closeTargets ? closeTargets.amTarget : 0;
-  const amPeriodGoal = closeTargets && closeTargets.evenPeers && closeTargets.peerCount
-    ? Math.floor(nights * weeks / closeTargets.peerCount)
-    : amWeeklyGoal * weeks;
-  const amMetGoal = !peerCloses.length || amPeriodGoal <= 0 || cMin >= amPeriodGoal;
+  const amPeriodGoal = typeof amPeriodCloseGoal === 'function'
+    ? amPeriodCloseGoal((report && report.prefs) || preferences, ROLES, weeks)
+    : 0;
+  const amMetGoal = !peerCloses.length || amPeriodGoal <= 0
+    || peerCloses.every((c) => Math.abs(c - amPeriodGoal) <= 2);
   const fairOk = cSpread <= 2 && weSpread <= 1 && clopens === 0 && amMetGoal && weMet === ROLES.length;
   return {
     coverOk,
@@ -21986,17 +22350,16 @@ function formatCoverageChip(st) {
 function formatAmCloseChip(st) {
   if (!st) return { text: msbT('AM closes'), cls: '', title: '' };
   const goal = st.amPeriodGoal || 0;
-  const range = st.cMin === st.cMax ? String(st.cMin) : (st.cMin + '-' + st.cMax);
+  const range = st.cMin === st.cMax ? String(st.cMin) : (st.cMin + '\u2013' + st.cMax);
   const text = goal
-    ? msbT('AM closes {range} / {goal}', { range: range, goal: goal })
-    : msbT('AM closes {range}', { range: (st.cMin === st.cMax ? String(st.cMin) : (st.cMin + '-' + st.cMax)) });
-  // Green only when the scaled period target is met — never a pass next to "needs ≥N/week".
-  const cls = st.amMetGoal && st.cSpread <= 2 ? 'ok' : 'warn';
+    ? msbT('AM closes {range} \u00b7 goal {goal}', { range: range, goal: goal })
+    : msbT('AM closes {range}', { range: range });
+  const offGoal = goal > 0 && (Math.abs(st.cMin - goal) > 2 || Math.abs(st.cMax - goal) > 2);
+  const cls = (!offGoal && st.cSpread <= 2) ? 'ok' : 'warn';
   const title = goal
-    ? msbT('Named AM closes this period {range} (scaled goal {goal}, {weekly}/week).', {
+    ? msbT('Each assistant closes {range} times this period; a fair share is about {goal}.', {
       range: range,
-      goal: goal,
-      weekly: st.amWeeklyGoal || 0
+      goal: goal
     })
     : msbT('Named AM close counts this period.');
   return { text, cls, title };
@@ -23464,6 +23827,12 @@ if (!_restoredSample && typeof ownTeamStarted === 'function' && ownTeamStarted()
   try { syncFirstRunEase(); } catch (eEaseOwn) {}
 }
 maybeAutoStartTour();
+try {
+  if (typeof maybeShowBackupNudge === 'function' && typeof hasPersistedBuiltSchedule === 'function' && hasPersistedBuiltSchedule()
+    && !(typeof firstRunWindowOpen === 'function' && firstRunWindowOpen())) {
+    maybeShowBackupNudge();
+  }
+} catch (eNudgeBoot) {}
 // Keep checklist fresh when period/names change
 const _pickPeriod = document.getElementById('pick-period');
 if (_pickPeriod) _pickPeriod.addEventListener('change', () => setTimeout(updateReadyChecklist, 50));

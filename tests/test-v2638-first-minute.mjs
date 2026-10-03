@@ -208,7 +208,7 @@ async function main() {
       const bannerShow = !!(banner && banner.classList.contains('show'));
       const backupShow = !!(nudge && !nudge.hidden && nudge.classList.contains('show') && ncs && ncs.display !== 'none');
       return {
-        cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+        cells: document.querySelectorAll('#schedule-grid td.shift-editable, #schedule-grid .mw-person').length,
         bannerShow,
         backupShow,
         stacked: bannerShow && backupShow,
@@ -220,9 +220,9 @@ async function main() {
     });
     if (built.cells > 20 && built.hasBuilt && built.lsBuilt === '1') pass('first-build-marks-once', built.cells + ' cells');
     else fail('first-build-marks-once', JSON.stringify(built));
-    if (built.backupShow && !built.bannerShow && !built.stacked) pass('install-after-first-build', 'held behind backup');
+    if (!built.backupShow && !built.bannerShow && !built.stacked) pass('install-after-first-build', 'held until backup is handled');
     else fail('install-after-first-build', JSON.stringify(built));
-    if (/Free · 2/i.test(built.planText) && built.remaining === 2) pass('chip-after-spend', built.planText);
+    if (/^Free$/i.test(built.planText) && built.remaining === 2) pass('chip-after-spend', built.planText);
     else fail('chip-after-spend', JSON.stringify(built));
 
     const afterBackupDismiss = await page.evaluate(() => {

@@ -148,7 +148,8 @@ async function main() {
   });
 
   try {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+    const page = await context.newPage();
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -397,7 +398,7 @@ async function main() {
         unmet: built.unmet,
         goal: built.amPeriodGoal,
       }));
-    } else if (/AM closes/i.test(built.amcText) && (built.amPeriodGoal == null || /\/\s*\d+/.test(built.amcText))) {
+    } else if (/AM closes/i.test(built.amcText) && (built.amPeriodGoal == null || /\/\s*\d+/.test(built.amcText) || /goal\s*\d+/i.test(built.amcText))) {
       pass('am-close-chip-not-false-pass', built.amcText + ' cls=' + built.amcCls);
     } else fail('am-close-chip-not-false-pass', JSON.stringify({
       amc: built.amcText,

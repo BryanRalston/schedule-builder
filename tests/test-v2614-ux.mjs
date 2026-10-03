@@ -131,7 +131,8 @@ async function main() {
     && /class="btn-demo welcome-primary"/.test(welcomeHtml)
     && /id="btn-tour-sample"/.test(welcomeHtml)
     && /loadSampleFromWelcome\(\)/.test(welcomeHtml)
-    && /class="btn-outline welcome-secondary-btn"/.test(welcomeHtml)
+    && /class="welcome-text-link"/.test(welcomeHtml)
+    && /id="btn-how-it-works"/.test(welcomeHtml)
     && /See a sample/.test(welcomeHtml)
     && !/<button class="btn-primary" onclick="loadDemoStore/.test(index)
     && welcomeHtml.split('btn-demo').length === 2) {
@@ -217,7 +218,7 @@ async function main() {
         startFs,
         sampleFs,
         startPrimary: !!(start && start.classList.contains('welcome-primary')),
-        sampleSecondary: !!(sample && sample.classList.contains('welcome-secondary-btn')),
+        sampleTextLink: !!(sample && sample.classList.contains('welcome-text-link')),
         sampleOnclick: sample ? sample.getAttribute('onclick') : '',
         setupActive: !!(document.getElementById('tab-setup') || {}).classList?.contains('active'),
         privacy: ((document.getElementById('welcome-privacy') || {}).textContent || ''),
@@ -230,7 +231,7 @@ async function main() {
       && /no cloud roster/i.test(firstOpen.privacy)) {
       pass('welcome-privacy-pitch');
     } else fail('welcome-privacy-pitch', firstOpen.privacy);
-    if (firstOpen.startPrimary && firstOpen.sampleSecondary
+    if (firstOpen.startPrimary && firstOpen.sampleTextLink
       && /loadSampleFromWelcome\(\)/.test(firstOpen.sampleOnclick)) {
       pass('welcome-primary-vs-sample', firstOpen.startH + '>' + firstOpen.sampleH);
     } else fail('welcome-primary-vs-sample', JSON.stringify(firstOpen));

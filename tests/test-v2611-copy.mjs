@@ -176,7 +176,7 @@ async function main() {
         setTimeout(() => {
           resolve({
             tab: currentAppTab,
-            cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+            cells: document.querySelectorAll('#schedule-grid td.shift-editable, #schedule-grid .mw-person').length,
             toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
           });
         }, 1600);

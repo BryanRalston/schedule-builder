@@ -295,7 +295,7 @@ async function main() {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
-            cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+            cells: document.querySelectorAll('#schedule-grid td.shift-editable, #schedule-grid .mw-person').length,
             toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
             title: typeof getRoleTitle === 'function' ? getRoleTitle('sm') : '',
             sm: (document.getElementById('name-sm') || {}).value || '',

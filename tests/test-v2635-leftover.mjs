@@ -319,7 +319,10 @@ async function engineChecks(page) {
     scenario('two-mgr-one-message', () => {
       const prevKc = kcList;
       const prevSchedule = schedule;
-      kcList = [{ id: 'kc1', name: 'Key Carrier 1', asManager: false, midDows: [] }];
+      const kcInput = document.getElementById('name-kc1');
+      const prevKcName = kcInput ? kcInput.value : null;
+      if (kcInput) kcInput.value = '';
+      kcList = [{ id: 'kc1', name: '', asManager: false, midDows: [] }];
       const roles = ['sm', 'am1'];
       schedule = { sm: {}, am1: {} };
       const violations = [];
@@ -335,6 +338,7 @@ async function engineChecks(page) {
       const left = leftoverMustFixViolations(violations, roles);
       const infeas = left.filter((v) => v.rule === 'coverage-infeasible');
       const perDay = left.filter((v) => v.rule === 'coverage-open' || v.rule === 'coverage-close');
+      if (kcInput && prevKcName != null) kcInput.value = prevKcName;
       kcList = prevKc;
       schedule = prevSchedule;
       return {

@@ -236,7 +236,7 @@ async function main() {
         return { bannerShow, backupShow, notNows, stacked: bannerShow && backupShow };
       })();
       return {
-        cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+        cells: document.querySelectorAll('#schedule-grid td.shift-editable, #schedule-grid .mw-person').length,
         planText: (plan && plan.textContent || '').trim(),
         remaining: typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null,
         hasBuilt: typeof hasBuiltOnceForInstall === 'function' ? hasBuiltOnceForInstall() : null,
@@ -247,10 +247,10 @@ async function main() {
     });
     if (built.cells > 20 && built.hasBuilt && built.lsBuilt === '1') pass('first-build-marks-once', built.cells + ' cells');
     else fail('first-build-marks-once', JSON.stringify(built));
-    if (built.backupShow && !built.bannerShow && !built.stacked && built.notNows === 1) {
-      pass('backup-first-no-stack', 'notNows=' + built.notNows);
+    if (!built.backupShow && !built.bannerShow && !built.stacked && built.notNows === 0) {
+      pass('backup-first-no-stack', 'held on first paint, notNows=' + built.notNows);
     } else fail('backup-first-no-stack', JSON.stringify(built));
-    if (/Free · 2/i.test(built.planText) && built.remaining === 2) pass('chip-after-spend', built.planText);
+    if (/^Free$/i.test(built.planText) && built.remaining === 2) pass('chip-after-spend', built.planText);
     else fail('chip-after-spend', JSON.stringify(built));
 
     const afterBackupDismiss = await page.evaluate(() => {

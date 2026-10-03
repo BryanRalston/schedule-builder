@@ -264,12 +264,13 @@ async function main() {
             can: typeof canGenerateSchedule === 'function' ? canGenerateSchedule() : null,
             disabled: !!(btn && btn.disabled),
             gateOpen: !!(gate && !gate.hasAttribute('hidden')),
+            windowOpen: typeof firstRunWindowOpen === 'function' ? firstRunWindowOpen() : false,
           });
         }, 2400);
       });
     });
-    if (second.left === 1 && second.count === 1 && second.can === true && !second.gateOpen) {
-      pass('second-real-build-gates', 'count=' + second.count);
+    if (second.left === 2 && second.count === 0 && second.can === true && !second.gateOpen && second.windowOpen) {
+      pass('second-real-build-gates', 'window still open, count=' + second.count);
     } else fail('second-real-build-gates', JSON.stringify(second));
     await freePage.close();
 

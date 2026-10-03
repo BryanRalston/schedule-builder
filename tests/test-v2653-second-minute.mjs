@@ -156,6 +156,10 @@ function hitVisible(id) {
   return { ok, why: ok ? 'hit' : ((top && top.id) || (top && top.className) || 'none'), top: Math.round(r.top) };
 }
 
+function inPage(body) {
+  return new Function(hitVisible.toString() + '\n' + qualitySnap.toString() + '\n' + body);
+}
+
 function qualitySnap() {
   const q = window._lastGenReport && window._lastGenReport.quality;
   const st = typeof computeCoverageAndFairnessStats === 'function' ? computeCoverageAndFairnessStats() : null;
@@ -182,6 +186,8 @@ function qualitySnap() {
     badChip: !!document.querySelector('#pgs-am-close.bad, .pgs-chip.bad'),
     windowOpen: typeof firstRunWindowOpen === 'function' ? firstRunWindowOpen() : null,
     roles: typeof getRoles === 'function' ? getRoles().length : 0,
+    unmet: (window._lastGenReport && window._lastGenReport.unmet) ? window._lastGenReport.unmet.slice(0, 12) : [],
+    hard: window._lastGenReport ? window._lastGenReport.hardErrorCount : null,
   };
 }
 
@@ -234,10 +240,12 @@ async function main() {
   else fail('11-es-keys', missingEs.join(' | ') || 'How it works');
 
   const testFiles = readdirSync(join(ROOT, 'tests')).filter((f) => f.endsWith('.mjs'));
+  const oldPlain = '2.6.5' + '2';
+  const oldEsc = '2\\' + '.6\\' + '.52';
   const stale = [];
   for (const f of testFiles) {
     const text = readFileSync(join(ROOT, 'tests', f), 'utf8');
-    if (text.includes('2.6.53') || text.includes('2\\.6\\.52')) stale.push(f);
+    if (text.includes(oldPlain) || text.includes(oldEsc)) stale.push(f);
   }
   const v52 = read('tests/test-v2652-first-minute.mjs');
   const v36 = read('tests/test-v2636-phone.mjs');
@@ -289,7 +297,6 @@ async function main() {
         const swCs = sw ? getComputedStyle(sw) : null;
         const head = document.querySelector('#schedule-grid .mw-day-head');
         return {
-          ms,
           mode: typeof scheduleViewMode === 'string' ? scheduleViewMode : '',
           days: document.querySelectorAll('#schedule-grid .mw-day').length,
           tds: document.querySelectorAll('#schedule-grid td').length,
@@ -425,7 +432,7 @@ async function main() {
       await page.fill('#name-am1', 'Chris Ortiz');
       await page.locator('#btn-build-from-setup').click();
       await waitReady(page);
-      const first = await page.evaluate(() => {
+      const first = await page.evaluate(inPage(`
         const title = document.getElementById('first-build-ready-title');
         const nudge = document.getElementById('backup-nudge');
         const nCs = nudge ? getComputedStyle(nudge) : null;
@@ -440,7 +447,7 @@ async function main() {
           nudgeOn,
           label: ((document.getElementById('btn-build-from-setup') || {}).textContent || '').trim(),
         });
-      });
+      `));
       const readyTitle = first.weeks ? ('Your ' + first.weeks + '-week schedule is ready') : '';
       if (first.title === readyTitle && first.hits.title.ok && first.hits.gap.ok && first.hits.add.ok && !first.nudgeOn && first.count === 0 && first.remaining === 2 && first.chip === 'Free' && !/Free\s*·\s*\d/.test(first.chip)) {
         pass('2-first-build-window', first.title);
@@ -452,16 +459,25 @@ async function main() {
       await page.fill('#name-am3', 'Luis Vega');
       await page.locator('#btn-build-from-setup').click();
       await page.waitForFunction(() => {
-        const t = ((document.getElementById('first-build-ready-title') || {}).textContent || '');
-        return /Filled the gaps|Still \d+ days without/.test(t);
+        const el = document.getElementById('first-build-ready-title');
+        const t = ((el || {}).textContent || '');
+        if (!/Filled the gaps|Still \d+ days without/.test(t)) return false;
+        const r = el.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > window.innerHeight || r.height < 2) return false;
+        const x = Math.min(window.innerWidth - 2, Math.max(2, r.left + Math.min(24, r.width / 2)));
+        const y = Math.min(window.innerHeight - 2, Math.max(2, r.top + Math.min(12, r.height / 2)));
+        const top = document.elementFromPoint(x, y);
+        return !!(top && (top === el || el.contains(top)));
       }, { timeout: 25000 });
-      const rebuilt = await page.evaluate(() => Object.assign(qualitySnap(), {
-        hits: {
-          title: hitVisible('first-build-ready-title'),
-          gap: hitVisible('first-build-gap'),
-        },
-        goal: amPeriodCloseGoal(preferences, getRoles(), currentPeriod.numWeeks),
-      }));
+      const rebuilt = await page.evaluate(inPage(`
+        return Object.assign(qualitySnap(), {
+          hits: {
+            title: hitVisible('first-build-ready-title'),
+            gap: hitVisible('first-build-gap'),
+          },
+          goal: amPeriodCloseGoal(preferences, getRoles(), currentPeriod.numWeeks),
+        });
+      `));
       const fourOk = rebuilt.weeks === 4 && rebuilt.count === 0 && rebuilt.collapsed && rebuilt.windowOpen
         && rebuilt.hits.title.ok && !rebuilt.needs && !rebuilt.slashGoal && rebuilt.amCls !== 'bad'
         && rebuilt.score >= 85 && rebuilt.mustFix === 0
@@ -472,14 +488,15 @@ async function main() {
       if (rebuilt.goal === 12) pass('3-period-goal', String(rebuilt.goal));
       else fail('3-period-goal', String(rebuilt.goal));
 
-      const beforeDock = await page.evaluate(() => String(window._lastGeneratedAt || ''));
+      const beforeDock = await page.evaluate(() => (window._lastGeneratedAt ? window._lastGeneratedAt.getTime() : 0));
       await page.locator('#btn-generate').click();
       await page.waitForFunction((prev) => {
-        return String(window._lastGeneratedAt || '') !== prev
+        const t = window._lastGeneratedAt ? window._lastGeneratedAt.getTime() : 0;
+        return t !== prev
           && getFreeGenerateCount() === 0
           && document.body.classList.contains('chips-collapsed');
       }, beforeDock, { timeout: 25000 });
-      const docked = await page.evaluate(() => qualitySnap());
+      const docked = await page.evaluate(inPage('return qualitySnap();'));
       if (docked.count === 0 && docked.collapsed && docked.mustFix === 0 && docked.score >= 85 && !docked.needs) {
         pass('3-docked-rebuild-free', docked.grade + ' ' + docked.score);
       } else fail('3-docked-rebuild-free', JSON.stringify(docked));
@@ -573,10 +590,11 @@ async function main() {
       if (spent.count === 1 && spent.remaining === 1 && /Free\s*·\s*1/.test(spent.chip)) pass('5-next-build-spends', spent.chip);
       else fail('5-next-build-spends', JSON.stringify(spent));
 
-      const beforeSkip = await page.evaluate(() => String(window._lastGeneratedAt || ''));
+      const beforeSkip = await page.evaluate(() => (window._lastGeneratedAt ? window._lastGeneratedAt.getTime() : 0));
       await page.locator('#btn-generate').click();
       await page.waitForFunction((prev) => {
-        return String(window._lastGeneratedAt || '') !== prev && getFreeGenerateCount() === 1;
+        const t = window._lastGeneratedAt ? window._lastGeneratedAt.getTime() : 0;
+        return t !== prev && getFreeGenerateCount() === 1;
       }, beforeSkip, { timeout: 25000 });
       const skipped = await page.evaluate(() => getFreeGenerateCount());
       if (skipped === 1) pass('5-docked-rebuild-skips');
@@ -603,7 +621,7 @@ async function main() {
       }));
       await page.locator('#btn-build-from-setup').click();
       await waitReady(page);
-      const five = await page.evaluate(() => qualitySnap());
+      const five = await page.evaluate(inPage('return qualitySnap();'));
       const fiveGoal = await page.evaluate(() => amPeriodCloseGoal(preferences, getRoles(), currentPeriod.numWeeks));
       if (period.weeks === 5 && five.weeks === 5 && five.score >= 85 && five.mustFix === 0 && five.roles >= 3 && fiveGoal === 15 && !/Needs attention/.test(five.grade || '')) {
         pass('3-five-week', 'P' + five.n + ' ' + five.grade + ' ' + five.score + ' goal ' + fiveGoal);
@@ -707,7 +725,7 @@ async function main() {
       const land = await page.evaluate(() => document.body.innerText || '');
       if (/NRF 4-5-4/.test(land)) pass('8-landing-nrf');
       else fail('8-landing-nrf');
-      await page.goto(base + '/app/?no_ga=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.goto(base + '/app/?no_ga=1&lang=es', { waitUntil: 'domcontentloaded', timeout: 60000 });
       await waitSample(page);
       const headerNrf = await page.evaluate(() => ({
         note: ((document.getElementById('nrf-us-law-note') || {}).textContent || ''),
@@ -769,7 +787,7 @@ async function main() {
           localStorage.removeItem('msb_sample_active');
         },
       });
-      await page.goto(base + '/app/?no_ga=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.goto(base + '/app/?no_ga=1&lang=es', { waitUntil: 'domcontentloaded', timeout: 60000 });
       await page.waitForSelector('#welcome-title', { timeout: 8000 });
       const welcome = await page.evaluate(() => ({
         title: ((document.getElementById('welcome-title') || {}).textContent || '').trim(),
@@ -826,8 +844,10 @@ async function main() {
       await page.fill('#name-am3', 'Luis Vega');
       await page.locator('#btn-build-from-setup').click();
       await page.waitForFunction(() => {
-        const rows = (window.__ga || []).filter((r) => r[0] === 'event' && r[1] === 'build_click');
-        return rows.some((r) => r[2] && r[2].surface === 'add_person');
+        const rows = (window.__ga || []).filter((r) => r[0] === 'event');
+        const clicks = rows.filter((r) => r[1] === 'build_click');
+        const results = rows.filter((r) => r[1] === 'build_result');
+        return clicks.some((r) => r[2] && r[2].surface === 'add_person') && results.length >= 2;
       }, { timeout: 25000 });
       const ev = events(await page.evaluate(() => window.__ga || []));
       const firsts = ev.filter((e) => e.name === 'first_build');

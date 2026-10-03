@@ -1135,8 +1135,6 @@ input[type="radio"] { accent-color: var(--gold); }
     background: var(--chrome-elevated);
     border-bottom: 1px solid var(--line);
   }
-  #first-build-ready { scroll-margin-top: 12.5rem; }
-  .week-table-wrapper { scroll-margin-top: 11rem; }
   #schedule-grid { max-width: 100%; overflow-x: hidden; }
   .mobile-week-cards { padding: 0.1rem 0 0.2rem; }
   .mw-day {
@@ -5263,6 +5261,10 @@ body.msb-board-live .container {
 }
 .sample-strip[hidden], .first-build-ready[hidden] { display: none !important; }
 #first-build-ready { scroll-margin-top: 9rem; }
+@media (max-width: 480px) {
+  #first-build-ready { scroll-margin-top: 12.5rem; }
+  .week-table-wrapper { scroll-margin-top: 11rem; }
+}
 body.sample-board #post-gen-strip { display: none !important; }
 .sample-strip button, #btn-add-person, .first-build-review-line {
   min-height: 2.4rem;
@@ -8739,14 +8741,27 @@ function countNamedClosers(roles) {
   return list.filter((r) => r && r !== 'sm').length;
 }
 
-/** Typed close numbers stay hard rules. Auto SM=1 / AM fair-share stays a preference. */
+/** Typed close numbers stay hard rules. Auto SM=1 / AM fair-share stays a preference.
+ *  roleRules.sm.closesPerWeek defaults to 1, and syncCloseTargetsToRoleRules writes
+ *  that same auto target on every Build. Neither one is a typed lock. */
 function smCloseCountIsLocked(prefs) {
   const p = prefs || (typeof preferences !== 'undefined' ? preferences : DEFAULT_PREFERENCES);
-  const rule = (typeof roleRules !== 'undefined' && roleRules && roleRules.sm) ? roleRules.sm : null;
-  if (rule && rule.closesPerWeek != null && rule.closesPerWeek !== '') return true;
   if (p && p.smClosesPerWeek != null && p.smClosesPerWeek !== '') {
     const n = parseInt(p.smClosesPerWeek, 10);
     if (Number.isFinite(n) && n !== 1) return true;
+  }
+  const rule = (typeof roleRules !== 'undefined' && roleRules && roleRules.sm) ? roleRules.sm : null;
+  if (rule && rule.closesPerWeek != null && rule.closesPerWeek !== '') {
+    const typed = parseInt(rule.closesPerWeek, 10);
+    if (!Number.isFinite(typed)) return false;
+    let auto = 1;
+    try {
+      if (typeof getSmClosesPerWeekTarget === 'function') {
+        const base = Object.assign({}, p || {}, { smClosesPerWeek: 1 });
+        auto = getSmClosesPerWeekTarget(base, 7, false);
+      }
+    } catch (eAuto) {}
+    if (typed !== auto) return true;
   }
   return false;
 }
@@ -10748,9 +10763,30 @@ function updateScheduleViewToggleUI() {
   });
 }
 
+function scrollClearOfStickyChrome(el) {
+  if (!el || typeof el.getBoundingClientRect !== 'function') return;
+  let offset = 12;
+  const header = document.querySelector('.app-header');
+  if (header) {
+    const hs = getComputedStyle(header);
+    if (hs.position === 'sticky' || hs.position === 'fixed') offset += header.getBoundingClientRect().height;
+  }
+  const dock = document.getElementById('built-rebuild-row');
+  if (dock && dock.classList.contains('is-docked') && getComputedStyle(dock).display !== 'none') {
+    offset += dock.getBoundingClientRect().height;
+  }
+  const switcher = document.getElementById('phone-week-switcher');
+  if (switcher && !switcher.hidden && getComputedStyle(switcher).display !== 'none') {
+    offset += switcher.getBoundingClientRect().height;
+  }
+  const top = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+}
+
 function scrollPhoneWeek(i) {
   const el = document.getElementById('week-wrap-' + i);
-  if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (el && typeof scrollClearOfStickyChrome === 'function') scrollClearOfStickyChrome(el);
+  else if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function renderPhoneWeekSwitcher() {
@@ -17261,8 +17297,9 @@ function _generateScheduleInner(opts) {
     const target = (document.body.classList.contains('chips-collapsed') && ready && !ready.hidden)
       ? ready
       : document.getElementById('schedule-grid');
-    if (target && typeof target.scrollIntoView === 'function') {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (target && typeof scrollClearOfStickyChrome === 'function') scrollClearOfStickyChrome(target);
+    else if (target && typeof target.scrollIntoView === 'function') {
+      target.scrollIntoView({ behavior: 'auto', block: 'start' });
     }
   }, 50);
 }

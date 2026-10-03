@@ -114,18 +114,18 @@ async function main() {
       };
     });
 
-    if (/v2\.6\.52/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.53/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
     if (boot.cmdkDisplay === 'none' || boot.cmdkW === 0) pass('cmdk-hidden', boot.cmdkDisplay);
     else fail('cmdk-hidden', JSON.stringify(boot));
     if (/works offline/i.test(boot.pillText) && boot.pillDisplay !== 'none') pass('offline-label', boot.pillText);
     else fail('offline-label', JSON.stringify({ t: boot.pillText, d: boot.pillDisplay }));
-    if (boot.welcomeBtns.length === 2
-      && /start with my team/i.test(boot.welcomeBtns[0])
-      && /see a sample/i.test(boot.welcomeBtns[1])
+    if (/start with my team/i.test(boot.welcomeBtns[0] || '')
+      && boot.welcomeBtns.some((t) => /see a sample/i.test(t))
+      && boot.welcomeBtns.some((t) => /how it works/i.test(t))
       && boot.hasX && !boot.dismissInRow) {
-      pass('welcome-two-actions', boot.welcomeBtns.join(' | '));
-    } else fail('welcome-two-actions', JSON.stringify(boot));
+      pass('welcome-compact', boot.welcomeBtns.join(' | '));
+    } else fail('welcome-compact', JSON.stringify(boot));
     if (boot.xH >= 44 || boot.xH === 0) pass('welcome-x-44', boot.xH + 'px');
     else fail('welcome-x-44', boot.xH + 'px');
     if (/Manager Schedule Pro/i.test(boot.wordmark || '') && !/^Schedule Pro$/i.test(boot.wordmark || '')) {

@@ -3,7 +3,7 @@
  * and cell edits. Quality does not ding SM for fewer weekend offs
  * when that default pref is on. First visit with no named team stays
  * clean (2.6.29). Close-even 2.6.30 and icon 2.6.31 stay.
- * Keeps 2.6.12–2.6.31 suites; version lock 2.6.52.
+ * Keeps 2.6.12–2.6.31 suites; version lock 2.6.53.
  * Run: node tests/test-v2632-ux.mjs
  */
 import { createServer } from 'http';
@@ -99,15 +99,15 @@ async function main() {
   console.log('\n=== v2.6.32 auto-save board + SM fewer-WE Quality ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.52') pass('version.json', version.version);
+  if (version.version === '2.6.53') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
+  if (index.includes("const APP_VERSION = '2.6.53'") && index.includes('id="app-version-label">v2.6.53')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

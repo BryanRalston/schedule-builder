@@ -4,7 +4,7 @@
  * demo / sample store does not consume; no KC-close residue when
  * kcList is empty; 2-person warning list is a summary, not ~30
  * opener/closer lines; 2.6.22 ready-enough still holds.
- * Keeps 2.6.12–2.6.22 behavior; version lock 2.6.52.
+ * Keeps 2.6.12–2.6.22 behavior; version lock 2.6.53.
  * Run: node tests/test-v2623-ux.mjs
  */
 import { createServer } from 'http';
@@ -76,15 +76,15 @@ async function main() {
   console.log('\n=== v2.6.23 free count + KC residue + thin-day warning summary ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.52') pass('version.json', version.version);
+  if (version.version === '2.6.53') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
+  if (index.includes("const APP_VERSION = '2.6.53'") && index.includes('id="app-version-label">v2.6.53')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -264,12 +264,13 @@ async function main() {
             can: typeof canGenerateSchedule === 'function' ? canGenerateSchedule() : null,
             disabled: !!(btn && btn.disabled),
             gateOpen: !!(gate && !gate.hasAttribute('hidden')),
+            windowOpen: typeof firstRunWindowOpen === 'function' ? firstRunWindowOpen() : false,
           });
         }, 2400);
       });
     });
-    if (second.left === 1 && second.count === 1 && second.can === true && !second.gateOpen) {
-      pass('second-real-build-gates', 'count=' + second.count);
+    if (second.left === 2 && second.count === 0 && second.can === true && !second.gateOpen && second.windowOpen) {
+      pass('second-real-build-gates', 'window still open, count=' + second.count);
     } else fail('second-real-build-gates', JSON.stringify(second));
     await freePage.close();
 

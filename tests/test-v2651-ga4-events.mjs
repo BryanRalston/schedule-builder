@@ -231,17 +231,17 @@ if (
 } else fail('sw-analytics-network-only', 'SW must leave analytics hosts on the network');
 
 if (
-  ver.version === '2.6.52' &&
-  app.includes("APP_VERSION = '2.6.52'") &&
-  sw.includes('msb-pro-v2.6.52') &&
-  app.includes('id="app-version-label">v2.6.52') &&
+  ver.version === '2.6.53' &&
+  app.includes("APP_VERSION = '2.6.53'") &&
+  sw.includes('msb-pro-v2.6.53') &&
+  app.includes('id="app-version-label">v2.6.53') &&
   twa.appVersion === '2.6.51' &&
   twa.appVersionName === '2.6.51' &&
   /versionCode 2651/.test(gradle) &&
   /versionName "2.6.51"/.test(gradle)
 ) {
-  pass('version-web-2.6.52-twa-2.6.51');
-} else fail('version-web-2.6.52-twa-2.6.51', ver.version + ' twa ' + twa.appVersion);
+  pass('version-web-2.6.53-twa-2.6.51');
+} else fail('version-web-2.6.53-twa-2.6.51', ver.version + ' twa ' + twa.appVersion);
 
 const failed = results.filter((r) => !r.ok);
 console.log('\n' + results.filter((r) => r.ok).length + ' passed,', failed.length, 'failed');

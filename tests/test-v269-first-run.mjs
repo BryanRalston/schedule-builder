@@ -71,7 +71,7 @@ async function main() {
   console.log('\n=== v2.6.9 first-run Start with my team ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.52') pass('version.json', version.version);
+  if (version.version === '2.6.53') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const index = read('app/index.html');
@@ -107,7 +107,8 @@ async function main() {
   });
 
   try {
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const phoneCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+    const page = await phoneCtx.newPage();
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -171,7 +172,7 @@ async function main() {
           resolve({
             tab: currentAppTab,
             named: managersAreNamed(),
-            cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+            cells: document.querySelectorAll('#schedule-grid td.shift-editable, #schedule-grid .mw-person').length,
             toast: [...document.querySelectorAll('#toast-host .toast-msg')].map((el) => el.textContent).pop() || '',
             boardLive: document.getElementById('tab-schedule')?.classList.contains('board-live') || false,
           });
@@ -182,7 +183,8 @@ async function main() {
       pass('build-from-setup-named', built.cells + ' cells');
     } else fail('build-from-setup-named', JSON.stringify(built));
 
-    const desk = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const deskCtx = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+    const desk = await deskCtx.newPage();
     await desk.goto(base + '/app/index.html?pro=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await desk.evaluate(() => {
       localStorage.clear();

@@ -72,15 +72,15 @@ async function main() {
   console.log('\n=== v2.6.15 backup nudge + board clopens ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.52') pass('version.json', version.version);
+  if (version.version === '2.6.53') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
+  if (index.includes("const APP_VERSION = '2.6.53'") && index.includes('id="app-version-label">v2.6.53')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -310,13 +310,28 @@ async function main() {
       pass('generate-still-builds', built.cells + ' cells');
     } else fail('generate-still-builds', JSON.stringify(built));
 
-    if (built.nudgeShown && /Save a backup now/.test(built.nudgeText)
+    const nudged = await page.evaluate(() => {
+      const role = 'sm';
+      const dk = typeof dateKey === 'function' && periodDates && periodDates[0] ? dateKey(periodDates[0]) : '';
+      const cur = schedule[role] && schedule[role][dk];
+      const next = cur === 'close' ? 'open-late' : 'close';
+      if (typeof applySchedEdit === 'function' && dk) applySchedEdit(role, dk, 0, next);
+      const nudge = document.getElementById('backup-nudge');
+      const cs = nudge ? getComputedStyle(nudge) : null;
+      return {
+        on: !!(nudge && !nudge.hidden && nudge.classList.contains('show') && cs && cs.display !== 'none'),
+        pos: cs ? cs.position : '',
+      };
+    });
+    if (!built.nudgeShown && /Save a backup now/.test(built.nudgeText)
       && /More → Backup JSON/.test(built.nudgeText)
       && /no cloud/i.test(built.nudgeText)
       && !built.modal
-      && built.flag !== '1') {
-      pass('first-generate-backup-nudge');
-    } else fail('first-generate-backup-nudge', JSON.stringify(built));
+      && built.flag !== '1'
+      && nudged.on
+      && nudged.pos !== 'fixed') {
+      pass('first-generate-backup-nudge', 'after a shift edit');
+    } else fail('first-generate-backup-nudge', JSON.stringify({ built, nudged }));
 
     if (built.exportEnabled && built.printEnabled && built.stripPresent && built.pos !== 'fixed') {
       pass('nudge-does-not-block-posting');
@@ -355,7 +370,7 @@ async function main() {
         }, 2000);
       });
     });
-    if (rebuilt.cells > 20 && /Schedule ready|Quality \d+/.test(rebuilt.toast) && !rebuilt.nudgeShown && rebuilt.flag === '1') {
+    if (rebuilt.cells > 20 && /Schedule ready|Quality \d+|Filled the gaps|Still \d+ days/.test(rebuilt.toast) && !rebuilt.nudgeShown && rebuilt.flag === '1') {
       pass('nudge-one-time-after-rebuild');
     } else fail('nudge-one-time-after-rebuild', JSON.stringify(rebuilt));
 

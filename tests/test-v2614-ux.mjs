@@ -113,15 +113,15 @@ async function main() {
   console.log('\n=== v2.6.14 first-minute identity ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.52') pass('version.json', version.version);
+  if (version.version === '2.6.53') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
+  if (index.includes("const APP_VERSION = '2.6.53'") && index.includes('id="app-version-label">v2.6.53')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -131,7 +131,8 @@ async function main() {
     && /class="btn-demo welcome-primary"/.test(welcomeHtml)
     && /id="btn-tour-sample"/.test(welcomeHtml)
     && /loadSampleFromWelcome\(\)/.test(welcomeHtml)
-    && /class="btn-outline welcome-secondary-btn"/.test(welcomeHtml)
+    && /class="welcome-text-link"/.test(welcomeHtml)
+    && /id="btn-how-it-works"/.test(welcomeHtml)
     && /See a sample/.test(welcomeHtml)
     && !/<button class="btn-primary" onclick="loadDemoStore/.test(index)
     && welcomeHtml.split('btn-demo').length === 2) {
@@ -217,7 +218,7 @@ async function main() {
         startFs,
         sampleFs,
         startPrimary: !!(start && start.classList.contains('welcome-primary')),
-        sampleSecondary: !!(sample && sample.classList.contains('welcome-secondary-btn')),
+        sampleTextLink: !!(sample && sample.classList.contains('welcome-text-link')),
         sampleOnclick: sample ? sample.getAttribute('onclick') : '',
         setupActive: !!(document.getElementById('tab-setup') || {}).classList?.contains('active'),
         privacy: ((document.getElementById('welcome-privacy') || {}).textContent || ''),
@@ -230,7 +231,7 @@ async function main() {
       && /no cloud roster/i.test(firstOpen.privacy)) {
       pass('welcome-privacy-pitch');
     } else fail('welcome-privacy-pitch', firstOpen.privacy);
-    if (firstOpen.startPrimary && firstOpen.sampleSecondary
+    if (firstOpen.startPrimary && firstOpen.sampleTextLink
       && /loadSampleFromWelcome\(\)/.test(firstOpen.sampleOnclick)) {
       pass('welcome-primary-vs-sample', firstOpen.startH + '>' + firstOpen.sampleH);
     } else fail('welcome-primary-vs-sample', JSON.stringify(firstOpen));

@@ -75,13 +75,13 @@ function staticChecks() {
   const sw = read('sw.js');
   const ver = JSON.parse(read('version.json'));
 
-  if (ver.version === '2.6.52') pass('version.json', ver.version);
+  if (ver.version === '2.6.53') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.52'") && sw.includes("msb-pro-v2.6.52")
-    && index.includes('id="app-version-label">v2.6.52')) {
+  if (index.includes("APP_VERSION = '2.6.53'") && sw.includes("msb-pro-v2.6.53")
+    && index.includes('id="app-version-label">v2.6.53')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.52');
+  } else fail('app-sw-version', 'expected 2.6.53');
 
   if (index.includes("function formatFreePlanDetail(")
     && index.includes("msbT('Free · {n} of {total} builds left'")
@@ -175,7 +175,7 @@ async function main() {
       };
     });
 
-    if (/v2\.6\.52/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.53/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
     if (/^Free$/i.test(boot.planText) && boot.planDisplay !== 'none' && boot.metaDisplay !== 'none') {
       pass('phone-chip-free-n', boot.planText + ' display=' + boot.planDisplay);
@@ -236,7 +236,7 @@ async function main() {
         return { bannerShow, backupShow, notNows, stacked: bannerShow && backupShow };
       })();
       return {
-        cells: document.querySelectorAll('#schedule-grid td.shift-editable').length,
+        cells: document.querySelectorAll('#schedule-grid td.shift-editable, #schedule-grid .mw-person').length,
         planText: (plan && plan.textContent || '').trim(),
         remaining: typeof remainingFreeGenerates === 'function' ? remainingFreeGenerates() : null,
         hasBuilt: typeof hasBuiltOnceForInstall === 'function' ? hasBuiltOnceForInstall() : null,
@@ -247,10 +247,10 @@ async function main() {
     });
     if (built.cells > 20 && built.hasBuilt && built.lsBuilt === '1') pass('first-build-marks-once', built.cells + ' cells');
     else fail('first-build-marks-once', JSON.stringify(built));
-    if (built.backupShow && !built.bannerShow && !built.stacked && built.notNows === 1) {
-      pass('backup-first-no-stack', 'notNows=' + built.notNows);
+    if (!built.backupShow && !built.bannerShow && !built.stacked && built.notNows === 0) {
+      pass('backup-first-no-stack', 'held on first paint, notNows=' + built.notNows);
     } else fail('backup-first-no-stack', JSON.stringify(built));
-    if (/Free · 2/i.test(built.planText) && built.remaining === 2) pass('chip-after-spend', built.planText);
+    if (/^Free$/i.test(built.planText) && built.remaining === 2) pass('chip-after-spend', built.planText);
     else fail('chip-after-spend', JSON.stringify(built));
 
     const afterBackupDismiss = await page.evaluate(() => {

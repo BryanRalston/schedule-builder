@@ -3,7 +3,7 @@
  * SM+AM1 first Build is hangable AND does not report Hard rules 0/40
  * / 4 must-fix from SM-exactly-1 vs AM-≥5 leftover. Coverage chip
  * explains two people + offs; weekend / AM-close chips match the
- * review list. Keeps 2.6.12–2.6.21 behavior; version lock 2.6.52.
+ * review list. Keeps 2.6.12–2.6.21 behavior; version lock 2.6.53.
  * Run: node tests/test-v2622-ux.mjs
  */
 import { createServer } from 'http';
@@ -75,15 +75,15 @@ async function main() {
   console.log('\n=== v2.6.22 scale close targets + consistent review chips ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.52') pass('version.json', version.version);
+  if (version.version === '2.6.53') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.52'") && index.includes('id="app-version-label">v2.6.52')) {
+  if (index.includes("const APP_VERSION = '2.6.53'") && index.includes('id="app-version-label">v2.6.53')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -148,7 +148,8 @@ async function main() {
   });
 
   try {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+    const page = await context.newPage();
     await page.goto(base + '/app/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.evaluate(() => {
       localStorage.clear();
@@ -397,7 +398,7 @@ async function main() {
         unmet: built.unmet,
         goal: built.amPeriodGoal,
       }));
-    } else if (/AM closes/i.test(built.amcText) && (built.amPeriodGoal == null || /\/\s*\d+/.test(built.amcText))) {
+    } else if (/AM closes/i.test(built.amcText) && (built.amPeriodGoal == null || /\/\s*\d+/.test(built.amcText) || /goal\s*\d+/i.test(built.amcText))) {
       pass('am-close-chip-not-false-pass', built.amcText + ' cls=' + built.amcCls);
     } else fail('am-close-chip-not-false-pass', JSON.stringify({
       amc: built.amcText,

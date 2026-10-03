@@ -1,5 +1,5 @@
 /**
- * v2.6.52 First minute — acceptance checks 1–11 plus App Expert addendum.
+ * v2.6.53 First minute — acceptance checks 1–11 plus App Expert addendum.
  * Run: node tests/test-v2652-first-minute.mjs
  * GA hosts are aborted. Each browser case uses a fresh context.
  */
@@ -128,7 +128,7 @@ async function newCase(browser, { viewport, userAgent, touch, init, screen, allo
 
 async function waitSample(page, timeout = 20000) {
   await page.waitForFunction(() => {
-    const cells = document.querySelectorAll('#schedule-grid td.shift-editable, #schedule-grid td').length;
+    const cells = document.querySelectorAll('#schedule-grid td.shift-editable, #schedule-grid td, #schedule-grid .mw-person').length;
     const strip = document.getElementById('sample-strip');
     return document.body.classList.contains('sample-board') && cells > 20 && strip && !strip.hidden;
   }, { timeout });
@@ -144,12 +144,12 @@ function sampleProbe() {
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0;
   };
-  const row = document.querySelector('#schedule-grid tbody tr');
+  const row = document.querySelector('#schedule-grid .mw-day') || document.querySelector('#schedule-grid tbody tr');
   const rr = row ? row.getBoundingClientRect() : null;
   const q = window._lastGenReport && window._lastGenReport.quality;
   const chip = document.getElementById('pgs-quality');
   return {
-    cells: document.querySelectorAll('#schedule-grid td').length,
+    cells: document.querySelectorAll('#schedule-grid td, #schedule-grid .mw-person').length,
     strip: vis('sample-strip'),
     stripText: (document.getElementById('sample-strip-text') || {}).textContent || '',
     useMyTeam: vis('btn-use-my-team'),
@@ -176,7 +176,7 @@ function sampleProbe() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.52 First minute ===');
+  console.log('\n=== v2.6.53 First minute ===');
 
   const version = JSON.parse(read('version.json'));
   const appHtml = read('app/index.html');
@@ -185,12 +185,12 @@ async function main() {
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
   const gradle = read('android-twa/app/build.gradle');
 
-  if (version.version === '2.6.52') pass('11-version-json', version.version);
+  if (version.version === '2.6.53') pass('11-version-json', version.version);
   else fail('11-version-json', version.version);
-  if (/APP_VERSION\s*=\s*'2\.6\.52'/.test(appHtml) && /id="app-version-label"[^>]*>\s*v2\.6\.52/.test(appHtml)) {
+  if (/APP_VERSION\s*=\s*'2\.6\.53'/.test(appHtml) && /id="app-version-label"[^>]*>\s*v2\.6\.53/.test(appHtml)) {
     pass('11-app-version');
   } else fail('11-app-version', 'APP_VERSION or label');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.52'")) pass('11-sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('11-sw-cache');
   else fail('11-sw-cache', 'cache name');
   if (twa.appVersion === '2.6.51' && twa.appVersionName === '2.6.51' && gradle.includes('versionCode 2651') && gradle.includes('versionName "2.6.51"')) {
     pass('11-twa-stays-2.6.51');
@@ -324,7 +324,7 @@ async function main() {
       await page.locator('#btn-build-from-setup').click();
       await page.waitForFunction(() => {
         const title = document.getElementById('first-build-ready-title');
-        const cells = document.querySelectorAll('#schedule-grid td').length;
+        const cells = document.querySelectorAll('#schedule-grid td, #schedule-grid .mw-person').length;
         return title && !document.getElementById('first-build-ready').hidden && /schedule is ready/i.test(title.textContent || '') && cells > 20;
       }, { timeout: 25000 });
       const elapsed = Date.now() - t0;
@@ -333,7 +333,7 @@ async function main() {
         const line = document.getElementById('first-build-review-line');
         const ready = document.getElementById('first-build-ready');
         const rr = ready.getBoundingClientRect();
-        const row = document.querySelector('#schedule-grid tbody tr');
+        const row = document.querySelector('#schedule-grid .mw-day') || document.querySelector('#schedule-grid tbody tr');
         const rowR = row ? row.getBoundingClientRect() : null;
         const q = window._lastGenReport && window._lastGenReport.quality;
         return {
@@ -364,9 +364,9 @@ async function main() {
       if (built.title === 'Your ' + built.weeks + '-week schedule is ready' && !built.lineBad && !built.needs && !built.sample && built.gap && built.add) {
         pass('4-ready-headline', built.title + ' | ' + built.line);
       } else fail('4-ready-headline', JSON.stringify(built));
-      if (built.remaining === 2 && built.count === 0 && /Free · 2/.test(built.chip)) {
-        pass('4-counter-reads-2', built.chip + ' remaining=' + built.remaining);
-      } else fail('4-counter-reads-2', JSON.stringify({ chip: built.chip, remaining: built.remaining, count: built.count }));
+      if (built.remaining === 2 && built.count === 0 && !/Free\s*·\s*\d/.test(built.chip)) {
+        pass('4-window-hides-counter', (built.chip || 'Free') + ' remaining=' + built.remaining);
+      } else fail('4-window-hides-counter', JSON.stringify({ chip: built.chip, remaining: built.remaining, count: built.count }));
       if (built.fy === namesStep.expected.fy && built.n === namesStep.expected.number) pass('4-built-period');
       else fail('4-built-period', JSON.stringify({ fy: built.fy, n: built.n, expected: namesStep.expected }));
       const scrolled = (built.readyTop >= 0 && built.readyTop < built.ih) || (built.rowTop != null && built.rowTop < built.ih && built.rowTop > -40);
@@ -429,7 +429,7 @@ async function main() {
       await page.goto(base + '/app/?no_ga=1', { waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => {
         const sm = (document.getElementById('name-sm') || {}).value || '';
-        return /Pat Nguyen/.test(sm) && document.querySelectorAll('#schedule-grid td').length > 20;
+        return /Pat Nguyen/.test(sm) && document.querySelectorAll('#schedule-grid td, #schedule-grid .mw-person').length > 20;
       }, { timeout: 15000 });
       const returned = await page.evaluate(() => ({
         sm: document.getElementById('name-sm').value,

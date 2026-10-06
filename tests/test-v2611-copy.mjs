@@ -81,11 +81,11 @@ async function main() {
   console.log('\n=== v2.6.11 clopen preference + feedback copy ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.53') pass('version.json', version.version);
+  if (version.version === '2.6.54') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.54'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
@@ -94,7 +94,7 @@ async function main() {
   const privacy = read('legal/privacy.html');
   const mon = read('monetization.json');
 
-  if (index.includes("const APP_VERSION = '2.6.53'") && index.includes('id="app-version-label">v2.6.53')) {
+  if (index.includes("const APP_VERSION = '2.6.54'") && index.includes('id="app-version-label">v2.6.54')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

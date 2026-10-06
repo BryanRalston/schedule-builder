@@ -1,5 +1,5 @@
 /**
- * v2.6.53 First minute — acceptance checks 1–11 plus App Expert addendum.
+ * v2.6.54 First minute — acceptance checks 1–11 plus App Expert addendum.
  * Run: node tests/test-v2652-first-minute.mjs
  * GA hosts are aborted. Each browser case uses a fresh context.
  */
@@ -176,7 +176,7 @@ function sampleProbe() {
 }
 
 async function main() {
-  console.log('\n=== v2.6.53 First minute ===');
+  console.log('\n=== v2.6.54 First minute ===');
 
   const version = JSON.parse(read('version.json'));
   const appHtml = read('app/index.html');
@@ -185,18 +185,18 @@ async function main() {
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
   const gradle = read('android-twa/app/build.gradle');
 
-  if (version.version === '2.6.53') pass('11-version-json', version.version);
+  if (version.version === '2.6.54') pass('11-version-json', version.version);
   else fail('11-version-json', version.version);
-  if (/APP_VERSION\s*=\s*'2\.6\.53'/.test(appHtml) && /id="app-version-label"[^>]*>\s*v2\.6\.53/.test(appHtml)) {
+  if (/APP_VERSION\s*=\s*'2\.6\.54'/.test(appHtml) && /id="app-version-label"[^>]*>\s*v2\.6\.54/.test(appHtml)) {
     pass('11-app-version');
   } else fail('11-app-version', 'APP_VERSION or label');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('11-sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.54'")) pass('11-sw-cache');
   else fail('11-sw-cache', 'cache name');
   if (twa.appVersion === '2.6.51' && twa.appVersionName === '2.6.51' && gradle.includes('versionCode 2651') && gradle.includes('versionName "2.6.51"')) {
     pass('11-twa-stays-2.6.51');
   } else fail('11-twa-stays-2.6.51', twa.appVersion + ' / ' + twa.appVersionName);
 
-  if (landing.includes('>Build a free schedule — no signup<') && landing.includes('Works in Safari, no download') && landing.includes('$19.99') && landing.includes('Free to try · $19.99 one-time to unlock')) {
+  if (landing.includes('>Try a sample board<') && landing.includes('No signup. Sample board included.') && landing.includes('Works in Safari, no download') && landing.includes('$19.99') && landing.includes('Free to try · $19.99 one-time to unlock')) {
     pass('7-landing-copy');
   } else fail('7-landing-copy', 'hero, safari line, or price');
   if ((landing.match(/href="app\/"/g) || []).length >= 2 && !landing.includes('id="tab-setup"') && !landing.includes('generateSchedule')) {
@@ -526,8 +526,9 @@ async function main() {
           playHidden: !play || play.hidden || (pcs && (pcs.display === 'none' || pcs.visibility === 'hidden')),
         };
       });
-      const fold = hero.text === 'Build a free schedule — no signup' && hero.href === 'app/' && hero.btnTop >= 0 && hero.btnBottom <= hero.ih && hero.priceTop > hero.btnBottom;
-      if (fold) pass('7-hero-above-fold-' + spec.name);
+      const fold = hero.text === 'Try a sample board' && hero.href === 'app/' && hero.btnTop >= 0 && hero.btnBottom <= hero.ih && hero.priceTop > hero.btnBottom;
+      const phonePriceBelow = spec.name === 'desk' || hero.priceTop >= hero.ih - 1;
+      if (fold && phonePriceBelow) pass('7-hero-above-fold-' + spec.name);
       else fail('7-hero-above-fold-' + spec.name, JSON.stringify(hero));
       if (spec.ios) {
         if (hero.playHidden && !hero.noteHidden && hero.noteText === 'Works in Safari, no download') pass('7-ios-safari-line');

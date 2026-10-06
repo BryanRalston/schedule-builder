@@ -40,7 +40,7 @@ if (landing.includes('href="app/"') && (landing.match(/href="app\/"/g) || []).le
   pass('open-app-points-at-app', 'two Open app CTAs → app/');
 } else fail('open-app-points-at-app', 'expected at least two href="app/" Open app links');
 
-if (landing.includes('>Build a free schedule — no signup<') && !landing.includes('id="tab-setup"') && !landing.includes('generateSchedule')) {
+if (landing.includes('>Try a sample board<') && landing.includes('Build a free schedule') && !landing.includes('id="tab-setup"') && !landing.includes('generateSchedule')) {
   pass('landing-stays-thin');
 } else fail('landing-stays-thin', 'root index.html picked up builder markup');
 
@@ -98,9 +98,9 @@ if (
 } else fail('landing-logo-accents', 'landing CTAs must use maroon + gold, not purple/cyan');
 
 const app = read('app/index.html');
-if (app.includes("APP_VERSION = '2.6.53'") && !app.includes('id="features"')) {
+if (app.includes("APP_VERSION = '2.6.54'") && !app.includes('id="features"')) {
   pass('app-stays-builder');
-} else fail('app-stays-builder', 'builder must stay at /app/ as 2.6.53');
+} else fail('app-stays-builder', 'builder must stay at /app/ as 2.6.54');
 
 if (!app.includes('maidensail.com/badge/schedule-manager-pro.svg')) {
   pass('maidensail-badge-not-in-app');

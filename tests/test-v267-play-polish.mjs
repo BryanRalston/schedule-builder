@@ -65,11 +65,11 @@ async function main() {
   console.log('\n=== v2.6.8 Play-launch polish ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.53') pass('version.json', version.version);
+  if (version.version === '2.6.54') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.54'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
   if (sw.includes("'./feedback.html'") || sw.includes('"./feedback.html"')) pass('sw-precache-feedback');
   else fail('sw-precache-feedback', 'feedback.html missing from PRECACHE');
@@ -80,7 +80,7 @@ async function main() {
   const feedback = read('feedback.html');
   const stagingPs1 = read('scripts/publish-staging.ps1');
 
-  if (index.includes("const APP_VERSION = '2.6.53'") && index.includes('id="app-version-label">v2.6.53')) {
+  if (index.includes("const APP_VERSION = '2.6.54'") && index.includes('id="app-version-label">v2.6.54')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 
@@ -213,7 +213,7 @@ async function main() {
         subtitle: (document.querySelector('.subtitle') || {}).textContent || '',
       };
     });
-    if (boot.ver === '2.6.53') pass('live-app-version', boot.ver);
+    if (boot.ver === '2.6.54') pass('live-app-version', boot.ver);
     else fail('live-app-version', boot.ver);
     if (!boot.authLocked && boot.shellDisplay === 'none') pass('first-run-offline-no-auth-shell', boot.shellDisplay);
     else fail('first-run-offline-no-auth-shell', JSON.stringify(boot));

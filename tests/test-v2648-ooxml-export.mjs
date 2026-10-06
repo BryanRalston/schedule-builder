@@ -1,7 +1,7 @@
 /**
  * v2.6.48: real Office Open XML Word (.docx) + Excel (.xlsx).
  * Assert ZIP/OOXML structure, not HTML-as-.doc / HTML-as-.xls.
- * Soft-confirm stays in-app. Readiness hang banner is UI-only (2.6.53).
+ * Soft-confirm stays in-app. Readiness hang banner is UI-only (2.6.54).
  * Run: node tests/test-v2648-ooxml-export.mjs
  */
 import { createRequire } from 'module';
@@ -145,13 +145,13 @@ function staticChecks() {
   const gradle = read('android-twa/app/build.gradle');
   const landing = read('index.html');
 
-  if (ver.version === '2.6.53') pass('version.json', ver.version);
+  if (ver.version === '2.6.54') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.53'") && sw.includes('msb-pro-v2.6.53')
-    && index.includes('id="app-version-label">v2.6.53')) {
+  if (index.includes("APP_VERSION = '2.6.54'") && sw.includes('msb-pro-v2.6.54')
+    && index.includes('id="app-version-label">v2.6.54')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.53');
+  } else fail('app-sw-version', 'expected 2.6.54');
 
   if (twa.appVersion === '2.6.51' && twa.appVersionName === '2.6.51'
     && /versionCode 2651/.test(gradle) && /versionName "2.6.51"/.test(gradle)) {
@@ -324,7 +324,7 @@ async function browserChecks(base, chromium) {
       version: (document.getElementById('app-version-label') || {}).textContent,
       hasOoxml: typeof MSB_OOXML !== 'undefined' && typeof MSB_OOXML.buildDocx === 'function',
     }));
-    if (/v2\.6\.53/.test(boot.version || '') && boot.hasOoxml) pass('in-app-ooxml', boot.version);
+    if (/v2\.6\.54/.test(boot.version || '') && boot.hasOoxml) pass('in-app-ooxml', boot.version);
     else fail('in-app-ooxml', JSON.stringify(boot));
 
     const setup = await setupHuntBoard(page);

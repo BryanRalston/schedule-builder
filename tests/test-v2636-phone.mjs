@@ -114,7 +114,7 @@ async function main() {
       };
     });
 
-    if (/v2\.6\.53/.test(boot.version || '')) pass('in-app-version', boot.version);
+    if (/v2\.6\.54/.test(boot.version || '')) pass('in-app-version', boot.version);
     else fail('in-app-version', boot.version);
     if (boot.cmdkDisplay === 'none' || boot.cmdkW === 0) pass('cmdk-hidden', boot.cmdkDisplay);
     else fail('cmdk-hidden', JSON.stringify(boot));

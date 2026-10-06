@@ -14,6 +14,14 @@
   } catch (e) {}
 })();
 </script>
+<script>
+(function () {
+  try {
+    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (ios) document.documentElement.classList.add('is-ios');
+  } catch (e) {}
+})();
+</script>
 <!-- Google tag (gtag.js) — Manager Schedule Pro GA4. Skipped for automation and opt-out devices. -->
 <script>
 (function () {
@@ -222,23 +230,41 @@ body {
   border-radius: 10px;
 }
 h1 {
-  margin: 0.85rem 0 0.7rem;
-  font-size: clamp(1.7rem, 5vw, 2.35rem);
-  line-height: 1.15;
-  letter-spacing: -0.035em;
+  margin: 0.85rem 0 0.5rem;
+  font-size: clamp(2.15rem, 4.2vw, 3.15rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
   color: var(--ink);
+  max-width: 11em;
+  text-wrap: balance;
 }
+.support {
+  margin: 0 0 1.15rem;
+  max-width: 26rem;
+  color: var(--ink-2);
+  font-size: 1.12rem;
+  line-height: 1.35;
+}
+.cta-bar { margin: 0 0 0.2rem; }
 .hero-cta {
   width: 100%;
-  max-width: 22rem;
-  min-height: 3rem;
-  margin: 0 0 0.45rem;
+  max-width: 20.5rem;
+  min-height: 3.25rem;
+  margin: 0;
+  font-size: 1.05rem;
+  padding: 0.85rem 1.2rem;
+}
+.hero-cta:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
 .ios-safari-note {
-  margin: 0 0 0.75rem;
+  margin: 0.7rem 0 0;
   font-size: 0.78rem;
   color: var(--ink-3);
 }
+html.is-ios .ios-safari-note[hidden] { display: block !important; }
+html.is-ios [data-cta="play"] { display: none !important; }
 .ios-safari-note[hidden] { display: none; }
 .nrf-secondary {
   font-size: 0.82rem;
@@ -337,37 +363,106 @@ footer {
 }
 footer a { color: #701030; text-decoration: none; }
 footer a:hover { text-decoration: underline; }
+@media (min-width: 900px) {
+  .wrap { width: min(44rem, calc(100% - 4rem)); padding-top: 2.75rem; }
+  .brand { font-size: 0.95rem; }
+  h1 { margin-top: 1.15rem; }
+  .support { font-size: 1.2rem; margin-bottom: 1.35rem; }
+  .after-hero { margin-top: 1.5rem; }
+  .hero-cta { min-height: 3.4rem; }
+}
+.sticky-cta { display: none; }
+/* Phone: first screen is the try path. Price, Play, and the longer pitch start after one viewport. */
+@media (max-width: 480px) {
+  body.sticky-on { padding-bottom: calc(5.4rem + env(safe-area-inset-bottom)); }
+  .wrap {
+    width: min(40rem, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 0 0 1.25rem;
+  }
+  .hero {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 1.35rem 0 1.5rem;
+  }
+  .brand img { width: 36px; height: 36px; }
+  h1 {
+    margin: 0.75rem 0 0.45rem;
+    font-size: 2.45rem;
+    max-width: 8.5em;
+  }
+  .support {
+    margin: 0 0 1.15rem;
+    font-size: 1.08rem;
+    max-width: 22rem;
+  }
+  .cta-bar { margin: 0; }
+  .hero-cta {
+    max-width: none;
+    min-height: 3.55rem;
+    font-size: 1.1rem;
+  }
+  .ios-safari-note { margin-top: 0.75rem; }
+  .after-hero { padding-top: 0.35rem; }
+  .sticky-cta.is-on {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    background: rgba(244, 246, 250, 0.96);
+    border-top: 1px solid rgba(21, 32, 51, 0.1);
+    box-shadow: 0 -12px 32px rgba(21, 32, 51, 0.08);
+  }
+  .sticky-cta .btn { width: 100%; min-height: 3.4rem; }
+}
 </style>
 </head>
 <body>
   <main class="wrap">
-    <div class="brand">
-      <img src="icons/icon-192.png" width="40" height="40" alt="">
-      Manager Schedule Pro
-    </div>
-    <h1>Retail manager shifts you can stand behind</h1>
-    <a class="btn btn-primary hero-cta" href="app/" data-cta="open_app">Build a free schedule — no signup</a>
-    <p class="ios-safari-note" id="ios-safari-note" hidden>Works in Safari, no download</p>
-    <div class="lede">
-      <p>Build a 5-week retail schedule — weekend days off, close then open avoided where the team allows, then review the board before you post.</p>
-      <p class="nrf-secondary">NRF 4-5-4 periods. No spreadsheet fight. No cloud roster. You stay in charge of what goes on the wall.</p>
-    </div>
-    <ul class="trust">
-      <li>Works offline</li>
-      <li>No account</li>
-      <li>Names, time off, and the board stay on this device</li>
-    </ul>
-    <div class="price-row">
-      <div>
-        <div class="price">$19.99<span>one-time</span></div>
-        <p class="price-note">Free to try · $19.99 one-time to unlock</p>
+    <section class="hero">
+      <div class="brand">
+        <img src="icons/icon-192.png" width="40" height="40" alt="">
+        Manager Schedule Pro
       </div>
-      <div class="ctas">
-        <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer" data-cta="play">Google Play</a>
-        <a class="btn btn-ghost" href="https://ralstonia5.gumroad.com/l/pwplbc" data-cta="gumroad">Buy license</a>
+      <h1>Build a free schedule</h1>
+      <p class="support">No signup. Sample board included.</p>
+      <div class="cta-bar">
+        <a class="btn btn-primary hero-cta" href="app/" data-cta="open_app">Try a sample board</a>
       </div>
-    </div>
+      <p class="ios-safari-note" id="ios-safari-note" hidden>Works in Safari, no download</p>
+    </section>
+    <section class="after-hero">
+      <div class="lede">
+        <p>Weekend days off, close then open avoided where the team allows, then review the board before you post.</p>
+        <p class="nrf-secondary">NRF 4-5-4 periods. No spreadsheet fight. No cloud roster. You stay in charge of what goes on the wall.</p>
+      </div>
+      <ul class="trust">
+        <li>Works offline</li>
+        <li>No account</li>
+        <li>Names, time off, and the board stay on this device</li>
+      </ul>
+      <div class="price-row">
+        <div>
+          <div class="price">$19.99<span>one-time</span></div>
+          <p class="price-note">Free to try · $19.99 one-time to unlock</p>
+        </div>
+        <div class="ctas">
+          <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.managerschedulebuilder.pro" target="_blank" rel="noopener noreferrer" data-cta="play">Google Play</a>
+          <a class="btn btn-ghost" href="https://ralstonia5.gumroad.com/l/pwplbc" data-cta="gumroad">Buy license</a>
+        </div>
+      </div>
+    </section>
   </main>
+  <div class="sticky-cta" hidden>
+    <a class="btn btn-primary" href="app/" data-cta="open_app">Try a sample board</a>
+  </div>
   <section class="features" id="features" aria-labelledby="features-head">
     <p class="features-head" id="features-head">Features</p>
 
@@ -396,7 +491,7 @@ footer a:hover { text-decoration: underline; }
     </article>
 
     <div class="features-cta">
-      <a class="btn btn-primary" href="app/" data-cta="open_app">Build a free schedule — no signup</a>
+      <a class="btn btn-primary" href="app/" data-cta="open_app">Try a sample board</a>
     </div>
   </section>
   <section class="can-do" id="can-do" aria-labelledby="can-do-title">
@@ -428,6 +523,29 @@ footer a:hover { text-decoration: underline; }
     el.hidden = true;
     el.style.display = 'none';
   });
+})();
+(function () {
+  var cta = document.querySelector('a.hero-cta');
+  var bar = document.querySelector('.sticky-cta');
+  if (!cta || !bar || !window.IntersectionObserver || !window.matchMedia) return;
+  var mq = window.matchMedia('(max-width: 480px)');
+  function setOn(on) {
+    bar.classList.toggle('is-on', on);
+    document.body.classList.toggle('sticky-on', on);
+    if (on) bar.removeAttribute('hidden');
+    else bar.setAttribute('hidden', '');
+  }
+  var io = new IntersectionObserver(function (entries) {
+    var vis = false;
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].isIntersecting && entries[i].intersectionRatio >= 0.6) vis = true;
+    }
+    setOn(mq.matches && !vis);
+  }, { threshold: [0, 0.6, 1] });
+  io.observe(cta);
+  function onMq() { if (!mq.matches) setOn(false); }
+  if (mq.addEventListener) mq.addEventListener('change', onMq);
+  else if (mq.addListener) mq.addListener(onMq);
 })();
 </script>
 </body>

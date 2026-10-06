@@ -1,11 +1,11 @@
 /**
- * v2.6.53: after Build, a hard reload must restore the board AND
+ * v2.6.54: after Build, a hard reload must restore the board AND
  * numbered review chips (Quality score, Coverage, WE offs, clopens).
  * Recompute from the restored board — no Rebuild tap, no free generate.
  * First visit with no named team stays clean (2.6.29). Cell edit still
  * persists (2.6.32). SM fewer-WE Quality skip (2.6.32) and close-even
  * (2.6.30) stay. Play/TWA icons and KC-C rules stay.
- * Keeps 2.6.12–2.6.32 suites; version lock 2.6.53.
+ * Keeps 2.6.12–2.6.32 suites; version lock 2.6.54.
  * Run: node tests/test-v2633-ux.mjs
  */
 import { createServer } from 'http';
@@ -111,18 +111,18 @@ function chipsNumbered(ch) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.53 restore review chips from the built board ===');
+  console.log('\n=== v2.6.54 restore review chips from the built board ===');
 
   const version = JSON.parse(read('version.json'));
-  if (version.version === '2.6.53') pass('version.json', version.version);
+  if (version.version === '2.6.54') pass('version.json', version.version);
   else fail('version.json', JSON.stringify(version));
 
   const sw = read('sw.js');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.54'")) pass('sw-cache');
   else fail('sw-cache', sw.slice(0, 120));
 
   const index = read('app/index.html');
-  if (index.includes("const APP_VERSION = '2.6.53'") && index.includes('id="app-version-label">v2.6.53')) {
+  if (index.includes("const APP_VERSION = '2.6.54'") && index.includes('id="app-version-label">v2.6.54')) {
     pass('index-version');
   } else fail('index-version', 'APP_VERSION / label mismatch');
 

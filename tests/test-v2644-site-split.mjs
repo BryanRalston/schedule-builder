@@ -95,13 +95,13 @@ function staticChecks() {
     pass('sitemap-xml-root');
   } else fail('sitemap-xml-root', 'need landing, /app/, and Feature Map ?map=1 at repo root');
 
-  if (ver.version === '2.6.53') pass('version.json', ver.version);
+  if (ver.version === '2.6.54') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (app.includes("APP_VERSION = '2.6.53'") && sw.includes('msb-pro-v2.6.53')
-    && app.includes('id="app-version-label">v2.6.53')) {
+  if (app.includes("APP_VERSION = '2.6.54'") && sw.includes('msb-pro-v2.6.54')
+    && app.includes('id="app-version-label">v2.6.54')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.53 in app + sw');
+  } else fail('app-sw-version', 'expected 2.6.54 in app + sw');
 
   if (twa.startUrl === '/schedule-builder/app/?source=pwa'
     && twa.appVersion === '2.6.51'
@@ -119,7 +119,7 @@ function staticChecks() {
     pass('sw-app-shell');
   } else fail('sw-app-shell', 'SW must precache / fall back to ./app/index.html');
 
-  if (landing.includes('Build a free schedule — no signup') && landing.includes('href="app/"')
+  if (landing.includes('Try a sample board') && landing.includes('Build a free schedule') && landing.includes('href="app/"')
     && landing.includes('Manager Schedule Pro')
     && landing.includes('$19.99')
     && landing.includes('Cortex Developments')
@@ -191,7 +191,7 @@ async function browserChecks(base, chromium) {
       store: !!document.getElementById('store-name'),
       version: (document.getElementById('app-version-label') || {}).textContent || ''
     }));
-    if (/\/app\/?/.test(opened.path) && opened.setup && opened.store && /v2\.6\.53/.test(opened.version)) {
+    if (/\/app\/?/.test(opened.path) && opened.setup && opened.store && /v2\.6\.54/.test(opened.version)) {
       pass('open-app-builder', opened.path + ' ' + opened.version);
     } else fail('open-app-builder', JSON.stringify(opened));
 

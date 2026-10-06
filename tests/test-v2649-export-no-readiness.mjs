@@ -1,5 +1,5 @@
 /**
- * v2.6.53: readiness / NOT READY hang banner is UI-only.
+ * v2.6.54: readiness / NOT READY hang banner is UI-only.
  * Exported .docx / .xlsx and the print sheet must not include it.
  * Soft-confirm and in-app Review / Posting stay. Real OOXML stays.
  * Run: node tests/test-v2649-export-no-readiness.mjs
@@ -133,13 +133,13 @@ function staticChecks() {
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
   const gradle = read('android-twa/app/build.gradle');
 
-  if (ver.version === '2.6.53') pass('version.json', ver.version);
+  if (ver.version === '2.6.54') pass('version.json', ver.version);
   else fail('version.json', JSON.stringify(ver));
 
-  if (index.includes("APP_VERSION = '2.6.53'") && sw.includes('msb-pro-v2.6.53')
-    && index.includes('id="app-version-label">v2.6.53')) {
+  if (index.includes("APP_VERSION = '2.6.54'") && sw.includes('msb-pro-v2.6.54')
+    && index.includes('id="app-version-label">v2.6.54')) {
     pass('app-sw-version');
-  } else fail('app-sw-version', 'expected 2.6.53');
+  } else fail('app-sw-version', 'expected 2.6.54');
 
   if (twa.appVersion === '2.6.51' && twa.appVersionName === '2.6.51'
     && /versionCode 2651/.test(gradle) && /versionName "2.6.51"/.test(gradle)) {
@@ -297,7 +297,7 @@ async function browserChecks(base, chromium) {
       version: (document.getElementById('app-version-label') || {}).textContent,
       hasOoxml: typeof MSB_OOXML !== 'undefined' && typeof MSB_OOXML.buildDocx === 'function',
     }));
-    if (/v2\.6\.53/.test(boot.version || '') && boot.hasOoxml) pass('in-app-ooxml', boot.version);
+    if (/v2\.6\.54/.test(boot.version || '') && boot.hasOoxml) pass('in-app-ooxml', boot.version);
     else fail('in-app-ooxml', JSON.stringify(boot));
 
     const setup = await setupHuntBoard(page);
@@ -395,7 +395,7 @@ async function browserChecks(base, chromium) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.53 export readiness is UI-only ===');
+  console.log('\n=== v2.6.54 export readiness is UI-only ===');
   staticChecks();
   unitChecks();
 

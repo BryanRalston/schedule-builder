@@ -1,5 +1,5 @@
 /**
- * v2.6.53 Second minute — acceptance checks 1–11 plus the item-12 file updates.
+ * v2.6.54 Second minute — acceptance checks 1–11 plus the item-12 file updates.
  * Run: node tests/test-v2653-second-minute.mjs
  * GA hosts are aborted. Each browser case uses a fresh context.
  * Do not launch this during a GPU measurement on the same PC.
@@ -197,7 +197,7 @@ async function useMyTeam(page) {
 }
 
 async function main() {
-  console.log('\n=== v2.6.53 Second minute ===');
+  console.log('\n=== v2.6.54 Second minute ===');
 
   const version = JSON.parse(read('version.json'));
   const appHtml = read('app/index.html');
@@ -206,12 +206,12 @@ async function main() {
   const twa = JSON.parse(read('android-twa/twa-manifest.json'));
   const gradle = read('android-twa/app/build.gradle');
 
-  if (version.version === '2.6.53') pass('11-version-json', version.version);
+  if (version.version === '2.6.54') pass('11-version-json', version.version);
   else fail('11-version-json', version.version);
-  if (/APP_VERSION\s*=\s*'2\.6\.53'/.test(appHtml) && /id="app-version-label"[^>]*>\s*v2\.6\.53/.test(appHtml)) {
+  if (/APP_VERSION\s*=\s*'2\.6\.54'/.test(appHtml) && /id="app-version-label"[^>]*>\s*v2\.6\.54/.test(appHtml)) {
     pass('11-app-version');
   } else fail('11-app-version', 'APP_VERSION or label');
-  if (sw.includes("const CACHE = 'msb-pro-v2.6.53'")) pass('11-sw-cache');
+  if (sw.includes("const CACHE = 'msb-pro-v2.6.54'")) pass('11-sw-cache');
   else fail('11-sw-cache', 'cache name');
   if (twa.appVersion === '2.6.51' && twa.appVersionName === '2.6.51' && gradle.includes('versionCode 2651') && gradle.includes('versionName "2.6.51"')) {
     pass('11-twa-stays');
